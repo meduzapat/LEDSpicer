@@ -60,9 +60,11 @@ namespace LEDSpicer {
 class Main {
 public:
 
-	Main();
+	Main(const string& config);
 
 	virtual ~Main();
+
+	void Main::run();
 
 	void static terminate();
 };

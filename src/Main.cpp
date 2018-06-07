@@ -32,7 +32,7 @@ void handler(int sig) {
 	if (sig == SIGTERM) {
 		cout << "Program terminated by signal" << endl;
 		Main::terminate();
-		exit(EXIT_SUCCESS);
+		return;
 	}
 
 	// display backtrace
@@ -63,7 +63,8 @@ int main(int argc, char **argv) {
 		// Help text.
 		if (commandline == "-h" or commandline == "--help") {
 			cout << endl <<
-				PACKAGE_NAME " command line usage:\n\n"
+				PACKAGE_TARNAME " <options>\n"
+				PACKAGE_NAME " command line options:\n"
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
 				"-v or --version\t\t\tDisplay version information\n"
@@ -77,8 +78,8 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PACKAGE_STRING " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
-				"For more information visit<" PACKAGE_URL ">\n\n"
+				PACKAGE_NAME " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
+				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
 				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
@@ -107,7 +108,8 @@ int main(int argc, char **argv) {
 		ledspicer.run();
 	}
 	catch(Error& e) {
-		cout << "Error: " + e->getMessage() << endl;
+		cout << "Error: " + e.getMessage() << endl;
+		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;

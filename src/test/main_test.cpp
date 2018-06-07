@@ -9,6 +9,6 @@
 
 #include "../Main.hpp"
 
-namespace RGBSpicer {
+namespace LEDSpicer {
 
-} /* namespace RGBSpicer */
+} /* namespace LEDSpicer */
