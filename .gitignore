@@ -1,0 +1,58 @@
+# IDE
+.anjuta*
+.project
+.cproject
+.settings/
+.metadata/
+
+# Common
+*~
+*.cache
+*.log
+Debug/
+
+# Autotools
+/stamp-h1
+/ltmain.sh
+/libtool
+/depcomp
+/config.sub
+/config.guess
+.autotools
+**/Makefile.in
+config.h.in
+*.m4
+Makefile
+*.status
+configure
+configure.scan
+install-sh
+config.h
+compile
+missing
+
+# Po
+*.Po
+po/
+
+# Compiled Object files
+src/LCDSpicer2/lcdspicer2
+.libs/
+*.slo
+*.lo
+*.Plo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Compiled Documentation
+doc/
+
