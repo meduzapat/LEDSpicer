@@ -48,7 +48,7 @@ using std::vector;
 // Compilation settings.
 #include "config.h"
 
-#define CONFIG_FILE "/etc/"PACKAGE_NAME".conf"
+#define CONFIG_FILE "/etc/" PACKAGE_TARNAME ".conf"
 
 #include "Error.hpp"
 
@@ -58,25 +58,17 @@ namespace LEDSpicer {
  * LEDSpicer::main
  */
 class Main {
+
 public:
 
-	Main(const string& config);
+	Main(bool daemonize, const string& config);
 
 	virtual ~Main();
 
-	void Main::run();
+	void run();
 
 	void static terminate();
 };
-
-} /* namespace LEDSpicer */
-
-/**
- * Signals handler
- *
- * @param sig
- */
-void handler(int sig);
 
 /**
  * Main function.
@@ -87,5 +79,7 @@ void handler(int sig);
  * @return exit code.
  */
 int main(int argc, char **argv);
+
+} /* namespace LEDSpicer */
 
 #endif /* MAIN_HPP_ */

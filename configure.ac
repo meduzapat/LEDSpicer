@@ -4,19 +4,45 @@ AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/Error.hpp])
 AC_CONFIG_HEADERS([config.h])
 
-# Checks for programs.
+AM_INIT_AUTOMAKE
+AM_SILENT_RULES
+AC_CONFIG_MACRO_DIR([m4])
+
+dnl *******************
+dnl * Needed Programs *
+dnl *******************
+AC_MSG_CHECKING([Programs])
+
 AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
 
-# Checks for libraries.
+dnl ********************
+dnl * Needed Libraries *
+dnl ********************
 
-# Checks for header files.
+dnl *****************
+dnl * Needed header *
+dnl *****************
+AC_MSG_CHECKING([Headers])
+
 AC_CHECK_HEADERS([unistd.h])
 
-# Checks for typedefs, structures, and compiler characteristics.
+dnl ****************
+dnl * Needed Types *
+dnl ****************
+AC_MSG_CHECKING([Types])
+
 AC_CHECK_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
-# Checks for library functions.
+dnl *************
+dnl * Makefiles *
+dnl *************
+AC_CONFIG_FILES([
+	Makefile
+	src/Makefile
+])
 
 AC_OUTPUT
 

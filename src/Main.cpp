@@ -1,7 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		main.cpp
- * @ingroup
+ * @file		Main.cpp
  * @since		Jun 6, 2018
  * @author		Patricio A. Rossi (MeduZa)
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
@@ -11,8 +10,15 @@
 
 using namespace LEDSpicer;
 
-Main::Main(const string& config) {
-	// TODO Auto-generated constructor stub
+Main::Main(bool daemonize, const string& config) {
+
+	if (daemonize) {
+		LOG(Log::DEBUG, "Daemonizing");
+		if (daemon(0, 0) == -1) {
+			throw Error("Unable to daemonize.");
+		}
+		LOG(Log::DEBUG, "Daemonized");
+	}
 }
 
 Main::~Main() {
@@ -27,7 +33,7 @@ void Main::terminate() {
 
 }
 
-void handler(int sig) {
+void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
 		cout << "Program terminated by signal" << endl;
@@ -47,14 +53,13 @@ void handler(int sig) {
 int main(int argc, char **argv) {
 
 #ifdef DEVELOP
-	signal(SIGSEGV, handler);
+	signal(SIGSEGV, signalHandler);
 #endif
-	signal(SIGTERM, handler);
+	signal(SIGTERM, signalHandler);
 
 	// Process command line options.
 	string commandline, configFile = "";
 	bool daemonize = true;
-	bool detect = false;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -62,14 +67,15 @@ int main(int argc, char **argv) {
 
 		// Help text.
 		if (commandline == "-h" or commandline == "--help") {
-			cout << endl <<
+			cout <<
+				PACKAGE_NAME " command line usage:\n"
 				PACKAGE_TARNAME " <options>\n"
-				PACKAGE_NAME " command line options:\n"
+				"options:\n"
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
 				"-v or --version\t\t\tDisplay version information\n"
 				"-h or --help\t\t\tDisplay this help screen.\n"
-				"If a configuration file is not provided " PACKAGE_NAME " will open the one inside /etc"
+				"If a configuration file is not provided " PACKAGE_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -103,7 +109,7 @@ int main(int argc, char **argv) {
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
 
-	Main ledspicer(configFile);
+	Main ledspicer(daemonize, configFile);
 	try {
 		ledspicer.run();
 	}
