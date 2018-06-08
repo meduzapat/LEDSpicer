@@ -3,6 +3,8 @@ bin_PROGRAMS = \
 	ledspicerd
 
 ledspicerd_SOURCES = \
+	Log.hpp          \
+	Log.cpp          \
 	Error.hpp        \
 	Error.cpp        \
 	Main.hpp         \

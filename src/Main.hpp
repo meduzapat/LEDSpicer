@@ -67,7 +67,11 @@ public:
 
 	void run();
 
-	void static terminate();
+	static void terminate();
+
+protected:
+
+	static bool running;
 };
 
 /**

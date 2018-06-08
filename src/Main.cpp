@@ -8,16 +8,26 @@
 
 #include "Main.hpp"
 
+#ifdef DEVELOP
+#include <execinfo.h>
+#endif
+
 using namespace LEDSpicer;
+
+bool Main::running = false;
 
 Main::Main(bool daemonize, const string& config) {
 
+	daemonize = false;
+
+	Log::initialize(not daemonize);
+
 	if (daemonize) {
-		LOG(Log::DEBUG, "Daemonizing");
+		Log::debug("Daemonizing");
 		if (daemon(0, 0) == -1) {
 			throw Error("Unable to daemonize.");
 		}
-		LOG(Log::DEBUG, "Daemonized");
+		Log::debug("Daemonized");
 	}
 }
 
@@ -26,17 +36,18 @@ Main::~Main() {
 }
 
 void Main::run() {
-
+	running = true;
+	Log::debug("running");
 }
 
 void Main::terminate() {
-
+	running = false;
 }
 
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		cout << "Program terminated by signal" << endl;
+		Log::info("Program terminated by signal");
 		Main::terminate();
 		return;
 	}
@@ -69,7 +80,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-h" or commandline == "--help") {
 			cout <<
 				PACKAGE_NAME " command line usage:\n"
-				PACKAGE_TARNAME " <options>\n"
+				PACKAGE " <options>\n"
 				"options:\n"
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
@@ -114,7 +125,7 @@ int main(int argc, char **argv) {
 		ledspicer.run();
 	}
 	catch(Error& e) {
-		cout << "Error: " + e.getMessage() << endl;
+		Log::error("Error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
 

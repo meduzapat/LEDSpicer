@@ -10,8 +10,6 @@
 
 using namespace LEDSpicer;
 
-bool Error::strError = false;
-
 Error::Error(const string& errorMessage) {
 	// TODO Auto-generated constructor stub
 
@@ -19,10 +17,6 @@ Error::Error(const string& errorMessage) {
 
 Error::~Error() {
 	// TODO Auto-generated destructor stub
-}
-
-void Error::setStdErrorOutput(bool option) {
-	strError = option;
 }
 
 string Error::getMessage() {

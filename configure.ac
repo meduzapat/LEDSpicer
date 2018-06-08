@@ -26,7 +26,7 @@ dnl * Needed header *
 dnl *****************
 AC_MSG_CHECKING([Headers])
 
-AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([syslog.h unistd.h])
 
 dnl ****************
 dnl * Needed Types *
@@ -58,8 +58,4 @@ Configuration: $sysconfdir
 CPPFLAGS     : ${CPPFLAGS}
 CXXFLAGS     : ${CXXFLAGS}
 Libraries    : ${LEDSPICER_LIBS}
-Linker       : $LD
-
-Plugins
-Output       : ${OUTPUT_PLUGINS}
-Input        : ${INPUT_PLUGINS}"
+Linker       : $LD"

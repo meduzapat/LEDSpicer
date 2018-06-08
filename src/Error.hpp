@@ -9,15 +9,7 @@
 #ifndef ERROR_HPP_
 #define ERROR_HPP_ 1
 
-// To handle IO stream.
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-
-// To handle strings
-#include <string>
-using std::string;
+#include "Log.hpp"
 
 namespace LEDSpicer {
 
@@ -40,15 +32,7 @@ public:
 	 */
 	string getMessage();
 
-	/**
-	 * Force the output to the standard error output instead of the log file.
-	 * @param option
-	 */
-	static void setStdErrorOutput(bool option);
-
 protected:
-
-	static bool strError;
 
 	string error;
 
