@@ -9,7 +9,13 @@
 #ifndef ERROR_HPP_
 #define ERROR_HPP_ 1
 
-#include "Log.hpp"
+#include <string>
+using std::string;
+using std::to_string;
+using std::stoi;
+
+// Compilation settings.
+#include "config.h"
 
 namespace LEDSpicer {
 

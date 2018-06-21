@@ -19,10 +19,19 @@ Comments are welcome.
 
 	- Patricio A. Rossi <meduzapat@users.sourceforge.net>
 
+Copyright note:
+	Ultimarc, Ultimarc brand and Ultimarc products are property of Ultimarc Limited Company.
+	For more information about Ultimarc visit their website at https://www.ultimarc.com
+
+Building LEDSpicer
+
 Essential:
 	build-essential
 	autoconf
 	libtool
+Libraries:
+	libusb-1.0
+	tinyxml2
 
 If documentation is needed:
 	doxygen
@@ -30,9 +39,14 @@ If documentation is needed:
 
 Prepare tools:
 	./autogen.sh
-	./configure CXXFLAGS='-g0 -O3'
+	./configure
 	or
-	./configure CXXFLAGS='-g3 -O0' for debelopment
+	./configure CXXFLAGS='-g0 -O3'
+	For developers (will enable debug g3, disable optimizations and activate the debug level for logs):
+	./configure --enable-develop
 
 then compile with:
 	make
+
+Install (needs root access):
+	make install

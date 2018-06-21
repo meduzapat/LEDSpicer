@@ -7,16 +7,24 @@ ledspicerd_SOURCES = \
 	Log.cpp          \
 	Error.hpp        \
 	Error.cpp        \
+	XMLHelper.hpp    \
+	XMLHelper.cpp    \
+	ConnectionUSB.hpp\
+	ConnectionUSB.cpp\
+	Device.hpp       \
+	Device.cpp       \
 	Main.hpp         \
 	Main.cpp
 
 ledspicerd_CPPFLAGS =                     \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
-	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	-DPACKAGE_SRC_DIR=\"$(srcdir)\"       \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)\"  \
-	-DPACKAGE_LIB_DIR=\"$(pkglibdir)\"
+	$(LEDSPICER_CPPFLAGS)
 
 ledspicerd_CXXFLAGS =    \
-	$(LEDSPICERD_CFLAGS) \
+	${CXXFLAGS}          \
 	-Wl,--no-as-needed
+
+ledspicerd_LDFLAGS =    \
+	${LEDSPICER_LIBS}
