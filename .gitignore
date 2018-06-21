@@ -30,13 +30,14 @@ install-sh
 config.h
 compile
 missing
+test-driver
 
 # Po
 *.Po
 po/
 
 # Compiled Object files
-src/LCDSpicer2/lcdspicer2
+src/ledspicerd
 .libs/
 *.slo
 *.lo
