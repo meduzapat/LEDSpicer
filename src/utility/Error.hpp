@@ -28,9 +28,9 @@ class Error {
 
 public:
 
-	Error(const string& errorMessage);
+	Error(const string& errorMessage) : error(errorMessage) {}
 
-	virtual ~Error();
+	virtual ~Error() {}
 
 	/**
 	 * Returns and resets the error message.

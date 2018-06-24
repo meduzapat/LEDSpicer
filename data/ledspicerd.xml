@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+LEDSpicer configuration file.
+Notes:
+	Everything here is case sensitive.
+	The program will fail to load if the configuration is wrong.
+
+Main section
+version:
+	is the configuration version leave it like that.
+usbDebugLevel: 
+	leave it at 3
+affinity: if the program is sending data too fast the USB connection can get lost,
+	if you receibe errors when the daemon is running try increasing this number by 10 until everything gets OK
+colorProfile:
+	list of colors to use.
+-->
+<ledspicer
+	version="1.0"
+	usb_debug_level="3"
+	affinity=""
+>
+<!--
+Devices
+name:
+	The code name of the device, right now I only supporting IPAC_ULTIMATE
+board_id:
+	if you have only one ultimate and you never changed the board id leave
+	it to 1, otherwise change it to the correct value.
+	Maximun 4 boards of the same kind.
+-->
+	<devices
+		name="IPAC_ULTIMATE"
+		board_id="1"
+	>
+<!--
+Elements:
+	Elements on the layout.
+name:
+	User friendly unique identifier.
+index:
+	Used by animations to know what LED is next in the sequense.
+board_position:
+	Used by the user interface to accomodate the element.
+type:
+	Element type (joystick, button, etc)
+Elements can use a single color LED (one pin) or rgb LED (three pins: red, green, blue),
+If a single color is detected, red, green, blue are ignored.
+pin:
+	For single color elements use only one pin number.
+red:
+	RGB LED red pin number.
+green:
+	RGB LED green pin number.
+blue:
+	RGB LED blue pin number.
+-->
+		<elements>
+			<element
+				name="P1_BUTTON1"
+				index="1"
+				board_position=""
+				type="button"
+				pin="1"
+			/>
+			<element
+				name="P1_BUTTON2"
+				index="2"
+				board_position=""
+				type="button"
+				red="2"
+				green="3"
+				blue="4"
+			/>
+		</elements>
+	</devices>
+
+</ledspicer>

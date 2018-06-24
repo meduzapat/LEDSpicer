@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer version="1.0" format="hex">
+
+	<color name="White" color="FFFFFF" />
+	<color name="LightGray" color="D3D3D3" />
+	<color name="Gray" color="808080" />
+	<color name="DimGray" color="696969" />
+	<color name="AlmostBlack" color="050505" />
+	<color name="Black" color="000000" />
+
+	<color name="Red" color="FF0000" />
+	<color name="LightRed" color="F08080" />
+	<color name="DarkRed" color="8B0000" />
+	<color name="VeryDarkRed" color="0B0000" />
+
+	<color name="Green" color="00FF00" />
+	<color name="LightGreen" color="90EE90" />
+	<color name="DarkGreen" color="006400" />
+	<color name="VeryDarkGreen" color="000600" />
+
+	<color name="Blue" color="0000FF" />
+	<color name="LightBlue" color="ADD8E6" />
+	<color name="DarkBlue" color="00008B" />
+	<color name="VeryDarkBlue" color="00000B" />
+
+	<color name="Yellow" color="FFFF00" />
+	<color name="LightYellow" color="FFFFE0" />
+	<color name="Olive" color="808000" />
+	<color name="Gold" color="FFD700" />
+	<color name="VeryDarkYellow" color="0b0600" />
+
+	<color name="Magenta" color="FF00FF" />
+	<color name="Violet" color="EE82EE" />
+	<color name="DarkMagenta" color="8B008B" />
+	<color name="Pink" color="FFC0CB" />
+	<color name="HotPink" color="FF69B4" />
+	<color name="VeryDarkMagenta" color="0B000B" />
+
+	<color name="Cyan" color="00FFFF" />
+	<color name="LightCyan" color="E0FFFF" />
+	<color name="DarkCyan" color="008B8B" />
+	<color name="VeryDarkCyan" color="000B0B" />
+
+</LEDSpicer>

@@ -2,11 +2,11 @@ AC_PREREQ([2.69])
 AC_INIT([LEDSpicer],[0.1.0],[https://sourceforge.net/p/ledspicer/tickets/?source=navbar],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
-AC_CONFIG_SRCDIR([src/Error.hpp])
+AC_CONFIG_SRCDIR([src/utility/Error.hpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -82,7 +82,6 @@ dnl * Makefiles *
 dnl *************
 AC_CONFIG_FILES([
 	Makefile
-	src/Makefile
 ])
 
 AC_OUTPUT

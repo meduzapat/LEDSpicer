@@ -10,15 +10,6 @@
 
 using namespace LEDSpicer;
 
-Error::Error(const string& errorMessage) {
-	// TODO Auto-generated constructor stub
-
-}
-
-Error::~Error() {
-	// TODO Auto-generated destructor stub
-}
-
 string Error::getMessage() {
 	return std::move(error);
 }

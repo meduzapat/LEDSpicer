@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<animation>
+	<actor
+		type="Pulse"
+		group="board as circle"
+		color="VeryDarkRed"
+		speed="60"
+		filter="Color"
+	>
+	</actor>
+	<actor
+		type="Serpentine"
+		group="board as circle"
+		color="LightCoral"
+		speed="75"
+		filter="Combine"
+		direction="Forward"
+		tailLength="3"
+		tailColor="DarkRed"
+		tailEffect="SlowFade"
+	>
+	</actor>
+	<actor
+		type="Serpentine"
+		group="credits"
+		color="White"
+		speed="50"
+		filter="Color"
+		direction="BouncingForward"
+		tailLength="0"
+		tailColor="Black"
+		tailEffect="Off"
+	>
+	</actor>
+	<actor
+		type="Pulse"
+		group="cabinet"
+		color="LightCyan"
+		speed="40"
+		filter="Color"
+	>
+	</actor>
+</animation>

@@ -23,6 +23,10 @@ using std::vector;
 #include <tinyxml2.h>
 
 #include "Error.hpp"
+#include "Log.hpp"
+
+// Conflicting with tinyxml2 Error function
+using LEDError = LEDSpicer::Error;
 
 namespace LEDSpicer {
 
@@ -70,9 +74,16 @@ public:
 	 *
 	 * @param attributeList A list of attributes to check.
 	 * @param subjects A map to check.
-	 * @return true if all attributes exists on the subject map.
+	 * @param node where will check.
+	 * @throws Error if an attribute is missing.
 	 */
-	bool checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects);
+	void checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects, const string& place);
+
+	/**
+	 * Returns a pointer to the root node.
+	 * @return
+	 */
+	tinyxml2::XMLElement* getRoot();
 
 protected:
 

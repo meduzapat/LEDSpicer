@@ -11,15 +11,17 @@ using namespace LEDSpicer;
 
 XMLHelper::XMLHelper(const string& fileName) {
 
+	Log::debug("Reading " + fileName);
+
 	if (LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS)
-		throw LEDSpicer::Error("Unable to read the file " + fileName);
+		throw LEDError("Unable to read the file " + fileName);
 
 	root = RootElement();
 	if (not root or std::strcmp(root->Name(), PACKAGE_NAME))
-		throw LEDSpicer::Error("Unknown data file");
+		throw LEDError("Unknown data file");
 
 	if (root->Attribute("Version") and not std::strcmp(root->Attribute("Version"), DataDocumentVersion))
-		throw LEDSpicer::Error("Invalid data file version");
+		throw LEDError("Invalid data file version, needed " DataDocumentVersion);
 }
 
 umap<string, string> XMLHelper::processNode(tinyxml2::XMLElement* nodeElement) {
@@ -41,16 +43,17 @@ umap<string, string> XMLHelper::processNode(const string& nodeElement) {
 
 	tinyxml2::XMLElement* node = root->FirstChildElement(nodeElement.c_str());
 	if (not node)
-		throw LEDSpicer::Error("Missing " + nodeElement + " section.");
+		throw LEDError("Missing " + nodeElement + " section.");
 
 	return std::move(processNode(node));
 }
 
-bool XMLHelper::checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects) {
-
+void XMLHelper::checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects, const string& place) {
 	for (string attribute : attributeList)
-		if (subjects.find(attribute) == subjects.end())
-			return false;
+		if (not subjects.count(attribute))
+			throw LEDError("Missing attribute " + attribute + " in " + place);
+}
 
-	return true;
+tinyxml2::XMLElement* XMLHelper::getRoot() {
+	return root;
 }

@@ -32,25 +32,14 @@
 // To handle daemonization.
 #include <unistd.h>
 
-// to handle threads.
-#include <thread>
-#include <future>
-using std::thread;
-
 // To handle c signals.
 #include <csignal>
 using std::signal;
 
-// To handle dynamic arrays.
-#include <vector>
-using std::vector;
+#include "DataLoader.hpp"
+#include "devices/Group.hpp"
 
-// Compilation settings.
-#include "config.h"
-
-#define CONFIG_FILE "/etc/" PACKAGE_TARNAME ".conf"
-
-#include "Error.hpp"
+#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
 
 namespace LEDSpicer {
 
@@ -61,7 +50,7 @@ class Main {
 
 public:
 
-	Main(bool daemonize, const string& config);
+	Main(bool daemonize, const string& config, bool dump);
 
 	virtual ~Main();
 
@@ -69,9 +58,14 @@ public:
 
 	static void terminate();
 
+	void dumpConfiguration();
+
 protected:
 
 	static bool running;
+
+	vector<Device*> devices;
+	vector<Group> layout;
 };
 
 /**

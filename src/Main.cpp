@@ -16,28 +16,48 @@ using namespace LEDSpicer;
 
 bool Main::running = false;
 
-Main::Main(bool daemonize, const string& config) {
+Main::Main(bool daemonize, const string& configFile, bool dump) {
 
+	// TODO: remove me
 	daemonize = false;
 
 	Log::initialize(not daemonize);
 
-	if (daemonize) {
+	if (daemonize and not dump) {
 		Log::debug("Daemonizing");
 		if (daemon(0, 0) == -1) {
 			throw Error("Unable to daemonize.");
 		}
 		Log::debug("Daemonized");
 	}
+
+	Log::debug("Reading configuration");
+	DataLoader config(configFile);
+	config.read();
+	devices = config.getDevices();
+	layout  = config.getLayout();
+
+	if (dump)
+		dumpConfiguration();
+	else
+		running = true;
 }
 
 Main::~Main() {
-	// TODO Auto-generated destructor stub
+	ConnectionUSB::terminate();
+	for (auto d : devices)
+		delete d;
+	for (auto a : animations)
+		delete a;
 }
 
 void Main::run() {
-	running = true;
-	Log::debug("running");
+
+	if (not running)
+		return;
+
+	Log::info("LEDSpicer Running");
+
 }
 
 void Main::terminate() {
@@ -52,13 +72,39 @@ void signalHandler(int sig) {
 		return;
 	}
 
-	// display backtrace
+	// display back trace
 #ifdef DEVELOP
 	void* array[10];
 	size_t size = backtrace(array, 10);
 	backtrace_symbols_fd(array, size, STDERR_FILENO);
 #endif
 	exit(EXIT_FAILURE);
+}
+
+void Main::dumpConfiguration() {
+	cout << endl << "Colors:" << endl;
+	Color::drawColors();
+
+	cout << "Hardware:" << endl;
+	for (auto d : devices) {
+		d->drawHardwarePinMap();
+	}
+	cout << endl << "Layout:";
+	for (auto group : layout) {
+		cout << endl <<
+			"Group: " << group.name << " -> " <<
+//			"Default state " << (group.defaultState == Group::States::Animation ? "Animation" : "Color") <<
+//			" to " << group.stateValue << endl <<
+			(int)group.elements.size() << " Element(s): " << endl;
+		for (auto element : group.elements) {
+			cout << std::left << std::setfill(' ') << std::setw(15) << element.name <<
+				" Pin" << (element.pins.size() == 1 ? " " : "s") <<  ": ";
+			for (auto pin : element.pins) {
+				cout << (int)*pin << " ";
+			}
+			cout << endl;
+		}
+	}
 }
 
 int main(int argc, char **argv) {
@@ -70,7 +116,9 @@ int main(int argc, char **argv) {
 
 	// Process command line options.
 	string commandline, configFile = "";
-	bool daemonize = true;
+	bool
+		daemonize = true,
+		dump      = true;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -84,9 +132,11 @@ int main(int argc, char **argv) {
 				"options:\n"
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
+				"-d or --dump\t\t\tDump configuration files and quit\n"
 				"-v or --version\t\t\tDisplay version information\n"
 				"-h or --help\t\t\tDisplay this help screen.\n"
-				"If a configuration file is not provided " PACKAGE_NAME " will use " CONFIG_FILE
+				"Data directory: " PACKAGE_DATA_DIR "/\n"
+				"If -c or --config is not provided " PACKAGE_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -110,6 +160,12 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
+		// Dump configuration.
+		if (commandline == "-d" or commandline == "--dump") {
+			dump = true;
+			continue;
+		}
+
 		// Force foreground.
 		if (commandline == "-f" or commandline == "--foreground") {
 			daemonize = false;
@@ -120,8 +176,8 @@ int main(int argc, char **argv) {
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
 
-	Main ledspicer(daemonize, configFile);
 	try {
+		Main ledspicer(daemonize, configFile, dump);
 		ledspicer.run();
 	}
 	catch(Error& e) {
