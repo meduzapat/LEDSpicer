@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LEDSpicer version="1.0" format="hex">
+<LEDSpicer
+	version="1.0"
+	type="Colors"
+	format="hex"
+>
 
 	<color name="White" color="FFFFFF" />
 	<color name="LightGray" color="D3D3D3" />

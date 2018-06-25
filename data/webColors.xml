@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LEDSpicer version="1.0" format="hex">
+<LEDSpicer
+	version="1.0"
+	type="Colors"
+	format="hex"
+>
 	<color name="AliceBlue" color="F0F8FF"/>
 	<color name="AntiqueWhite" color="FAEBD7"/>
 	<color name="Aqua" color="00FFFF"/>

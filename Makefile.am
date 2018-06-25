@@ -13,27 +13,20 @@ bin_PROGRAMS = \
 	ledspicerd
 
 ledspicerd_SOURCES =                 \
-	src/utility/Log.hpp              \
 	src/utility/Log.cpp              \
-	src/utility/Error.hpp            \
 	src/utility/Error.cpp            \
-	src/utility/XMLHelper.hpp        \
+	src/utility/Utility.cpp          \
 	src/utility/XMLHelper.cpp        \
-	src/utility/Color.hpp            \
 	src/utility/Color.cpp            \
-	src/DataLoader.hpp               \
 	src/DataLoader.cpp               \
-	src/ConnectionUSB.hpp            \
 	src/ConnectionUSB.cpp            \
-	src/devices/Element.hpp          \
 	src/devices/Element.cpp          \
-	src/devices/Group.hpp            \
 	src/devices/Group.cpp            \
-	src/devices/Device.hpp           \
 	src/devices/Device.cpp           \
-	src/devices/UltimarcUltimate.hpp \
 	src/devices/UltimarcUltimate.cpp \
-	src/Main.hpp                     \
+	src/animations/Animation.cpp     \
+	src/animations/Pulse.cpp         \
+	src/animations/Serpentine.cpp    \
 	src/Main.cpp
 
 ledspicerd_CPPFLAGS =                     \

@@ -33,3 +33,18 @@ void Serpentine::calculateFrame() {
 	}
 */
 }
+
+void Serpentine::drawConfig() {
+	cout << "Type: Serpentine " << endl;
+	Animation::drawConfig();
+	cout << "Color: #" << std::uppercase << std::hex <<
+		std::setfill('0') << std::setw(2) << (int)color.getR() <<
+		std::setfill('0') << std::setw(2) << (int)color.getG() <<
+		std::setfill('0') << std::setw(2) << (int)color.getB() <<
+		" Tail Color: #" <<
+		std::setfill('0') << std::setw(2) << (int)tailColor.getR() <<
+		std::setfill('0') << std::setw(2) << (int)tailColor.getG() <<
+		std::setfill('0') << std::setw(2) << (int)tailColor.getB() << endl <<
+		"Direction: " << direction2str(direction) << endl << std::dec <<
+		"Tail Length: " << (int)tailLength << " Tail Effect " << effects2str(tailEffect) << endl;
+}

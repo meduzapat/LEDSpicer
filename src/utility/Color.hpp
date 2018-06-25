@@ -38,13 +38,33 @@ public:
 	 * Combine: will combine with the background.
 	 * Diff: Will difference with the background.
 	 */
-	enum Filter : uint8_t {Normal, Combine, Diff};
+	enum Filters : uint8_t {Normal, Combine, Diff};
 
+	/**
+	 * Creates a new Color class (black color).
+	 */
 	Color() {}
 
+	/**
+	 * Creates a new Color class from RGB independent values.
+	 * @param r
+	 * @param g
+	 * @param b
+	 */
 	Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
 
+	/**
+	 * Creates a new Color class from a color name from the color list.
+	 * @param color
+	 */
 	Color(const string& color);
+
+	/**
+	 * Creates a new color class from a hex or dec color format.
+	 * @param color
+	 * @param format
+	 */
+	Color(const string& color, const string& format);
 
 	virtual ~Color() {}
 
@@ -54,7 +74,14 @@ public:
 
 	void set(uint8_t r, uint8_t g, uint8_t b);
 	void set(uint32_t color);
-	void set(const string& color, const string& format);
+
+	/**
+	 * Sets the color from an hex(ex FFFFFF) or dec (ex: 255,255,255) string.
+	 * TODO: implement dec if needed.
+	 * @param color
+	 * @param format true for hex
+	 */
+	void set(const string& color, bool formatHex);
 	void set(const string& color);
 	void set(const Color& color);
 
@@ -98,6 +125,14 @@ public:
 	static umap<string, Color> colors;
 
 	static void drawColors();
+
+	/**
+	 * Converts the filter code into string.
+	 * @param filter
+	 * @return
+	 */
+	static string filter2str(Filters filter);
+	static Filters str2filter(const string& filter);
 
 protected:
 

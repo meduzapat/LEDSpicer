@@ -37,7 +37,8 @@ test-driver
 po/
 
 # Compiled Object files
-src/ledspicerd
+ledspicerd
+.dirstamp
 .libs/
 *.slo
 *.lo

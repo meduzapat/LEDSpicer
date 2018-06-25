@@ -65,7 +65,12 @@ protected:
 	static bool running;
 
 	vector<Device*> devices;
-	vector<Group> layout;
+	umap<string, Group> layout;
+	umap<string, vector<Animation*>> animations;
+
+	bool defaultStateAnimation = false;
+
+	string defaultStateValue;
 };
 
 /**

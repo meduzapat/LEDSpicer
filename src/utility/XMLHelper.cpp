@@ -9,7 +9,7 @@
 
 using namespace LEDSpicer;
 
-XMLHelper::XMLHelper(const string& fileName) {
+XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 
 	Log::debug("Reading " + fileName);
 
@@ -22,6 +22,9 @@ XMLHelper::XMLHelper(const string& fileName) {
 
 	if (root->Attribute("Version") and not std::strcmp(root->Attribute("Version"), DataDocumentVersion))
 		throw LEDError("Invalid data file version, needed " DataDocumentVersion);
+
+	if (root->Attribute("Type") and fileType == root->Attribute("Version"))
+		throw LEDError("Invalid data file type, needed " + fileType);
 }
 
 umap<string, string> XMLHelper::processNode(tinyxml2::XMLElement* nodeElement) {
@@ -46,12 +49,6 @@ umap<string, string> XMLHelper::processNode(const string& nodeElement) {
 		throw LEDError("Missing " + nodeElement + " section.");
 
 	return std::move(processNode(node));
-}
-
-void XMLHelper::checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects, const string& place) {
-	for (string attribute : attributeList)
-		if (not subjects.count(attribute))
-			throw LEDError("Missing attribute " + attribute + " in " + place);
 }
 
 tinyxml2::XMLElement* XMLHelper::getRoot() {

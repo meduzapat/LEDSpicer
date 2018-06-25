@@ -13,7 +13,11 @@ using namespace LEDSpicer;
 umap<string, Color> Color::colors;
 
 Color::Color(const string& color) {
-	set(color, "");
+	set(color);
+}
+
+Color::Color(const string& color, const string& formatHex) {
+	set(color, formatHex == "hex");
 }
 
 void Color::setR(uint8_t color) {
@@ -46,7 +50,7 @@ void Color::set(const string& color) {
 	set(colors[color]);
 }
 
-void Color::set(const string& color, const string& format) {
+void Color::set(const string& color, bool format) {
 
 	if (color.empty() or color.size() != 6)
 		set(0, 0, 0);
@@ -110,7 +114,7 @@ uint8_t Color::transition(uint8_t colorA, uint8_t colorB, uint8_t percent) {
 
 void Color::loadColors(umap<string, string> colorsData, const string& format) {
 	for (auto colorData : colorsData)
-		colors[colorData.first] = std::move(Color(colorData.second));
+		colors[colorData.first] = std::move(Color(colorData.second, format));
 }
 
 void Color::drawColors() {
@@ -126,3 +130,25 @@ void Color::drawColors() {
 	cout << std::dec << endl;
 }
 
+string Color::filter2str(Filters filter) {
+	switch (filter) {
+	case Normal:
+		return "Normal";
+	case Combine:
+		return "Combine";
+	case Diff:
+		return "Diff";
+	}
+	return "";
+}
+
+Color::Filters Color::str2filter(const string& filter) {
+	if (filter == "Normal")
+		return Normal;
+	if (filter == "Combine")
+		return Combine;
+	if (filter == "Diff")
+		return Diff;
+	Log::error("Invalid filter type " + filter + " assuming Combine");
+	return Combine;
+}

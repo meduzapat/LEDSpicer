@@ -9,15 +9,6 @@
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
 
-#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colorProfile"}
-#define REQUIRED_PARAM_COLOR          {"name", "color"}
-#define REQUIRED_PARAM_DEVICE         {"name", "boardId", "fps"}
-#define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
-#define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
-#define REQUIRED_PARAM_LAYOUT         {"defaultState", "stateValue"}
-#define REQUIRED_PARAM_NAME_ONLY      {"name"}
-#define REQUIRED_PARAM_ACTOR          {"type", "group"}
-
 #include "utility/XMLHelper.hpp"
 #include "utility/Color.hpp"
 #include "devices/Group.hpp"
@@ -25,6 +16,15 @@
 #include "animations/Serpentine.hpp"
 #include "animations/Pulse.hpp"
 #include "config.h"
+
+#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colorProfile"}
+#define REQUIRED_PARAM_COLOR          {"name", "color"}
+#define REQUIRED_PARAM_DEVICE         {"name", "boardId", "fps"}
+#define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
+#define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
+#define REQUIRED_PARAM_LAYOUT         {"defaultState", "stateValue"}
+#define REQUIRED_PARAM_NAME_ONLY      {"name"}
+#define REQUIRED_PARAM_ACTOR          {"type", "group", "speed"}
 
 namespace LEDSpicer {
 
@@ -64,13 +64,25 @@ public:
 	 * moves the layout out.
 	 * @return
 	 */
-	vector<Group> getLayout();
+	umap<string, Group> getLayout();
 
 	/**
 	 * Moves the animations out.
 	 * @return
 	 */
-	vector<Animation*> getAnimations();
+	umap<string, vector<Animation*>> getAnimations();
+
+	/**
+	 * Moves the default state value out.
+	 * @return
+	 */
+	string getDefaultStateValue();
+
+	/**
+	 * Returns if the default state is an animation or color.
+	 * @return
+	 */
+	bool isAnimation();
 
 protected:
 
@@ -80,14 +92,17 @@ protected:
 	/// Maps elements by name.
 	umap<string, Element> elements;
 
-	/// Stores the layout.
-	vector<Group> layout;
-
-	/// Maps groups by name.
-	umap<string, Group*> groups;
+	/// Stores groups by name.
+	umap<string, Group> layout;
 
 	/// Temporary stores the animations.
-	vector<Animation*> animations;
+	umap<string, vector<Animation*>> animations;
+
+	/// Stores the default state flag
+	bool animation = false;
+
+	/// Stores the default state value.
+	string defaultValue;
 
 	/**
 	 * Loads the color File
@@ -117,7 +132,7 @@ protected:
 	 * @param groupNode
 	 * @param group
 	 */
-	void processGroupElement(tinyxml2::XMLElement* groupNode, Group& group);
+	void processGroupElements(tinyxml2::XMLElement* groupNode, Group& group, const string& name);
 
 	/**
 	 * Reads an animation file.
@@ -142,7 +157,7 @@ protected:
 	 * @param actorData
 	 * @return
 	 */
-	static Animation* createAnimation(const string& name, umap<string, string>& actorData);
+	Animation* createAnimation(const string& name, umap<string, string>& actorData);
 
 	/**
 	 * Checks if pin is contained inside pins for a device name.

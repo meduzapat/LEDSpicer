@@ -13,3 +13,12 @@ using namespace LEDSpicer::Animations;
 void Pulse::calculateFrame() {
 
 }
+
+void Pulse::drawConfig() {
+	cout << "Type: Pulse " << endl;
+	Animation::drawConfig();
+	cout << "Color: #" << std::uppercase << std::hex <<
+			std::setfill('0') << std::setw(2) << (int)color.getR() <<
+			std::setfill('0') << std::setw(2) << (int)color.getG() <<
+			std::setfill('0') << std::setw(2) << (int)color.getB() << std::dec << endl;
+}

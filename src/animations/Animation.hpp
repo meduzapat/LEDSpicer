@@ -21,14 +21,14 @@
 using std::vector;
 
 #include "../devices/Group.hpp"
+#include "../utility/Color.hpp"
 #include "../utility/Error.hpp"
-#include "../utility/Log.hpp"
+#include "../utility/Utility.hpp"
 
 #define DIRECTION_NONE 0
 #define DIRECTION_FORWARD 1
 #define DIRECTION_BACKWARD 2
 #define DIRECTION_BOUNCING 4
-
 
 #ifndef ANIMATION_HPP_
 #define ANIMATION_HPP_ 1
@@ -46,24 +46,32 @@ class Animation {
 
 public:
 
-	enum Directions : uint8_t {None, Forward, Backward, Bouncing = 4};
+	enum Directions : uint8_t {Stop, Forward, Backward, ForwardBouncing, BackwardBouncing};
 
 	enum Effects    : uint8_t {None, SlowFade, Fade, FastFade};
 
-	Animation(const umap<string, string>& parameters, Group& layout);
+	Animation(umap<string, string>& parameters, Group& layout);
 
-	virtual ~Animation();
+	virtual ~Animation() {}
 
 	void drawFrame();
+
+	virtual void drawConfig();
+
+	static string direction2str(Directions direction);
+	static Directions str2direction(const string& direction);
+
+	static string effects2str(Effects effect);
+	static Effects str2effects(const string& effect);
 
 protected:
 
 	uint8_t speed = 0;
 
-	Color::Filter filter = Color::Filter::Color;
+	Color::Filters filter = Color::Filters::Normal;
 
-	/// A copy of the group elements to work.
-	Group frame;
+	/// A copy of the group pins to work on.
+	vector<uint8_t> internalValues;
 
 	/// A reference to the real group of elements.
 	Group& group;

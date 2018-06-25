@@ -31,17 +31,16 @@ public:
 	enum States {Color, Animation, Pattern};
 
 	//uint8_t defaultState, const string& stateValue, 		defaultState(defaultState),	stateValue(stateValue),
-	Group(const string& name) : name(name) {}
+	Group() {}
 
 	virtual ~Group() {}
 
-	vector <Element> elements;
+	void drawElements();
+
+	vector<Element> elements;
 
 //	uint8_t defaultState;
 
-	string
-//		stateValue,
-		name;
 };
 
 }} /* namespace LEDSpicer */

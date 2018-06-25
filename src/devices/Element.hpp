@@ -35,8 +35,16 @@ public:
 
 	virtual ~Element() {}
 
-	void setColor(Color color);
+	void setColor(Color& color);
 
+	void setPinValue(uint8_t pinNumber, uint8_t val);
+	uint8_t getPinValue(uint8_t pinNumber);
+	uint8_t* getPin(uint8_t pinNumber);
+	const vector<uint8_t*>& getPins() const;
+
+	/**
+	 * Array of pointers to the original pins
+	 */
 	vector<uint8_t*> pins;
 
 	string name;

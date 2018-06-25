@@ -6,11 +6,11 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
+#include "Animation.hpp"
+#include "../utility/Color.hpp"
+
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
-
-#include "Animation.hpp"
-#include "../Color.hpp"
 
 namespace LEDSpicer {
 namespace Animations {
@@ -23,29 +23,35 @@ class Serpentine: public Animation {
 public:
 
 
-	Serpentine(const umap<string, string>& parameters, Group& layout) :
+	Serpentine(umap<string, string>& parameters, Group& layout) :
 		Animation(parameters, layout),
-		color(parameters['color']),
-		tailColor(parameters['tailColor']),
-		cDirection(parameters['direction']),
-		direction(parameters['direction']),
-		tailLength(parameters['tailLength']),
-		tailEffect(parameters['tailEffect'])
-	{}
+		color(parameters["color"]),
+		tailColor(parameters["tailColor"]),
+		cDirection(str2direction(parameters["direction"])),
+		direction(cDirection),
+		tailLength(stoi(parameters["tailLength"])),
+		tailEffect(str2effects(parameters["tailEffect"])) {}
 
 	virtual ~Serpentine() {}
+
+	virtual void drawConfig();
 
 protected:
 
 	Color
 		color,
 		tailColor;
+
+	Directions
+		cDirection,
+		direction;
+
+	Effects
+		tailEffect;
+
 	uint8_t
-		cDirection = 0,
-		direction  = 0,
-		tailLength = 0,
-		tailEffect = 0,
-		position   = 0;
+		tailLength,
+		position = 0;
 
 	virtual void calculateFrame();
 };

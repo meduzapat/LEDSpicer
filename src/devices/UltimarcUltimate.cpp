@@ -69,7 +69,8 @@ void UltimarcUltimate::drawHardwarePinMap() {
 		fillerL = 1,
 		fillerR = half + 1;
 	cout << getName() << " Pins " << (int)getNumberOfLeds() << endl;
-	cout << "Hardware pin map:" << endl;
+	cout << "Hardware pin map:" << endl <<
+			"R  G  B     B  G  R"  << endl;
 	for (uint8_t c = 1; c <= getNumberOfLeds() / 2; ++c) {
 		*getLED(c)        = fillerL++;
 		*getLED(c + half) = fillerR++;

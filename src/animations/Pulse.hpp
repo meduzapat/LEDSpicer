@@ -21,11 +21,13 @@ class Pulse : public Animation {
 
 public:
 
-	Pulse(const umap<string, string>& parameters, Group& layout) :
+	Pulse(umap<string, string>& parameters, Group& layout) :
 		Animation(parameters, layout),
-		color(parameters['color']) {}
+		color(parameters["color"]) {}
 
 	virtual ~Pulse() {}
+
+	void drawConfig();
 
 protected:
 

@@ -6,26 +6,16 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef SRC_LEDSPICER_XMLHELPER_HPP_
-#define SRC_LEDSPICER_XMLHELPER_HPP_ 1
-
-// To handle unordered map.
-#include <unordered_map>
-#ifndef umap
-	#define umap std::unordered_map
-#endif
-
-// To use vectors.
-#include <vector>
-using std::vector;
-
 // To process XML files.
 #include <tinyxml2.h>
 
-#include "Error.hpp"
+#include "Utility.hpp"
 #include "Log.hpp"
 
-// Conflicting with tinyxml2 Error function
+#ifndef SRC_LEDSPICER_XMLHELPER_HPP_
+#define SRC_LEDSPICER_XMLHELPER_HPP_ 1
+
+// Conflicting with tinyxml2 Error function, global shit :(
 using LEDError = LEDSpicer::Error;
 
 namespace LEDSpicer {
@@ -47,7 +37,7 @@ public:
 	 * @param fileName
 	 * @throws Error if the file is missing, the body is missing or the version is different.
 	 */
-	XMLHelper(const string& fileName);
+	XMLHelper(const string& fileName, const string& fileType);
 
 	/**
 	 * Reads the attributes from a XML node.
@@ -67,17 +57,6 @@ public:
 	 * @throws Error if node does not exist or an error happen.
 	 */
 	umap<string, string> processNode(const string& nodeName);
-
-	/**
-	 * Checks if the map subject have the attributeList elements.
-	 * This function ignores other elements.
-	 *
-	 * @param attributeList A list of attributes to check.
-	 * @param subjects A map to check.
-	 * @param node where will check.
-	 * @throws Error if an attribute is missing.
-	 */
-	void checkAttributes(const vector<string>& attributeList, umap<string, string>& subjects, const string& place);
 
 	/**
 	 * Returns a pointer to the root node.

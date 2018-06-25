@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<animation>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
 	<actor
 		type="Pulse"
 		group="board as circle"
 		color="VeryDarkRed"
 		speed="60"
-		filter="Color"
+		filter="Normal"
 	>
 	</actor>
 	<actor
@@ -25,11 +28,11 @@
 		group="credits"
 		color="White"
 		speed="50"
-		filter="Color"
-		direction="BouncingForward"
+		filter="Normal"
+		direction="ForwardBouncing"
 		tailLength="0"
 		tailColor="Black"
-		tailEffect="Off"
+		tailEffect="None"
 	>
 	</actor>
 	<actor
@@ -37,7 +40,7 @@
 		group="cabinet"
 		color="LightCyan"
 		speed="40"
-		filter="Color"
+		filter="Normal"
 	>
 	</actor>
-</animation>
+</LEDSpicer>

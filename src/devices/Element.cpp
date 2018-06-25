@@ -10,6 +10,22 @@
 
 using namespace LEDSpicer::Devices;
 
-void Element::setColor(Color color) {
+void Element::setColor(Color& color) {
 
+}
+
+void Element::setPinValue(uint8_t pinNumber, uint8_t val) {
+	*pins[pinNumber] = val;
+}
+
+uint8_t Element::getPinValue(uint8_t pinNumber) {
+	return *pins[pinNumber];
+}
+
+uint8_t* Element::getPin(uint8_t pinNumber) {
+	return pins[pinNumber];
+}
+
+const vector<uint8_t*>& Element::getPins() const {
+	return pins;
 }
