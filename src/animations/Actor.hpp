@@ -1,7 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Animation.hpp
- * @ingroup
+ * @file		Actor.hpp
  * @since		Jun 22, 2018
  * @author		Patricio A. Rossi (MeduZa)
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
@@ -42,7 +41,7 @@ using Devices::Element;
 /**
  * LEDSpicer::Animation
  */
-class Animation {
+class Actor {
 
 public:
 
@@ -50,9 +49,9 @@ public:
 
 	enum Effects    : uint8_t {None, SlowFade, Fade, FastFade};
 
-	Animation(umap<string, string>& parameters, Group& layout);
+	Actor(umap<string, string>& parameters, Group& layout);
 
-	virtual ~Animation() {}
+	virtual ~Actor() {}
 
 	void drawFrame();
 
@@ -67,6 +66,13 @@ public:
 protected:
 
 	uint8_t speed = 0;
+
+	/// Current frame.
+	uint8_t frame = 0;
+
+	Directions
+		cDirection,
+		direction;
 
 	Color::Filters filter = Color::Filters::Normal;
 

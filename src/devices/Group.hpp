@@ -28,18 +28,32 @@ class Group {
 
 public:
 
-	enum States {Color, Animation, Pattern};
-
-	//uint8_t defaultState, const string& stateValue, 		defaultState(defaultState),	stateValue(stateValue),
 	Group() {}
 
 	virtual ~Group() {}
 
 	void drawElements();
 
-	vector<Element> elements;
+	/**
+	 * Returns the number of elements.
+	 * @return
+	 */
+	uint8_t count() const;
 
-//	uint8_t defaultState;
+	/**
+	 * Returns a pointer to the internal elements array.
+	 * @param element
+	 * @return
+	 */
+	Element& getElement(uint8_t element);
+
+	/**
+	 * Returns a reference to the elements inside.
+	 * @return
+	 */
+	const vector<Element>& getElements() const;
+
+	vector<Element> elements;
 
 };
 

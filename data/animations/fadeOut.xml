@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="Pulse"
+		group="board as circle"
+		color="White"
+		speed="60"
+		filter="Normal"
+		direction="Backward"
+	/>
+	<actor
+		type="Pulse"
+		group="credits"
+		color="White"
+		speed="60"
+		filter="Normal"
+		direction="Backward"
+	/>
+	<actor
+		type="Pulse"
+		group="cabinet"
+		color="LightCyan"
+		speed="40"
+		filter="Normal"
+		direction="Forward"
+	/>
+</LEDSpicer>

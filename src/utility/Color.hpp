@@ -85,10 +85,10 @@ public:
 	void set(const string& color);
 	void set(const Color& color);
 
-	uint8_t getR();
-	uint8_t getG();
-	uint8_t getB();
-	uint32_t getRGB();
+	uint8_t getR() const;
+	uint8_t getG() const;
+	uint8_t getB() const;
+	uint32_t getRGB() const;
 
 	/**
 	 * Calculates the fade for this color.
@@ -104,6 +104,12 @@ public:
 	 * @return
 	 */
 	Color transition(const Color& destination, uint8_t percent);
+
+	/**
+	 * Returns the monochrome version of the color.
+	 * @return
+	 */
+	uint8_t getMonochrome() const;
 
 	/**
 	 * Creates a linear transition between two colors tones.
@@ -125,6 +131,8 @@ public:
 	static umap<string, Color> colors;
 
 	static void drawColors();
+
+	void drawColor();
 
 	/**
 	 * Converts the filter code into string.

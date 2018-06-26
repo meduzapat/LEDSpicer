@@ -1,18 +1,17 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Animation.cpp
- * @ingroup
+ * @file		Actor.cpp
  * @since		Jun 22, 2018
  * @author		Patricio A. Rossi (MeduZa)
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "Animation.hpp"
+#include "Actor.hpp"
 
 
 using namespace LEDSpicer::Animations;
 
-Animation::Animation(umap<string, string>& parameters, Group& layout) :
+Actor::Actor(umap<string, string>& parameters, Group& layout) :
 	speed(stoi(parameters["speed"])),
 	filter(Color::str2filter(parameters["filter"])),
 	group(layout)
@@ -24,7 +23,7 @@ Animation::Animation(umap<string, string>& parameters, Group& layout) :
 	internalValues.shrink_to_fit();
 }
 
-void Animation::drawFrame() {
+void Actor::drawFrame() {
 	calculateFrame();
 	uint8_t pinC = 0;
 	for (auto element : group.elements) {
@@ -41,11 +40,11 @@ void Animation::drawFrame() {
 	}
 }
 
-void Animation::drawConfig() {
-	cout << "speed: " << (int)speed << "% filter: " << Color::filter2str(filter) << " ";
+void Actor::drawConfig() {
+	cout << "Speed: " << (int)speed << "% Filter: " << Color::filter2str(filter) << " ";
 }
 
-string Animation::direction2str(Directions direction) {
+string Actor::direction2str(Directions direction) {
 	switch (direction) {
 	case Stop:
 		return "None";
@@ -61,7 +60,7 @@ string Animation::direction2str(Directions direction) {
 	return "";
 }
 
-Animation::Directions Animation::str2direction(const string& direction) {
+Actor::Directions Actor::str2direction(const string& direction) {
 
 	if (direction == "Stop")
 		return Stop;
@@ -76,7 +75,7 @@ Animation::Directions Animation::str2direction(const string& direction) {
 	throw Error("Invalid direction " + direction);
 }
 
-string Animation::effects2str(Effects effect) {
+string Actor::effects2str(Effects effect) {
 	switch (effect) {
 	case None:
 		return "None";
@@ -90,7 +89,7 @@ string Animation::effects2str(Effects effect) {
 	return "";
 }
 
-Animation::Effects Animation::str2effects(const string& effect) {
+Actor::Effects Actor::str2effects(const string& effect) {
 	if (effect == "None")
 		return None;
 	if (effect == "SlowFade")

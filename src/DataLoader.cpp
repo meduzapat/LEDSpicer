@@ -17,7 +17,7 @@ void DataLoader::read() {
 
 	ConnectionUSB::openSession(stoi(tempAttr["usbDebugLevel"]));
 
-	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colorProfile"]).append(".xml"));
+	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colors"]).append(".xml"));
 
 	processDevices();
 
@@ -25,23 +25,15 @@ void DataLoader::read() {
 }
 
 vector<Device*> DataLoader::getDevices() {
-	return std::move(devices);
+	return devices;
 }
 
 umap<string, Group> DataLoader::getLayout() {
-	return std::move(layout);
+	return layout;
 }
 
-umap<string, vector<Animation*>> DataLoader::getAnimations() {
-	return std::move(animations);
-}
-
-string DataLoader::getDefaultStateValue() {
-	return std::move(defaultValue);
-}
-
-bool DataLoader::isAnimation() {
-	return animation;
+string DataLoader::getDefaultProfile() const {
+	return defaultProfile;
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -68,18 +60,16 @@ void DataLoader::processColorFile(const string& file) {
 
 void DataLoader::processDevices() {
 
-	umap<string, string> deviceAttr;
-
-	tinyxml2::XMLElement* devices = root->FirstChildElement("devices");
-	if (not devices)
+	tinyxml2::XMLElement* element = root->FirstChildElement("devices");
+	if (not element)
 		throw LEDError("Missing devices section");
 
-	tinyxml2::XMLElement* element = devices->FirstChildElement("device");
+	element = element->FirstChildElement("device");
 	if (not element)
 		throw LEDError("Empty devices section");
 
 	for (; element; element = element->NextSiblingElement("device")) {
-		deviceAttr = processNode(element);
+		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, "device");
 		auto device = createDevice(deviceAttr["name"], deviceAttr["boardId"], deviceAttr["fps"]);
 		this->devices.push_back(device);
@@ -89,7 +79,6 @@ void DataLoader::processDevices() {
 
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
-	umap<string, string> tempAttr;
 	vector<bool> pinCheck(device->getNumberOfLeds(), false);
 
 	tinyxml2::XMLElement* element = deviceNode->FirstChildElement("element");
@@ -98,7 +87,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	for (; element; element = element->NextSiblingElement("element")) {
 		Element deviceElement;
-		tempAttr = processNode(element);
+		umap<string, string> tempAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE_ELEMENT, tempAttr, "device element");
 
 		vector<uint8_t> pins;
@@ -141,8 +130,7 @@ void DataLoader::processLayout() {
 
 	tempAttr = processNode(layout);
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, "layout");
-	animation = tempAttr["defaultState"] == "Animation";
-	defaultValue = tempAttr["stateValue"];
+	defaultProfile = tempAttr["defaultProfile"];
 
 	tinyxml2::XMLElement* element = layout->FirstChildElement("group");
 	if (not element)
@@ -159,9 +147,6 @@ void DataLoader::processLayout() {
 		processGroupElements(element, group, tempAttr["name"]);
 		this->layout[tempAttr["name"]] = std::move(group);
 	}
-
-	if (animation)
-		processAnimation(defaultValue);
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group, const string& name) {
@@ -187,20 +172,50 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 	}
 }
 
-void DataLoader::processAnimation(const string& name) {
+Profile* DataLoader::processProfile(const string& name) {
 
+	XMLHelper profile(string(PACKAGE_DATA_DIR).append("/profiles/").append(name).append(".xml"), "Profile");
+	umap<string, string> tempAttr = processNode(profile.getRoot());
+	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
+
+	Profile* profilePtr = new Profile(
+		Color(tempAttr.at("defaultColorOn")),
+		Color(tempAttr.at("defaultColorOff")),
+		processAnimation(tempAttr["startAnimation"]),
+		processAnimation(tempAttr["stopAnimation"])
+	);
+
+	// Check for animations.
+	tinyxml2::XMLElement* element = profile.getRoot()->FirstChildElement("animations");
+	if (element) {
+		element = element->FirstChildElement("animation");
+		for (; element; element = element->NextSiblingElement("animation")) {
+			tempAttr = processNode(element);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for profile " + name);
+			profilePtr->addAnimation(tempAttr["name"], processAnimation(tempAttr["name"]));
+		}
+	}
+	return profilePtr;
+}
+
+vector<Actor*> DataLoader::processAnimation(const string& name) {
+
+	// TODO cache information on disk about animations so we avoid a read from HD.
 	XMLHelper animation(string(PACKAGE_DATA_DIR).append("/animations/").append(name).append(".xml"), "Animation");
+
 	umap<string, string> actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement("actor");
 	if (not element)
 		throw LEDError("No actors found");
 
+	vector<Actor*> actors;
 	for (; element; element = element->NextSiblingElement("actor")) {
 		actorData = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + name);
-		animations[name].push_back(createAnimation(name, actorData));
+		actors.push_back(createAnimation(name, actorData));
 	}
 
+	return actors;
 }
 
 Device* DataLoader::createDevice(const string& name, const string& boardId, const string& fps) {
@@ -212,12 +227,14 @@ Device* DataLoader::createDevice(const string& name, const string& boardId, cons
 	throw LEDError("Unknown board name");
 }
 
-Animation* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {
+Actor* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {
 	string groupName = actorData["group"];
 	if (actorData["type"] == "Serpentine") {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "animation Serpentine");
 		return new Serpentine(actorData, layout[groupName]);
 	}
 	if (actorData["type"] == "Pulse") {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, actorData, "animation Pulse");
 		return new Pulse(actorData, layout[groupName]);
 	}
 	throw LEDError("Invalid animation type '" + actorData["type"] + "' inside " + name);

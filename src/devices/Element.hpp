@@ -35,7 +35,7 @@ public:
 
 	virtual ~Element() {}
 
-	void setColor(Color& color);
+	void setColor(const Color& color);
 
 	void setPinValue(uint8_t pinNumber, uint8_t val);
 	uint8_t getPinValue(uint8_t pinNumber);

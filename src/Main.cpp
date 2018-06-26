@@ -34,11 +34,9 @@ Main::Main(bool daemonize, const string& configFile, bool dump) {
 	Log::debug("Reading configuration");
 	DataLoader config(configFile, "Configuration");
 	config.read();
-	devices    = config.getDevices();
-	layout     = config.getLayout();
-	animations = config.getAnimations();
-	defaultStateAnimation = config.isAnimation();
-	defaultStateValue = config.getDefaultStateValue();
+	devices        = config.getDevices();
+	layout         = config.getLayout();
+	defaultProfile = config.processProfile(config.getDefaultProfile());
 
 	if (dump)
 		dumpConfiguration();
@@ -47,12 +45,11 @@ Main::Main(bool daemonize, const string& configFile, bool dump) {
 }
 
 Main::~Main() {
+
+	delete defaultProfile;
 	ConnectionUSB::terminate();
 	for (auto d : devices)
 		delete d;
-	for (auto a : animations)
-		for (auto actor : a.second)
-			delete actor;
 }
 
 void Main::run() {
@@ -88,23 +85,16 @@ void signalHandler(int sig) {
 void Main::dumpConfiguration() {
 	cout << endl << "System Configuration:" << endl << "Colors:" << endl;
 	Color::drawColors();
-	cout << "Hardware:" << endl;
-	for (auto d : devices) {
+	cout  << endl << "Hardware:" << endl;
+	for (auto d : devices)
 		d->drawHardwarePinMap();
-	}
 	cout << endl << "Layout:";
 	for (auto group : layout) {
 		cout << endl << "Group: " << group.first << " -> ";
 		group.second.drawElements();
 	}
-	cout << endl << "Animations:" << endl;
-	for (auto animation : animations) {
-		cout << endl << animation.first << endl << "Actors:" << endl;
-		for (auto actor : animation.second) {
-			actor->drawConfig();
-			cout << endl;
-		}
-	}
+	cout << endl << "Default Profile:" << endl;
+	defaultProfile->drawConfig();
 }
 
 int main(int argc, char **argv) {

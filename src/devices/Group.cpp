@@ -21,3 +21,15 @@ void Group::drawElements() {
 		cout << endl;
 	}
 }
+
+uint8_t Group::count() const {
+	return elements.size();
+}
+
+Element& Group::getElement(uint8_t element) {
+	return elements[element];
+}
+
+const vector<Element>& Group::getElements() const {
+	return elements;
+}

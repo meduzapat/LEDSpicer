@@ -62,19 +62,19 @@ void Color::set(const Color& color) {
 	set(color.r, color.g, color.b);
 }
 
-uint8_t Color::getR() {
+uint8_t Color::getR() const {
 	return r;
 }
 
-uint8_t Color::getG() {
+uint8_t Color::getG() const {
 	return g;
 }
 
-uint8_t Color::getB() {
+uint8_t Color::getB() const {
 	return b;
 }
 
-uint32_t Color::getRGB() {
+uint32_t Color::getRGB() const {
 	uint32_t number = 0;
 	number |= r;
 	number<<= 8;
@@ -89,11 +89,11 @@ Color Color::fade(uint8_t percent) {
 	Color color;
 
 	if (percent)
-		color.set(r * 255 / percent, g * 255 / percent, b * 255  / percent);
+		color.set((float)r * 255 / percent, (float)g * 255 / percent, (float)b * 255  / percent);
 	else
 		color.set(0, 0, 0);
 
-	return std::move(color);
+	return color;
 }
 
 Color Color::transition(const Color& destination, uint8_t percent) {
@@ -104,7 +104,11 @@ Color Color::transition(const Color& destination, uint8_t percent) {
 		transition(b, destination.b, percent)
 	);
 
-	return std::move(rColor);
+	return rColor;
+}
+
+uint8_t Color::getMonochrome() const {
+	return static_cast<uint8_t>(0.301 * (float)r + 0.587 * (float)g + 0.114 * (float)b);
 }
 
 uint8_t Color::transition(uint8_t colorA, uint8_t colorB, uint8_t percent) {
@@ -119,15 +123,20 @@ void Color::loadColors(umap<string, string> colorsData, const string& format) {
 
 void Color::drawColors() {
 	for (auto c : Color::colors) {
-		cout <<
-			std::left << std::setfill(' ') << std::setw(15) << c.first << " = #" << std::hex <<
-			std::uppercase << std::setfill('0') << std::setw(2) << (int)c.second.getR() <<
-			std::setfill(' ') << std::setw(15) << std::uppercase <<
-			std::setfill('0') << std::setw(2) << (int)c.second.getG() <<
-			std::setfill(' ') << std::setw(15) << std::uppercase <<
-			std::setfill('0') << std::setw(2) << (int)c.second.getB() << endl;
+		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
+		c.second.drawColor();
 	}
-	cout << std::dec << endl;
+}
+
+void Color::drawColor() {
+	cout <<
+		"#" << std::hex <<
+		std::uppercase << std::setfill('0') << std::setw(2) << (int)getR() <<
+		std::setfill(' ') << std::setw(15) << std::uppercase <<
+		std::setfill('0') << std::setw(2) << (int)getG() <<
+		std::setfill(' ') << std::setw(15) << std::uppercase <<
+		std::setfill('0') << std::setw(2) << (int)getB() << endl;
+	cout << std::dec;
 }
 
 string Color::filter2str(Filters filter) {

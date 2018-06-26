@@ -24,9 +24,10 @@ ledspicerd_SOURCES =                 \
 	src/devices/Group.cpp            \
 	src/devices/Device.cpp           \
 	src/devices/UltimarcUltimate.cpp \
-	src/animations/Animation.cpp     \
+	src/animations/Actor.cpp         \
 	src/animations/Pulse.cpp         \
 	src/animations/Serpentine.cpp    \
+	src/devices/Profile.cpp          \
 	src/Main.cpp
 
 ledspicerd_CPPFLAGS =                     \

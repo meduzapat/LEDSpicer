@@ -39,7 +39,7 @@ umap<string, string> XMLHelper::processNode(tinyxml2::XMLElement* nodeElement) {
 		pAttrib = pAttrib->Next();
 	}
 
-	return std::move(groupValues);
+	return groupValues;
 }
 
 umap<string, string> XMLHelper::processNode(const string& nodeElement) {
@@ -48,7 +48,7 @@ umap<string, string> XMLHelper::processNode(const string& nodeElement) {
 	if (not node)
 		throw LEDError("Missing " + nodeElement + " section.");
 
-	return std::move(processNode(node));
+	return processNode(node);
 }
 
 tinyxml2::XMLElement* XMLHelper::getRoot() {

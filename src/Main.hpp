@@ -66,11 +66,7 @@ protected:
 
 	vector<Device*> devices;
 	umap<string, Group> layout;
-	umap<string, vector<Animation*>> animations;
-
-	bool defaultStateAnimation = false;
-
-	string defaultStateValue;
+	Profile* defaultProfile;
 };
 
 /**

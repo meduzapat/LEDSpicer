@@ -10,8 +10,15 @@
 
 using namespace LEDSpicer::Devices;
 
-void Element::setColor(Color& color) {
-
+void Element::setColor(const Color& color) {
+	if (pins.size() == 3) {
+		*pins[0] = color.getR();
+		*pins[1] = color.getG();
+		*pins[2] = color.getB();
+	}
+	else {
+		*pins[0] = color.getMonochrome();
+	}
 }
 
 void Element::setPinValue(uint8_t pinNumber, uint8_t val) {

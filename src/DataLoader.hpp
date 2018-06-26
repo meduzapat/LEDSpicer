@@ -9,30 +9,33 @@
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
 
+#include "config.h"
 #include "utility/XMLHelper.hpp"
-#include "utility/Color.hpp"
-#include "devices/Group.hpp"
 #include "devices/UltimarcUltimate.hpp"
+#include "utility/Color.hpp"
+#include "devices/Profile.hpp"
+#include "devices/Group.hpp"
 #include "animations/Serpentine.hpp"
 #include "animations/Pulse.hpp"
-#include "config.h"
 
-#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colorProfile"}
+#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colors"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
 #define REQUIRED_PARAM_DEVICE         {"name", "boardId", "fps"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
-#define REQUIRED_PARAM_LAYOUT         {"defaultState", "stateValue"}
+#define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
+#define REQUIRED_PARAM_PROFILE        {"defaultColorOn", "defaultColorOff", "startAnimation", "stopAnimation"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
-#define REQUIRED_PARAM_ACTOR          {"type", "group", "speed"}
+#define REQUIRED_PARAM_ACTOR          {"type", "group", "speed", "direction"}
 
 namespace LEDSpicer {
 
-using Animations::Animation;
+using Animations::Actor;
 using Animations::Serpentine;
 using Animations::Pulse;
 using Devices::UltimarcUltimate;
 using Devices::Device;
+using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
 
@@ -67,22 +70,12 @@ public:
 	umap<string, Group> getLayout();
 
 	/**
-	 * Moves the animations out.
-	 * @return
+	 * Reads an profile file.
+	 * @param name
 	 */
-	umap<string, vector<Animation*>> getAnimations();
+	Profile* processProfile(const string& name);
 
-	/**
-	 * Moves the default state value out.
-	 * @return
-	 */
-	string getDefaultStateValue();
-
-	/**
-	 * Returns if the default state is an animation or color.
-	 * @return
-	 */
-	bool isAnimation();
+	string getDefaultProfile() const;
 
 protected:
 
@@ -95,14 +88,8 @@ protected:
 	/// Stores groups by name.
 	umap<string, Group> layout;
 
-	/// Temporary stores the animations.
-	umap<string, vector<Animation*>> animations;
-
-	/// Stores the default state flag
-	bool animation = false;
-
-	/// Stores the default state value.
-	string defaultValue;
+	/// Stores the default profile name.
+	string defaultProfile;
 
 	/**
 	 * Loads the color File
@@ -138,7 +125,7 @@ protected:
 	 * Reads an animation file.
 	 * @param file
 	 */
-	void processAnimation(const string& file);
+	vector<Actor*> processAnimation(const string& file);
 
 	/**
 	 * Creates a device object.
@@ -157,7 +144,7 @@ protected:
 	 * @param actorData
 	 * @return
 	 */
-	Animation* createAnimation(const string& name, umap<string, string>& actorData);
+	Actor* createAnimation(const string& name, umap<string, string>& actorData);
 
 	/**
 	 * Checks if pin is contained inside pins for a device name.

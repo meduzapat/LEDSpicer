@@ -6,30 +6,18 @@
 	<actor
 		type="Pulse"
 		group="board as circle"
-		color="VeryDarkRed"
+		color="White"
 		speed="60"
 		filter="Normal"
-		direction="ForwardBouncing"
-	/>
-	<actor
-		type="Serpentine"
-		group="board as circle"
-		color="LightCoral"
-		speed="75"
-		filter="Combine"
 		direction="Forward"
-		tailLength="3"
-		tailColor="DarkRed"
 	/>
 	<actor
-		type="Serpentine"
+		type="Pulse"
 		group="credits"
 		color="White"
-		speed="50"
+		speed="60"
 		filter="Normal"
-		direction="ForwardBouncing"
-		tailLength="0"
-		tailColor="Black"
+		direction="Forward"
 	/>
 	<actor
 		type="Pulse"
@@ -37,6 +25,6 @@
 		color="LightCyan"
 		speed="40"
 		filter="Normal"
-		direction="ForwardBouncing"
+		direction="Forward"
 	/>
 </LEDSpicer>

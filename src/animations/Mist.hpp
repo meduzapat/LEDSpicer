@@ -1,15 +1,14 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Pulse.hpp
- * @since		Jun 24, 2018
+ * @file		Mist.hpp
+ * @ingroup
+ * @since		Jun 25, 2018
  * @author		Patricio A. Rossi (MeduZa)
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef PULSE_HPP_
-#define PULSE_HPP_ 1
-
-#define REQUIRED_PARAM_ACTOR_PULSE {"color", "direction"}
+#ifndef MIST_HPP_
+#define MIST_HPP_ 1
 
 #include "Actor.hpp"
 
@@ -17,29 +16,31 @@ namespace LEDSpicer {
 namespace Animations {
 
 /**
- * LEDSpicer::Animations::Pulse
+ * LEDSpicer::Animations::Mist
  */
-class Pulse : public Actor {
+class Mist: public Actor {
 
 public:
 
-	Pulse(umap<string, string>& parameters, Group& layout) :
+	Mist(umap<string, string>& parameters, Group& layout) :
 		Actor(parameters, layout),
-		color(parameters["color"]) {}
+		color1(parameters["color1"]),
+		color2(parameters["color2"]) {}
 
-	virtual ~Pulse() {}
+	virtual ~Mist() {}
 
-	void drawConfig();
+	virtual void drawConfig();
 
 protected:
 
-	Color color;
+	Color
+		color1,
+		color2;
 
 	virtual void calculateFrame();
-
 };
 
 } /* namespace Animations */
 } /* namespace LEDSpicer */
 
-#endif /* PULSE_HPP_ */
+#endif /* MIST_HPP_ */

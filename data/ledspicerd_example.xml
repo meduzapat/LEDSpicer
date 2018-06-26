@@ -3,7 +3,7 @@
 	version="1.0"
 	type="Configuration"
 	usbDebugLevel="3"
-	colorProfile="basicColors"
+	colors="basicColors"
 >
 	<devices>
 		<device
@@ -260,8 +260,7 @@
 		</device>
 	</devices>
 	<layout
-		defaultState="Animation"
-		stateValue="serpentine"
+		defaultProfile="default"
 	>
 		<group
 			name="board as circle"

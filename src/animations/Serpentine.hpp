@@ -6,11 +6,13 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "Animation.hpp"
 #include "../utility/Color.hpp"
+#include "Actor.hpp"
 
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
+
+#define REQUIRED_PARAM_ACTOR_SERPENTINE {"tailLength", "tailColor"}
 
 namespace LEDSpicer {
 namespace Animations {
@@ -18,19 +20,18 @@ namespace Animations {
 /**
  * LEDSpicer::Serpentine
  */
-class Serpentine: public Animation {
+class Serpentine: public Actor {
 
 public:
 
-
 	Serpentine(umap<string, string>& parameters, Group& layout) :
-		Animation(parameters, layout),
+		Actor(parameters, layout),
 		color(parameters["color"]),
 		tailColor(parameters["tailColor"]),
 		cDirection(str2direction(parameters["direction"])),
 		direction(cDirection),
 		tailLength(stoi(parameters["tailLength"])),
-		tailEffect(str2effects(parameters["tailEffect"])) {}
+		tailweight(100 / (tailLength + 1)) {}
 
 	virtual ~Serpentine() {}
 
@@ -42,18 +43,13 @@ protected:
 		color,
 		tailColor;
 
-	Directions
-		cDirection,
-		direction;
-
-	Effects
-		tailEffect;
-
 	uint8_t
 		tailLength,
-		position = 0;
+		tailweight;
 
 	virtual void calculateFrame();
+
+
 };
 
 }} /* namespace LEDSpicer */
