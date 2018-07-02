@@ -7,18 +7,22 @@
  */
 
 #include "ConnectionUSB.hpp"
-
+#ifdef DRY_RUN
+#include <iomanip>
+#endif
 using namespace LEDSpicer;
 
 libusb_context* ConnectionUSB::usbSession = nullptr;
+uint8_t         ConnectionUSB::waitTime   = 0;
 
 ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request) :
 	requestType(requestType),
 	request(request)
 {
-
+#ifndef DRY_RUN
 	if (not usbSession)
 		throw Error("USB session not initialized");
+#endif
 }
 
 void ConnectionUSB::initialize() {
@@ -35,6 +39,9 @@ void ConnectionUSB::connect() {
 #endif
 
 	handle = libusb_open_device_with_vid_pid(usbSession, board.vendor, board.product);
+
+	if (not handle)
+		throw Error("Unable to connect to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
 
 	libusb_set_auto_detach_kernel_driver(handle, true);
 }
@@ -58,7 +65,7 @@ ConnectionUSB::~ConnectionUSB() {
 }
 
 void ConnectionUSB::openSession(uint8_t debugLevel) {
-
+#ifndef DRY_RUN
 	if (usbSession)
 		return;
 
@@ -68,20 +75,21 @@ void ConnectionUSB::openSession(uint8_t debugLevel) {
 		throw new Error("Unable to open USB session");
 
 	libusb_set_debug(usbSession, debugLevel);
+#endif
 }
 
 void ConnectionUSB::terminate() {
-
+#ifdef DRY_RUN
 	if (not usbSession)
 		return;
 
 	Log::debug("Closing USB session");
 	libusb_exit(usbSession);
 	usbSession = nullptr;
+#endif
 }
 
 void ConnectionUSB::transfer(vector<uint8_t> data) {
-
 	checkTransferError(libusb_control_transfer(
 		handle,
 		requestType,
@@ -95,7 +103,12 @@ void ConnectionUSB::transfer(vector<uint8_t> data) {
 }
 
 void ConnectionUSB::transfer() {
-
+#ifdef DRY_RUN
+	for (auto pin : LEDs)
+		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << '-';
+	cout << endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+#else
 	checkTransferError(libusb_control_transfer(
 		handle,
 		requestType,
@@ -106,15 +119,21 @@ void ConnectionUSB::transfer() {
 		LEDs.size(),
 		TIMEOUT
 	));
+#endif
 }
 
-uint8_t* ConnectionUSB::getLED(uint8_t ledPos) {
-	return &LEDs[ledPos];
+void ConnectionUSB::setInterval(uint8_t waitTime) {
+	Log::debug("Set interval to " + to_string(waitTime) + "ms");
+	ConnectionUSB::waitTime = waitTime;
+}
+
+uint8_t ConnectionUSB::getInterval() {
+	return waitTime;
 }
 
 void ConnectionUSB::checkTransferError(int responseCode) {
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(board.fps));
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
 	if (responseCode >= 0)
 		return;

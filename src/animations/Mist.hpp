@@ -37,7 +37,7 @@ protected:
 		color1,
 		color2;
 
-	virtual void calculateFrame();
+	virtual void canAdvaceFrame();
 };
 
 } /* namespace Animations */

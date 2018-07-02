@@ -16,49 +16,63 @@ using namespace LEDSpicer;
 
 bool Main::running = false;
 
-Main::Main(bool daemonize, const string& configFile, bool dump) {
+Main::Main(
+	Modes mode,
+	vector<Device*>& devices,
+	umap<string, Group>& layout,
+	Profile* defaultProfile,
+	umap<string, Element*>& allElements
+) :
+	devices(std::move(devices)),
+	layout(std::move(layout)),
+	defaultProfile(defaultProfile),
+	allElements(std::move(allElements))
+{
 
-	// TODO: remove me
-	daemonize = false;
+	if (mode == Modes::Dump)
+		return;
 
-	Log::initialize(not daemonize);
-
-	if (daemonize and not dump) {
+#ifndef DRY_RUN
+	if (mode == Modes::Background) {
 		Log::debug("Daemonizing");
 		if (daemon(0, 0) == -1) {
 			throw Error("Unable to daemonize.");
 		}
 		Log::debug("Daemonized");
 	}
-
-	Log::debug("Reading configuration");
-	DataLoader config(configFile, "Configuration");
-	config.read();
-	devices        = config.getDevices();
-	layout         = config.getLayout();
-	defaultProfile = config.processProfile(config.getDefaultProfile());
-
-	if (dump)
-		dumpConfiguration();
-	else
-		running = true;
+	for (auto device : this->devices)
+		device->initialize();
+#endif
+	running = true;
 }
 
 Main::~Main() {
 
 	delete defaultProfile;
-	ConnectionUSB::terminate();
 	for (auto d : devices)
 		delete d;
+	ConnectionUSB::terminate();
 }
 
 void Main::run() {
 
-	if (not running)
-		return;
-
 	Log::info("LEDSpicer Running");
 
+	while (running) {
+		// 1 check queue for events.. <-|<-
+			// run event ---------------| |
+		// run default profile------------|
+
+		for (auto device : devices)
+			device->setLeds(0);
+		defaultProfile->runFrame();
+
+		// send data
+		for (auto device : devices)
+			device->transfer();
+
+		Actor::advanceFrame();
+	}
 }
 
 void Main::terminate() {
@@ -88,9 +102,11 @@ void Main::dumpConfiguration() {
 	cout  << endl << "Hardware:" << endl;
 	for (auto d : devices)
 		d->drawHardwarePinMap();
+	cout << "Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl;
+	cout << "Total Elements registered: " << (int)allElements.size() << endl;
 	cout << endl << "Layout:";
 	for (auto group : layout) {
-		cout << endl << "Group: " << group.first << " -> ";
+		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
 	}
 	cout << endl << "Default Profile:" << endl;
@@ -106,9 +122,8 @@ int main(int argc, char **argv) {
 
 	// Process command line options.
 	string commandline, configFile = "";
-	bool
-		daemonize = true,
-		dump      = true;
+
+	Main::Modes mode = Main::Modes::Normal;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -152,22 +167,45 @@ int main(int argc, char **argv) {
 
 		// Dump configuration.
 		if (commandline == "-d" or commandline == "--dump") {
-			dump = true;
+			mode = Main::Modes::Dump;
 			continue;
 		}
 
 		// Force foreground.
 		if (commandline == "-f" or commandline == "--foreground") {
-			daemonize = false;
+			if (mode == Main::Modes::Dump)
+				continue;
+			mode = Main::Modes::Background;
 			continue;
 		}
 	}
 
+#ifdef DEVELOP
+	Log::initialize(true);
+#else
+	Log::initialize(mode == Main::Modes::Normal);
+#endif
+
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
 
+	Log::debug("Reading configuration");
+
 	try {
-		Main ledspicer(daemonize, configFile, dump);
+		DataLoader config(configFile, "Configuration");
+		config.read();
+		Main ledspicer(
+			mode,
+			config.getDevices(),
+			config.getLayout(),
+			config.processProfile(config.getDefaultProfile()),
+			config.getElementList()
+		);
+
+		if (mode == Main::Modes::Dump) {
+			ledspicer.dumpConfiguration();
+			return EXIT_SUCCESS;
+		}
 		ledspicer.run();
 	}
 	catch(Error& e) {

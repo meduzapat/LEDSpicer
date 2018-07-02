@@ -11,24 +11,23 @@
 
 using namespace LEDSpicer::Devices;
 
-
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
-//	Log::debug("Turning LED " + to_string(led) + " to " + to_string(intensity));
-	if (not led or led == LEDs.size()) {
-		Log::debug("Invalid led number" + to_string(led));
-		return this;
-	}
-
+	validateLed(led);
 	LEDs[led] = intensity;
 	return this;
 }
 
 Device* Device::setLeds(uint8_t intensity) {
-//	Log::debug("Turning LEDs " + to_string(intensity));
 	for (uint8_t c = 1; c < LEDs.size(); c++) {
 		setLed(c, intensity);
 	}
 	return this;
+}
+
+uint8_t* Device::getLED(uint8_t ledPos) {
+	if (not ledPos or ledPos > board.LEDs)
+		throw Error("Invalid pin number " + to_string(ledPos) + " for " + board.name);
+	return &LEDs.at(ledPos);
 }
 
 string Device::getName() {
@@ -90,3 +89,29 @@ void Device::printDeviceInformation() {
 	libusb_free_config_descriptor(config);
 }
 #endif
+
+void Device::registerElement(const string& name, uint8_t led) {
+	validateLed(led);
+	elementsByName.emplace(name, Element(name, &LEDs[led]));
+}
+
+void Device::registerElement(const string& name, uint8_t led1, uint8_t led2, uint8_t led3) {
+	validateLed(led1);
+	validateLed(led2);
+	validateLed(led3);
+	elementsByName.emplace(name, Element(name, &LEDs[led1], &LEDs[led2], &LEDs[led3]));
+}
+
+Element* Device::getElement(const string& name) {
+	return &elementsByName.at(name);
+}
+
+void Device::validateLed(uint8_t led) const {
+	if (not led or led >= LEDs.size())
+		throw Error("Invalid led number " + to_string(led));
+}
+
+uint8_t Device::getNumberOfElements() const {
+	return elementsByName.size();
+}
+

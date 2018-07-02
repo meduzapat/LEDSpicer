@@ -8,53 +8,59 @@
 
 #include "Actor.hpp"
 
-
 using namespace LEDSpicer::Animations;
 
-Actor::Actor(umap<string, string>& parameters, Group& layout) :
-	speed(stoi(parameters["speed"])),
+uint8_t Actor::currentFrame = 1;
+uint8_t Actor::FPS          = 0;
+
+Actor::Actor(umap<string, string>& parameters, Group* const group) :
+	direction(str2direction(parameters["direction"])),
 	filter(Color::str2filter(parameters["filter"])),
-	group(layout)
+	group(group)
 {
-	uint8_t pinC = 0;
-	for (auto element : group.elements)
-		pinC += element.pins.size();
-	internalValues.resize(pinC, 0);
-	internalValues.shrink_to_fit();
+
+	if (direction == Directions::Forward or direction == Directions::ForwardBouncing) {
+		cDirection = Directions::Forward;
+	}
+	else {
+		cDirection = Directions::Backward;
+		currentActorFrame = totalActorFrames;
+	}
+	changeFrameTotal = static_cast<uint8_t>(str2speed(parameters["speed"])) + 1;
 }
 
-void Actor::drawFrame() {
-	calculateFrame();
-	uint8_t pinC = 0;
-	for (auto element : group.elements) {
-		for (auto pin : element.getPins()) {
-			switch (filter) {
-			case Color::Filters::Normal:
-				*pin = internalValues[pinC];
-			break;
-			case Color::Filters::Combine:
-				*pin = Color::transition(*pin, internalValues[pinC], 50);
-			}
-			++pinC;
-		}
-	}
+uint8_t Actor::drawFrame() {
+
+	calculateElements();
+
+	if (canAdvaceFrame())
+		advanceActorFrame();
+
+	return currentActorFrame;
+}
+
+const uint8_t Actor::getTotalFrames() const {
+	return totalActorFrames;
 }
 
 void Actor::drawConfig() {
-	cout << "Speed: " << (int)speed << "% Filter: " << Color::filter2str(filter) << " ";
+	cout <<
+		"Speed: " << speed2str(static_cast<Speed>(changeFrameTotal)) <<
+		" Filter: " << Color::filter2str(filter) <<
+		" Direction: " << direction2str(direction) << endl;
 }
 
 string Actor::direction2str(Directions direction) {
 	switch (direction) {
-	case Stop:
+	case Directions::Stop:
 		return "None";
-	case Forward:
+	case Directions::Forward:
 		return "Forward";
-	case Backward:
+	case Directions::Backward:
 		return "Backward";
-	case ForwardBouncing:
+	case Directions::ForwardBouncing:
 		return "Forward Bouncing";
-	case BackwardBouncing:
+	case Directions::BackwardBouncing:
 		return "Backward Bouncing";
 	}
 	return "";
@@ -63,40 +69,136 @@ string Actor::direction2str(Directions direction) {
 Actor::Directions Actor::str2direction(const string& direction) {
 
 	if (direction == "Stop")
-		return Stop;
+		return Directions::Stop;
 	if (direction == "Forward")
-		return Forward;
+		return Directions::Forward;
 	if (direction == "Backward")
-		return Backward;
+		return Directions::Backward;
 	if (direction == "ForwardBouncing")
-		return ForwardBouncing;
+		return Directions::ForwardBouncing;
 	if (direction == "BackwardBouncing")
-		return BackwardBouncing;
+		return Directions::BackwardBouncing;
 	throw Error("Invalid direction " + direction);
 }
 
-string Actor::effects2str(Effects effect) {
-	switch (effect) {
-	case None:
-		return "None";
-	case SlowFade:
-		return "SlowFade";
-	case Fade:
-		return "Fade";
-	case FastFade:
-		return "FastFade";
+string Actor::speed2str(Speed speed) {
+	switch (speed) {
+	case Speed::VeryFast:
+		return "VeryFast";
+	case Speed::Fast:
+		return "Fast";
+	case Speed::Normal:
+		return "Normal";
+	case Speed::Slow:
+		return "Slow";
+	case Speed::VerySlow:
+		return "VerySlow";
 	}
 	return "";
 }
 
-Actor::Effects Actor::str2effects(const string& effect) {
-	if (effect == "None")
-		return None;
-	if (effect == "SlowFade")
-		return SlowFade;
-	if (effect == "Fade")
-		return Fade;
-	if (effect == "FastFade")
-		return FastFade;
-	throw Error("Invalid Effect " + effect);
+Actor::Speed Actor::str2speed(const string& speed) {
+	if (speed == "Very Fast")
+		return Speed::VeryFast;
+	if (speed == "Fast")
+		return Speed::Fast;
+	if (speed == "Normal")
+		return Speed::Normal;
+	if (speed == "Slow")
+		return Speed::Slow;
+	if (speed == "Very Slow")
+		return Speed::VerySlow;
+	throw Error("Invalid speed " + speed);
+}
+
+void Actor::setFPS(uint8_t FPS) {
+	Log::debug("Setting FPS to " + to_string(FPS));
+	Actor::FPS = FPS;
+}
+
+uint8_t Actor::getFPS() {
+	return FPS;
+}
+
+void Actor::advanceFrame() {
+	++currentFrame;
+	if (currentFrame > FPS)
+		currentFrame = 1;
+}
+
+uint8_t Actor::getNumberOfElements() const {
+	return group->getElements().size();
+}
+
+void Actor::changeElementColor(uint8_t index, Color color, Color::Filters filter, uint8_t percent) {
+
+	switch (filter) {
+		case Color::Filters::Normal:
+			group->getElement(index)->setColor(color);
+			break;
+		case Color::Filters::Combine:
+			group->getElement(index)->setColor(
+				group->getElement(index)->getColor().transition(color, percent)
+			);
+		}
+}
+
+void Actor::changeElementsColor(Color color, Color::Filters filter, uint8_t percent) {
+	for (uint8_t c = 0; c < group->size(); ++c) {
+		changeElementColor(c, color, filter, percent);
+	}
+}
+
+bool Actor::canAdvaceFrame() {
+
+	if (changeFrame >= changeFrameTotal) {
+		changeFrame = 1;
+		return true;
+	}
+
+	changeFrame++;
+	return false;
+}
+
+void Actor::advanceActorFrame() {
+	currentActorFrame = calculateNextFrame(cDirection, currentActorFrame);
+}
+
+uint8_t Actor::calculateNextFrame(Directions& cDirection, uint8_t frame) {
+
+	switch (cDirection) {
+	case Directions::Forward:
+		if (frame == getNumberOfElements())
+			frame = 1;
+		else
+			frame++;
+		break;
+	case Directions::ForwardBouncing:
+	case Directions::BackwardBouncing:
+		if (cDirection == Directions::Forward) {
+			// change of direction.
+			if (frame == getNumberOfElements()) {
+				cDirection = Directions::Backward;
+				frame--;
+				break;
+			}
+			frame++;
+			break;
+		}
+		if (frame == 1) {
+			cDirection = Directions::Forward;
+			frame++;
+			break;
+		}
+		frame--;
+		break;
+	case Directions::Backward:
+		if (frame == 1)
+			frame = getNumberOfElements();
+		else
+			frame--;
+		break;
+	}
+
+	return frame;
 }

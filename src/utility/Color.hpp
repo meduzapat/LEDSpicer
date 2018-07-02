@@ -38,7 +38,7 @@ public:
 	 * Combine: will combine with the background.
 	 * Diff: Will difference with the background.
 	 */
-	enum Filters : uint8_t {Normal, Combine, Diff};
+	enum class Filters : uint8_t {Normal, Combine, Diff};
 
 	/**
 	 * Creates a new Color class (black color).
@@ -73,6 +73,7 @@ public:
 	void setB(uint8_t color);
 
 	void set(uint8_t r, uint8_t g, uint8_t b);
+
 	void set(uint32_t color);
 
 	/**
@@ -95,7 +96,7 @@ public:
 	 * @param percent
 	 * @return
 	 */
-	Color fade(uint8_t percent);
+	Color fade(uint8_t percent) const;
 
 	/**
 	 * Calculates the transition between this color and a destination color.
@@ -103,7 +104,7 @@ public:
 	 * @param percent
 	 * @return
 	 */
-	Color transition(const Color& destination, uint8_t percent);
+	Color transition(const Color& destination, uint8_t percent) const;
 
 	/**
 	 * Returns the monochrome version of the color.
@@ -125,14 +126,11 @@ public:
 	 * @param colorsData
 	 * @param format (not used yet, only hex) hex or dec
 	 */
-	static void loadColors(umap<string, string> colorsData, const string& format);
-
-	/// Loaded colors.
-	static umap<string, Color> colors;
+	static void loadColors(const umap<string, string>& colorsData, const string& format);
 
 	static void drawColors();
 
-	void drawColor();
+	void drawColor() const;
 
 	/**
 	 * Converts the filter code into string.
@@ -142,7 +140,12 @@ public:
 	static string filter2str(Filters filter);
 	static Filters str2filter(const string& filter);
 
+	static const Color& getColor(const string& color);
+
 protected:
+
+	/// Loaded colors.
+	static umap<string, Color> colors;
 
 	uint8_t
 		r = 0,

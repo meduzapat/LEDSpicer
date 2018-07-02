@@ -23,9 +23,7 @@ class Pulse : public Actor {
 
 public:
 
-	Pulse(umap<string, string>& parameters, Group& layout) :
-		Actor(parameters, layout),
-		color(parameters["color"]) {}
+	Pulse(umap<string, string>& parameters, Group* const layout);
 
 	virtual ~Pulse() {}
 
@@ -35,7 +33,9 @@ protected:
 
 	Color color;
 
-	virtual void calculateFrame();
+	virtual void calculateElements();
+
+	virtual bool canAdvaceFrame();
 
 };
 

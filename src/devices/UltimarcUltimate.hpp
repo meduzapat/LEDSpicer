@@ -39,9 +39,9 @@ public:
 	 * @param boardId
 	 * @param fps
 	 */
-	UltimarcUltimate(uint8_t boardId, uint16_t fps);
+	UltimarcUltimate(uint8_t boardId);
 
-	virtual ~UltimarcUltimate() {}
+	virtual ~UltimarcUltimate();
 
 	virtual void drawHardwarePinMap();
 

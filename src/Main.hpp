@@ -50,7 +50,15 @@ class Main {
 
 public:
 
-	Main(bool daemonize, const string& config, bool dump);
+	enum class Modes : uint8_t {Background, Dump, Normal};
+
+	Main(
+		Modes mode,
+		vector<Device*>& devices,
+		umap<string, Group>& layout,
+		Profile* defaultProfile,
+		umap<string, Element*>& allElements
+	);
 
 	virtual ~Main();
 
@@ -67,6 +75,7 @@ protected:
 	vector<Device*> devices;
 	umap<string, Group> layout;
 	Profile* defaultProfile;
+	umap<string, Element*> allElements;
 };
 
 /**

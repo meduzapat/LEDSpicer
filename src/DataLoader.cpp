@@ -15,7 +15,10 @@ void DataLoader::read() {
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
+	uint8_t fps = stoi(tempAttr["fps"]);
+	ConnectionUSB::setInterval(1000 / (fps > 30 ? 30 : fps));
 	ConnectionUSB::openSession(stoi(tempAttr["usbDebugLevel"]));
+	Actor::setFPS((fps > 30 ? 30 : fps));
 
 	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colors"]).append(".xml"));
 
@@ -24,15 +27,19 @@ void DataLoader::read() {
 	processLayout();
 }
 
-vector<Device*> DataLoader::getDevices() {
+vector<Device*>& DataLoader::getDevices() {
 	return devices;
 }
 
-umap<string, Group> DataLoader::getLayout() {
+umap<string, Group>& DataLoader::getLayout() {
 	return layout;
 }
 
-string DataLoader::getDefaultProfile() const {
+umap<string, Element*>& DataLoader::getElementList() {
+	return allElements;
+}
+
+string& DataLoader::getDefaultProfile() {
 	return defaultProfile;
 }
 
@@ -55,7 +62,7 @@ void DataLoader::processColorFile(const string& file) {
 		colorsData[colorAttr["name"]] = colorAttr["color"];
 	}
 
-	Color::loadColors(std::move(colorsData), format);
+	Color::loadColors(colorsData, format);
 }
 
 void DataLoader::processDevices() {
@@ -71,7 +78,7 @@ void DataLoader::processDevices() {
 	for (; element; element = element->NextSiblingElement("device")) {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, "device");
-		auto device = createDevice(deviceAttr["name"], deviceAttr["boardId"], deviceAttr["fps"]);
+		auto device = createDevice(deviceAttr["name"], deviceAttr["boardId"]);
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}
@@ -86,53 +93,50 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		throw LEDError("Empty elements section in board " + device->getName());
 
 	for (; element; element = element->NextSiblingElement("element")) {
-		Element deviceElement;
 		umap<string, string> tempAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE_ELEMENT, tempAttr, "device element");
 
-		vector<uint8_t> pins;
 		// Single color.
 		if (tempAttr.count("pin")) {
-			pins.push_back(stoi(tempAttr["pin"]));
+			device->registerElement(tempAttr["name"], stoi(tempAttr["pin"]));
+			pinCheck[stoi(tempAttr["pin"]) - 1] = true;
 		}
 		// RGB.
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr["name"]);
-			pins.push_back(stoi(tempAttr["red"]));
-			pins.push_back(stoi(tempAttr["green"]));
-			pins.push_back(stoi(tempAttr["blue"]));
+			device->registerElement(
+				tempAttr["name"],
+				stoi(tempAttr["red"]),
+				stoi(tempAttr["green"]),
+				stoi(tempAttr["blue"])
+			);
+			pinCheck[stoi(tempAttr["red"])   - 1] = true;
+			pinCheck[stoi(tempAttr["green"]) - 1] = true;
+			pinCheck[stoi(tempAttr["blue"])  - 1] = true;
 		}
-		for (uint8_t pin : pins) {
-			checkValidPin(pin, device->getNumberOfLeds(), device->getName());
-			pinCheck[pin - 1] = true;
-			deviceElement.pins.push_back(device->getLED(pin));
-			deviceElement.name = tempAttr["name"];
-		}
-
-		this->elements[tempAttr["name"]] = std::move(deviceElement);
+		allElements.emplace(tempAttr["name"], device->getElement(tempAttr["name"]));
 	}
 
 	// Checks orphan Pins.
-	Log::debug(to_string(this->elements.size()) + " elements with " + to_string(pinCheck.size()) + " LEDs");
-	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin) {
+	Log::debug(device->getName() + " with " + to_string(device->getNumberOfElements()) + " elements and " + to_string(pinCheck.size()) + " LEDs");
+	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
-			Log::notice("Pin " + to_string(pin + 1) + " is orphan for device " + device->getName());
-	}
+			Log::notice("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
 }
 
 void DataLoader::processLayout() {
 
 	umap<string, string> tempAttr;
 
-	tinyxml2::XMLElement* layout = root->FirstChildElement("layout");
-	if (not layout)
+	tinyxml2::XMLElement* layoutNode = root->FirstChildElement("layout");
+	if (not layoutNode)
 		throw LEDError("Missing layout section");
 
-	tempAttr = processNode(layout);
+	tempAttr = processNode(layoutNode);
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, "layout");
 	defaultProfile = tempAttr["defaultProfile"];
 
-	tinyxml2::XMLElement* element = layout->FirstChildElement("group");
+	tinyxml2::XMLElement* element = layoutNode->FirstChildElement("group");
 	if (not element)
 		throw LEDError("Empty layout section");
 
@@ -143,32 +147,36 @@ void DataLoader::processLayout() {
 		if (this->layout.count(tempAttr["name"]))
 			throw LEDError("Duplicated group " + tempAttr["name"]);
 
-		Group group;
-		processGroupElements(element, group, tempAttr["name"]);
-		this->layout[tempAttr["name"]] = std::move(group);
+		layout.emplace(tempAttr["name"], Group());
+		processGroupElements(element, tempAttr["name"]);
 	}
+
 }
 
-void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group, const string& name) {
-
-	umap<string, string> elementAttr;
+void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, const string& name) {
 
 	tinyxml2::XMLElement* element = groupNode->FirstChildElement("element");
 
 	if (not element)
 		throw LEDError("Empty group section");
 
+	uint8_t numPins = 0;
+	umap<string, Group*> groupElements;
 	for (; element; element = element->NextSiblingElement("element")) {
-		elementAttr = processNode(element);
+		umap<string, string> elementAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "group element");
+
 		// Check dupes and add
-		for (auto el: group.elements)
-			if (el.name == elementAttr["name"])
-				throw LEDError("Duplicated element name " + elementAttr["name"] + " in group '" + name + "'");
-		if (elements.count(elementAttr["name"]))
-			group.elements.push_back(std::move(elements[elementAttr["name"]]));
-		else
+		if (groupElements.count(elementAttr["name"]))
+			throw LEDError("Duplicated element name " + elementAttr["name"] + " in group '" + name + "'");
+
+		if (allElements.count(elementAttr["name"])) {
+			layout[name].linkElement(allElements[elementAttr["name"]]);
+			groupElements.emplace(elementAttr["name"], &layout[name]);
+		}
+		else {
 			throw LEDError("Invalid element " + elementAttr["name"] + " in group '" + name + "'");
+		}
 	}
 }
 
@@ -218,10 +226,10 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 	return actors;
 }
 
-Device* DataLoader::createDevice(const string& name, const string& boardId, const string& fps) {
+Device* DataLoader::createDevice(const string& name, const string& boardId) {
 
 	if (name == IPAC_ULTIMATE) {
-		return new UltimarcUltimate(stoi(boardId), stoi(fps));
+		return new UltimarcUltimate(stoi(boardId));
 	}
 
 	throw LEDError("Unknown board name");
@@ -231,18 +239,11 @@ Actor* DataLoader::createAnimation(const string& name, umap<string, string>& act
 	string groupName = actorData["group"];
 	if (actorData["type"] == "Serpentine") {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "animation Serpentine");
-		return new Serpentine(actorData, layout[groupName]);
+		return new Serpentine(actorData, &layout.at(groupName));
 	}
 	if (actorData["type"] == "Pulse") {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, actorData, "animation Pulse");
-		return new Pulse(actorData, layout[groupName]);
+		return new Pulse(actorData, &layout.at(groupName));
 	}
 	throw LEDError("Invalid animation type '" + actorData["type"] + "' inside " + name);
 }
-
-
-void DataLoader::checkValidPin(uint8_t pin, uint8_t pins, const string& name) {
-	if (not pin or pin > pins)
-		throw LEDError("Invalid pin number for " + name);
-}
-

@@ -24,14 +24,7 @@ class Serpentine: public Actor {
 
 public:
 
-	Serpentine(umap<string, string>& parameters, Group& layout) :
-		Actor(parameters, layout),
-		color(parameters["color"]),
-		tailColor(parameters["tailColor"]),
-		cDirection(str2direction(parameters["direction"])),
-		direction(cDirection),
-		tailLength(stoi(parameters["tailLength"])),
-		tailweight(100 / (tailLength + 1)) {}
+	Serpentine(umap<string, string>& parameters, Group* const layout);
 
 	virtual ~Serpentine() {}
 
@@ -43,12 +36,17 @@ protected:
 		color,
 		tailColor;
 
-	uint8_t
-		tailLength,
-		tailweight;
+	Directions tailDirection;
 
-	virtual void calculateFrame();
+	struct TailData {
+		uint8_t percent;
+		uint8_t position = 0;
+	};
+	vector<TailData> tailData;
 
+	void calculateTailPosition();
+
+	virtual void calculateElements();
 
 };
 

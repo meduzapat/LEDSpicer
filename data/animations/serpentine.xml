@@ -6,16 +6,16 @@
 	<actor
 		type="Pulse"
 		group="board as circle"
-		color="VeryDarkRed"
-		speed="60"
+		color="DarkRed"
+		speed="Normal"
 		filter="Normal"
 		direction="ForwardBouncing"
 	/>
 	<actor
 		type="Serpentine"
 		group="board as circle"
-		color="LightCoral"
-		speed="75"
+		color="White"
+		speed="Fast"
 		filter="Combine"
 		direction="Forward"
 		tailLength="3"
@@ -25,7 +25,7 @@
 		type="Serpentine"
 		group="credits"
 		color="White"
-		speed="50"
+		speed="Normal"
 		filter="Normal"
 		direction="ForwardBouncing"
 		tailLength="0"
@@ -35,7 +35,7 @@
 		type="Pulse"
 		group="cabinet"
 		color="LightCyan"
-		speed="40"
+		speed="Normal"
 		filter="Normal"
 		direction="ForwardBouncing"
 	/>

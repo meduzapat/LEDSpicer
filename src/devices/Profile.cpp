@@ -20,7 +20,7 @@ Profile::~Profile() {
 		delete s;
 	stopAnimation.clear();
 
-	for (auto a : animations) {
+	for (auto& a : animations) {
 		for (auto actor : a.second)
 			delete actor;
 		a.second.clear();
@@ -34,28 +34,79 @@ void Profile::addAnimation(const string& animationName, const vector<Actor*>& an
 }
 
 void Profile::drawConfig() {
-	cout << "Default Color when On: ";
+	cout << "Default Color when On:  ";
 	defaultColorOn.drawColor();
 	cout << "Default Color when Off: ";
 	defaultColorOff.drawColor();
-	cout << "Start Animation: " << (startAnimation.size() ? "" : "None") << endl;
+	cout << endl << "Start Animation: " << (startAnimation.size() ? "" : "None") << endl;
 	for (auto s : startAnimation)
 		s->drawConfig();
-	cout << "Stop Animation: " << (stopAnimation.size() ? "" : "None") << endl;
+	cout << endl << "Stop Animation: " << (stopAnimation.size() ? "" : "None") << endl;
 	for (auto s : stopAnimation)
 		s->drawConfig();
+
+	for (auto& a : animations) {
+		cout << endl << "Animation " << a.first << ": " << endl;
+		for(auto actor : a.second)
+			actor->drawConfig();
+	}
 	if (groupsOverwrite.size()) {
-		cout << "Groups Overwrite Color: " << endl;
-		for (auto g : groupsOverwrite) {
+		cout << endl << "Groups Overwrite Color: " << endl;
+		for (auto& g : groupsOverwrite) {
 			cout << g.first << " ";
 			g.second->drawColor();
 		}
 	}
 	if (elementsOverwrite.size()) {
-		cout << "Elements Overwrite Color: " << endl;
-		for (auto e : groupsOverwrite) {
+		cout << endl << "Elements Overwrite Color: " << endl;
+		for (auto& e : elementsOverwrite) {
 			cout << e.first << " ";
 			e.second->drawColor();
 		}
 	}
 }
+
+const Profile::States Profile::runFrame() {
+
+	for (auto& anim : animations)
+		for (auto actor : anim.second)
+			actor->drawFrame();
+	return States::Running;
+
+
+	uint8_t status;
+	if (state == States::Starting)
+		if (startAnimation.size()) {
+			for (auto actor : startAnimation) {
+				status = actor->drawFrame();
+				// activate other animations half way.
+				if (status == actor->getTotalFrames() / 2)
+					runningStartStopOnly = false;
+				else if (status == actor->getTotalFrames())
+					state = States::Running;
+			}
+		}
+
+	if (not runningStartStopOnly)
+		for (auto& anim : animations)
+			for (auto actor : anim.second)
+				actor->drawFrame();
+
+	if (state == States::Ending)
+		if (stopAnimation.size()) {
+			for (auto actor : stopAnimation) {
+				status = actor->drawFrame();
+				if (status == actor->getTotalFrames() / 2)
+					// de-activate other animations half way.
+					runningStartStopOnly = true;
+				else if (status == actor->getTotalFrames())
+					state = States::Done;
+			}
+		}
+	return state;
+}
+
+void Profile::resetState() {
+	state = States::Starting;
+}
+

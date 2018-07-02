@@ -38,22 +38,36 @@ public:
 	 * Returns the number of elements.
 	 * @return
 	 */
-	uint8_t count() const;
+	uint8_t size() const;
 
 	/**
-	 * Returns a pointer to the internal elements array.
+	 * Inserts a new element.
 	 * @param element
-	 * @return
 	 */
-	Element& getElement(uint8_t element);
+	void linkElement(Element* element);
 
 	/**
-	 * Returns a reference to the elements inside.
+	 * Returns a reference to the pointers to the internal elements.
 	 * @return
 	 */
-	const vector<Element>& getElements() const;
+	const vector<Element*>& getElements() const;
 
-	vector<Element> elements;
+	/**
+	 * Returns a reference to the internal element.
+	 * @param index
+	 * @return
+	 */
+	Element* getElement(uint8_t index);
+
+	/**
+	 * Writes the internal buffer.
+	 */
+//	void writeBuffer(Color::Filters filter);
+
+protected:
+
+	/// Elements on this group.
+	vector<Element*> elements;
 
 };
 

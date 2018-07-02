@@ -84,19 +84,19 @@ uint32_t Color::getRGB() const {
 	return number;
 }
 
-Color Color::fade(uint8_t percent) {
+Color Color::fade(uint8_t percent) const {
 
 	Color color;
 
 	if (percent)
-		color.set((float)r * 255 / percent, (float)g * 255 / percent, (float)b * 255  / percent);
+		color.set(r * percent / 100, g * percent / 100, b * percent / 100);
 	else
-		color.set(0, 0, 0);
+		color.set(*this);
 
 	return color;
 }
 
-Color Color::transition(const Color& destination, uint8_t percent) {
+Color Color::transition(const Color& destination, uint8_t percent) const {
 
 	Color rColor(
 		transition(r, destination.r, percent),
@@ -112,12 +112,12 @@ uint8_t Color::getMonochrome() const {
 }
 
 uint8_t Color::transition(uint8_t colorA, uint8_t colorB, uint8_t percent) {
-	return (colorA + (colorB - colorA) * (1 / percent));
+	return (colorA + ((colorB - colorA) * (percent / 100)));
 //    return sqrt((1 - percent) * colorA^2 + percent * colorB^2)
 }
 
-void Color::loadColors(umap<string, string> colorsData, const string& format) {
-	for (auto colorData : colorsData)
+void Color::loadColors(const umap<string, string>& colorsData, const string& format) {
+	for (auto& colorData : colorsData)
 		colors[colorData.first] = std::move(Color(colorData.second, format));
 }
 
@@ -128,7 +128,7 @@ void Color::drawColors() {
 	}
 }
 
-void Color::drawColor() {
+void Color::drawColor() const {
 	cout <<
 		"#" << std::hex <<
 		std::uppercase << std::setfill('0') << std::setw(2) << (int)getR() <<
@@ -141,11 +141,11 @@ void Color::drawColor() {
 
 string Color::filter2str(Filters filter) {
 	switch (filter) {
-	case Normal:
+	case Filters::Normal:
 		return "Normal";
-	case Combine:
+	case Filters::Combine:
 		return "Combine";
-	case Diff:
+	case Filters::Diff:
 		return "Diff";
 	}
 	return "";
@@ -153,11 +153,15 @@ string Color::filter2str(Filters filter) {
 
 Color::Filters Color::str2filter(const string& filter) {
 	if (filter == "Normal")
-		return Normal;
+		return Filters::Normal;
 	if (filter == "Combine")
-		return Combine;
+		return Filters::Combine;
 	if (filter == "Diff")
-		return Diff;
+		return Filters::Diff;
 	Log::error("Invalid filter type " + filter + " assuming Combine");
-	return Combine;
+	return Filters::Combine;
+}
+
+const Color& Color::getColor(const string& color) {
+	return colors[color];
 }

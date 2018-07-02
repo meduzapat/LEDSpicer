@@ -10,12 +10,24 @@
 
 using namespace LEDSpicer::Animations;
 
-void Pulse::calculateFrame() {
+Pulse::Pulse(umap<string, string>& parameters, Group* const layout) :
+	Actor(parameters, layout),
+	color(parameters["color"])
+{
 
+	totalActorFrames = FPS * changeFrameTotal;
+}
+
+void Pulse::calculateElements() {
+	changeElementsColor(color.fade(currentActorFrame * 100 / totalActorFrames), filter);
+}
+
+bool Pulse::canAdvaceFrame() {
+	return true;
 }
 
 void Pulse::drawConfig() {
-	cout << "Type: Pulse " << endl;
+	cout << "Actor Type: Pulse " << endl;
 	Actor::drawConfig();
 	cout << "Color: ";
 	color.drawColor();

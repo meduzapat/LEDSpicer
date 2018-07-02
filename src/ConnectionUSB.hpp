@@ -65,12 +65,9 @@ public:
 	 */
 	void transfer(vector<uint8_t> data);
 
-	/**
-	 * Returns a pointer to a single LED.
-	 * @param ledPos
-	 * @return
-	 */
-	uint8_t* getLED(uint8_t ledPos);
+	static void setInterval(uint8_t waitTime);
+
+	static uint8_t getInterval();
 
 protected:
 
@@ -89,9 +86,7 @@ protected:
 			/// Product ID
 			product = 0,
 			/// The value field for the setup packet.
-			value   = 0,
-			/// 10 frames per second.
-			fps     = 100;
+			value   = 0;
 		uint8_t
 			/// Interface number
 			interface = 0,
@@ -106,6 +101,8 @@ protected:
 	uint8_t
 		requestType = 0,
 		request     = 0;
+
+	static uint8_t waitTime;
 
 	virtual void afterConnect() = 0;
 

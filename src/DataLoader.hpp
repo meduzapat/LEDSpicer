@@ -14,13 +14,12 @@
 #include "devices/UltimarcUltimate.hpp"
 #include "utility/Color.hpp"
 #include "devices/Profile.hpp"
-#include "devices/Group.hpp"
 #include "animations/Serpentine.hpp"
 #include "animations/Pulse.hpp"
 
-#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colors"}
+#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colors", "fps"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
-#define REQUIRED_PARAM_DEVICE         {"name", "boardId", "fps"}
+#define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
@@ -58,16 +57,22 @@ public:
 	void read();
 
 	/**
-	 * Moves the Devices out.
+	 * Returns the devices list.
 	 * @return
 	 */
-	vector<Device*> getDevices();
+	vector<Device*>& getDevices();
 
 	/**
-	 * moves the layout out.
+	 * Returns the layout.
 	 * @return
 	 */
-	umap<string, Group> getLayout();
+	umap<string, Group>& getLayout();
+
+	/**
+	 * Returns the list of all registered elements.
+	 * @return
+	 */
+	umap<string, Element*>& getElementList();
 
 	/**
 	 * Reads an profile file.
@@ -75,15 +80,19 @@ public:
 	 */
 	Profile* processProfile(const string& name);
 
-	string getDefaultProfile() const;
+	/**
+	 * Returns the name of the default profile.
+	 * @return
+	 */
+	string& getDefaultProfile();
 
 protected:
 
 	/// Stores devices.
 	vector<Device*> devices;
 
-	/// Maps elements by name.
-	umap<string, Element> elements;
+	/// list with all elements by name.
+	umap<string, Element*> allElements;
 
 	/// Stores groups by name.
 	umap<string, Group> layout;
@@ -117,9 +126,9 @@ protected:
 	/**
 	 * Reads elements from groups.
 	 * @param groupNode
-	 * @param group
+	 * @param name
 	 */
-	void processGroupElements(tinyxml2::XMLElement* groupNode, Group& group, const string& name);
+	void processGroupElements(tinyxml2::XMLElement* groupNode, const string& name);
 
 	/**
 	 * Reads an animation file.
@@ -132,10 +141,9 @@ protected:
 	 * TODO: In a future will be cool to move devices into plugins so they are loaded dynamically.
 	 * @param name
 	 * @param boardId
-	 * @param fps
 	 * @return
 	 */
-	static Device* createDevice(const string& name, const string& boardId, const string& fps);
+	static Device* createDevice(const string& name, const string& boardId);
 
 	/**
 	 * Creates a new animation object.
@@ -146,13 +154,6 @@ protected:
 	 */
 	Actor* createAnimation(const string& name, umap<string, string>& actorData);
 
-	/**
-	 * Checks if pin is contained inside pins for a device name.
-	 * @param pin
-	 * @param pins
-	 * @param name
-	 */
-	static void checkValidPin(uint8_t pin, uint8_t pins, const string& name);
 };
 
 } /* namespace LEDSpicer */

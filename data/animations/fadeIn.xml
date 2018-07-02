@@ -7,7 +7,7 @@
 		type="Pulse"
 		group="board as circle"
 		color="White"
-		speed="60"
+		speed="Normal"
 		filter="Normal"
 		direction="Forward"
 	/>
@@ -15,7 +15,7 @@
 		type="Pulse"
 		group="credits"
 		color="White"
-		speed="60"
+		speed="Normal"
 		filter="Normal"
 		direction="Forward"
 	/>
@@ -23,7 +23,7 @@
 		type="Pulse"
 		group="cabinet"
 		color="LightCyan"
-		speed="40"
+		speed="Slow"
 		filter="Normal"
 		direction="Forward"
 	/>

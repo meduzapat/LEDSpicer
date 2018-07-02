@@ -10,7 +10,7 @@
 
 using namespace LEDSpicer::Devices;
 
-UltimarcUltimate::UltimarcUltimate(uint8_t boardId, uint16_t fps) : Device() {
+UltimarcUltimate::UltimarcUltimate(uint8_t boardId) : Device() {
 	board.name      = "Ipac Ultimate IO";
 	board.vendor    = IPAC_ULTIMATE_VENDOR;
 	board.product   = IPAC_ULTIMATE_PRODUCT;
@@ -18,12 +18,17 @@ UltimarcUltimate::UltimarcUltimate(uint8_t boardId, uint16_t fps) : Device() {
 	board.boardId   = boardId;
 	board.value     = IPAC_ULTIMATE_VALUE;
 	board.LEDs      = IPAC_ULTIMATE_LEDS;
-	// convert FPS to milliseconds.
-	board.fps       = 1000/fps;
 	// Initialize the internal LED matrix and add extra field for the command.
 	LEDs.resize(IPAC_ULTIMATE_LEDS + 1);
 	LEDs.shrink_to_fit();
 	LEDs[0] = 0x04;
+}
+
+UltimarcUltimate::~UltimarcUltimate() {
+	if (handle) {
+		setLeds(0);
+		transfer();
+	}
 }
 
 void UltimarcUltimate::afterConnect() {
@@ -61,6 +66,8 @@ void UltimarcUltimate::afterConnect() {
 void UltimarcUltimate::afterClaimInterface() {
 	Log::debug("Initializing board");
 	transfer({0x03, 0, 0, 0xC0, 0});
+	setLeds(0);
+	transfer();
 }
 
 void UltimarcUltimate::drawHardwarePinMap() {

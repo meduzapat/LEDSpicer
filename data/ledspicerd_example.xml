@@ -3,13 +3,13 @@
 	version="1.0"
 	type="Configuration"
 	usbDebugLevel="3"
+	fps="14"
 	colors="basicColors"
 >
 	<devices>
 		<device
 			name="IPAC_ULTIMATE"
 			boardId="1"
-			fps="14"
 		>
 <!-- Cabinet -->
 			<element

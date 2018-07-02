@@ -15,6 +15,6 @@ void Mist::drawConfig() {
 
 }
 
-void Mist::calculateFrame() {
+void Mist::canAdvaceFrame() {
 
 }
