@@ -97,7 +97,6 @@ Color Color::fade(uint8_t percent) const {
 }
 
 Color Color::transition(const Color& destination, uint8_t percent) const {
-
 	Color rColor(
 		transition(r, destination.r, percent),
 		transition(g, destination.g, percent),
@@ -111,8 +110,8 @@ uint8_t Color::getMonochrome() const {
 	return static_cast<uint8_t>(0.301 * (float)r + 0.587 * (float)g + 0.114 * (float)b);
 }
 
-uint8_t Color::transition(uint8_t colorA, uint8_t colorB, uint8_t percent) {
-	return (colorA + ((colorB - colorA) * (percent / 100)));
+uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
+	return colorA + (colorB - colorA) * percent / 100;
 //    return sqrt((1 - percent) * colorA^2 + percent * colorB^2)
 }
 
@@ -122,7 +121,7 @@ void Color::loadColors(const umap<string, string>& colorsData, const string& for
 }
 
 void Color::drawColors() {
-	for (auto c : Color::colors) {
+	for (auto& c : colors) {
 		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
 		c.second.drawColor();
 	}
@@ -162,6 +161,16 @@ Color::Filters Color::str2filter(const string& filter) {
 	return Filters::Combine;
 }
 
+vector<string> Color::getNames() {
+	vector<string> colorNames;
+	for (auto& c : Color::colors)
+		colorNames.push_back(c.first);
+	return colorNames;
+}
+
 const Color& Color::getColor(const string& color) {
-	return colors[color];
+	if (colors.count(color))
+		return colors[color];
+	Log::error("Unknown color " + color);
+	return colors["White"];
 }

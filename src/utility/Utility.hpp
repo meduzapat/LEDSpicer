@@ -40,6 +40,42 @@ public:
 		const umap<string, string>& subjects,
 		const string& place
 	);
+
+	/**
+	 * Explodes a string into chunks using a delimiter.
+	 *
+	 * @param text
+	 * @param delimiter
+	 * @param limit
+	 * @return an array with the string chunks.
+	 */
+	static vector<string> explode(
+		const string& text,
+		const char delimiter,
+		const size_t limit = 0
+	);
+
+	/**
+	 * Verify that a number is between two vales
+	 * @param val subject
+	 * @param min minimum
+	 * @param max maximum
+	 * @param truncate
+	 *        if set to true, the value will be changed to min or max depending on what it fails,
+	 *        this mode always returns true.
+	 * @return
+	 */
+	static bool verifyValue(int& val, int min, int max, bool truncate = true);
+
+	/**
+	 * Same but for smaller numbers.
+	 * @param val
+	 * @param min
+	 * @param max
+	 * @param truncate
+	 * @return
+	 */
+	static bool verifyValue(uint8_t& val, uint8_t min, uint8_t max, bool truncate = true);
 };
 
 } // namespace

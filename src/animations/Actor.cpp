@@ -19,13 +19,11 @@ Actor::Actor(umap<string, string>& parameters, Group* const group) :
 	group(group)
 {
 
-	if (direction == Directions::Forward or direction == Directions::ForwardBouncing) {
+	if (direction == Directions::Forward or direction == Directions::ForwardBouncing)
 		cDirection = Directions::Forward;
-	}
-	else {
+	else
 		cDirection = Directions::Backward;
-		currentActorFrame = totalActorFrames;
-	}
+
 	changeFrameTotal = static_cast<uint8_t>(str2speed(parameters["speed"])) + 1;
 }
 
@@ -45,9 +43,9 @@ const uint8_t Actor::getTotalFrames() const {
 
 void Actor::drawConfig() {
 	cout <<
-		"Speed: " << speed2str(static_cast<Speed>(changeFrameTotal)) <<
-		" Filter: " << Color::filter2str(filter) <<
-		" Direction: " << direction2str(direction) << endl;
+		"Speed: " << speed2str(static_cast<Speed>(changeFrameTotal - 1)) <<
+		", Filter: " << Color::filter2str(filter) <<
+		", Direction: " << direction2str(direction) << endl;
 }
 
 string Actor::direction2str(Directions direction) {
@@ -84,7 +82,7 @@ Actor::Directions Actor::str2direction(const string& direction) {
 string Actor::speed2str(Speed speed) {
 	switch (speed) {
 	case Speed::VeryFast:
-		return "VeryFast";
+		return "Very Fast";
 	case Speed::Fast:
 		return "Fast";
 	case Speed::Normal:
@@ -92,13 +90,13 @@ string Actor::speed2str(Speed speed) {
 	case Speed::Slow:
 		return "Slow";
 	case Speed::VerySlow:
-		return "VerySlow";
+		return "Very Slow";
 	}
 	return "";
 }
 
 Actor::Speed Actor::str2speed(const string& speed) {
-	if (speed == "Very Fast")
+	if (speed == "VeryFast")
 		return Speed::VeryFast;
 	if (speed == "Fast")
 		return Speed::Fast;
@@ -106,7 +104,7 @@ Actor::Speed Actor::str2speed(const string& speed) {
 		return Speed::Normal;
 	if (speed == "Slow")
 		return Speed::Slow;
-	if (speed == "Very Slow")
+	if (speed == "VerySlow")
 		return Speed::VerySlow;
 	throw Error("Invalid speed " + speed);
 }
@@ -130,7 +128,7 @@ uint8_t Actor::getNumberOfElements() const {
 	return group->getElements().size();
 }
 
-void Actor::changeElementColor(uint8_t index, Color color, Color::Filters filter, uint8_t percent) {
+void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 
 	switch (filter) {
 		case Color::Filters::Normal:
@@ -143,7 +141,7 @@ void Actor::changeElementColor(uint8_t index, Color color, Color::Filters filter
 		}
 }
 
-void Actor::changeElementsColor(Color color, Color::Filters filter, uint8_t percent) {
+void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
 	for (uint8_t c = 0; c < group->size(); ++c) {
 		changeElementColor(c, color, filter, percent);
 	}
@@ -161,40 +159,40 @@ bool Actor::canAdvaceFrame() {
 }
 
 void Actor::advanceActorFrame() {
-	currentActorFrame = calculateNextFrame(cDirection, currentActorFrame);
+	currentActorFrame = calculateNextFrame(cDirection, currentActorFrame, direction, totalActorFrames);
 }
 
-uint8_t Actor::calculateNextFrame(Directions& cDirection, uint8_t frame) {
+uint8_t Actor::calculateNextFrame(Directions& currentDirection, uint8_t frame, Directions direction, uint8_t totalElements) {
 
-	switch (cDirection) {
+	switch (direction) {
 	case Directions::Forward:
-		if (frame == getNumberOfElements())
+		if (frame >= totalElements)
 			frame = 1;
 		else
 			frame++;
 		break;
 	case Directions::ForwardBouncing:
 	case Directions::BackwardBouncing:
-		if (cDirection == Directions::Forward) {
+		if (currentDirection == Directions::Forward) {
 			// change of direction.
-			if (frame == getNumberOfElements()) {
-				cDirection = Directions::Backward;
-				frame--;
+			if (frame >= totalElements) {
+				currentDirection = Directions::Backward;
+//				frame--;
 				break;
 			}
 			frame++;
 			break;
 		}
-		if (frame == 1) {
-			cDirection = Directions::Forward;
-			frame++;
+		if (frame <= 1) {
+			currentDirection = Directions::Forward;
+//			frame++;
 			break;
 		}
 		frame--;
 		break;
 	case Directions::Backward:
-		if (frame == 1)
-			frame = getNumberOfElements();
+		if (frame <= 1)
+			frame = totalElements;
 		else
 			frame--;
 		break;

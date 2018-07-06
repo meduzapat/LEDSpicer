@@ -50,7 +50,7 @@ class Main {
 
 public:
 
-	enum class Modes : uint8_t {Background, Dump, Normal};
+	enum class Modes : uint8_t {Background, Dump, Normal, TestLed, TestElement};
 
 	Main(
 		Modes mode,
@@ -64,6 +64,10 @@ public:
 
 	void run();
 
+	void testLeds();
+
+	void testElements();
+
 	static void terminate();
 
 	void dumpConfiguration();
@@ -76,6 +80,10 @@ protected:
 	umap<string, Group> layout;
 	Profile* defaultProfile;
 	umap<string, Element*> allElements;
+
+private:
+
+	Device* selectDevice();
 };
 
 /**

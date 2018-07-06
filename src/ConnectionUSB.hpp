@@ -47,7 +47,7 @@ public:
 
 	virtual ~ConnectionUSB();
 
-	static void openSession(uint8_t debugLevel);
+	static void openSession();
 
 	void initialize();
 

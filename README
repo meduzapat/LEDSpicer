@@ -29,9 +29,13 @@ Essential:
 	build-essential
 	autoconf
 	libtool
+
 Libraries:
 	libusb-1.0
 	tinyxml2
+
+Debian/Ubuntu based systems just get them by:
+	apt install build-essential libtinyxml2-dev libusb-1.0-0-dev 
 
 If documentation is needed:
 	doxygen
@@ -40,13 +44,21 @@ If documentation is needed:
 Prepare tools:
 	./autogen.sh
 	./configure
-	or
+
+Or for optimized version:
 	./configure CXXFLAGS='-g0 -O3'
-	For developers (will enable debug g3, disable optimizations and activate the debug level for logs):
+I normally use something this:
+	./configure CXXFLAGS='-g0 -O3' --prefix=/usr --sysconfdir=/etc
+The data directory can also be changed with --datarootdir=DIR
+
+Or for developers: will enable debug level 3, disable optimizations and activate the debug level for logs.
 	./configure --enable-develop
+Developers also can add CXXFLAGS='-DDRY_RUN' to test without connecting to any USB hardware, will print the data to screen.
+	./configure --enable-develop CXXFLAGS='-DDRY_RUN'
 
 then compile with:
 	make
 
-Install (needs root access):
+Optional install (needs root access):
 	make install
+

@@ -16,8 +16,10 @@ void DataLoader::read() {
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
 	uint8_t fps = stoi(tempAttr["fps"]);
+	if (fps == 0)
+		throw LEDError("FPS = 0, No speed, nothing to do, done");
 	ConnectionUSB::setInterval(1000 / (fps > 30 ? 30 : fps));
-	ConnectionUSB::openSession(stoi(tempAttr["usbDebugLevel"]));
+	ConnectionUSB::openSession();
 	Actor::setFPS((fps > 30 ? 30 : fps));
 
 	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colors"]).append(".xml"));
@@ -228,8 +230,11 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 
 Device* DataLoader::createDevice(const string& name, const string& boardId) {
 
+	uint8_t devId = stoi(boardId);
+	if (Utility::verifyValue(devId, 1, 4, false))
+		LEDError("Invalid board id 1 - 4" + stoi(boardId));
 	if (name == IPAC_ULTIMATE) {
-		return new UltimarcUltimate(stoi(boardId));
+		return new UltimarcUltimate(devId);
 	}
 
 	throw LEDError("Unknown board name");
@@ -238,12 +243,20 @@ Device* DataLoader::createDevice(const string& name, const string& boardId) {
 Actor* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {
 	string groupName = actorData["group"];
 	if (actorData["type"] == "Serpentine") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "animation Serpentine");
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "actor Serpentine");
 		return new Serpentine(actorData, &layout.at(groupName));
 	}
 	if (actorData["type"] == "Pulse") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, actorData, "animation Pulse");
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, actorData, "actor Pulse");
 		return new Pulse(actorData, &layout.at(groupName));
 	}
-	throw LEDError("Invalid animation type '" + actorData["type"] + "' inside " + name);
+	if (actorData["type"] == "Gradient") {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_GRADIENT, actorData, "actor Gradient");
+		return new Gradient(actorData, &layout.at(groupName));
+	}
+	if (actorData["type"] == "Random") {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_RANDOM, actorData, "actor Random");
+		return new Random(actorData, &layout.at(groupName));
+	}
+	throw LEDError("Invalid actor type '" + actorData["type"] + "' inside " + name);
 }

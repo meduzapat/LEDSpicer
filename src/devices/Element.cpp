@@ -33,21 +33,25 @@ Element::Element(Element* other) : name(other->name) {
 
 void Element::setColor(const Color& color) {
 	if (pins.size() == 3) {
-		*pins[0] = color.getR();
-		*pins[1] = color.getG();
-		*pins[2] = color.getB();
+		*pins[Color::Channels::Red] = color.getR();
+		*pins[Color::Channels::Green] = color.getG();
+		*pins[Color::Channels::Blue] = color.getB();
 	}
 	else {
-		*pins[0] = color.getMonochrome();
+		*pins[SINGLE_PIN] = color.getMonochrome();
 	}
 }
 
 LEDSpicer::Color Element::getColor() {
 	Color color;
 	if (pins.size() == 1)
-		color.set(*pins[0], *pins[0], *pins[0]);
+		color.set(*pins[SINGLE_PIN], *pins[SINGLE_PIN], *pins[SINGLE_PIN]);
 	else
-		color.set(*pins[0], *pins[1], *pins[2]);
+		color.set(
+			*pins[Color::Channels::Red],
+			*pins[Color::Channels::Green],
+			*pins[Color::Channels::Blue]
+		);
 	return color;
 }
 

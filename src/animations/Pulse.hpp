@@ -9,7 +9,7 @@
 #ifndef PULSE_HPP_
 #define PULSE_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSE {"color", "direction"}
+#define REQUIRED_PARAM_ACTOR_PULSE {"color"}
 
 #include "Actor.hpp"
 

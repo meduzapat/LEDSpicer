@@ -12,7 +12,7 @@
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_SERPENTINE {"tailLength", "tailColor"}
+#define REQUIRED_PARAM_ACTOR_SERPENTINE {"tailLength", "tailColor", "tailIntensity"}
 
 namespace LEDSpicer {
 namespace Animations {
@@ -36,11 +36,9 @@ protected:
 		color,
 		tailColor;
 
-	Directions tailDirection;
-
 	struct TailData {
 		uint8_t percent;
-		uint8_t position = 0;
+		uint8_t position;
 	};
 	vector<TailData> tailData;
 

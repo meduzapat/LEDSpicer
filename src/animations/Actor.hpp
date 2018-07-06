@@ -29,6 +29,8 @@ using std::vector;
 #define DIRECTION_BACKWARD 2
 #define DIRECTION_BOUNCING 4
 
+#define REQUIRED_PARAM_ACTOR {"type", "group", "speed", "direction"}
+
 #ifndef ANIMATION_HPP_
 #define ANIMATION_HPP_ 1
 
@@ -96,7 +98,9 @@ public:
 protected:
 
 	uint8_t
+		/// Current change frame factor.
 		changeFrame = 1,
+		/// Total number of frames to actually move to the next actor frame.
 		changeFrameTotal,
 		/// Current actor frame.
 		currentActorFrame = 1,
@@ -120,9 +124,9 @@ protected:
 
 	uint8_t getNumberOfElements() const;
 
-	void changeElementColor(uint8_t index, Color color, Color::Filters filter, uint8_t percent = 50);
+	void changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent = 50);
 
-	void changeElementsColor(Color color, Color::Filters filter, uint8_t percent = 50);
+	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	/**
 	 * Calculates and advances the frame.
@@ -130,9 +134,9 @@ protected:
 	 */
 	virtual bool canAdvaceFrame();
 
-	void advanceActorFrame();
+	virtual void advanceActorFrame();
 
-	uint8_t calculateNextFrame(Directions& cDirection, uint8_t element);
+	static uint8_t calculateNextFrame(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
 
 private:
 

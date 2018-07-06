@@ -22,6 +22,9 @@ using std::string;
 	#define umap std::unordered_map
 #endif
 
+#include <vector>
+using std::vector;
+
 #include "Log.hpp"
 
 namespace LEDSpicer {
@@ -39,6 +42,8 @@ public:
 	 * Diff: Will difference with the background.
 	 */
 	enum class Filters : uint8_t {Normal, Combine, Diff};
+
+	enum Channels : uint8_t {Red, Green, Blue};
 
 	/**
 	 * Creates a new Color class (black color).
@@ -93,7 +98,7 @@ public:
 
 	/**
 	 * Calculates the fade for this color.
-	 * @param percent
+	 * @param percent 0 to 100, invisible to visible.
 	 * @return
 	 */
 	Color fade(uint8_t percent) const;
@@ -119,7 +124,7 @@ public:
 	 * @param percent
 	 * @return
 	 */
-	static uint8_t transition(uint8_t colorA, uint8_t colorB, uint8_t percent);
+	static uint8_t transition(uint8_t colorA, uint8_t colorB, float percent);
 
 	/**
 	 * Imports a set of colors to be used by the program.
@@ -141,6 +146,8 @@ public:
 	static Filters str2filter(const string& filter);
 
 	static const Color& getColor(const string& color);
+
+	static vector<string> getNames();
 
 protected:
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- profile skeleton -->
+<LEDSpicer
+	version="1.0"
+	type="Profile"
+	defaultColorOn=""
+	defaultColorOff=""
+	startAnimation=""
+	stopAnimation=""
+>
+	<animations>
+	</animations>
+	<elements>
+	</elements>
+	<groups>
+	</groups>
+</LEDSpicer>

@@ -115,3 +115,6 @@ uint8_t Device::getNumberOfElements() const {
 	return elementsByName.size();
 }
 
+umap<string, Element>* Device::getElements() {
+	return &elementsByName;
+}

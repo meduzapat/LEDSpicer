@@ -25,8 +25,10 @@ ledspicerd_SOURCES =                 \
 	src/devices/Device.cpp           \
 	src/devices/UltimarcUltimate.cpp \
 	src/animations/Actor.cpp         \
+	src/animations/Gradient.cpp      \
 	src/animations/Pulse.cpp         \
 	src/animations/Serpentine.cpp    \
+	src/animations/Random.cpp        \
 	src/devices/Profile.cpp          \
 	src/Main.cpp
 

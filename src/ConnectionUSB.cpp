@@ -64,8 +64,9 @@ ConnectionUSB::~ConnectionUSB() {
 	handle = nullptr;
 }
 
-void ConnectionUSB::openSession(uint8_t debugLevel) {
+void ConnectionUSB::openSession() {
 #ifndef DRY_RUN
+
 	if (usbSession)
 		return;
 
@@ -74,7 +75,14 @@ void ConnectionUSB::openSession(uint8_t debugLevel) {
 	if (libusb_init(&usbSession) != 0)
 		throw new Error("Unable to open USB session");
 
-	libusb_set_debug(usbSession, debugLevel);
+/*
+	LIBUSB_LOG_LEVEL_NONE = 0
+	LIBUSB_LOG_LEVEL_ERROR
+	LIBUSB_LOG_LEVEL_WARNING
+	LIBUSB_LOG_LEVEL_INFO
+	LIBUSB_LOG_LEVEL_DEBUG
+*/
+	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_NONE);
 #endif
 }
 

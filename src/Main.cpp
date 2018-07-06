@@ -28,7 +28,6 @@ Main::Main(
 	defaultProfile(defaultProfile),
 	allElements(std::move(allElements))
 {
-
 	if (mode == Modes::Dump)
 		return;
 
@@ -59,8 +58,8 @@ void Main::run() {
 	Log::info("LEDSpicer Running");
 
 	while (running) {
-		// 1 check queue for events.. <-|<-
-			// run event ---------------| |
+		// 1 check queue for events.. <----
+			// run event ---------------^ |
 		// run default profile------------|
 
 		for (auto device : devices)
@@ -75,6 +74,77 @@ void Main::run() {
 	}
 }
 
+void Main::testLeds() {
+	cout << "Test LEDs (q to quit)" << endl;
+	string inp;
+	Device* device = selectDevice();
+	if (not device)
+		return;
+
+	while (true) {
+		uint8_t led;
+		std::cin.clear();
+		cout << endl << "Select a Led (r to reset, q to quit):" << endl;
+		std::getline(std::cin, inp);
+
+		if (inp == "r") {
+			device->setLeds(0);
+			device->transfer();
+			continue;
+		}
+
+		if (inp == "q")
+			return;
+
+		try {
+			led = std::stoi(inp);
+			if (led > device->getNumberOfLeds() or led < 1)
+				throw "";
+			device->setLed(led, 255);
+			device->transfer();
+		}
+		catch (...) {
+			cerr << "Invalid pin number" << endl;
+		}
+	}
+}
+
+void Main::testElements() {
+	cout << "Test Elements (q to quit)" << endl;
+	string inp;
+	Device* device = selectDevice();
+	if (not device)
+		return;
+
+	while (true) {
+		std::cin.clear();
+
+		for (auto e : *device->getElements())
+			cout << e.second.getName() << endl;
+		cout << endl << "Enter an element name (r to reset, q to quit):" << endl;
+
+		std::getline(std::cin, inp);
+
+		if (inp == "r") {
+			device->setLeds(0);
+			device->transfer();
+			continue;
+		}
+
+		if (inp == "q")
+			return;
+
+		try {
+			Element* element = device->getElement(inp);
+			element->setColor(Color::getColor("White"));
+			device->transfer();
+		}
+		catch (...) {
+			cerr << "Invalid pin number" << endl;
+		}
+	}
+}
+
 void Main::terminate() {
 	running = false;
 }
@@ -82,7 +152,7 @@ void Main::terminate() {
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		Log::info("Program terminated by signal");
+		Log::info(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
 	}
@@ -138,6 +208,8 @@ int main(int argc, char **argv) {
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
 				"-d or --dump\t\t\tDump configuration files and quit\n"
+				"-l or --leds\t\t\tTest LEDs.\n"
+				"-e or --elements\t\tTest registered elements.\n"
 				"-v or --version\t\t\tDisplay version information\n"
 				"-h or --help\t\t\tDisplay this help screen.\n"
 				"Data directory: " PACKAGE_DATA_DIR "/\n"
@@ -171,6 +243,18 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
+		// Test LEDs.
+		if (commandline == "-l" or commandline == "--leds") {
+			mode = Main::Modes::TestLed;
+			continue;
+		}
+
+		// Test Elements
+		if (commandline == "-e" or commandline == "--elements") {
+			mode = Main::Modes::TestElement;
+			continue;
+		}
+
 		// Force foreground.
 		if (commandline == "-f" or commandline == "--foreground") {
 			if (mode == Main::Modes::Dump)
@@ -183,7 +267,7 @@ int main(int argc, char **argv) {
 #ifdef DEVELOP
 	Log::initialize(true);
 #else
-	Log::initialize(mode == Main::Modes::Normal);
+	Log::initialize(mode != Main::Modes::Background);
 #endif
 
 	if (configFile.empty())
@@ -206,6 +290,17 @@ int main(int argc, char **argv) {
 			ledspicer.dumpConfiguration();
 			return EXIT_SUCCESS;
 		}
+
+		if (mode == Main::Modes::TestLed) {
+			ledspicer.testLeds();
+			return EXIT_SUCCESS;
+		}
+
+		if (mode == Main::Modes::TestElement) {
+			ledspicer.testElements();
+			return EXIT_SUCCESS;
+		}
+
 		ledspicer.run();
 	}
 	catch(Error& e) {
@@ -215,3 +310,38 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 }
+
+//################
+//# Helper stuff #
+//################
+
+Device* Main::selectDevice() {
+	string inp;
+	while (true) {
+		if (devices.size() == 1) {
+			return devices[0];
+			break;
+		}
+		std::cin.clear();
+		uint8_t deviceIndex;
+		cout << "Select a device:" << endl;
+		for (uint8_t c = 0; c < devices.size(); ++c)
+			// TODO: add device id.
+			cout << c+1 << ": " << devices[c]->getName() << endl;
+		std::getline(std::cin, inp);
+		if (inp == "q")
+			return nullptr;
+		try {
+			deviceIndex = std::stoi(inp);
+			if (deviceIndex > devices.size() or deviceIndex < 1)
+				throw "";
+			return devices[deviceIndex - 1];
+			break;
+		}
+		catch (...) {
+			cerr << "Invalid device number" << endl;
+		}
+	}
+}
+
+

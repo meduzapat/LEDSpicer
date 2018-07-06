@@ -19,6 +19,8 @@ using std::vector;
 #ifndef ELEMENT_HPP_
 #define ELEMENT_HPP_ 1
 
+#define SINGLE_PIN 0
+
 namespace LEDSpicer {
 namespace Devices {
 

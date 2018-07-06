@@ -111,6 +111,8 @@ public:
 
 #endif
 
+	umap<string, Element>* getElements();
+
 protected:
 
 	/// Maps elements by name.

@@ -16,8 +16,10 @@
 #include "devices/Profile.hpp"
 #include "animations/Serpentine.hpp"
 #include "animations/Pulse.hpp"
+#include "animations/Gradient.hpp"
+#include "animations/Random.hpp"
 
-#define REQUIRED_PARAM_ROOT           {"usbDebugLevel", "colors", "fps"}
+#define REQUIRED_PARAM_ROOT           {"colors", "fps"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
 #define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
@@ -25,13 +27,14 @@
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_PROFILE        {"defaultColorOn", "defaultColorOff", "startAnimation", "stopAnimation"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
-#define REQUIRED_PARAM_ACTOR          {"type", "group", "speed", "direction"}
 
 namespace LEDSpicer {
 
 using Animations::Actor;
 using Animations::Serpentine;
 using Animations::Pulse;
+using Animations::Gradient;
+using Animations::Random;
 using Devices::UltimarcUltimate;
 using Devices::Device;
 using Devices::Profile;
