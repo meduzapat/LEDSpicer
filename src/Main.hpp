@@ -36,6 +36,7 @@
 #include <csignal>
 using std::signal;
 
+#include "Messages.hpp"
 #include "DataLoader.hpp"
 #include "devices/Group.hpp"
 
@@ -50,15 +51,9 @@ class Main {
 
 public:
 
-	enum class Modes : uint8_t {Background, Dump, Normal, TestLed, TestElement};
+	enum class Modes : uint8_t {Foreground, Dump, Normal, TestLed, TestElement};
 
-	Main(
-		Modes mode,
-		vector<Device*>& devices,
-		umap<string, Group>& layout,
-		Profile* defaultProfile,
-		umap<string, Element*>& allElements
-	);
+	Main(Modes mode);
 
 	virtual ~Main();
 
@@ -76,14 +71,23 @@ protected:
 
 	static bool running;
 
-	vector<Device*> devices;
-	umap<string, Group> layout;
-	Profile* defaultProfile;
-	umap<string, Element*> allElements;
+	Messages messages;
+
+	void runCurrentProfile();
+
+	vector<Profile*> profiles;
 
 private:
 
 	Device* selectDevice();
+
+	/**
+	 * Attempts to load profiles from a list of names.
+	 * @param data
+	 * @return nullptr if all failed.
+	 */
+	Profile* tryProfiles(const vector<string>& data);
+
 };
 
 /**

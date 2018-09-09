@@ -16,39 +16,30 @@ using namespace LEDSpicer;
 
 bool Main::running = false;
 
-Main::Main(
-	Modes mode,
-	vector<Device*>& devices,
-	umap<string, Group>& layout,
-	Profile* defaultProfile,
-	umap<string, Element*>& allElements
-) :
-	devices(std::move(devices)),
-	layout(std::move(layout)),
-	defaultProfile(defaultProfile),
-	allElements(std::move(allElements))
-{
+Main::Main(Modes mode) : messages(DataLoader::portNumber) {
+	profiles.push_back(DataLoader::defaultProfile);
 	if (mode == Modes::Dump)
 		return;
 
 #ifndef DRY_RUN
-	if (mode == Modes::Background) {
+	if (mode == Modes::Normal) {
 		Log::debug("Daemonizing");
 		if (daemon(0, 0) == -1) {
 			throw Error("Unable to daemonize.");
 		}
 		Log::debug("Daemonized");
 	}
-	for (auto device : this->devices)
+	for (auto device : DataLoader::devices)
 		device->initialize();
 #endif
+
 	running = true;
 }
 
 Main::~Main() {
 
-	delete defaultProfile;
-	for (auto d : devices)
+	delete DataLoader::defaultProfile;
+	for (auto d : DataLoader::devices)
 		delete d;
 	ConnectionUSB::terminate();
 }
@@ -58,20 +49,36 @@ void Main::run() {
 	Log::info("LEDSpicer Running");
 
 	while (running) {
-		// 1 check queue for events.. <----
-			// run event ---------------^ |
-		// run default profile------------|
 
-		for (auto device : devices)
-			device->setLeds(0);
-		defaultProfile->runFrame();
+		if (messages.read()) {
+			Message msg = messages.getMessage();
+			switch (msg.type) {
+			case Message::Types::LoadProfile: {
+				if (not tryProfiles(msg.data)) {
+					Log::debug("All requested profiles failed");
+					break;
+				}
+				break;
+			}
 
-		// send data
-		for (auto device : devices)
-			device->transfer();
+			case Message::Types::FinishLastProfile:
+				if (profiles.size() == 1)
+					break;
+				Log::debug("Profile terminate " + to_string(profiles.size()));
+				profiles.back()->terminate();
+				break;
 
-		Actor::advanceFrame();
+			default:
+				break;
+			}
+		}
+		runCurrentProfile();
 	}
+	profiles[0]->terminate();
+
+	// Wait for termination.
+	while (not profiles[0]->isRunning())
+		profiles[0]->runFrame();
 }
 
 void Main::testLeds() {
@@ -170,17 +177,17 @@ void Main::dumpConfiguration() {
 	cout << endl << "System Configuration:" << endl << "Colors:" << endl;
 	Color::drawColors();
 	cout  << endl << "Hardware:" << endl;
-	for (auto d : devices)
+	for (auto d : DataLoader::devices)
 		d->drawHardwarePinMap();
 	cout << "Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl;
-	cout << "Total Elements registered: " << (int)allElements.size() << endl;
+	cout << "Total Elements registered: " << (int)DataLoader::allElements.size() << endl;
 	cout << endl << "Layout:";
-	for (auto group : layout) {
+	for (auto group : DataLoader::layout) {
 		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
 	}
 	cout << endl << "Default Profile:" << endl;
-	defaultProfile->drawConfig();
+	DataLoader::defaultProfile->drawConfig();
 }
 
 int main(int argc, char **argv) {
@@ -193,6 +200,7 @@ int main(int argc, char **argv) {
 	// Process command line options.
 	string commandline, configFile = "";
 
+	// Run in the background.
 	Main::Modes mode = Main::Modes::Normal;
 
 	for (int i = 1; i < argc; i++) {
@@ -222,7 +230,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PACKAGE_NAME " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
@@ -256,10 +264,8 @@ int main(int argc, char **argv) {
 		}
 
 		// Force foreground.
-		if (commandline == "-f" or commandline == "--foreground") {
-			if (mode == Main::Modes::Dump)
-				continue;
-			mode = Main::Modes::Background;
+		if (mode != Main::Modes::Dump and (commandline == "-f" or commandline == "--foreground")) {
+			mode = Main::Modes::Foreground;
 			continue;
 		}
 	}
@@ -267,7 +273,7 @@ int main(int argc, char **argv) {
 #ifdef DEVELOP
 	Log::initialize(true);
 #else
-	Log::initialize(mode != Main::Modes::Background);
+	Log::initialize(mode != Main::Modes::Normal);
 #endif
 
 	if (configFile.empty())
@@ -275,33 +281,38 @@ int main(int argc, char **argv) {
 
 	Log::debug("Reading configuration");
 
+	// Read Configuration.
 	try {
+
 		DataLoader config(configFile, "Configuration");
-		config.read();
-		Main ledspicer(
-			mode,
-			config.getDevices(),
-			config.getLayout(),
-			config.processProfile(config.getDefaultProfile()),
-			config.getElementList()
-		);
+		config.readConfiguration();
+	}
+	catch(Error& e) {
+		Log::error("Error: " + e.getMessage());
+		return EXIT_FAILURE;
+	}
 
-		if (mode == Main::Modes::Dump) {
+	// Run mode.
+	try {
+
+		Main ledspicer(mode);
+
+		switch (mode) {
+		case Main::Modes::Dump:
 			ledspicer.dumpConfiguration();
-			return EXIT_SUCCESS;
-		}
+			break;
 
-		if (mode == Main::Modes::TestLed) {
+		case Main::Modes::TestLed:
 			ledspicer.testLeds();
-			return EXIT_SUCCESS;
-		}
+			break;
 
-		if (mode == Main::Modes::TestElement) {
+		case Main::Modes::TestElement:
 			ledspicer.testElements();
-			return EXIT_SUCCESS;
-		}
+			break;
 
-		ledspicer.run();
+		default:
+			ledspicer.run();
+		}
 	}
 	catch(Error& e) {
 		Log::error("Error: " + e.getMessage());
@@ -315,27 +326,45 @@ int main(int argc, char **argv) {
 //# Helper stuff #
 //################
 
+void Main::runCurrentProfile() {
+
+	// Reset elements.
+	for (auto& eD : DataLoader::allElements)
+		eD.second->setColor(profiles.back()->getBackgroundColor());
+
+	profiles.back()->runFrame();
+
+	if (not profiles.back()->isRunning())
+		profiles.pop_back();
+
+	// Send data.
+	for (auto device : DataLoader::devices)
+		device->transfer();
+
+	Actor::advanceFrame();
+}
+
 Device* Main::selectDevice() {
 	string inp;
 	while (true) {
-		if (devices.size() == 1) {
-			return devices[0];
+		if (DataLoader::devices.size() == 1) {
+			return DataLoader::devices[0];
 			break;
 		}
 		std::cin.clear();
 		uint8_t deviceIndex;
 		cout << "Select a device:" << endl;
-		for (uint8_t c = 0; c < devices.size(); ++c)
+		for (uint8_t c = 0; c < DataLoader::devices.size(); ++c)
 			// TODO: add device id.
-			cout << c+1 << ": " << devices[c]->getName() << endl;
+			cout << c+1 << ": " << DataLoader::devices[c]->getName() << endl;
 		std::getline(std::cin, inp);
 		if (inp == "q")
 			return nullptr;
 		try {
 			deviceIndex = std::stoi(inp);
-			if (deviceIndex > devices.size() or deviceIndex < 1)
+			if (deviceIndex > DataLoader::devices.size() or deviceIndex < 1)
 				throw "";
-			return devices[deviceIndex - 1];
+			return DataLoader::devices[deviceIndex - 1];
 			break;
 		}
 		catch (...) {
@@ -344,4 +373,20 @@ Device* Main::selectDevice() {
 	}
 }
 
-
+Profile* Main::tryProfiles(const vector<string>& data) {
+	Profile* profile = nullptr;
+	for (auto& p : data) {
+		Log::debug("changing profile to " + p);
+		try {
+			profile = DataLoader::processProfile(p);
+			profiles.push_back(profile);
+			profile->reset();
+			break;
+		}
+		catch(Error& e) {
+			Log::debug(e.getMessage());
+			continue;
+		}
+	}
+	return profile;
+}

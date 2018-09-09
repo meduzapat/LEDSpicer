@@ -19,7 +19,6 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const layout) :
 		colors.push_back(Color::getColor(c));
 	if (colors.size() < 2)
 		throw Error("You need two or more colors for actor Gradient to do something.");
-	totalActorFrames = FPS * changeFrameTotal / 2;
 	currentColor = cDirection == Directions::Forward ? 1 : colors.size();
 }
 
@@ -32,10 +31,6 @@ void Gradient::calculateElements() {
 		calculateSequential();
 		break;
 	}
-}
-
-bool Gradient::canAdvaceFrame() {
-	return true;
 }
 
 void Gradient::advanceActorFrame() {

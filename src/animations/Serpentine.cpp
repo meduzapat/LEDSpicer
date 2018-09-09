@@ -15,7 +15,10 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	color(parameters["color"]),
 	tailColor(parameters["tailColor"])
 {
-	totalActorFrames = group->size(); // * (direction == Directions::Forward or direction == Directions::Backward ? 1 : 2);
+
+	changeFrameTotal = static_cast<uint8_t>(speed) + 1;
+
+	totalActorFrames = group->size();
 	uint8_t
 		tailLength    = 0,
 		tailIntensity = 0;
@@ -79,3 +82,15 @@ void Serpentine::drawConfig() {
 			" Tail Intensity: " << (tailData.size() ? tailData.front().percent + tailData.back().percent : 0) <<
 			"%" << endl;
 }
+
+void Serpentine::advanceActorFrame() {
+
+	if (changeFrame >= changeFrameTotal) {
+		changeFrame = 1;
+		Actor::advanceActorFrame();
+		return ;
+	}
+
+	changeFrame++;
+}
+

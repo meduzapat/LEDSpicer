@@ -10,7 +10,14 @@
 
 using namespace LEDSpicer;
 
-void DataLoader::read() {
+vector<Device*> DataLoader::devices;
+umap<string, Element*> DataLoader::allElements;
+umap<string, Group> DataLoader::layout;
+Profile* DataLoader::defaultProfile;
+umap<string, Profile*> DataLoader::profiles;
+string DataLoader::portNumber;
+
+void DataLoader::readConfiguration() {
 
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
@@ -22,27 +29,13 @@ void DataLoader::read() {
 	ConnectionUSB::openSession();
 	Actor::setFPS((fps > 30 ? 30 : fps));
 
+	portNumber =  tempAttr["port"];
+
 	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colors"]).append(".xml"));
 
 	processDevices();
 
 	processLayout();
-}
-
-vector<Device*>& DataLoader::getDevices() {
-	return devices;
-}
-
-umap<string, Group>& DataLoader::getLayout() {
-	return layout;
-}
-
-umap<string, Element*>& DataLoader::getElementList() {
-	return allElements;
-}
-
-string& DataLoader::getDefaultProfile() {
-	return defaultProfile;
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -96,12 +89,12 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	for (; element; element = element->NextSiblingElement("element")) {
 		umap<string, string> tempAttr = processNode(element);
-		Utility::checkAttributes(REQUIRED_PARAM_DEVICE_ELEMENT, tempAttr, "device element");
+		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
 		// Single color.
-		if (tempAttr.count("pin")) {
-			device->registerElement(tempAttr["name"], stoi(tempAttr["pin"]));
-			pinCheck[stoi(tempAttr["pin"]) - 1] = true;
+		if (tempAttr.count("led")) {
+			device->registerElement(tempAttr["name"], stoi(tempAttr["led"]));
+			pinCheck[stoi(tempAttr["led"]) - 1] = true;
 		}
 		// RGB.
 		else {
@@ -136,7 +129,7 @@ void DataLoader::processLayout() {
 
 	tempAttr = processNode(layoutNode);
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, "layout");
-	defaultProfile = tempAttr["defaultProfile"];
+	string defaultProfileStr = tempAttr["defaultProfile"];
 
 	tinyxml2::XMLElement* element = layoutNode->FirstChildElement("group");
 	if (not element)
@@ -152,6 +145,16 @@ void DataLoader::processLayout() {
 		layout.emplace(tempAttr["name"], Group());
 		processGroupElements(element, tempAttr["name"]);
 	}
+
+	// Create a group with all elements on it called All if not defined.
+	if (not this->layout.count("All")) {
+		Group group;
+		for (auto& gp : allElements)
+			group.linkElement(gp.second);
+		layout.emplace("All", group);
+	}
+
+	defaultProfile = processProfile(defaultProfileStr);
 
 }
 
@@ -184,19 +187,41 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, const str
 
 Profile* DataLoader::processProfile(const string& name) {
 
+	if (profiles.count(name))
+		return profiles[name];
+
 	XMLHelper profile(string(PACKAGE_DATA_DIR).append("/profiles/").append(name).append(".xml"), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
+	Actor
+	 * start = nullptr,
+	 * end   = nullptr;
+
+	tinyxml2::XMLElement* element = profile.getRoot()->FirstChildElement("startTransition");
+	if (element) {
+		umap<string, string> tempAttr = processNode(element);
+		tempAttr["group"]  = "All";
+		tempAttr["filter"] = "Normal";
+		start = createAnimation(name, tempAttr);
+	}
+
+	element = profile.getRoot()->FirstChildElement("endTransition");
+	if (element) {
+		umap<string, string> tempAttr = processNode(element);
+		tempAttr["group"]  = "All";
+		tempAttr["filter"] = "Normal";
+		end = createAnimation(name, tempAttr);
+	}
+
 	Profile* profilePtr = new Profile(
-		Color(tempAttr.at("defaultColorOn")),
-		Color(tempAttr.at("defaultColorOff")),
-		processAnimation(tempAttr["startAnimation"]),
-		processAnimation(tempAttr["stopAnimation"])
+		Color(tempAttr.at("backgroundColor")),
+		start,
+		end
 	);
 
 	// Check for animations.
-	tinyxml2::XMLElement* element = profile.getRoot()->FirstChildElement("animations");
+	element = profile.getRoot()->FirstChildElement("animations");
 	if (element) {
 		element = element->FirstChildElement("animation");
 		for (; element; element = element->NextSiblingElement("animation")) {
@@ -205,12 +230,12 @@ Profile* DataLoader::processProfile(const string& name) {
 			profilePtr->addAnimation(tempAttr["name"], processAnimation(tempAttr["name"]));
 		}
 	}
+	profiles[name] = profilePtr;
 	return profilePtr;
 }
 
 vector<Actor*> DataLoader::processAnimation(const string& name) {
 
-	// TODO cache information on disk about animations so we avoid a read from HD.
 	XMLHelper animation(string(PACKAGE_DATA_DIR).append("/animations/").append(name).append(".xml"), "Animation");
 
 	umap<string, string> actorData;

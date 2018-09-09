@@ -143,16 +143,34 @@ public:
 	 * @return
 	 */
 	static string filter2str(Filters filter);
+
+	/**
+	 * Converts a string into a filter.
+	 * @param filter
+	 * @return
+	 */
 	static Filters str2filter(const string& filter);
 
+	/**
+	 * Returns a color by name.
+	 * @param color
+	 * @return
+	 */
 	static const Color& getColor(const string& color);
 
-	static vector<string> getNames();
+	/**
+	 * Returns a pointer to an array of color names.
+	 * @return
+	 */
+	static const vector<string>& getNames();
 
 protected:
 
 	/// Loaded colors.
 	static umap<string, Color> colors;
+
+	/// List of color names.
+	static vector<string> names;
 
 	uint8_t
 		r = 0,

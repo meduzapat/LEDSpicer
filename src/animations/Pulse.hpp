@@ -35,8 +35,6 @@ protected:
 
 	virtual void calculateElements();
 
-	virtual bool canAdvaceFrame();
-
 };
 
 } /* namespace Animations */

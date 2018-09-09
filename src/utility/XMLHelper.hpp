@@ -47,10 +47,10 @@ public:
 	 * @return A map with the key pairs.
 	 * @throws Error if an error happen.
 	 */
-	umap<string, string> processNode(tinyxml2::XMLElement* nodeElement);
+	static umap<string, string> processNode(tinyxml2::XMLElement* nodeElement);
 
 	/**
-	 * Reads the attributes from a node by its name.
+	 * Reads the attributes from a node by its name on the root.
 	 *
 	 * @param nodeName The name of the node, note that only the first occurrence will be read.
 	 * @return A map with the parameters in that node.

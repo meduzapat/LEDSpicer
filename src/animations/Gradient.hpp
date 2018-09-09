@@ -31,9 +31,9 @@ public:
 
 	void drawConfig();
 
-	Modes str2mode(const string& mode);
+	static Modes str2mode(const string& mode);
 
-	string mode2str(Modes mode);
+	static string mode2str(Modes mode);
 
 protected:
 
@@ -46,12 +46,6 @@ protected:
 	uint8_t currentColor;
 
 	void calculateElements();
-
-	/**
-	 * Every frame is necessary to create a smooth transition.
-	 * @return
-	 */
-	bool canAdvaceFrame();
 
 	/**
 	 * Gradient needs to always go forward.

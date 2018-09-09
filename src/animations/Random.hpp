@@ -36,17 +36,9 @@ protected:
 		newColors,
 		oldColors;
 
-	static vector<string> colorNames;
-
 	void calculateElements();
 
 	void generateNewColors();
-
-	/**
-	 * Every frame is necessary to create a smooth transition.
-	 * @return
-	 */
-	bool canAdvaceFrame();
 
 	/**
 	 * Random needs to always go forward.

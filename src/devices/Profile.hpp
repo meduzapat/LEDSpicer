@@ -6,13 +6,15 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef PROFILE_HPP_
-#define PROFILE_HPP_ 1
-
 #include "Element.hpp"
 #include "Group.hpp"
 #include "../animations/Actor.hpp"
 #include "../utility/Color.hpp"
+
+#ifndef PROFILE_HPP_
+#define PROFILE_HPP_ 1
+
+#define REQUIRED_PARAM_PROFILE {"backgroundColor"}
 
 namespace LEDSpicer {
 namespace Devices {
@@ -26,20 +28,16 @@ class Profile {
 
 public:
 
-	enum class States : uint8_t {Starting, Running, Ending, Done};
-
-//	Profile() {}
-
 	Profile(
-		const Color& defaultColorOn,
-		const Color& defaultColorOff,
-		const vector<Actor*>& startAnimation,
-		const vector<Actor*>& stopAnimation
-	) :
-		defaultColorOn(std::move(defaultColorOn)),
-		defaultColorOff(std::move(defaultColorOff)),
-		startAnimation(std::move(startAnimation)),
-		stopAnimation(std::move(stopAnimation)) {}
+		const Color& backgroundColor,
+		Actor* start,
+		Actor* end
+	):
+		backgroundColor(backgroundColor),
+		actual(start),
+		start(start),
+		end(end)
+	{}
 
 	virtual ~Profile();
 
@@ -49,42 +47,62 @@ public:
 
 	/**
 	 * Execute a frame.
-	 * @return
 	 */
-	const Profile::States runFrame();
+	void runFrame();
 
 	/**
-	 * Set the state back to Starting.
+	 * Leave it ready to restart.
 	 */
-	void resetState();
+	void reset();
+
+	/**
+	 * Initialize the ending sequence.
+	 */
+	void terminate();
+
+	/**
+	 * Returns true if the profile is transiting and the previous profile needs to draw.
+	 * @return
+	 */
+	bool isTransiting() const;
+
+	/**
+	 * Returns true if the profile is running.
+	 * @return
+	 */
+	bool isRunning() const;
+
+	/**
+	 * Returns a read only reference to the background color.
+	 * @return
+	 */
+	const Color& getBackgroundColor() const;
+
+	/**
+	 * Return the number of animations.
+	 * @return
+	 */
+	uint8_t getAnimationsCount() const;
 
 protected:
 
-	/// State 0 starting, 1 running, 2 ending, 3 done.
-	States state = States::Starting;
+	Color backgroundColor;
 
-	/// Flag to know if the start or stop animation (if any) is executing.
-	bool runningStartStopOnly = true;
+	bool running = true;
 
-	Color
-		defaultColorOn,
-		defaultColorOff;
-
-	vector<Actor*>
-		/// Initial animation.
-		startAnimation,
-		/// Final animation.
-		stopAnimation;
+	Actor
+		* actual,
+		* start,
+		* end;
 
 	/// List of animations to run.
 	umap<string, vector<Actor*>> animations;
 
 	/// List of Elements by name that need the color to be changed.
-	umap<string,const Color* const> elementsOverwrite;
+	umap<string, const Color* const> elementsOverwrite;
 
 	/// List of Groups by name that need the color to be changed.
-	umap<string,const Color* const> groupsOverwrite;
-
+	umap<string, const Color* const> groupsOverwrite;
 
 };
 

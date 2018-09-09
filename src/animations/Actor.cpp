@@ -16,25 +16,23 @@ uint8_t Actor::FPS          = 0;
 Actor::Actor(umap<string, string>& parameters, Group* const group) :
 	direction(str2direction(parameters["direction"])),
 	filter(Color::str2filter(parameters["filter"])),
-	group(group)
+	group(group),
+	speed(str2speed(parameters["speed"]))
 {
-
-	if (direction == Directions::Forward or direction == Directions::ForwardBouncing)
-		cDirection = Directions::Forward;
-	else
-		cDirection = Directions::Backward;
-
-	changeFrameTotal = static_cast<uint8_t>(str2speed(parameters["speed"])) + 1;
+	// default frames calculation.
+	totalActorFrames = FPS * (static_cast<uint8_t>(speed) + 1) / 2;
+	restart();
 }
 
-uint8_t Actor::drawFrame() {
+bool Actor::drawFrame() {
 
 	calculateElements();
-
-	if (canAdvaceFrame())
-		advanceActorFrame();
-
-	return currentActorFrame;
+	advanceActorFrame();
+	if ((direction == Directions::Forward or direction == Directions::ForwardBouncing) and currentActorFrame == 1)
+		return true;
+	else if ((direction == Directions::Backward or direction == Directions::BackwardBouncing) and currentActorFrame == totalActorFrames)
+		return true;
+	return false;
 }
 
 const uint8_t Actor::getTotalFrames() const {
@@ -43,9 +41,18 @@ const uint8_t Actor::getTotalFrames() const {
 
 void Actor::drawConfig() {
 	cout <<
-		"Speed: " << speed2str(static_cast<Speed>(changeFrameTotal - 1)) <<
+		"Speed: " << speed2str(speed) <<
+		", Frames: " << (int)getTotalFrames() <<
 		", Filter: " << Color::filter2str(filter) <<
 		", Direction: " << direction2str(direction) << endl;
+}
+
+void Actor::restart() {
+	currentActorFrame = 1;
+	if (direction == Directions::Forward or direction == Directions::ForwardBouncing)
+			cDirection = Directions::Forward;
+		else
+			cDirection = Directions::Backward;
 }
 
 string Actor::direction2str(Directions direction) {
@@ -145,17 +152,6 @@ void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8
 	for (uint8_t c = 0; c < group->size(); ++c) {
 		changeElementColor(c, color, filter, percent);
 	}
-}
-
-bool Actor::canAdvaceFrame() {
-
-	if (changeFrame >= changeFrameTotal) {
-		changeFrame = 1;
-		return true;
-	}
-
-	changeFrame++;
-	return false;
 }
 
 void Actor::advanceActorFrame() {

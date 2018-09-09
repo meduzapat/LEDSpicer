@@ -10,12 +10,14 @@ EXTRA_DIST = \
 	autogen.sh
 	
 bin_PROGRAMS = \
-	ledspicerd
+	ledspicerd \
+	emitter
 
 ledspicerd_SOURCES =                 \
 	src/utility/Log.cpp              \
 	src/utility/Error.cpp            \
 	src/utility/Utility.cpp          \
+	src/utility/Socks.cpp            \
 	src/utility/XMLHelper.cpp        \
 	src/utility/Color.cpp            \
 	src/DataLoader.cpp               \
@@ -29,7 +31,9 @@ ledspicerd_SOURCES =                 \
 	src/animations/Pulse.cpp         \
 	src/animations/Serpentine.cpp    \
 	src/animations/Random.cpp        \
+	src/animations/Fill.cpp          \
 	src/devices/Profile.cpp          \
+	src/Messages.cpp                 \
 	src/Main.cpp
 
 ledspicerd_CPPFLAGS =                     \
@@ -45,4 +49,17 @@ ledspicerd_CXXFLAGS =    \
 ledspicerd_LDFLAGS =    \
 	${LEDSPICER_LIBS}
 	
+emitter_SOURCES =                    \
+	src/utility/Log.cpp              \
+	src/utility/Error.cpp            \
+	src/utility/Utility.cpp          \
+	src/utility/Socks.cpp            \
+	src/Emitter.cpp
+
+emitter_CXXFLAGS =    \
+	${CXXFLAGS}       \
+	-Wl,--no-as-needed
+
+emitter_LDFLAGS =    \
+	${LEDSPICER_LIBS}
 	

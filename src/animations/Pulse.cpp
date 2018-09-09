@@ -14,16 +14,10 @@ Pulse::Pulse(umap<string, string>& parameters, Group* const layout) :
 	Actor(parameters, layout),
 	color(parameters["color"])
 {
-
-	totalActorFrames = FPS * changeFrameTotal / 2;
 }
 
 void Pulse::calculateElements() {
 	changeElementsColor(color.fade((currentActorFrame * 100) / totalActorFrames), filter);
-}
-
-bool Pulse::canAdvaceFrame() {
-	return true;
 }
 
 void Pulse::drawConfig() {

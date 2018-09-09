@@ -19,13 +19,12 @@
 #include "animations/Gradient.hpp"
 #include "animations/Random.hpp"
 
-#define REQUIRED_PARAM_ROOT           {"colors", "fps"}
+#define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
 #define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
-#define REQUIRED_PARAM_PROFILE        {"defaultColorOn", "defaultColorOff", "startAnimation", "stopAnimation"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
 
 namespace LEDSpicer {
@@ -44,7 +43,8 @@ using Devices::Element;
 /**
  * LEDSpicer::DataLoader
  *
- * Data loader will load any data file and configuration and process it
+ * Data loader will load any data file and configuration and process it.
+ * It also works as an storage for the loaded files.
  */
 class DataLoader: public XMLHelper {
 
@@ -57,57 +57,41 @@ public:
 	/**
 	 * Reads and process the configuration file.
 	 */
-	void read();
-
-	/**
-	 * Returns the devices list.
-	 * @return
-	 */
-	vector<Device*>& getDevices();
-
-	/**
-	 * Returns the layout.
-	 * @return
-	 */
-	umap<string, Group>& getLayout();
-
-	/**
-	 * Returns the list of all registered elements.
-	 * @return
-	 */
-	umap<string, Element*>& getElementList();
+	void readConfiguration();
 
 	/**
 	 * Reads an profile file.
 	 * @param name
 	 */
-	Profile* processProfile(const string& name);
+	static Profile* processProfile(const string& name);
 
-	/**
-	 * Returns the name of the default profile.
-	 * @return
-	 */
-	string& getDefaultProfile();
-
-protected:
+/* Storage */
 
 	/// Stores devices.
-	vector<Device*> devices;
+	static vector<Device*> devices;
 
 	/// list with all elements by name.
-	umap<string, Element*> allElements;
+	static umap<string, Element*> allElements;
 
 	/// Stores groups by name.
-	umap<string, Group> layout;
+	static umap<string, Group> layout;
 
 	/// Stores the default profile name.
-	string defaultProfile;
+	static Profile* defaultProfile;
+
+	/// Keeps references to profiles.
+	static umap<string, Profile*> profiles;
+
+	/// Port number to use for listening.
+	static string portNumber;
+
+protected:
 
 	/**
 	 * Loads the color File
 	 * @param file
 	 */
-	void processColorFile(const string& file);
+	static void processColorFile(const string& file);
 
 	/**
 	 * Reads the devices section from config.
@@ -137,7 +121,7 @@ protected:
 	 * Reads an animation file.
 	 * @param file
 	 */
-	vector<Actor*> processAnimation(const string& file);
+	static vector<Actor*> processAnimation(const string& file);
 
 	/**
 	 * Creates a device object.
@@ -155,7 +139,7 @@ protected:
 	 * @param actorData
 	 * @return
 	 */
-	Actor* createAnimation(const string& name, umap<string, string>& actorData);
+	static Actor* createAnimation(const string& name, umap<string, string>& actorData);
 
 };
 

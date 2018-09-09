@@ -12,14 +12,6 @@ using namespace LEDSpicer::Devices;
 
 Profile::~Profile() {
 
-	for (auto s : startAnimation)
-		delete s;
-	startAnimation.clear();
-
-	for (auto s : stopAnimation)
-		delete s;
-	stopAnimation.clear();
-
 	for (auto& a : animations) {
 		for (auto actor : a.second)
 			delete actor;
@@ -27,6 +19,11 @@ Profile::~Profile() {
 	}
 	animations.clear();
 
+	if (start)
+		delete start;
+
+	if (end)
+		delete end;
 }
 
 void Profile::addAnimation(const string& animationName, const vector<Actor*>& animation) {
@@ -34,22 +31,19 @@ void Profile::addAnimation(const string& animationName, const vector<Actor*>& an
 }
 
 void Profile::drawConfig() {
-	cout << "Default Color when On:  ";
-	defaultColorOn.drawColor();
-	cout << "Default Color when Off: ";
-	defaultColorOff.drawColor();
-	cout << endl << "Start Animation: " << (startAnimation.size() ? "" : "None") << endl;
-	for (auto s : startAnimation)
-		s->drawConfig();
-	cout << endl << "Stop Animation: " << (stopAnimation.size() ? "" : "None") << endl;
-	for (auto s : stopAnimation)
-		s->drawConfig();
+	cout << "Background color: ";
+	backgroundColor.drawColor();
+	cout << "Start transition:" << endl;
+	start->drawConfig();
+	cout << "Ending transition:" << endl;
+	end->drawConfig();
 
 	for (auto& a : animations) {
 		cout << endl << "Animation " << a.first << ": " << endl;
 		for(auto actor : a.second)
 			actor->drawConfig();
 	}
+
 	if (groupsOverwrite.size()) {
 		cout << endl << "Groups Overwrite Color: " << endl;
 		for (auto& g : groupsOverwrite) {
@@ -66,47 +60,45 @@ void Profile::drawConfig() {
 	}
 }
 
-const Profile::States Profile::runFrame() {
+void Profile::runFrame() {
 
-	for (auto& anim : animations)
-		for (auto actor : anim.second)
-			actor->drawFrame();
-	return States::Running;
+	if (actual and actual->drawFrame()) {
+		if (actual == end)
+			running = false;
+		actual = nullptr;
+	}
 
-
-	uint8_t status;
-	if (state == States::Starting)
-		if (startAnimation.size()) {
-			for (auto actor : startAnimation) {
-				status = actor->drawFrame();
-				// activate other animations half way.
-				if (status == actor->getTotalFrames() / 2)
-					runningStartStopOnly = false;
-				else if (status == actor->getTotalFrames())
-					state = States::Running;
-			}
-		}
-
-	if (not runningStartStopOnly)
+	if (!actual and running)
 		for (auto& anim : animations)
 			for (auto actor : anim.second)
 				actor->drawFrame();
-
-	if (state == States::Ending)
-		if (stopAnimation.size()) {
-			for (auto actor : stopAnimation) {
-				status = actor->drawFrame();
-				if (status == actor->getTotalFrames() / 2)
-					// de-activate other animations half way.
-					runningStartStopOnly = true;
-				else if (status == actor->getTotalFrames())
-					state = States::Done;
-			}
-		}
-	return state;
 }
 
-void Profile::resetState() {
-	state = States::Starting;
+void Profile::reset() {
+	running = true;
+	actual = start;
+	if (start)
+		actual->restart();
 }
 
+void Profile::terminate() {
+	actual = end;
+	if (start)
+		actual->restart();
+}
+
+bool Profile::isTransiting() const {
+	return actual != nullptr;
+}
+
+bool Profile::isRunning() const {
+	return running;
+}
+
+const LEDSpicer::Color& Profile::getBackgroundColor() const {
+	return backgroundColor;
+}
+
+uint8_t Profile::getAnimationsCount() const {
+	return animations.size();
+}

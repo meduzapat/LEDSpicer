@@ -30,6 +30,8 @@ public:
 
 	Group() {}
 
+	Group(const vector<Element*>& elements) : elements(elements) {}
+
 	virtual ~Group() {}
 
 	void drawElements();

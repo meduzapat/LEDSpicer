@@ -10,14 +10,9 @@
 
 using namespace LEDSpicer::Animations;
 
-vector<string> Random::colorNames;
-
 Random::Random(umap<string, string>& parameters, Group* const layout) :
 	Actor(parameters, layout)
 {
-
-	if (colorNames.empty())
-		colorNames = Color::getNames();
 
 	try {
 		std::srand(stoi(parameters["seed"]));
@@ -28,11 +23,10 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 
 	oldColors.reserve(getNumberOfElements());
 
-	totalActorFrames = FPS * changeFrameTotal / 2;
-
+	// TODO this is used by other actors, move to a generic place.
 	if (parameters["colors"].empty()) {
-		colors.reserve(colorNames.size());
-		for (auto& c : colorNames)
+		colors.reserve(Color::getNames().size());
+		for (auto& c : Color::getNames())
 			colors.push_back(&Color::getColor(c));
 	}
 	else {
@@ -45,7 +39,6 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 		oldColors.push_back(&Color::getColor("Black"));
 
 	generateNewColors();
-
 }
 
 void Random::calculateElements() {
@@ -65,10 +58,6 @@ void Random::generateNewColors() {
 	newColors.reserve(getNumberOfElements());
 	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
 		newColors.push_back(colors[std::rand() / ((RAND_MAX + 1u) / colors.size())]);
-}
-
-bool Random::canAdvaceFrame() {
-	return true;
 }
 
 void Random::advanceActorFrame() {

@@ -38,6 +38,7 @@ po/
 
 # Compiled Object files
 ledspicerd
+emitter
 .dirstamp
 .libs/
 *.slo

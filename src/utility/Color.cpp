@@ -11,6 +11,7 @@
 using namespace LEDSpicer;
 
 umap<string, Color> Color::colors;
+vector<string> Color::names;
 
 Color::Color(const string& color) {
 	set(color);
@@ -116,8 +117,10 @@ uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
 }
 
 void Color::loadColors(const umap<string, string>& colorsData, const string& format) {
-	for (auto& colorData : colorsData)
+	for (auto& colorData : colorsData) {
 		colors[colorData.first] = std::move(Color(colorData.second, format));
+		names.push_back(colorData.first);
+	}
 }
 
 void Color::drawColors() {
@@ -161,11 +164,8 @@ Color::Filters Color::str2filter(const string& filter) {
 	return Filters::Combine;
 }
 
-vector<string> Color::getNames() {
-	vector<string> colorNames;
-	for (auto& c : Color::colors)
-		colorNames.push_back(c.first);
-	return colorNames;
+const vector<string>& Color::getNames() {
+	return names;
 }
 
 const Color& Color::getColor(const string& color) {

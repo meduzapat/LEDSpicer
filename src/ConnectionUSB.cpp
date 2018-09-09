@@ -82,7 +82,9 @@ void ConnectionUSB::openSession() {
 	LIBUSB_LOG_LEVEL_INFO
 	LIBUSB_LOG_LEVEL_DEBUG
 */
-	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_NONE);
+#ifdef DEVELOP
+	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_INFO);
+#endif
 #endif
 }
 
@@ -98,6 +100,18 @@ void ConnectionUSB::terminate() {
 }
 
 void ConnectionUSB::transfer(vector<uint8_t> data) {
+#ifdef DRY_RUN
+	uint8_t count = 40;
+	for (auto pin : data) {
+		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';
+		if (!count--) {
+			count = 40;
+			cout << endl;
+		}
+	}
+	cout << endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+#else
 	checkTransferError(libusb_control_transfer(
 		handle,
 		requestType,
@@ -108,12 +122,19 @@ void ConnectionUSB::transfer(vector<uint8_t> data) {
 		data.size(),
 		TIMEOUT
 	));
+#endif
 }
 
 void ConnectionUSB::transfer() {
 #ifdef DRY_RUN
-	for (auto pin : LEDs)
-		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << '-';
+	uint8_t count = 40;
+	for (auto pin : LEDs) {
+		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';
+		if (!count--) {
+			count = 40;
+			cout << endl;
+		}
+	}
 	cout << endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 #else

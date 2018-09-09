@@ -32,6 +32,12 @@ public:
 
 protected:
 
+	uint8_t
+		/// Current change frame factor.
+		changeFrame = 1,
+		/// Total number of frames to actually move to the next actor frame.
+		changeFrameTotal;
+
 	Color
 		color,
 		tailColor;
@@ -46,6 +52,7 @@ protected:
 
 	virtual void calculateElements();
 
+	virtual void advanceActorFrame();
 };
 
 }} /* namespace LEDSpicer */

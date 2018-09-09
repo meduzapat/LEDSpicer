@@ -57,9 +57,9 @@ public:
 
 	/**
 	 * Draws the next frame.
-	 * @return the current actor frame.
+	 * @return the true if the cycle ended.
 	 */
-	uint8_t drawFrame();
+	bool drawFrame();
 
 	/**
 	 * Returns the total number of frames this Actor needs.
@@ -71,6 +71,11 @@ public:
 	 * Draws the actor configuration.
 	 */
 	virtual void drawConfig();
+
+	/**
+	 * Reset the animation back to begin.
+	 */
+	virtual void restart();
 
 	static string direction2str(Directions direction);
 	static Directions str2direction(const string& direction);
@@ -98,10 +103,6 @@ public:
 protected:
 
 	uint8_t
-		/// Current change frame factor.
-		changeFrame = 1,
-		/// Total number of frames to actually move to the next actor frame.
-		changeFrameTotal,
 		/// Current actor frame.
 		currentActorFrame = 1,
 		/// Total actor frames.
@@ -112,6 +113,8 @@ protected:
 		cDirection,
 		/// Direction
 		direction;
+
+	Speed speed;
 
 	/// How the color information will be draw back.
 	Color::Filters filter = Color::Filters::Normal;
@@ -127,12 +130,6 @@ protected:
 	void changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
-
-	/**
-	 * Calculates and advances the frame.
-	 * @return true if the frame was advanced.
-	 */
-	virtual bool canAdvaceFrame();
 
 	virtual void advanceActorFrame();
 
