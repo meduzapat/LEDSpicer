@@ -6,12 +6,12 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef RANDOM_HPP_
-#define RANDOM_HPP_ 1
-
 #include <cstdlib>
 
 #include "Actor.hpp"
+
+#ifndef RANDOM_HPP_
+#define RANDOM_HPP_ 1
 
 #define REQUIRED_PARAM_ACTOR_RANDOM {"seed", "colors"}
 

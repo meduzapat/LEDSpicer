@@ -10,6 +10,33 @@
 
 using namespace LEDSpicer;
 
+void Utility::ltrim(string& text) {
+	size_t chars = 0;
+	for (size_t c = 0; c < text.size(); c++) {
+		if (text[c] != ' ' and text[c] != '\n' and text[c] != '\t')
+			break;
+		chars ++;
+	}
+	if (chars)
+		text.erase(0, chars);
+}
+
+void Utility::rtrim(string& text) {
+	size_t chars = 0;
+	for (size_t c = text.size(); c > 0; c--) {
+		if (text[c] != ' ' and c != '\n' and c != '\t')
+			break;
+		chars ++;
+	}
+	if (chars)
+		text.resize(text.size() - chars + 1);
+}
+
+void Utility::trim(string& text) {
+	ltrim(text);
+	rtrim(text);
+}
+
 void Utility::checkAttributes(
 	const vector<string>& attributeList,
 	const umap<string, string>& subjects,

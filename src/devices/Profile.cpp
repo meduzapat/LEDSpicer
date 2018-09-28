@@ -33,10 +33,14 @@ void Profile::addAnimation(const string& animationName, const vector<Actor*>& an
 void Profile::drawConfig() {
 	cout << "Background color: ";
 	backgroundColor.drawColor();
-	cout << "Start transition:" << endl;
-	start->drawConfig();
-	cout << "Ending transition:" << endl;
-	end->drawConfig();
+	if (start) {
+		cout << endl << "Start transition:" << endl;
+		start->drawConfig();
+	}
+	if (end) {
+		cout << endl << "Ending transition:" << endl;
+		end->drawConfig();
+	}
 
 	for (auto& a : animations) {
 		cout << endl << "Animation " << a.first << ": " << endl;
@@ -68,7 +72,7 @@ void Profile::runFrame() {
 		actual = nullptr;
 	}
 
-	if (!actual and running)
+	if (not actual and running)
 		for (auto& anim : animations)
 			for (auto actor : anim.second)
 				actor->drawFrame();
@@ -82,13 +86,14 @@ void Profile::reset() {
 }
 
 void Profile::terminate() {
+	running = true;
 	actual = end;
-	if (start)
+	if (end)
 		actual->restart();
 }
 
 bool Profile::isTransiting() const {
-	return actual != nullptr;
+	return actual == start or actual == end;
 }
 
 bool Profile::isRunning() const {

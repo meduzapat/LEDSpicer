@@ -19,17 +19,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_UTILITY_SOCKS_HPP_
-#define SRC_UTILITY_SOCKS_HPP_ 1
-
 // To use strings
 #include <string>
 using std::string;
 
-#include <netdb.h>      // For gethostbyname()
+// For gethostbyname()
+#include <netdb.h>
 
 #include "Error.hpp"
 #include "Log.hpp"
+
+#ifndef SRC_UTILITY_SOCKS_HPP_
+#define SRC_UTILITY_SOCKS_HPP_ 1
 
 namespace LEDSpicer {
 

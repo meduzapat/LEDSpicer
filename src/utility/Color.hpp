@@ -6,8 +6,11 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef COLOR_HPP_
-#define COLOR_HPP_ 1
+// To handle unordered map.
+#include <unordered_map>
+#ifndef umap
+	#define umap std::unordered_map
+#endif
 
 // For ints.
 #include <cstdint>
@@ -16,16 +19,13 @@
 #include <string>
 using std::string;
 
-// To handle unordered map.
-#include <unordered_map>
-#ifndef umap
-	#define umap std::unordered_map
-#endif
-
 #include <vector>
 using std::vector;
 
 #include "Log.hpp"
+
+#ifndef COLOR_HPP_
+#define COLOR_HPP_ 1
 
 namespace LEDSpicer {
 
@@ -101,7 +101,7 @@ public:
 	 * @param percent 0 to 100, invisible to visible.
 	 * @return
 	 */
-	Color fade(uint8_t percent) const;
+	Color fade(uint percent) const;
 
 	/**
 	 * Calculates the transition between this color and a destination color.
@@ -133,8 +133,20 @@ public:
 	 */
 	static void loadColors(const umap<string, string>& colorsData, const string& format);
 
+	/**
+	 * Output the internal list of colors.
+	 */
 	static void drawColors();
 
+	/**
+	 * Output the colors from an array of colors.
+	 * @param colors
+	 */
+	static void drawColors(vector<const Color*>& colors);
+
+	/**
+	 * Output the current color HEX.
+	 */
 	void drawColor() const;
 
 	/**

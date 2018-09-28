@@ -6,18 +6,19 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef DATALOADER_HPP_
-#define DATALOADER_HPP_ 1
-
 #include "config.h"
 #include "utility/XMLHelper.hpp"
 #include "devices/UltimarcUltimate.hpp"
+#include "devices/UltimarcPacDrive.hpp"
 #include "utility/Color.hpp"
 #include "devices/Profile.hpp"
 #include "animations/Serpentine.hpp"
 #include "animations/Pulse.hpp"
 #include "animations/Gradient.hpp"
 #include "animations/Random.hpp"
+
+#ifndef DATALOADER_HPP_
+#define DATALOADER_HPP_ 1
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
@@ -35,6 +36,7 @@ using Animations::Pulse;
 using Animations::Gradient;
 using Animations::Random;
 using Devices::UltimarcUltimate;
+using Devices::UltimarcPacDrive;
 using Devices::Device;
 using Devices::Profile;
 using Devices::Group;
@@ -130,7 +132,7 @@ protected:
 	 * @param boardId
 	 * @return
 	 */
-	static Device* createDevice(const string& name, const string& boardId);
+	static Device* createDevice(umap<string, string>& deviceData);
 
 	/**
 	 * Creates a new animation object.

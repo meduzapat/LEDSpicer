@@ -24,6 +24,7 @@ using std::vector;
 namespace LEDSpicer {
 namespace Devices {
 
+
 /**
  * LEDSpicer::Devices::Element
  * Represent an Element that contain pins (LEDs), with functionality to handle them.

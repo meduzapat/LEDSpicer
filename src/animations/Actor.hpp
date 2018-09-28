@@ -6,12 +6,6 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-// To handle unordered map.
-#include <unordered_map>
-#ifndef umap
-	#define umap std::unordered_map
-#endif
-
 // For ints.
 #include <cstdint>
 
@@ -24,15 +18,15 @@ using std::vector;
 #include "../utility/Error.hpp"
 #include "../utility/Utility.hpp"
 
-#define DIRECTION_NONE 0
-#define DIRECTION_FORWARD 1
+#ifndef ANIMATION_HPP_
+#define ANIMATION_HPP_ 1
+
+#define DIRECTION_NONE     0
+#define DIRECTION_FORWARD  1
 #define DIRECTION_BACKWARD 2
 #define DIRECTION_BOUNCING 4
 
-#define REQUIRED_PARAM_ACTOR {"type", "group", "speed", "direction"}
-
-#ifndef ANIMATION_HPP_
-#define ANIMATION_HPP_ 1
+#define REQUIRED_PARAM_ACTOR {"type", "group", "speed", "direction", "filter"}
 
 namespace LEDSpicer {
 namespace Animations {
@@ -60,12 +54,6 @@ public:
 	 * @return the true if the cycle ended.
 	 */
 	bool drawFrame();
-
-	/**
-	 * Returns the total number of frames this Actor needs.
-	 * @return
-	 */
-	const uint8_t getTotalFrames() const;
 
 	/**
 	 * Draws the actor configuration.
@@ -103,7 +91,7 @@ public:
 protected:
 
 	uint8_t
-		/// Current actor frame.
+		/// Internally used by actors to keep track of incremental frames.
 		currentActorFrame = 1,
 		/// Total actor frames.
 		totalActorFrames;
@@ -133,7 +121,22 @@ protected:
 
 	virtual void advanceActorFrame();
 
-	static uint8_t calculateNextFrame(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
+	/**
+	 * Will calculate the next element index for a group of element, based on the direction and the current position.
+	 * @param [out] currentDirection will be updated with the new direction.
+	 * @param element the element index from 1.
+	 * @param direction
+	 * @param totalElements
+	 * @return the next element.
+	 */
+	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
+
+	/**
+	 * Creates an array of colors from a string of comma separted color names.
+	 * @param colors
+	 * @return
+	 */
+	static vector<const Color*> extractColors(string colors);
 
 private:
 

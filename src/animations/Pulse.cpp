@@ -10,14 +10,8 @@
 
 using namespace LEDSpicer::Animations;
 
-Pulse::Pulse(umap<string, string>& parameters, Group* const layout) :
-	Actor(parameters, layout),
-	color(parameters["color"])
-{
-}
-
 void Pulse::calculateElements() {
-	changeElementsColor(color.fade((currentActorFrame * 100) / totalActorFrames), filter);
+	changeElementsColor(color.fade((static_cast<uint>(currentActorFrame) * 100) / totalActorFrames), filter);
 }
 
 void Pulse::drawConfig() {
@@ -25,4 +19,5 @@ void Pulse::drawConfig() {
 	Actor::drawConfig();
 	cout << "Color: ";
 	color.drawColor();
+	cout << endl;
 }

@@ -16,7 +16,7 @@ void Group::drawElements() {
 		cout << std::left << std::setfill(' ') << std::setw(15) << element->getName() <<
 			" Pin" << (element->getPins().size() == 1 ? " " : "s") <<  ": ";
 		for (auto pin : element->getPins()) {
-			cout << (int)*pin << " ";
+			cout << std::setw(2) << (int)*pin << " ";
 		}
 		cout << endl;
 	}
@@ -28,6 +28,10 @@ uint8_t Group::size() const {
 
 void Group::linkElement(Element* element) {
 	elements.push_back(element);
+}
+
+void Group::shrinkToFit() {
+	elements.shrink_to_fit();
 }
 
 const vector<Element*>& Group::getElements() const {

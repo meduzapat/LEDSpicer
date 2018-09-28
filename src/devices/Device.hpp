@@ -7,11 +7,11 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef DEVICE_HPP_
-#define DEVICE_HPP_ 1
-
 #include "../ConnectionUSB.hpp"
 #include "Group.hpp"
+
+#ifndef DEVICE_HPP_
+#define DEVICE_HPP_ 1
 
 namespace LEDSpicer {
 namespace Devices {
@@ -26,7 +26,7 @@ class Device : public ConnectionUSB {
 
 public:
 
-	Device() : ConnectionUSB(UM_REQUEST_TYPE, UM_REQUEST) {}
+	using ConnectionUSB::ConnectionUSB;
 
 	virtual ~Device() {}
 
@@ -50,13 +50,19 @@ public:
 	 * @param ledPos
 	 * @return
 	 */
-	uint8_t* getLED(uint8_t ledPos);
+	uint8_t* getLed(uint8_t ledPos);
 
 	/**
 	 * Returns the board name.
 	 * @return
 	 */
 	string getName();
+
+	/**
+	 * Returns the board Id.
+	 * @return
+	 */
+	uint8_t getId();
 
 	/**
 	 * Returns the number of LEDs (pins) this board controls.
@@ -117,6 +123,10 @@ protected:
 
 	/// Maps elements by name.
 	umap<string, Element> elementsByName;
+
+	/// Basic
+	void afterClaimInterface();
+
 };
 
 }} /* namespace LEDSpicer */

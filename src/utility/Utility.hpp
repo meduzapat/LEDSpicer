@@ -26,6 +26,12 @@ class Utility {
 
 public:
 
+	static void ltrim(string& text);
+
+	static void rtrim(string& text);
+
+	static void trim(string& text);
+
 	/**
 	 * Checks if the map subject have the attributeList elements.
 	 * This function ignores other elements.

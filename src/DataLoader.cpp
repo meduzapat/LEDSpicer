@@ -73,7 +73,8 @@ void DataLoader::processDevices() {
 	for (; element; element = element->NextSiblingElement("device")) {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, "device");
-		auto device = createDevice(deviceAttr["name"], deviceAttr["boardId"]);
+		auto device = createDevice(deviceAttr);
+		Log::debug("Initializing board " + device->getName() + " Id: " + std::to_string(device->getId()));
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}
@@ -89,11 +90,15 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	for (; element; element = element->NextSiblingElement("element")) {
 		umap<string, string> tempAttr = processNode(element);
+
+		if (allElements.count(tempAttr["name"]))
+			throw LEDError("Duplicated element " + tempAttr["name"]);
+
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
 		// Single color.
 		if (tempAttr.count("led")) {
-			device->registerElement(tempAttr["name"], stoi(tempAttr["led"]));
+			device->registerElement(tempAttr["name"], stoi(tempAttr["led"]) - 1);
 			pinCheck[stoi(tempAttr["led"]) - 1] = true;
 		}
 		// RGB.
@@ -101,9 +106,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr["name"]);
 			device->registerElement(
 				tempAttr["name"],
-				stoi(tempAttr["red"]),
-				stoi(tempAttr["green"]),
-				stoi(tempAttr["blue"])
+				stoi(tempAttr["red"])   - 1,
+				stoi(tempAttr["green"]) - 1,
+				stoi(tempAttr["blue"])  - 1
 			);
 			pinCheck[stoi(tempAttr["red"])   - 1] = true;
 			pinCheck[stoi(tempAttr["green"]) - 1] = true;
@@ -116,7 +121,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	Log::debug(device->getName() + " with " + to_string(device->getNumberOfElements()) + " elements and " + to_string(pinCheck.size()) + " LEDs");
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
-			Log::notice("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
+			Log::info("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
 }
 
 void DataLoader::processLayout() {
@@ -151,6 +156,7 @@ void DataLoader::processLayout() {
 		Group group;
 		for (auto& gp : allElements)
 			group.linkElement(gp.second);
+		group.shrinkToFit();
 		layout.emplace("All", group);
 	}
 
@@ -183,6 +189,7 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, const str
 			throw LEDError("Invalid element " + elementAttr["name"] + " in group '" + name + "'");
 		}
 	}
+	layout[name].shrinkToFit();
 }
 
 Profile* DataLoader::processProfile(const string& name) {
@@ -253,20 +260,29 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 	return actors;
 }
 
-Device* DataLoader::createDevice(const string& name, const string& boardId) {
+Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 
-	uint8_t devId = stoi(boardId);
-	if (Utility::verifyValue(devId, 1, 4, false))
-		LEDError("Invalid board id 1 - 4" + stoi(boardId));
-	if (name == IPAC_ULTIMATE) {
-		return new UltimarcUltimate(devId);
-	}
+	uint8_t devId = deviceData.count("boardId") ? stoi(deviceData["boardId"]) : 1;
+
+	if (not Utility::verifyValue(devId, 1, 4, false))
+		throw LEDError(std::to_string(devId) + " is an invalid board id, use 1 to 4");
+
+	if (deviceData["name"] == IPAC_ULTIMATE)
+		return new UltimarcUltimate(devId, deviceData);
+
+	if (deviceData["name"] == PAC_DRIVE)
+		return new UltimarcPacDrive(devId, deviceData);
+
 
 	throw LEDError("Unknown board name");
 }
 
 Actor* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {
+
 	string groupName = actorData["group"];
+	if (not layout.count(groupName))
+		throw LEDError(groupName + " is not a valid group name in animation " + name);
+
 	if (actorData["type"] == "Serpentine") {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "actor Serpentine");
 		return new Serpentine(actorData, &layout.at(groupName));

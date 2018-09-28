@@ -6,12 +6,6 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-// To handle unordered map.
-#include <unordered_map>
-#ifndef umap
-	#define umap std::unordered_map
-#endif
-
 #include "Element.hpp"
 
 #ifndef LAYOUT_HPP_
@@ -47,6 +41,11 @@ public:
 	 * @param element
 	 */
 	void linkElement(Element* element);
+
+	/**
+	 * Reduces the group elements to the minimum necessary.
+	 */
+	void shrinkToFit();
 
 	/**
 	 * Returns a reference to the pointers to the internal elements.

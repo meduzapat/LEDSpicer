@@ -20,7 +20,8 @@
 using namespace LEDSpicer;
 
 Socks::Socks(const string& hostAddress, const string& hostPort, bool bind) {
-	prepare(hostAddress, hostPort, bind);
+	if (not hostPort.empty())
+		prepare(hostAddress, hostPort, bind);
 }
 
 void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind) {
@@ -102,7 +103,6 @@ bool Socks::recive(string& buffer) {
 		return false;
 
 	buffer.clear();
-//	buffer.reserve(BUFFER_SIZE);
 
 	int on = 1;
 	ssize_t n = 0;
@@ -123,10 +123,11 @@ bool Socks::recive(string& buffer) {
 	n = recv(sockFB, bufferp, BUFFER_SIZE, 0);// MSG_DONTWAIT
 	if (n >= 0) {
 		buffer = bufferp;
+		delete[] bufferp;
 		return true;
 	}
+	delete[] bufferp;
 	return false;
-//	delete[] bufferp;
 }
 
 void Socks::disconnect() {

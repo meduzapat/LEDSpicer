@@ -9,9 +9,9 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <iostream>
-#include <unistd.h>
 using std::cout;
 using std::endl;
+#include <unistd.h>
 #include <cstring>
 
 #include "Message.hpp"

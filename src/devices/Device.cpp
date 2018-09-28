@@ -11,6 +11,12 @@
 
 using namespace LEDSpicer::Devices;
 
+void Device::afterClaimInterface() {
+	Log::debug("Initializing board");
+	setLeds(0);
+	transfer();
+}
+
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
 	validateLed(led);
 	LEDs[led] = intensity;
@@ -18,20 +24,22 @@ Device* Device::setLed(uint8_t led, uint8_t intensity) {
 }
 
 Device* Device::setLeds(uint8_t intensity) {
-	for (uint8_t c = 1; c < LEDs.size(); c++) {
-		setLed(c, intensity);
-	}
+	for (auto& led : LEDs)
+		led = intensity;
 	return this;
 }
 
-uint8_t* Device::getLED(uint8_t ledPos) {
-	if (not ledPos or ledPos > board.LEDs)
-		throw Error("Invalid pin number " + to_string(ledPos) + " for " + board.name);
+uint8_t* Device::getLed(uint8_t ledPos) {
+	validateLed(ledPos);
 	return &LEDs.at(ledPos);
 }
 
 string Device::getName() {
 	return board.name;
+}
+
+uint8_t Device::getId() {
+	return board.boardId;
 }
 
 uint8_t Device::getNumberOfLeds() {
@@ -107,7 +115,7 @@ Element* Device::getElement(const string& name) {
 }
 
 void Device::validateLed(uint8_t led) const {
-	if (not led or led >= LEDs.size())
+	if (led >= LEDs.size())
 		throw Error("Invalid led number " + to_string(led));
 }
 

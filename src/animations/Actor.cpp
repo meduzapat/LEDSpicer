@@ -30,19 +30,15 @@ bool Actor::drawFrame() {
 	advanceActorFrame();
 	if ((direction == Directions::Forward or direction == Directions::ForwardBouncing) and currentActorFrame == 1)
 		return true;
-	else if ((direction == Directions::Backward or direction == Directions::BackwardBouncing) and currentActorFrame == totalActorFrames)
+	if ((direction == Directions::Backward or direction == Directions::BackwardBouncing) and currentActorFrame == totalActorFrames)
 		return true;
 	return false;
-}
-
-const uint8_t Actor::getTotalFrames() const {
-	return totalActorFrames;
 }
 
 void Actor::drawConfig() {
 	cout <<
 		"Speed: " << speed2str(speed) <<
-		", Frames: " << (int)getTotalFrames() <<
+		", Frames: " << (int)totalActorFrames <<
 		", Filter: " << Color::filter2str(filter) <<
 		", Direction: " << direction2str(direction) << endl;
 }
@@ -138,14 +134,14 @@ uint8_t Actor::getNumberOfElements() const {
 void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 
 	switch (filter) {
-		case Color::Filters::Normal:
-			group->getElement(index)->setColor(color);
-			break;
-		case Color::Filters::Combine:
-			group->getElement(index)->setColor(
-				group->getElement(index)->getColor().transition(color, percent)
-			);
-		}
+	case Color::Filters::Normal:
+		group->getElement(index)->setColor(color);
+		break;
+	case Color::Filters::Combine:
+		group->getElement(index)->setColor(
+			group->getElement(index)->getColor().transition(color, percent)
+		);
+	}
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
@@ -155,17 +151,17 @@ void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8
 }
 
 void Actor::advanceActorFrame() {
-	currentActorFrame = calculateNextFrame(cDirection, currentActorFrame, direction, totalActorFrames);
+	currentActorFrame = calculateNextOf(cDirection, currentActorFrame, direction, totalActorFrames);
 }
 
-uint8_t Actor::calculateNextFrame(Directions& currentDirection, uint8_t frame, Directions direction, uint8_t totalElements) {
+uint8_t Actor::calculateNextOf(Directions& currentDirection, uint8_t frame, Directions direction, uint8_t totalElements) {
 
 	switch (direction) {
 	case Directions::Forward:
 		if (frame >= totalElements)
 			frame = 1;
 		else
-			frame++;
+			++frame;
 		break;
 	case Directions::ForwardBouncing:
 	case Directions::BackwardBouncing:
@@ -173,26 +169,36 @@ uint8_t Actor::calculateNextFrame(Directions& currentDirection, uint8_t frame, D
 			// change of direction.
 			if (frame >= totalElements) {
 				currentDirection = Directions::Backward;
-//				frame--;
+				--frame;
 				break;
 			}
-			frame++;
+			++frame;
 			break;
 		}
 		if (frame <= 1) {
 			currentDirection = Directions::Forward;
-//			frame++;
+			++frame;
 			break;
 		}
-		frame--;
+		--frame;
 		break;
 	case Directions::Backward:
 		if (frame <= 1)
 			frame = totalElements;
 		else
-			frame--;
+			--frame;
 		break;
 	}
 
 	return frame;
+}
+
+vector<const LEDSpicer::Color*> Actor::extractColors(string colors) {
+	vector<const Color*> r;
+	for (auto& c : Utility::explode(colors, ',')) {
+		Utility::trim(c);
+		r.push_back(&Color::getColor(c));
+	}
+	r.shrink_to_fit();
+	return r;
 }

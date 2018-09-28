@@ -9,19 +9,18 @@
 // For special io format
 #include <iomanip>
 
+#include "Ultimarc.hpp"
+
 #ifndef ULTIMARCULTIMATE_HPP_
 #define ULTIMARCULTIMATE_HPP_ 1
 
 #define IPAC_ULTIMATE "IPAC_ULTIMATE"
 
-#define IPAC_ULTIMATE_VENDOR        0xD209
 #define IPAC_ULTIMATE_PRODUCT       0x0410
 #define IPAC_ULTIMATE_VALUE         0x0203
 #define IPAC_ULTIMATE_INTERFACE     3
 #define IPAC_ULTIMATE_NGC_INTERFACE 2
 #define IPAC_ULTIMATE_LEDS          96
-
-#include "Device.hpp"
 
 namespace LEDSpicer {
 namespace Devices {
@@ -30,20 +29,20 @@ namespace Devices {
  * LEDSpicer::Devices::UltimarcUltimate
  * Class to keep Ultimate I/O data and functionality.
  */
-class UltimarcUltimate: public Device {
+class UltimarcUltimate: public Ultimarc {
 
 public:
 
 	/**
-	 * @todo right now I have no way to test multiple boards, and no idea how to do it.
 	 * @param boardId
-	 * @param fps
 	 */
-	UltimarcUltimate(uint8_t boardId);
+	UltimarcUltimate(uint8_t boardId, umap<string, string>& options);
 
-	virtual ~UltimarcUltimate();
+	virtual ~UltimarcUltimate() {}
 
 	virtual void drawHardwarePinMap();
+
+	void transfer();
 
 protected:
 

@@ -6,9 +6,6 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef LOG_HPP_
-#define LOG_HPP_ 1
-
 // To handle IO stream.
 #include <iostream>
 using std::cout;
@@ -22,6 +19,9 @@ using std::string;
 #include <syslog.h>
 
 #include "config.h"
+
+#ifndef LOG_HPP_
+#define LOG_HPP_ 1
 
 namespace LEDSpicer {
 

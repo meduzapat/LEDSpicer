@@ -7,6 +7,7 @@
  */
 
 #include "Main.hpp"
+#include <fcntl.h>
 
 #ifdef DEVELOP
 #include <execinfo.h>
@@ -16,7 +17,26 @@ using namespace LEDSpicer;
 
 bool Main::running = false;
 
-Main::Main(Modes mode) : messages(DataLoader::portNumber) {
+void signalHandler(int sig) {
+
+	if (sig == SIGTERM) {
+		Log::info(PACKAGE_NAME " terminated by signal");
+		Main::terminate();
+		return;
+	}
+
+	// display back trace
+#ifdef DEVELOP
+	void* array[10];
+	size_t size = backtrace(array, 10);
+	backtrace_symbols_fd(array, size, STDERR_FILENO);
+#endif
+	exit(EXIT_FAILURE);
+}
+
+Main::Main(Modes mode) :
+	messages(mode == Modes::Normal or mode == Modes::Foreground ? DataLoader::portNumber : "")
+{
 	profiles.push_back(DataLoader::defaultProfile);
 	if (mode == Modes::Dump)
 		return;
@@ -104,8 +124,8 @@ void Main::testLeds() {
 			return;
 
 		try {
-			led = std::stoi(inp);
-			if (led > device->getNumberOfLeds() or led < 1)
+			led = std::stoi(inp) - 1;
+			if (led >= device->getNumberOfLeds())
 				throw "";
 			device->setLed(led, 255);
 			device->transfer();
@@ -154,23 +174,6 @@ void Main::testElements() {
 
 void Main::terminate() {
 	running = false;
-}
-
-void signalHandler(int sig) {
-
-	if (sig == SIGTERM) {
-		Log::info(PACKAGE_NAME " terminated by signal");
-		Main::terminate();
-		return;
-	}
-
-	// display back trace
-#ifdef DEVELOP
-	void* array[10];
-	size_t size = backtrace(array, 10);
-	backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
-	exit(EXIT_FAILURE);
 }
 
 void Main::dumpConfiguration() {
@@ -264,7 +267,7 @@ int main(int argc, char **argv) {
 		}
 
 		// Force foreground.
-		if (mode != Main::Modes::Dump and (commandline == "-f" or commandline == "--foreground")) {
+		if (mode == Main::Modes::Normal and (commandline == "-f" or commandline == "--foreground")) {
 			mode = Main::Modes::Foreground;
 			continue;
 		}
@@ -283,7 +286,6 @@ int main(int argc, char **argv) {
 
 	// Read Configuration.
 	try {
-
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 	}

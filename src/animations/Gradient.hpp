@@ -6,7 +6,7 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "Actor.hpp"
+#include "TimedActor.hpp"
 
 #ifndef GRADIENT_HPP_
 #define GRADIENT_HPP_ 1
@@ -19,11 +19,11 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Rainbow
  */
-class Gradient: public Actor {
+class Gradient: public TimedActor {
 
 public:
 
-	enum class Modes : uint8_t {All, Sequential};
+	enum class Modes : uint8_t {All, Sequential, Cyclic};
 
 	Gradient(umap<string, string>& parameters, Group* const layout);
 
@@ -37,27 +37,27 @@ public:
 
 protected:
 
-	vector<Color> colors;
+	vector<const Color*> colors;
 
 	Directions colorDirection;
 
 	Modes mode;
 
-	uint8_t currentColor;
+	uint8_t
+		/// The color for the 1st element.
+		currentColor,
+		/// the calculated increment
+		increment = 0,
+		/// Keeps the transition percent.
+		currentPercent = 0;
 
 	void calculateElements();
 
-	/**
-	 * Gradient needs to always go forward.
-	 */
-	void advanceActorFrame();
-
 private:
 
-	void calculateAll();
+	void calculateSingle();
 
-	void calculateSequential();
-
+	void calculateMultiple();
 };
 
 } /* namespace Animations */

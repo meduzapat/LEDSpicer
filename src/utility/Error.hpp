@@ -6,9 +6,6 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#ifndef ERROR_HPP_
-#define ERROR_HPP_ 1
-
 #include <string>
 using std::string;
 using std::to_string;
@@ -16,6 +13,9 @@ using std::stoi;
 
 // Compilation settings.
 #include "config.h"
+
+#ifndef ERROR_HPP_
+#define ERROR_HPP_ 1
 
 namespace LEDSpicer {
 

@@ -23,18 +23,17 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 
 	oldColors.reserve(getNumberOfElements());
 
-	// TODO this is used by other actors, move to a generic place.
 	if (parameters["colors"].empty()) {
 		colors.reserve(Color::getNames().size());
 		for (auto& c : Color::getNames())
 			colors.push_back(&Color::getColor(c));
 	}
 	else {
-		for (auto& s : Utility::explode(parameters["colors"], ','))
-			colors.push_back(&Color::getColor(s));
+		colors = extractColors(parameters["colors"]);
+		if (colors.size() < 2)
+			throw Error("You need two or more colors for actor Random to do something.");
 	}
 
-	colors.shrink_to_fit();
 	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
 		oldColors.push_back(&Color::getColor("Black"));
 
@@ -61,13 +60,13 @@ void Random::generateNewColors() {
 }
 
 void Random::advanceActorFrame() {
-	currentActorFrame = calculateNextFrame(cDirection, currentActorFrame, Directions::Forward, totalActorFrames);
+	currentActorFrame = calculateNextOf(cDirection, currentActorFrame, Directions::Forward, totalActorFrames);
 }
 
 void Random::drawConfig() {
 	cout << "Actor Type: Random " << endl;
 	Actor::drawConfig();
-	cout << "Colors: " << endl;
-	for (auto& c : colors)
-		c->drawColor();
+	cout << "Colors: ";
+	Color::drawColors(colors);
+	cout << endl;
 }

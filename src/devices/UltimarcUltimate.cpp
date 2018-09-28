@@ -10,25 +10,15 @@
 
 using namespace LEDSpicer::Devices;
 
-UltimarcUltimate::UltimarcUltimate(uint8_t boardId) : Device() {
-	board.name      = "Ipac Ultimate IO";
-	board.vendor    = IPAC_ULTIMATE_VENDOR;
+UltimarcUltimate::UltimarcUltimate(uint8_t boardId, umap<string, string>& options) :
+		Ultimarc(ULTIMARC_VENDOR, IPAC_ULTIMATE_PRODUCT, IPAC_ULTIMATE_LEDS) {
+	board.name      = "Ultimarc Ipac Ultimate IO";
+	board.vendor    = ULTIMARC_VENDOR;
 	board.product   = IPAC_ULTIMATE_PRODUCT;
 	board.interface = 0;
 	board.boardId   = boardId;
 	board.value     = IPAC_ULTIMATE_VALUE;
 	board.LEDs      = IPAC_ULTIMATE_LEDS;
-	// Initialize the internal LED matrix and add extra field for the command.
-	LEDs.resize(IPAC_ULTIMATE_LEDS + 1);
-	LEDs.shrink_to_fit();
-	LEDs[0] = 0x04;
-}
-
-UltimarcUltimate::~UltimarcUltimate() {
-	if (handle) {
-		setLeds(0);
-		transfer();
-	}
 }
 
 void UltimarcUltimate::afterConnect() {
@@ -54,42 +44,51 @@ void UltimarcUltimate::afterConnect() {
 	 * Also I not sure why 0x40.
 	 */
 	if ((descriptor.bcdDevice & 0x40)) {
-		Log::info("No Game Controller detected");
+		Log::info("No Game Controller mode detected");
 		board.interface = IPAC_ULTIMATE_NGC_INTERFACE;
 	}
 	else {
-		Log::info("Game Controller detected");
+		Log::info("Game Controller mode detected");
 		board.interface = IPAC_ULTIMATE_INTERFACE;
 	}
 }
 
 void UltimarcUltimate::afterClaimInterface() {
-	Log::debug("Initializing board");
-	transfer({0x03, 0, 0, 0xC0, 0});
-	setLeds(0);
-	transfer();
+	vector<uint8_t> data = {0x03, 0, 0, 0xC0, 0};
+	transferData(data);
+	Device::afterClaimInterface();
 }
 
 void UltimarcUltimate::drawHardwarePinMap() {
 	uint8_t
-		half    = getNumberOfLeds() / 2,
+		half    = IPAC_ULTIMATE_LEDS / 2,
 		fillerL = 1,
-		fillerR = half + 1;
-	cout << getName() << " Pins " << (int)getNumberOfLeds() << endl;
-	cout << "Hardware pin map:" << endl <<
+		fillerR = half + 1,
+		rLed    = half;
+	cout << getName() << " Pins " << IPAC_ULTIMATE_LEDS << endl;
+	cout << "Hardware pin map:"    << endl <<
 			"R  G  B     B  G  R"  << endl;
-	for (uint8_t c = 1; c <= getNumberOfLeds() / 2; ++c) {
-		*getLED(c)        = fillerL++;
-		*getLED(c + half) = fillerR++;
-		cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLED(c);
-		if (not (c % 3)) {
+	for (uint8_t lLed = 0; lLed < half; ++lLed) {
+		setLed(lLed, fillerL++);
+		setLed(fillerR - 1, fillerR);
+		fillerR++;
+		cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(lLed);
+		if (not ((lLed + 1) % 3)) {
 			cout << "   ";
-			uint8_t c2 = c - 2;
-			for (; c2 < c + 1; ++c2)
-				cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLED(c2 + half);
+			for (uint8_t c = 0; c < 3; ++c)
+				cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(rLed++);
 			cout << endl;
 		}
 	}
+	cout << endl;
+}
+
+void UltimarcUltimate::transfer() {
+
+	vector<uint8_t> load;
+	load.push_back(0x04);
+	load.insert(load.end(), LEDs.begin(), LEDs.end());
+	transferData(load);
 }
 
 /*

@@ -6,12 +6,12 @@
  * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
+#include "Actor.hpp"
+
 #ifndef PULSE_HPP_
 #define PULSE_HPP_ 1
 
 #define REQUIRED_PARAM_ACTOR_PULSE {"color"}
-
-#include "Actor.hpp"
 
 namespace LEDSpicer {
 namespace Animations {
@@ -23,7 +23,9 @@ class Pulse : public Actor {
 
 public:
 
-	Pulse(umap<string, string>& parameters, Group* const layout);
+	Pulse(umap<string, string>& parameters, Group* const layout):
+		Actor(parameters, layout),
+		color(parameters["color"]) {}
 
 	virtual ~Pulse() {}
 

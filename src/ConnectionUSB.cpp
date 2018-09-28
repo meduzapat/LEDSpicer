@@ -15,7 +15,7 @@ using namespace LEDSpicer;
 libusb_context* ConnectionUSB::usbSession = nullptr;
 uint8_t         ConnectionUSB::waitTime   = 0;
 
-ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request) :
+ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request, uint8_t elements) :
 	requestType(requestType),
 	request(request)
 {
@@ -23,6 +23,8 @@ ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request) :
 	if (not usbSession)
 		throw Error("USB session not initialized");
 #endif
+	LEDs.resize(elements);
+	LEDs.shrink_to_fit();
 }
 
 void ConnectionUSB::initialize() {
@@ -35,7 +37,7 @@ void ConnectionUSB::initialize() {
 void ConnectionUSB::connect() {
 
 #ifdef DEVELOP
-	Log::debug("Connecting to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
+	Log::info("Connecting to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
 #endif
 
 	handle = libusb_open_device_with_vid_pid(usbSession, board.vendor, board.product);
@@ -48,7 +50,7 @@ void ConnectionUSB::connect() {
 
 void ConnectionUSB::claimInterface() {
 
-	Log::debug("Claiming interface " + to_string(board.interface));
+	Log::info("Claiming interface " + to_string(board.interface));
 	if (libusb_claim_interface(handle, board.interface))
 		throw Error("Unable to claim interface to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
 }
@@ -74,22 +76,23 @@ void ConnectionUSB::openSession() {
 
 	if (libusb_init(&usbSession) != 0)
 		throw new Error("Unable to open USB session");
-
+#ifdef DEVELOP
 /*
-	LIBUSB_LOG_LEVEL_NONE = 0
+	LIBUSB_LOG_LEVEL_NONE
 	LIBUSB_LOG_LEVEL_ERROR
 	LIBUSB_LOG_LEVEL_WARNING
 	LIBUSB_LOG_LEVEL_INFO
 	LIBUSB_LOG_LEVEL_DEBUG
 */
-#ifdef DEVELOP
 	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_INFO);
 #endif
+#else
+	Log::debug("No USB - DRY RUN");
 #endif
 }
 
 void ConnectionUSB::terminate() {
-#ifdef DRY_RUN
+#ifndef DRY_RUN
 	if (not usbSession)
 		return;
 
@@ -99,20 +102,20 @@ void ConnectionUSB::terminate() {
 #endif
 }
 
-void ConnectionUSB::transfer(vector<uint8_t> data) {
+void ConnectionUSB::transferData(vector<uint8_t>& data) {
+
 #ifdef DRY_RUN
-	uint8_t count = 40;
+	uint8_t count = MAX_DUMP_COLUMNS;
 	for (auto pin : data) {
 		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';
-		if (!count--) {
-			count = 40;
+		if (!--count) {
+			count = MAX_DUMP_COLUMNS;
 			cout << endl;
 		}
 	}
 	cout << endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 #else
-	checkTransferError(libusb_control_transfer(
+	auto responseCode = libusb_control_transfer(
 		handle,
 		requestType,
 		request,
@@ -121,48 +124,7 @@ void ConnectionUSB::transfer(vector<uint8_t> data) {
 		data.data(),
 		data.size(),
 		TIMEOUT
-	));
-#endif
-}
-
-void ConnectionUSB::transfer() {
-#ifdef DRY_RUN
-	uint8_t count = 40;
-	for (auto pin : LEDs) {
-		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';
-		if (!count--) {
-			count = 40;
-			cout << endl;
-		}
-	}
-	cout << endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
-#else
-	checkTransferError(libusb_control_transfer(
-		handle,
-		requestType,
-		request,
-		board.value,
-		board.interface,
-		LEDs.data(),
-		LEDs.size(),
-		TIMEOUT
-	));
-#endif
-}
-
-void ConnectionUSB::setInterval(uint8_t waitTime) {
-	Log::debug("Set interval to " + to_string(waitTime) + "ms");
-	ConnectionUSB::waitTime = waitTime;
-}
-
-uint8_t ConnectionUSB::getInterval() {
-	return waitTime;
-}
-
-void ConnectionUSB::checkTransferError(int responseCode) {
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+	);
 
 	if (responseCode >= 0)
 		return;
@@ -181,6 +143,17 @@ void ConnectionUSB::checkTransferError(int responseCode) {
 	default:
 		throw Error ("Libusb error " + to_string(responseCode));
 	}
+#endif
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+}
+
+void ConnectionUSB::setInterval(uint8_t waitTime) {
+	Log::debug("Set interval to " + to_string(waitTime) + "ms");
+	ConnectionUSB::waitTime = waitTime;
+}
+
+uint8_t ConnectionUSB::getInterval() {
+	return waitTime;
 }
 
 

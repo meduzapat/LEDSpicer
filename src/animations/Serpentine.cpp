@@ -11,12 +11,10 @@
 using namespace LEDSpicer::Animations;
 
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
-	Actor(parameters, group),
+	TimedActor(parameters, group),
 	color(parameters["color"]),
 	tailColor(parameters["tailColor"])
 {
-
-	changeFrameTotal = static_cast<uint8_t>(speed) + 1;
 
 	totalActorFrames = group->size();
 	uint8_t
@@ -62,7 +60,7 @@ void Serpentine::calculateTailPosition() {
 		return;
 
 	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
-	uint8_t lastTail = calculateNextFrame(tailDirection, currentActorFrame, direction, totalActorFrames);
+	uint8_t lastTail = calculateNextOf(tailDirection, currentActorFrame, direction, totalActorFrames);
 	// avoid duplicated frames due to speed.
 	if (tailData[0].position == lastTail)
 		return;
@@ -76,21 +74,9 @@ void Serpentine::drawConfig() {
 	Actor::drawConfig();
 	cout << "Color: ";
 	color.drawColor();
-	cout << "Tail Color: ";
+	cout << ", Tail Color: ";
 	tailColor.drawColor();
-	cout << "Tail Length: " << (int)tailData.size() <<
-			" Tail Intensity: " << (tailData.size() ? tailData.front().percent + tailData.back().percent : 0) <<
+	cout << ", Tail Length: " << (int)tailData.size() <<
+			", Tail Intensity: " << (tailData.size() ? tailData.front().percent + tailData.back().percent : 0) <<
 			"%" << endl;
 }
-
-void Serpentine::advanceActorFrame() {
-
-	if (changeFrame >= changeFrameTotal) {
-		changeFrame = 1;
-		Actor::advanceActorFrame();
-		return ;
-	}
-
-	changeFrame++;
-}
-

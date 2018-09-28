@@ -7,7 +7,7 @@
  */
 
 #include "../utility/Color.hpp"
-#include "Actor.hpp"
+#include "TimedActor.hpp"
 
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
@@ -20,7 +20,7 @@ namespace Animations {
 /**
  * LEDSpicer::Serpentine
  */
-class Serpentine: public Actor {
+class Serpentine: public TimedActor {
 
 public:
 
@@ -31,12 +31,6 @@ public:
 	virtual void drawConfig();
 
 protected:
-
-	uint8_t
-		/// Current change frame factor.
-		changeFrame = 1,
-		/// Total number of frames to actually move to the next actor frame.
-		changeFrameTotal;
 
 	Color
 		color,
@@ -51,8 +45,6 @@ protected:
 	void calculateTailPosition();
 
 	virtual void calculateElements();
-
-	virtual void advanceActorFrame();
 };
 
 }} /* namespace LEDSpicer */

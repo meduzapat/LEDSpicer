@@ -85,7 +85,7 @@ uint32_t Color::getRGB() const {
 	return number;
 }
 
-Color Color::fade(uint8_t percent) const {
+Color Color::fade(uint percent) const {
 
 	Color color;
 
@@ -98,6 +98,12 @@ Color Color::fade(uint8_t percent) const {
 }
 
 Color Color::transition(const Color& destination, uint8_t percent) const {
+	if (not percent)
+		return *this;
+
+	if (percent == 100)
+		return destination;
+
 	Color rColor(
 		transition(r, destination.r, percent),
 		transition(g, destination.g, percent),
@@ -113,7 +119,6 @@ uint8_t Color::getMonochrome() const {
 
 uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
 	return colorA + (colorB - colorA) * percent / 100;
-//    return sqrt((1 - percent) * colorA^2 + percent * colorB^2)
 }
 
 void Color::loadColors(const umap<string, string>& colorsData, const string& format) {
@@ -127,6 +132,16 @@ void Color::drawColors() {
 	for (auto& c : colors) {
 		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
 		c.second.drawColor();
+		cout << endl;
+	}
+}
+
+void Color::drawColors(vector<const Color*>& colors) {
+	uint8_t count = 0;
+	for (auto c : colors) {
+		c->drawColor();
+		if (++count < colors.size())
+			cout << ", ";
 	}
 }
 
@@ -137,7 +152,7 @@ void Color::drawColor() const {
 		std::setfill(' ') << std::setw(15) << std::uppercase <<
 		std::setfill('0') << std::setw(2) << (int)getG() <<
 		std::setfill(' ') << std::setw(15) << std::uppercase <<
-		std::setfill('0') << std::setw(2) << (int)getB() << endl;
+		std::setfill('0') << std::setw(2) << (int)getB();
 	cout << std::dec;
 }
 

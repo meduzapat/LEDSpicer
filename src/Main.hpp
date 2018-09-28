@@ -26,9 +26,6 @@
  *
  */
 
-#ifndef MAIN_HPP_
-#define MAIN_HPP_ 1
-
 // To handle daemonization.
 #include <unistd.h>
 
@@ -40,9 +37,14 @@ using std::signal;
 #include "DataLoader.hpp"
 #include "devices/Group.hpp"
 
+#ifndef MAIN_HPP_
+#define MAIN_HPP_ 1
+
 #define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
 
 namespace LEDSpicer {
+
+using Devices::Device;
 
 /**
  * LEDSpicer::main
