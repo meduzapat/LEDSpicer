@@ -105,10 +105,19 @@ protected:
 
 	virtual void afterConnect() = 0;
 
+	/**
+	 * Connect to the USB board.
+	 */
 	void connect();
 
+	/**
+	 * Detach from kernel and claim the interface.
+	 */
 	void claimInterface();
 
+	/**
+	 * if anything needs to be initialized after claiming goes here.
+	 */
 	virtual void afterClaimInterface() = 0;
 };
 

@@ -147,6 +147,11 @@ public:
 	/**
 	 * Output the current color HEX.
 	 */
+	void drawHex() const;
+
+	/**
+	 * Draws the current color name.
+	 */
 	void drawColor() const;
 
 	/**
@@ -175,6 +180,12 @@ public:
 	 * @return
 	 */
 	static const vector<string>& getNames();
+
+	/**
+	 * Returns the color name.
+	 * @return
+	 */
+	string getName() const;
 
 protected:
 

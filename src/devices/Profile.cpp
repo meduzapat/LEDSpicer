@@ -79,21 +79,21 @@ void Profile::runFrame() {
 }
 
 void Profile::reset() {
-	running = true;
 	actual = start;
 	if (start)
 		actual->restart();
+	running = start != nullptr;
 }
 
 void Profile::terminate() {
-	running = true;
 	actual = end;
 	if (end)
 		actual->restart();
+	running = end != nullptr;
 }
 
 bool Profile::isTransiting() const {
-	return actual == start or actual == end;
+	return (actual == start or actual == end) and actual != nullptr;
 }
 
 bool Profile::isRunning() const {

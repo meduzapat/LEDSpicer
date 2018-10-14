@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices;
 
 UltimarcUltimate::UltimarcUltimate(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(ULTIMARC_VENDOR, IPAC_ULTIMATE_PRODUCT, IPAC_ULTIMATE_LEDS) {
+		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, IPAC_ULTIMATE_LEDS) {
 	board.name      = "Ultimarc Ipac Ultimate IO";
 	board.vendor    = ULTIMARC_VENDOR;
 	board.product   = IPAC_ULTIMATE_PRODUCT;

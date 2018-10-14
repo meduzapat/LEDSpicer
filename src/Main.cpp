@@ -73,18 +73,15 @@ void Main::run() {
 		if (messages.read()) {
 			Message msg = messages.getMessage();
 			switch (msg.type) {
-			case Message::Types::LoadProfile: {
-				if (not tryProfiles(msg.data)) {
-					Log::debug("All requested profiles failed");
-					break;
-				}
+			case Message::Types::LoadProfile:
+				if (not tryProfiles(msg.data))
+					Log::info("All requested profiles failed");
 				break;
-			}
 
 			case Message::Types::FinishLastProfile:
 				if (profiles.size() == 1)
 					break;
-				Log::debug("Profile terminate " + to_string(profiles.size()));
+				Log::info("Profile finished: " + to_string(profiles.size()));
 				profiles.back()->terminate();
 				break;
 
@@ -273,11 +270,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-#ifdef DEVELOP
 	Log::initialize(true);
-#else
-	Log::initialize(mode != Main::Modes::Normal);
-#endif
 
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
@@ -293,6 +286,10 @@ int main(int argc, char **argv) {
 		Log::error("Error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
+
+#ifndef DEVELOP
+	Log::logToStdErr(mode != Main::Modes::Normal);
+#endif
 
 	// Run mode.
 	try {

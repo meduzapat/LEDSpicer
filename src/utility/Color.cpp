@@ -131,7 +131,7 @@ void Color::loadColors(const umap<string, string>& colorsData, const string& for
 void Color::drawColors() {
 	for (auto& c : colors) {
 		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
-		c.second.drawColor();
+		c.second.drawHex();
 		cout << endl;
 	}
 }
@@ -145,15 +145,18 @@ void Color::drawColors(vector<const Color*>& colors) {
 	}
 }
 
-void Color::drawColor() const {
-	cout <<
-		"#" << std::hex <<
-		std::uppercase << std::setfill('0') << std::setw(2) << (int)getR() <<
+void Color::drawHex() const {
+	cout << "#" << std::hex << std::uppercase <<
+		std::setfill('0') << std::setw(2)  << (int)getR()    <<
 		std::setfill(' ') << std::setw(15) << std::uppercase <<
-		std::setfill('0') << std::setw(2) << (int)getG() <<
+		std::setfill('0') << std::setw(2)  << (int)getG()    <<
 		std::setfill(' ') << std::setw(15) << std::uppercase <<
-		std::setfill('0') << std::setw(2) << (int)getB();
+		std::setfill('0') << std::setw(2)  << (int)getB();
 	cout << std::dec;
+}
+
+void Color::drawColor() const {
+	cout << getName();
 }
 
 string Color::filter2str(Filters filter) {
@@ -181,6 +184,13 @@ Color::Filters Color::str2filter(const string& filter) {
 
 const vector<string>& Color::getNames() {
 	return names;
+}
+
+string Color::getName() const {
+	for (auto& color : colors)
+		if (color.second.getRGB() == getRGB())
+			return color.first;
+	return "unknown";
 }
 
 const Color& Color::getColor(const string& color) {

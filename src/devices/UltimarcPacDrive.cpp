@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices;
 
 UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(ULTIMARC_VENDOR, PAC_DRIVE_PRODUCT, PAC_DRIVE_LEDS) {
+		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, PAC_DRIVE_LEDS) {
 	board.name      = "Ultimarc Pac Drive Controller";
 	board.vendor    = ULTIMARC_VENDOR;
 	board.product   = PAC_DRIVE_PRODUCT;

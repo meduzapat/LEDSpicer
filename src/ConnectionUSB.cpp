@@ -27,6 +27,17 @@ ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request, uint8_t ele
 	LEDs.shrink_to_fit();
 }
 
+ConnectionUSB::~ConnectionUSB() {
+
+	if (not handle)
+		return;
+
+	Log::debug("Releasing interface " + to_string(board.interface));
+	libusb_release_interface(handle, board.interface);
+	libusb_close(handle);
+	handle = nullptr;
+}
+
 void ConnectionUSB::initialize() {
 	connect();
 	afterConnect();
@@ -53,17 +64,6 @@ void ConnectionUSB::claimInterface() {
 	Log::info("Claiming interface " + to_string(board.interface));
 	if (libusb_claim_interface(handle, board.interface))
 		throw Error("Unable to claim interface to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
-}
-
-ConnectionUSB::~ConnectionUSB() {
-
-	if (not handle)
-		return;
-
-	Log::debug("Releasing interface " + to_string(board.interface));
-	libusb_release_interface(handle, board.interface);
-	libusb_close(handle);
-	handle = nullptr;
 }
 
 void ConnectionUSB::openSession() {
@@ -129,6 +129,13 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 	if (responseCode >= 0)
 		return;
 
+	Log::debug(
+		"bmRequestType: " + to_string(requestType) +
+		" bRequest: "     + to_string(request) +
+		" wValue: "       + to_string(board.value) +
+		" wIndex: "       + to_string(board.interface) +
+		" wLength: "      + to_string(data.size())
+	);
 	switch (responseCode) {
 	case LIBUSB_ERROR_TIMEOUT:
 		throw Error("Transfer timed out");

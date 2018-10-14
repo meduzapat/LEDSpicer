@@ -18,12 +18,12 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 
 	root = RootElement();
 	if (not root or std::strcmp(root->Name(), PACKAGE_NAME))
-		throw LEDError("Unknown data file");
+		throw LEDError("Unknown or invalid data file");
 
-	if (root->Attribute("Version") and not std::strcmp(root->Attribute("Version"), DataDocumentVersion))
+	if (not root->Attribute("version") or std::strcmp(root->Attribute("version"), DataDocumentVersion))
 		throw LEDError("Invalid data file version, needed " DataDocumentVersion);
 
-	if (root->Attribute("Type") and fileType == root->Attribute("Version"))
+	if (not root->Attribute("type") or fileType != root->Attribute("type"))
 		throw LEDError("Invalid data file type, needed " + fileType);
 }
 

@@ -274,7 +274,7 @@ Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 		return new UltimarcPacDrive(devId, deviceData);
 
 
-	throw LEDError("Unknown board name");
+	throw LEDError("Unknown board name " + deviceData["name"]);
 }
 
 Actor* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {

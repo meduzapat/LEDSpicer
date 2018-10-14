@@ -53,34 +53,72 @@ class Main {
 
 public:
 
-	enum class Modes : uint8_t {Foreground, Dump, Normal, TestLed, TestElement};
+	enum class Modes : uint8_t {
+		/// Do not detach from head.
+		Foreground,
+		/// Dump Config and exit.
+		Dump,
+		/// Run as a daemon.
+		Normal,
+		/// Run LEDs test.
+		TestLed,
+		/// Run Elements test.
+		TestElement
+	};
 
 	Main(Modes mode);
 
 	virtual ~Main();
 
+	/**
+	 * Starts the main loop.
+	 */
 	void run();
 
+	/**
+	 * Starts the the LEDs test.
+	 */
 	void testLeds();
 
+	/**
+	 * Starts the Elements test.
+	 */
 	void testElements();
 
+	/**
+	 * Stops the main loop.
+	 */
 	static void terminate();
 
+	/**
+	 * Starts the dump configuration.
+	 */
 	void dumpConfiguration();
 
 protected:
 
+	/// Flag for the main loop.
 	static bool running;
 
+	/// Keeps messages incoming.
 	Messages messages;
 
-	void runCurrentProfile();
-
+	/**
+	 * Stack of profiles.
+	 */
 	vector<Profile*> profiles;
+
+	/**
+	 * Executes the current profile.
+	 */
+	void runCurrentProfile();
 
 private:
 
+	/**
+	 * Functionality for test programs.
+	 * @return
+	 */
 	Device* selectDevice();
 
 	/**
