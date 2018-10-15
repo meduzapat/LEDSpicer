@@ -79,8 +79,10 @@ void Main::run() {
 				break;
 
 			case Message::Types::FinishLastProfile:
-				if (profiles.size() == 1)
+				if (profiles.size() == 1) {
+					LogDebug("Cannot terminate the default profile.");
 					break;
+				}
 				LogNotice("Profile finished: " + to_string(profiles.size()));
 				profiles.back()->terminate();
 				break;
@@ -272,7 +274,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	Log::initialize(true);
+	Log::initialize(mode != Main::Modes::Normal);
 
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
@@ -383,7 +385,7 @@ Profile* Main::tryProfiles(const vector<string>& data) {
 			break;
 		}
 		catch(Error& e) {
-			LogDebug(e.getMessage());
+			LogDebug("Profile failed: " + e.getMessage());
 			continue;
 		}
 	}

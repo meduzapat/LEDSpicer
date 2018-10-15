@@ -21,6 +21,7 @@ using std::vector;
 
 #include "utility/Error.hpp"
 #include "utility/Log.hpp"
+#include "utility/Utility.hpp"
 
 #ifndef CONNECTIONUSB_HPP_
 #define CONNECTIONUSB_HPP_ 1

@@ -101,3 +101,9 @@ bool Utility::verifyValue(uint8_t& val, uint8_t min, uint8_t max, bool truncate)
 	}
 	return true;
 }
+
+string Utility::hex2str(int number) {
+	std::stringstream stream;
+	stream << std::hex << std::showbase << number;
+	return string(stream.str());
+}

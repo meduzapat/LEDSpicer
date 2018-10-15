@@ -15,7 +15,7 @@ UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& option
 	board.name      = "Ultimarc Pac Drive Controller";
 	board.vendor    = ULTIMARC_VENDOR;
 	board.product   = PAC_DRIVE_PRODUCT;
-	board.interface = 0;
+	board.interface = PAC_DRIVE_INTERFACE;
 	board.boardId   = boardId;
 	board.value     = PAC_DRIVE_VALUE;
 	board.LEDs      = PAC_DRIVE_LEDS;

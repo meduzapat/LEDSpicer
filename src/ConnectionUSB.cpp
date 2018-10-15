@@ -32,7 +32,7 @@ ConnectionUSB::~ConnectionUSB() {
 	if (not handle)
 		return;
 
-	LogInfo("Releasing interface " + to_string(board.interface) + " for " + board.name + " id " + to_string(board.boardId));
+	LogInfo("Releasing interface " + to_string(board.interface) + " for " + board.name + " Id " + to_string(board.boardId));
 	libusb_release_interface(handle, board.interface);
 	libusb_close(handle);
 	handle = nullptr;
@@ -47,12 +47,12 @@ void ConnectionUSB::initialize() {
 
 void ConnectionUSB::connect() {
 
-	LogInfo("Connecting to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
+	LogInfo("Connecting to " + Utility::hex2str(board.vendor) + ":" + Utility::hex2str(board.product) + " " + board.name);
 
 	handle = libusb_open_device_with_vid_pid(usbSession, board.vendor, board.product);
 
 	if (not handle)
-		throw Error("Unable to connect to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
+		throw Error("Unable to connect to " + Utility::hex2str(board.vendor) + ":" + Utility::hex2str(board.product) + " " + board.name);
 
 	libusb_set_auto_detach_kernel_driver(handle, true);
 }
@@ -131,10 +131,10 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		return;
 
 	LogDebug(
-		"bmRequestType: " + to_string(requestType) +
-		" bRequest: "     + to_string(request) +
-		" wValue: "       + to_string(board.value) +
-		" wIndex: "       + to_string(board.interface) +
+		"bmRequestType: " + Utility::hex2str(requestType) +
+		" bRequest: "     + Utility::hex2str(request) +
+		" wValue: "       + Utility::hex2str(board.value) +
+		" wIndex: "       + Utility::hex2str(board.interface) +
 		" wLength: "      + to_string(data.size())
 	);
 	switch (responseCode) {

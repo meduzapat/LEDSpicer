@@ -14,9 +14,9 @@
 #define PAC_DRIVE "PAC_DRIVE"
 
 #define PAC_DRIVE_PRODUCT       0x1500
-#define PAC_DRIVE_VALUE         0x0203
+//#define PAC_DRIVE_VALUE         0x0203
+#define PAC_DRIVE_VALUE         0x0200
 #define PAC_DRIVE_INTERFACE     0
-#define PAC_DRIVE_NGC_INTERFACE 0
 #define PAC_DRIVE_LEDS          16
 
 namespace LEDSpicer {

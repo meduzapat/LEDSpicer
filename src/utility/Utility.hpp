@@ -15,6 +15,9 @@
 #include <vector>
 using std::vector;
 
+// to handle special formats.
+#include <sstream>
+
 #include "Error.hpp"
 
 #ifndef UTILITY_HPP_
@@ -82,6 +85,13 @@ public:
 	 * @return
 	 */
 	static bool verifyValue(uint8_t& val, uint8_t min, uint8_t max, bool truncate = true);
+
+	/**
+	 * converts an integer into is hexadecimal representation.
+	 * @param number
+	 * @return
+	 */
+	static string hex2str(int number);
 };
 
 } // namespace
