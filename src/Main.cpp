@@ -20,7 +20,7 @@ bool Main::running = false;
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		Log::info(PACKAGE_NAME " terminated by signal");
+		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
 	}
@@ -43,11 +43,11 @@ Main::Main(Modes mode) :
 
 #ifndef DRY_RUN
 	if (mode == Modes::Normal) {
-		Log::debug("Daemonizing");
+		LogDebug("Daemonizing");
 		if (daemon(0, 0) == -1) {
 			throw Error("Unable to daemonize.");
 		}
-		Log::debug("Daemonized");
+		LogDebug("Daemonized");
 	}
 	for (auto device : DataLoader::devices)
 		device->initialize();
@@ -66,7 +66,7 @@ Main::~Main() {
 
 void Main::run() {
 
-	Log::info("LEDSpicer Running");
+	LogInfo("LEDSpicer Running");
 
 	while (running) {
 
@@ -75,13 +75,13 @@ void Main::run() {
 			switch (msg.type) {
 			case Message::Types::LoadProfile:
 				if (not tryProfiles(msg.data))
-					Log::info("All requested profiles failed");
+					LogNotice("All requested profiles failed");
 				break;
 
 			case Message::Types::FinishLastProfile:
 				if (profiles.size() == 1)
 					break;
-				Log::info("Profile finished: " + to_string(profiles.size()));
+				LogNotice("Profile finished: " + to_string(profiles.size()));
 				profiles.back()->terminate();
 				break;
 
@@ -179,9 +179,11 @@ void Main::dumpConfiguration() {
 	cout  << endl << "Hardware:" << endl;
 	for (auto d : DataLoader::devices)
 		d->drawHardwarePinMap();
-	cout << "Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl;
-	cout << "Total Elements registered: " << (int)DataLoader::allElements.size() << endl;
-	cout << endl << "Layout:";
+	cout <<
+		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
+		"Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl <<
+		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
+		"Layout:";
 	for (auto group : DataLoader::layout) {
 		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
@@ -275,15 +277,13 @@ int main(int argc, char **argv) {
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
 
-	Log::debug("Reading configuration");
-
 	// Read Configuration.
 	try {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 	}
 	catch(Error& e) {
-		Log::error("Error: " + e.getMessage());
+		LogError("Error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
 
@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(Error& e) {
-		Log::error("Error: " + e.getMessage());
+		LogError("Program terminated by error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
 
@@ -375,7 +375,7 @@ Device* Main::selectDevice() {
 Profile* Main::tryProfiles(const vector<string>& data) {
 	Profile* profile = nullptr;
 	for (auto& p : data) {
-		Log::debug("changing profile to " + p);
+		LogInfo("changing profile to " + p);
 		try {
 			profile = DataLoader::processProfile(p);
 			profiles.push_back(profile);
@@ -383,7 +383,7 @@ Profile* Main::tryProfiles(const vector<string>& data) {
 			break;
 		}
 		catch(Error& e) {
-			Log::debug(e.getMessage());
+			LogDebug(e.getMessage());
 			continue;
 		}
 	}

@@ -10,7 +10,10 @@
 
 using namespace LEDSpicer;
 
-void (*Log::logFn)(const string&, int) = Log::logToStdOut;
+// Default to info
+int Log::minLevel = LOG_INFO;
+
+void (*Log::logFn)(const string&, int) = Log::logIntoStdOut;
 
 void Log::initialize(bool logToStdOut) {
 	logToStdErr(logToStdOut);
@@ -37,30 +40,32 @@ void Log::notice(const string& message) {
 }
 
 void Log::debug(const string& message) {
-#ifdef DEVELOP
 	log(message, LOG_DEBUG);
-#endif
 }
 
 void Log::logToStdErr(bool option) {
 
-	if (not option and logFn != logToSysLog) {
+	if (not option and logFn != logIntoSysLog) {
 		openlog(PACKAGE_NAME, LOG_PID|LOG_CONS, LOG_USER);
-		logFn = logToSysLog;
+		logFn = logIntoSysLog;
 		return;
 	}
 
-	if (option and logFn != logToStdOut) {
+	if (option and logFn != logIntoStdOut) {
 		terminate();
-		logFn = logToStdOut;
+		logFn = logIntoStdOut;
 	}
 }
 
-void Log::logToSysLog(const string& message, int level) {
+void Log::logIntoSysLog(const string& message, int level) {
 	syslog(level, "%s", message.c_str());
 }
 
-void Log::logToStdOut(const string& message, int level) {
+void Log::logIntoStdOut(const string& message, int level) {
+
+	if (level > minLevel)
+		return;
+
 	if (level == LOG_ERR) {
 		cerr << message << endl;
 		return;
@@ -69,8 +74,53 @@ void Log::logToStdOut(const string& message, int level) {
 }
 
 void Log::terminate() {
-	if (logFn == logToSysLog) {
+	if (logFn == logIntoSysLog) {
 		logFn = nullptr;
 		closelog();
 	}
+}
+
+void Log::setLogLevel(int level) {
+	minLevel = level;
+	if (logFn == logIntoSysLog)
+		setlogmask(LOG_UPTO(level));
+}
+
+int Log::getLogLevel() {
+	return minLevel;
+}
+
+bool Log::isLogging(int level) {
+	return level <= minLevel;
+}
+
+int Log::str2level(const string& level) {
+	if (level == "Error")
+		return LOG_ERR;
+	if (level == "Warning")
+		return LOG_WARNING;
+	if (level == "Notice")
+		return LOG_NOTICE;
+	if (level == "Info")
+		return LOG_INFO;
+	if (level == "Debug")
+		return LOG_DEBUG;
+	LogError("Invalid log level " + level + " assuming Info");
+	return LOG_INFO;
+}
+
+string Log::level2str(int level) {
+	switch (level) {
+	case LOG_ERR:
+		return "Error";
+	case LOG_WARNING:
+		return "Warning";
+	case LOG_NOTICE:
+		return "Notice";
+	case LOG_INFO:
+		return "Info";
+	case LOG_DEBUG:
+		return "Debug";
+	}
+	return "Unknown";
 }

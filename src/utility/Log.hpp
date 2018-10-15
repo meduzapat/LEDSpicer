@@ -23,6 +23,12 @@ using std::string;
 #ifndef LOG_HPP_
 #define LOG_HPP_ 1
 
+#define LogError(message)   if (Log::isLogging(LOG_ERR)) {Log::error(message);}
+#define LogWarning(message) if (Log::isLogging(LOG_WARNING)) {Log::warning(message);}
+#define LogNotice(message)  if (Log::isLogging(LOG_NOTICE)) {Log::notice(message);}
+#define LogInfo(message)    if (Log::isLogging(LOG_INFO)) {Log::info(message);}
+#define LogDebug(message)   if (Log::isLogging(LOG_DEBUG)) {Log::debug(message);}
+
 namespace LEDSpicer {
 
 /**
@@ -82,7 +88,53 @@ public:
 	 */
 	static void terminate();
 
+	/**
+	 * Sets the log level to minimal following  this table:
+	 *  LOG_EMERG
+	 *  LOG_ALERT
+	 *  LOG_CRIT
+	 *  LOG_ERR
+	 *  LOG_WARNING
+	 *  LOG_NOTICE
+	 *  LOG_INFO
+	 *  LOG_DEBUG
+	 * @param level
+	 */
+	static void setLogLevel(int level);
+
+	/**
+	 * Returns the current in use log level.
+	 * @return
+	 */
+	static int getLogLevel();
+
+	/**
+	 * returns true if the logger is logging the level.
+	 * @param level
+	 * @return
+	 */
+	static bool isLogging(int level);
+
+	/**
+	 * Converts a string log level into its numeric value.
+	 * @param level
+	 * @return
+	 */
+	static int str2level(const string& level);
+
+	/**
+	 * Converts a log level value into its string representation.
+	 * @param level
+	 * @return
+	 */
+	static string level2str(int level);
+
 protected:
+
+	/**
+	 * The level of logging.
+	 */
+	static int minLevel;
 
 	/**
 	 * logging function pointer.
@@ -90,23 +142,18 @@ protected:
 	static void (*logFn)(const string&, int);
 
 	/**
-	 * Creates a new Log object
-	 */
-	Log();
-
-	/**
 	 * Function to log into the syslog
 	 * @param message
 	 * @param level
 	 */
-	static void logToSysLog(const string& message, int level);
+	static void logIntoSysLog(const string& message, int level);
 
 	/**
 	 * Function to log into the standard output
 	 * @param message
 	 * @param level
 	 */
-	static void logToStdOut(const string& message, int level);
+	static void logIntoStdOut(const string& message, int level);
 
 	/**
 	 * Creates a log entry
@@ -115,6 +162,32 @@ protected:
 	 */
 	static void log(const string& message, int level);
 
+private:
+
+	/**
+	 * Static class.
+	 */
+	Log() = delete;
+
+	/**
+	 * Disabled.
+	 * @param
+	 */
+	Log(Log const&) = delete;
+
+	/**
+	 * Disabled.
+	 * @param other
+	 * @return
+	 */
+	Log& operator=(const Log& other) = delete;
+
+	/**
+	 * Disabled.
+	 * @param other
+	 * @return
+	 */
+	Log& operator=(Log&& other) noexcept = delete;
 
 };
 

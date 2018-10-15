@@ -11,7 +11,7 @@ using namespace LEDSpicer;
 
 XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 
-	Log::debug("Reading " + fileName);
+	LogInfo("Reading " + fileName);
 
 	if (LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS)
 		throw LEDError("Unable to read the file " + fileName);

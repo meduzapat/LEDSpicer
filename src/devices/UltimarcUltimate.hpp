@@ -38,7 +38,7 @@ public:
 	 */
 	UltimarcUltimate(uint8_t boardId, umap<string, string>& options);
 
-	virtual ~UltimarcUltimate() {}
+	virtual ~UltimarcUltimate();
 
 	virtual void drawHardwarePinMap();
 

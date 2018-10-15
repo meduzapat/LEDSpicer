@@ -12,7 +12,7 @@
 using namespace LEDSpicer::Devices;
 
 void Device::afterClaimInterface() {
-	Log::debug("Initializing board");
+	LogDebug("Initializing board");
 	setLeds(0);
 	transfer();
 }

@@ -113,7 +113,7 @@ Actor::Speed Actor::str2speed(const string& speed) {
 }
 
 void Actor::setFPS(uint8_t FPS) {
-	Log::debug("Setting FPS to " + to_string(FPS));
+	LogDebug("Setting FPS to " + to_string(FPS));
 	Actor::FPS = FPS;
 }
 

@@ -29,10 +29,12 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 	if (sockFB)
 		throw Error("Already prepared.");
 
-	if (bind)
-		Log::debug("Binding " + hostAddress + " port " + hostPort);
-	else
-		Log::debug("Connecting to " + hostAddress + " port " + hostPort);
+	if (bind) {
+		LogInfo("Binding " + hostAddress + " port " + hostPort);
+	}
+	else {
+		LogInfo("Connecting to " + hostAddress + " port " + hostPort);
+	}
 
 	addrinfo
 		hints,
@@ -57,7 +59,7 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 		);
 
 		if (sockFB == -1) {
-			Log::debug("Failed to create socket " + string(strerror(errno)));
+			LogDebug("Failed to create socket " + string(strerror(errno)));
 			continue;
 		}
 		int errcode = 0;
@@ -65,13 +67,13 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 			errcode = ::bind(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
 			if (not errcode)
 				break;
-			Log::debug(string(gai_strerror(errcode)));
+			LogDebug(string(gai_strerror(errcode)));
 		}
 		else {
 			errcode = ::connect(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
 			if (not errcode)
 				break;
-			Log::debug(string(gai_strerror(errcode)));
+			LogDebug(string(gai_strerror(errcode)));
 		}
 		::close(sockFB);
 	}
@@ -132,7 +134,7 @@ bool Socks::recive(string& buffer) {
 
 void Socks::disconnect() {
 	if (sockFB) {
-		Log::debug("Closing network connection");
+		LogInfo("Closing network connection");
 		::close(sockFB);
 		sockFB = 0;
 	}

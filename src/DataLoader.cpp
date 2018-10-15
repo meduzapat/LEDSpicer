@@ -22,10 +22,21 @@ void DataLoader::readConfiguration() {
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
-	uint8_t fps = stoi(tempAttr["fps"]);
+	// set log level.
+	if (tempAttr.count("logLevel"))
+		Log::setLogLevel(Log::str2level(tempAttr["logLevel"]));
+
+	// set FPS.
+	uint8_t fps = 0;
+	try {
+		fps = stoi(tempAttr["fps"]);
+	} catch (...) {
+		throw LEDError("Invalid value for FPS");
+	}
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
 	ConnectionUSB::setInterval(1000 / (fps > 30 ? 30 : fps));
+	// activate LIBUSB.
 	ConnectionUSB::openSession();
 	Actor::setFPS((fps > 30 ? 30 : fps));
 
@@ -53,7 +64,7 @@ void DataLoader::processColorFile(const string& file) {
 		colorAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_COLOR, colorAttr, "color");
 		if (colorsData.count(colorAttr["name"]))
-			Log::warning("Duplicated color " + colorAttr["name"]);
+			LogWarning("Duplicated color " + colorAttr["name"]);
 		colorsData[colorAttr["name"]] = colorAttr["color"];
 	}
 
@@ -74,7 +85,7 @@ void DataLoader::processDevices() {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, "device");
 		auto device = createDevice(deviceAttr);
-		Log::debug("Initializing board " + device->getName() + " Id: " + std::to_string(device->getId()));
+		LogInfo("Initializing board " + device->getName() + " Id: " + std::to_string(device->getId()));
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}
@@ -118,10 +129,10 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	}
 
 	// Checks orphan Pins.
-	Log::debug(device->getName() + " with " + to_string(device->getNumberOfElements()) + " elements and " + to_string(pinCheck.size()) + " LEDs");
+	LogInfo(device->getName() + " with " + to_string(device->getNumberOfElements()) + " elements and " + to_string(pinCheck.size()) + " LEDs");
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
-			Log::info("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
+			LogNotice("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
 }
 
 void DataLoader::processLayout() {

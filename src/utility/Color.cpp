@@ -178,7 +178,7 @@ Color::Filters Color::str2filter(const string& filter) {
 		return Filters::Combine;
 	if (filter == "Diff")
 		return Filters::Diff;
-	Log::error("Invalid filter type " + filter + " assuming Combine");
+	LogError("Invalid filter type " + filter + " assuming Combine");
 	return Filters::Combine;
 }
 
@@ -196,6 +196,6 @@ string Color::getName() const {
 const Color& Color::getColor(const string& color) {
 	if (colors.count(color))
 		return colors[color];
-	Log::error("Unknown color " + color);
+	LogError("Unknown color " + color);
 	return colors["White"];
 }

@@ -19,7 +19,7 @@ bool Messages::read() {
 		Message msg;
 		vector<string> chunks = Utility::explode(buffer, DELIMITER);
 		if (chunks.size() < 2) {
-			Log::info("Invalid message received");
+			LogNotice("Malformed message received");
 			return false;
 		}
 		// Discard trash
@@ -29,7 +29,7 @@ bool Messages::read() {
 			msg.type = static_cast<Message::Types>(std::stoi(chunks.back()));
 		}
 		catch (...) {
-			Log::info("Invalid message received");
+			LogNotice("Invalid message type received");
 			return false;
 		}
 		chunks.pop_back();

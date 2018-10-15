@@ -32,7 +32,7 @@ ConnectionUSB::~ConnectionUSB() {
 	if (not handle)
 		return;
 
-	Log::debug("Releasing interface " + to_string(board.interface));
+	LogInfo("Releasing interface " + to_string(board.interface) + " for " + board.name + " id " + to_string(board.boardId));
 	libusb_release_interface(handle, board.interface);
 	libusb_close(handle);
 	handle = nullptr;
@@ -47,9 +47,7 @@ void ConnectionUSB::initialize() {
 
 void ConnectionUSB::connect() {
 
-#ifdef DEVELOP
-	Log::info("Connecting to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
-#endif
+	LogInfo("Connecting to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
 
 	handle = libusb_open_device_with_vid_pid(usbSession, board.vendor, board.product);
 
@@ -61,7 +59,7 @@ void ConnectionUSB::connect() {
 
 void ConnectionUSB::claimInterface() {
 
-	Log::info("Claiming interface " + to_string(board.interface));
+	LogInfo("Claiming interface " + to_string(board.interface));
 	if (libusb_claim_interface(handle, board.interface))
 		throw Error("Unable to claim interface to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
 }
@@ -72,7 +70,7 @@ void ConnectionUSB::openSession() {
 	if (usbSession)
 		return;
 
-	Log::debug("Opening USB session");
+	LogInfo("Opening USB session");
 
 	if (libusb_init(&usbSession) != 0)
 		throw new Error("Unable to open USB session");
@@ -87,7 +85,7 @@ void ConnectionUSB::openSession() {
 	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_INFO);
 #endif
 #else
-	Log::debug("No USB - DRY RUN");
+	LogDebug("No USB - DRY RUN");
 #endif
 }
 
@@ -96,7 +94,7 @@ void ConnectionUSB::terminate() {
 	if (not usbSession)
 		return;
 
-	Log::debug("Closing USB session");
+	LogInfo("Closing USB session");
 	libusb_exit(usbSession);
 	usbSession = nullptr;
 #endif
@@ -115,6 +113,7 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 	}
 	cout << endl;
 #else
+
 	auto responseCode = libusb_control_transfer(
 		handle,
 		requestType,
@@ -126,10 +125,12 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		TIMEOUT
 	);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+
 	if (responseCode >= 0)
 		return;
 
-	Log::debug(
+	LogDebug(
 		"bmRequestType: " + to_string(requestType) +
 		" bRequest: "     + to_string(request) +
 		" wValue: "       + to_string(board.value) +
@@ -151,11 +152,10 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		throw Error ("Libusb error " + to_string(responseCode));
 	}
 #endif
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 }
 
 void ConnectionUSB::setInterval(uint8_t waitTime) {
-	Log::debug("Set interval to " + to_string(waitTime) + "ms");
+	LogInfo("Set interval to " + to_string(waitTime) + "ms");
 	ConnectionUSB::waitTime = waitTime;
 }
 

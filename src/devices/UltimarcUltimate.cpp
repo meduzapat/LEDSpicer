@@ -21,10 +21,15 @@ UltimarcUltimate::UltimarcUltimate(uint8_t boardId, umap<string, string>& option
 	board.LEDs      = IPAC_ULTIMATE_LEDS;
 }
 
+UltimarcUltimate::~UltimarcUltimate() {
+	setLeds(0);
+	transfer();
+}
+
 void UltimarcUltimate::afterConnect() {
 
 	// Detect interface.
-	Log::debug("detecting interface");
+	LogDebug("Detecting interface");
 
 	libusb_device *device = libusb_get_device(handle);
 
@@ -44,11 +49,11 @@ void UltimarcUltimate::afterConnect() {
 	 * Also I not sure why 0x40.
 	 */
 	if ((descriptor.bcdDevice & 0x40)) {
-		Log::info("No Game Controller mode detected");
+		LogInfo("No Game Controller mode detected");
 		board.interface = IPAC_ULTIMATE_NGC_INTERFACE;
 	}
 	else {
-		Log::info("Game Controller mode detected");
+		LogInfo("Game Controller mode detected");
 		board.interface = IPAC_ULTIMATE_INTERFACE;
 	}
 }
@@ -95,13 +100,13 @@ void UltimarcUltimate::transfer() {
 not used
 
 void Device::setLedsTo(uint8_t intensity) {
-	Log::debug("Turning LEDs " + to_string(intensity));
+	LogDebug("Turning LEDs " + to_string(intensity));
 	uint8_t map[] = {0x03, code, value, value2, 0};
 	transfer({0x03, 0x80, intensity, 0xC0, 0});
 }
 
 void Device::setLedTo(uint8_t led, uint8_t intensity) {
-	Log::debug("Turning LED " + to_string(led) + " to " + to_string(intensity));
+	LogDebug("Turning LED " + to_string(led) + " to " + to_string(intensity));
 	transfer({0x03, led, intensity, 0xC0, 0});
 }
 */

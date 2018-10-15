@@ -24,7 +24,7 @@ UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& option
 			changePoint = stoi(options["changePoint"]);
 		}
 		catch(...) {
-			Log::warning("Invalid value for changePoint board " + getName() + " Id " + to_string(getId()));
+			LogWarning("Invalid value for changePoint board " + getName() + " Id " + to_string(getId()));
 		}
 	}
 }

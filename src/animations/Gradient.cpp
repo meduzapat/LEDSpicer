@@ -62,7 +62,7 @@ Gradient::Modes Gradient::str2mode(const string& mode) {
 		return Modes::Sequential;
 	if (mode == "Cyclic")
 		return Modes::Cyclic;
-	Log::error("Invalid mode " + mode + " assuming All");
+	LogError("Invalid mode " + mode + " assuming All");
 	return Modes::All;
 }
 
