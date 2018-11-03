@@ -19,7 +19,8 @@ UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& option
 	board.boardId   = boardId;
 	board.value     = PAC_DRIVE_VALUE;
 	board.LEDs      = PAC_DRIVE_LEDS;
-	if (options.count("changePoint")) {		try {
+	if (options.count("changePoint")) {
+		try {
 			changePoint = stoi(options["changePoint"]);
 		}
 		catch(...) {
@@ -30,9 +31,9 @@ UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& option
 
 void UltimarcPacDrive::drawHardwarePinMap() {
 	uint8_t half = PAC_DRIVE_LEDS / 2;
-	cout << getName() << " Pins " << PAC_DRIVE_LEDS << endl;
-	cout << "Hardware pin map:" << endl <<
-			"L     R"  << endl;
+	cout
+		<< getName() << " Pins " << PAC_DRIVE_LEDS << endl
+		<< "Hardware pin map:" << endl << "L     R"  << endl;
 	for (uint8_t r = 0; r < half; ++r) {
 		uint8_t l = PAC_DRIVE_LEDS - r - 1;
 		setLed(r, r + 1);
