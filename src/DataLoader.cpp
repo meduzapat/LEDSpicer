@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		DataLoader.cpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      DataLoader.cpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "DataLoader.hpp"
@@ -309,6 +309,10 @@ Actor* DataLoader::createAnimation(const string& name, umap<string, string>& act
 	if (actorData["type"] == "Random") {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_RANDOM, actorData, "actor Random");
 		return new Random(actorData, &layout.at(groupName));
+	}
+	if (actorData["type"] == "Filler") {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_FILLER, actorData, "actor Filler");
+		return new Filler(actorData, &layout.at(groupName));
 	}
 	throw LEDError("Invalid actor type '" + actorData["type"] + "' inside " + name);
 }

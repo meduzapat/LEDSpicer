@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Actor.hpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      Actor.hpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 // For ints.
@@ -88,6 +88,22 @@ public:
 	 */
 	static void advanceFrame();
 
+	/**
+	 * @return true if the animation is on the bouncing period.
+	 */
+	bool isBouncing() const;
+
+	/**
+	 * @return true if the current frame is the first frame.
+	 */
+	bool isFirstFrame() const;
+
+	/**
+	 * @return true if the current frame is the last frame,
+	 * for bouncing directions will return the moment when the bounce starts.
+	 */
+	bool isLastFrame() const;
+
 protected:
 
 	uint8_t
@@ -102,6 +118,7 @@ protected:
 		/// Direction
 		direction;
 
+	/// The current speed.
 	Speed speed;
 
 	/// How the color information will be draw back.

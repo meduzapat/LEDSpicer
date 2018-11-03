@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Color.cpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      Color.cpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "Color.hpp"
@@ -19,6 +19,14 @@ Color::Color(const string& color) {
 
 Color::Color(const string& color, const string& formatHex) {
 	set(color, formatHex == "hex");
+}
+
+bool Color::operator==(const Color& other) {
+	return r == other.r and g == other.g and b == other.b;
+}
+
+bool Color::operator!=(const Color& other) {
+	return r != other.r or g != other.g or b != other.b;
 }
 
 void Color::setR(uint8_t color) {
@@ -188,7 +196,7 @@ const vector<string>& Color::getNames() {
 
 string Color::getName() const {
 	for (auto& color : colors)
-		if (color.second.getRGB() == getRGB())
+		if (color.second == *this)
 			return color.first;
 	return "unknown";
 }

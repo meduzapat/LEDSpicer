@@ -1,11 +1,11 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Main.hpp
- * @since		Jun 6, 2018
+ * @file      Main.hpp
+ * @since     Jun 6, 2018
  *
- * @author		Patricio A. Rossi (MeduZa)
+ * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  *
  * @copyright	LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

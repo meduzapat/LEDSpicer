@@ -33,6 +33,7 @@ ledspicerd_SOURCES =                 \
 	src/animations/Pulse.cpp         \
 	src/animations/Serpentine.cpp    \
 	src/animations/Random.cpp        \
+	src/animations/Filler.cpp        \
 	src/devices/Profile.cpp          \
 	src/Messages.cpp                 \
 	src/Main.cpp

@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		UltimarcUltimate.hpp
- * @since		Jun 23, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      UltimarcUltimate.hpp
+ * @since     Jun 23, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 // For special io format

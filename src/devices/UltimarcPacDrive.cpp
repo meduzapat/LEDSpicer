@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		UltimarcPacDrive.cpp
- * @since		Sep 19, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      UltimarcPacDrive.cpp
+ * @since     Sep 19, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "UltimarcPacDrive.hpp"
@@ -19,8 +19,7 @@ UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& option
 	board.boardId   = boardId;
 	board.value     = PAC_DRIVE_VALUE;
 	board.LEDs      = PAC_DRIVE_LEDS;
-	if (options.count("changePoint")) {
-		try {
+	if (options.count("changePoint")) {		try {
 			changePoint = stoi(options["changePoint"]);
 		}
 		catch(...) {

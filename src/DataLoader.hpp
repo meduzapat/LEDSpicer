@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		DataLoader.hpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      DataLoader.hpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "config.h"
@@ -16,6 +16,7 @@
 #include "animations/Pulse.hpp"
 #include "animations/Gradient.hpp"
 #include "animations/Random.hpp"
+#include "animations/Filler.hpp"
 
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
@@ -35,6 +36,7 @@ using Animations::Serpentine;
 using Animations::Pulse;
 using Animations::Gradient;
 using Animations::Random;
+using Animations::Filler;
 using Devices::UltimarcUltimate;
 using Devices::UltimarcPacDrive;
 using Devices::Device;

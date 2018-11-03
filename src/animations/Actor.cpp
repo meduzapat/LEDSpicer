@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Actor.cpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      Actor.cpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "Actor.hpp"
@@ -37,18 +37,20 @@ bool Actor::drawFrame() {
 
 void Actor::drawConfig() {
 	cout <<
-		"Speed: " << speed2str(speed) <<
-		", Frames: " << (int)totalActorFrames <<
-		", Filter: " << Color::filter2str(filter) <<
-		", Direction: " << direction2str(direction) << endl;
+		"Speed: "       << speed2str(speed)          <<
+		", Filter: "    << Color::filter2str(filter) <<
+		", Direction: " << direction2str(direction)  << endl;
 }
 
 void Actor::restart() {
-	currentActorFrame = 1;
-	if (direction == Directions::Forward or direction == Directions::ForwardBouncing)
-			cDirection = Directions::Forward;
-		else
-			cDirection = Directions::Backward;
+	if (direction == Directions::Forward or direction == Directions::ForwardBouncing) {
+		currentActorFrame = 1;
+		cDirection = Directions::Forward;
+	}
+	else {
+		currentActorFrame = totalActorFrames;
+		cDirection = Directions::Backward;
+	}
 }
 
 string Actor::direction2str(Directions direction) {
@@ -125,6 +127,49 @@ void Actor::advanceFrame() {
 	++currentFrame;
 	if (currentFrame > FPS)
 		currentFrame = 1;
+}
+
+bool Actor::isBouncing() const {
+	switch (direction) {
+	case Directions::ForwardBouncing:
+		return cDirection == Directions::Backward;
+	case Directions::BackwardBouncing:
+		return cDirection == Directions::Forward;
+	default:
+		return false;
+	}
+}
+
+bool Actor::isFirstFrame() const {
+	switch (direction) {
+	case Directions::Forward:
+	case Directions::ForwardBouncing:
+		if (cDirection == Directions::Forward and currentActorFrame == 1)
+			return true;
+		break;
+	case Directions::Backward:
+	case Directions::BackwardBouncing:
+		if (cDirection == Directions::Backward and currentActorFrame == totalActorFrames)
+			return true;
+		break;
+	}
+	return false;
+}
+
+bool Actor::isLastFrame() const {
+	switch (direction) {
+	case Directions::Forward:
+	case Directions::ForwardBouncing:
+		if (cDirection == Directions::Forward and currentActorFrame == totalActorFrames)
+			return true;
+		break;
+	case Directions::Backward:
+	case Directions::BackwardBouncing:
+		if (cDirection == Directions::Backward and currentActorFrame == 1)
+			return true;
+		break;
+	}
+	return false;
 }
 
 uint8_t Actor::getNumberOfElements() const {

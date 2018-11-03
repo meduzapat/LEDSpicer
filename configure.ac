@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.2.0],[https://sourceforge.net/p/ledspicer/tickets/?source=navbar],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.2.1],[https://sourceforge.net/p/ledspicer/tickets/?source=navbar],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.hpp])

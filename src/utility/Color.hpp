@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Color.hpp
- * @since		Jun 22, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      Color.hpp
+ * @since     Jun 22, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 // To handle unordered map.
@@ -72,6 +72,20 @@ public:
 	Color(const string& color, const string& format);
 
 	virtual ~Color() {}
+
+	/**
+	 * Compare same color.
+	 * @param other
+	 * @return
+	 */
+	bool operator==(const Color& other);
+
+	/**
+	 * Compare different Colors.
+	 * @param other
+	 * @return
+	 */
+	bool operator!=(const Color& other);
 
 	void setR(uint8_t color);
 	void setG(uint8_t color);

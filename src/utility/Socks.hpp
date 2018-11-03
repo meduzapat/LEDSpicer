@@ -1,9 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		Socks.hpp
- * @author		Patricio A. Rossi (MeduZa)
+ * @file      Socks.hpp
+ * @author    Patricio A. Rossi (MeduZa)
  * 
- * @copyright	Copyright © 2015 - 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2015 - 2018 Patricio A. Rossi (MeduZa)
  *
  * @copyright	ledspicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

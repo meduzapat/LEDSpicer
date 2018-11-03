@@ -1,10 +1,9 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file		TimedActor.hpp
- * @ingroup
- * @since		Sep 16, 2018
- * @author		Patricio A. Rossi (MeduZa)
- * @copyright	Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @file      TimedActor.hpp
+ * @since     Sep 16, 2018
+ * @author    Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
 #include "Actor.hpp"
@@ -27,6 +26,16 @@ public:
 	TimedActor(umap<string, string>& parameters, Group* const group);
 
 	~TimedActor() {}
+
+	/**
+	 * @return return true if the frame is the same than before.
+	 */
+	bool isSameFrame() const;
+
+	/**
+	 * @return return true if this is the last timed frame (the next actor frame will change).
+	 */
+	bool willChange() const;
 
 protected:
 
