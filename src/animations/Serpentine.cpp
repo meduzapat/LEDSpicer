@@ -21,30 +21,24 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 		tailLength    = 0,
 		tailIntensity = 0;
 
-	try {
-		tailLength = stoi(parameters["tailLength"]);
-		// tail cannot be larger than the array, serpentine will overlap.
-		Utility::verifyValue(tailLength, 0, group->size());
-	}
-	catch (...) {
-		throw Error("Invalid tailLength, enter a number 0-" + to_string(group->size()));
-	}
+	tailLength = Utility::parseNumber(parameters["tailLength"], "Invalid tailLength, enter a number 0-" + to_string(group->size()));
+	// tail cannot be larger than the array, serpentine will overlap.
+	if (not Utility::verifyValue(tailLength, 0, group->size()))
+		throw Error("Tail cannot be larger than the group: " + to_string(group->size()));
 
 	tailData.resize(tailLength);
 	tailData.shrink_to_fit();
-	try {
-		tailIntensity = stoi(parameters["tailIntensity"]);
-		Utility::verifyValue(tailIntensity, 0, 100);
-	}
-	catch (...) {
-		throw Error("Invalid tailIntensity, enter a number 1-100");
-	}
+	tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
+	if (not Utility::verifyValue(tailIntensity, 0, 100))
+		throw Error("Invalid tailIntensity, enter a number 0-100");
+
 	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
 	if (tailData.size())
 		for (uint8_t c = 0; c < tailData.size(); c++) {
 			tailData[c].percent  = tailweight * (tailData.size() - c);
 			tailData[c].position = currentActorFrame;
 		}
+
 }
 
 void Serpentine::calculateElements() {

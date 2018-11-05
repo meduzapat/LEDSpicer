@@ -28,6 +28,10 @@ class Ultimarc : public Device {
 
 	using Device::Device;
 
+	uint16_t getVendor() {
+		return ULTIMARC_VENDOR;
+	}
+
 };
 
 }}

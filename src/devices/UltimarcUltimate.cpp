@@ -11,14 +11,14 @@
 using namespace LEDSpicer::Devices;
 
 UltimarcUltimate::UltimarcUltimate(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, IPAC_ULTIMATE_LEDS) {
-	board.name      = "Ultimarc Ipac Ultimate IO";
-	board.vendor    = ULTIMARC_VENDOR;
-	board.product   = IPAC_ULTIMATE_PRODUCT;
+		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, IPAC_ULTIMATE_LEDS)
+	{
+	// TODO: move this to a generic place where every board should populate their levels.
+	if (not Utility::verifyValue(boardId, 1, IPAC_ULTIMAGE_MAX_BOARDS, false))
+		throw Error("Board id should be a number between 1 and " + to_string(IPAC_ULTIMAGE_MAX_BOARDS));
 	board.interface = 0;
 	board.boardId   = boardId;
 	board.value     = IPAC_ULTIMATE_VALUE;
-	board.LEDs      = IPAC_ULTIMATE_LEDS;
 }
 
 UltimarcUltimate::~UltimarcUltimate() {
@@ -96,18 +96,10 @@ void UltimarcUltimate::transfer() {
 	transferData(load);
 }
 
-/*
-not used
-
-void Device::setLedsTo(uint8_t intensity) {
-	LogDebug("Turning LEDs " + to_string(intensity));
-	uint8_t map[] = {0x03, code, value, value2, 0};
-	transfer({0x03, 0x80, intensity, 0xC0, 0});
+uint16_t UltimarcUltimate::getProduct() {
+	return IPAC_ULTIMATE_PRODUCT;
 }
 
-void Device::setLedTo(uint8_t led, uint8_t intensity) {
-	LogDebug("Turning LED " + to_string(led) + " to " + to_string(intensity));
-	transfer({0x03, led, intensity, 0xC0, 0});
+string UltimarcUltimate::getName() {
+	return IPAC_ULTIMATE_NAME;
 }
-*/
-

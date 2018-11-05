@@ -14,12 +14,7 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 	Actor(parameters, layout)
 {
 
-	try {
-		std::srand(stoi(parameters["seed"]));
-	}
-	catch (...) {
-		throw Error("Invalid number for seed");
-	}
+	std::srand(Utility::parseNumber(parameters["seed"], "Invalid number for seed"));
 
 	oldColors.reserve(getNumberOfElements());
 

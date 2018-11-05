@@ -42,9 +42,13 @@ void Filler::calculateElements() {
 				filling ? 0                 : totalActorFrames - currentActorFrame,
 				filling ? currentActorFrame : totalActorFrames
 			);
-			if (willChange() and
-				(((direction == Directions::ForwardBouncing or direction == Directions::Forward) and isLastFrame()) or
-				((direction == Directions::BackwardBouncing or direction == Directions::Backward) and isFirstFrame())))
+			if (
+				willChange() and
+				(
+					(isDirectionForward() and isLastFrame()) or
+					(isDirectionBackward() and isFirstFrame())
+				)
+			)
 				filling = not filling;
 			break;
 		}
@@ -54,7 +58,7 @@ void Filler::calculateElements() {
 		);
 		break;
 	case Modes::LinearSimple:
-		if (direction == Directions::Forward or direction == Directions::ForwardBouncing)
+		if (isDirectionForward())
 			fillElementsLinear(0, currentActorFrame);
 		else
 			fillElementsLinear(currentActorFrame - 1, totalActorFrames);

@@ -10,6 +10,14 @@
 
 using namespace LEDSpicer;
 
+int Utility::parseNumber(const string& number, const string& errorMessage) {
+	try {
+		return std::stoi(number);
+	} catch (...) {
+		throw Error(errorMessage);
+	}
+}
+
 void Utility::ltrim(string& text) {
 	size_t chars = 0;
 	for (size_t c = 0; c < text.size(); c++) {

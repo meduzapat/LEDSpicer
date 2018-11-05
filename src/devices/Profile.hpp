@@ -29,10 +29,12 @@ class Profile {
 public:
 
 	Profile(
+		const string& name,
 		const Color& backgroundColor,
 		Actor* start,
 		Actor* end
 	):
+		name(name),
 		backgroundColor(backgroundColor),
 		actual(start),
 		start(start),
@@ -61,38 +63,57 @@ public:
 	void terminate();
 
 	/**
-	 * Returns true if the profile is transiting and the previous profile needs to draw.
-	 * @return
+	 * @return true if the profile is transiting and the previous profile needs to draw.
 	 */
 	bool isTransiting() const;
 
 	/**
-	 * Returns true if the profile is running.
-	 * @return
+	 * @return true if the profile is running the termination animation.
+	 */
+	bool isTerminating() const;
+
+	/**
+	 * @return true if the profile is running the stating animation.
+	 */
+	bool isStarting() const;
+
+	/**
+	 * @return true if the profile is running.
 	 */
 	bool isRunning() const;
 
 	/**
-	 * Returns a read only reference to the background color.
-	 * @return
+	 * @return a read only reference to the background color.
 	 */
 	const Color& getBackgroundColor() const;
 
 	/**
-	 * Return the number of animations.
-	 * @return
+	 * @return the number of animations.
 	 */
 	uint8_t getAnimationsCount() const;
 
+	/**
+	 * @return the Profile name.
+	 */
+	const string& getName() const;
+
 protected:
 
+	/// Color to use when cleaning up.
 	Color backgroundColor;
 
+	/// Flag to know when the profile finished.
 	bool running = true;
 
+	/// Keeps the profile name.
+	string name;
+
 	Actor
+		/// The current animation.
 		* actual,
+		/// The starting animation.
 		* start,
+		/// The ending animation.
 		* end;
 
 	/// List of animations to run.

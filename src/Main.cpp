@@ -58,9 +58,14 @@ Main::Main(Modes mode) :
 
 Main::~Main() {
 
-	delete DataLoader::defaultProfile;
-	for (auto d : DataLoader::devices)
+	for (auto d : DataLoader::devices) {
+		LogInfo("Closing " + d->getName());
 		delete d;
+	}
+
+	for (auto p : DataLoader::profiles)
+		delete p.second;
+
 	ConnectionUSB::terminate();
 }
 
@@ -83,8 +88,13 @@ void Main::run() {
 					LogDebug("Cannot terminate the default profile.");
 					break;
 				}
-				LogNotice("Profile finished: " + to_string(profiles.size()));
-				profiles.back()->terminate();
+				if (profiles.back()->isTerminating()) {
+					LogNotice("Profile " + profiles.back()->getName() + " is finishing, try later.");
+				}
+				else {
+					LogNotice("Profile " + profiles.back()->getName() + " changed state to finishing.");
+					profiles.back()->terminate();
+				}
 				break;
 
 			default:
@@ -335,14 +345,18 @@ void Main::runCurrentProfile() {
 
 	profiles.back()->runFrame();
 
-	if (not profiles.back()->isRunning())
-		profiles.pop_back();
-
 	// Send data.
 	for (auto device : DataLoader::devices)
 		device->transfer();
 
-	Actor::advanceFrame();
+	// profiles are cached.
+	if (not profiles.back()->isRunning()) {
+		profiles.pop_back();
+		profiles.back()->reset();
+	}
+	else {
+		Actor::advanceFrame();
+	}
 }
 
 Device* Main::selectDevice() {

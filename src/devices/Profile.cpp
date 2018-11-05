@@ -79,21 +79,35 @@ void Profile::runFrame() {
 }
 
 void Profile::reset() {
-	actual = start;
-	if (start)
+
+	running = true;
+	for (auto& anim : animations)
+		for (auto actor : anim.second)
+			actor->restart();
+
+	if (start) {
+		actual = start;
 		actual->restart();
-	running = start != nullptr;
+	}
 }
 
 void Profile::terminate() {
 	actual = end;
-	if (end)
+	if (actual)
 		actual->restart();
-	running = end != nullptr;
+	running = actual != nullptr;
 }
 
 bool Profile::isTransiting() const {
 	return (actual == start or actual == end) and actual != nullptr;
+}
+
+bool Profile::isTerminating() const {
+	return actual == end and actual != nullptr;
+}
+
+bool Profile::isStarting() const {
+	return actual == start and actual != nullptr;
 }
 
 bool Profile::isRunning() const {
@@ -106,4 +120,8 @@ const LEDSpicer::Color& Profile::getBackgroundColor() const {
 
 uint8_t Profile::getAnimationsCount() const {
 	return animations.size();
+}
+
+const string& Profile::getName() const {
+	return name;
 }

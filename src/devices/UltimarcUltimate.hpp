@@ -16,11 +16,13 @@
 
 #define IPAC_ULTIMATE "IPAC_ULTIMATE"
 
+#define IPAC_ULTIMATE_NAME          "Ultimarc Ipac Ultimate IO"
 #define IPAC_ULTIMATE_PRODUCT       0x0410
 #define IPAC_ULTIMATE_VALUE         0x0203
 #define IPAC_ULTIMATE_INTERFACE     3
 #define IPAC_ULTIMATE_NGC_INTERFACE 2
 #define IPAC_ULTIMATE_LEDS          96
+#define IPAC_ULTIMAGE_MAX_BOARDS    4
 
 namespace LEDSpicer {
 namespace Devices {
@@ -43,6 +45,10 @@ public:
 	virtual void drawHardwarePinMap();
 
 	void transfer();
+
+	uint16_t getProduct();
+
+	string getName();
 
 protected:
 

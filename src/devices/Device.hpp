@@ -53,22 +53,10 @@ public:
 	uint8_t* getLed(uint8_t ledPos);
 
 	/**
-	 * Returns the board name.
-	 * @return
-	 */
-	string getName();
-
-	/**
 	 * Returns the board Id.
 	 * @return
 	 */
 	uint8_t getId();
-
-	/**
-	 * Returns the number of LEDs (pins) this board controls.
-	 * @return
-	 */
-	uint8_t getNumberOfLeds();
 
 	/**
 	 * Populates the pins with the correct pin number and
@@ -106,16 +94,6 @@ public:
 	 * @return
 	 */
 	uint8_t getNumberOfElements() const;
-
-// Development debugging functions
-#ifdef DEVELOP
-
-	/**
-	 * Prints the board technical information.
-	 */
-	void printDeviceInformation();
-
-#endif
 
 	umap<string, Element>* getElements();
 

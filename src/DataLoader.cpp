@@ -27,12 +27,7 @@ void DataLoader::readConfiguration() {
 		Log::setLogLevel(Log::str2level(tempAttr["logLevel"]));
 
 	// set FPS.
-	uint8_t fps = 0;
-	try {
-		fps = stoi(tempAttr["fps"]);
-	} catch (...) {
-		throw LEDError("Invalid value for FPS");
-	}
+	uint8_t fps = Utility::parseNumber(tempAttr["fps"], "Invalid value for FPS");
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
 	ConnectionUSB::setInterval(1000 / (fps > 30 ? 30 : fps));
@@ -109,21 +104,21 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		// Single color.
 		if (tempAttr.count("led")) {
-			device->registerElement(tempAttr["name"], stoi(tempAttr["led"]) - 1);
-			pinCheck[stoi(tempAttr["led"]) - 1] = true;
+			uint8_t pin = Utility::parseNumber(tempAttr["led"], "Invalid Value for pin in board " + device->getName()) - 1;
+			device->registerElement(tempAttr["name"], pin);
+			pinCheck[pin] = true;
 		}
 		// RGB.
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr["name"]);
-			device->registerElement(
-				tempAttr["name"],
-				stoi(tempAttr["red"])   - 1,
-				stoi(tempAttr["green"]) - 1,
-				stoi(tempAttr["blue"])  - 1
-			);
-			pinCheck[stoi(tempAttr["red"])   - 1] = true;
-			pinCheck[stoi(tempAttr["green"]) - 1] = true;
-			pinCheck[stoi(tempAttr["blue"])  - 1] = true;
+			uint8_t
+				r = Utility::parseNumber(tempAttr["red"], "Invalid Value for red pin in board " + device->getName()) - 1,
+				g = Utility::parseNumber(tempAttr["green"], "Invalid Value for green pin in board " + device->getName()) - 1,
+				b = Utility::parseNumber(tempAttr["blue"], "Invalid Value for blue pin in board " + device->getName()) - 1;
+			device->registerElement(tempAttr["name"], r, g , b);
+			pinCheck[r] = true;
+			pinCheck[g] = true;
+			pinCheck[b] = true;
 		}
 		allElements.emplace(tempAttr["name"], device->getElement(tempAttr["name"]));
 	}
@@ -233,6 +228,7 @@ Profile* DataLoader::processProfile(const string& name) {
 	}
 
 	Profile* profilePtr = new Profile(
+		name,
 		Color(tempAttr.at("backgroundColor")),
 		start,
 		end
@@ -273,10 +269,7 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 
 Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 
-	uint8_t devId = deviceData.count("boardId") ? stoi(deviceData["boardId"]) : 1;
-
-	if (not Utility::verifyValue(devId, 1, 4, false))
-		throw LEDError(std::to_string(devId) + " is an invalid board id, use 1 to 4");
+	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
 
 	if (deviceData["name"] == IPAC_ULTIMATE)
 		return new UltimarcUltimate(devId, deviceData);

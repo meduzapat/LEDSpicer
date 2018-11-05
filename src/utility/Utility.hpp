@@ -29,10 +29,31 @@ class Utility {
 
 public:
 
+	/**
+	 * Attempts to extract a number from a string.
+	 * @param number A string representing a number.
+	 * @param errorMessage The message to display in case of error.
+	 * @throws Error if the string is not valid.
+	 * @return The extracted number.
+	 */
+	static int parseNumber(const string& number, const string& errorMessage);
+
+	/**
+	 * Removes spaces from the left
+	 * @param text
+	 */
 	static void ltrim(string& text);
 
+	/**
+	 * Removes spaces from the right.
+	 * @param text
+	 */
 	static void rtrim(string& text);
 
+	/**
+	 * Removes spaces from both sides.
+	 * @param text
+	 */
 	static void trim(string& text);
 
 	/**

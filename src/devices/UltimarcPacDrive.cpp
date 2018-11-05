@@ -12,21 +12,14 @@ using namespace LEDSpicer::Devices;
 
 UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& options) :
 		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, PAC_DRIVE_LEDS) {
-	board.name      = "Ultimarc Pac Drive Controller";
-	board.vendor    = ULTIMARC_VENDOR;
-	board.product   = PAC_DRIVE_PRODUCT;
+	// TODO: move this to a generic place where every board should populate their levels.
+	if (not Utility::verifyValue(boardId, 1, PAC_DRIVE_MAX_BOARDS, false))
+			throw Error("Device id should be a number between 1 and " + to_string(PAC_DRIVE_MAX_BOARDS));
 	board.interface = PAC_DRIVE_INTERFACE;
 	board.boardId   = boardId;
 	board.value     = PAC_DRIVE_VALUE;
-	board.LEDs      = PAC_DRIVE_LEDS;
-	if (options.count("changePoint")) {
-		try {
-			changePoint = stoi(options["changePoint"]);
-		}
-		catch(...) {
-			LogWarning("Invalid value for changePoint board " + getName() + " Id " + to_string(getId()));
-		}
-	}
+	if (options.count("changePoint"))
+		changePoint = Utility::parseNumber(options["changePoint"], "Invalid value for changePoint device " + getName() + " Id " + to_string(getId()));
 }
 
 void UltimarcPacDrive::drawHardwarePinMap() {
@@ -60,6 +53,14 @@ void UltimarcPacDrive::transfer() {
 		}
 	}
 	transferData(load);
+}
+
+uint16_t UltimarcPacDrive::getProduct() {
+	return PAC_DRIVE_PRODUCT;
+}
+
+string UltimarcPacDrive::getName() {
+	return IPAC_DRIVE_NAME;
 }
 
 void UltimarcPacDrive::afterConnect() {}

@@ -28,9 +28,10 @@ bool Actor::drawFrame() {
 
 	calculateElements();
 	advanceActorFrame();
-	if ((direction == Directions::Forward or direction == Directions::ForwardBouncing) and currentActorFrame == 1)
-		return true;
-	if ((direction == Directions::Backward or direction == Directions::BackwardBouncing) and currentActorFrame == totalActorFrames)
+	if (
+		(isDirectionForward() and currentActorFrame == 1) or
+		(isDirectionBackward() and currentActorFrame == totalActorFrames)
+	)
 		return true;
 	return false;
 }
@@ -43,7 +44,7 @@ void Actor::drawConfig() {
 }
 
 void Actor::restart() {
-	if (direction == Directions::Forward or direction == Directions::ForwardBouncing) {
+	if (isDirectionForward()) {
 		currentActorFrame = 1;
 		cDirection = Directions::Forward;
 	}
@@ -170,6 +171,14 @@ bool Actor::isLastFrame() const {
 		break;
 	}
 	return false;
+}
+
+bool Actor::isDirectionForward() {
+	return direction == Directions::Forward or direction == Directions::ForwardBouncing;
+}
+
+bool Actor::isDirectionBackward() {
+	return direction == Directions::Backward or direction == Directions::BackwardBouncing;
 }
 
 uint8_t Actor::getNumberOfElements() const {

@@ -32,7 +32,7 @@ ConnectionUSB::~ConnectionUSB() {
 	if (not handle)
 		return;
 
-	LogInfo("Releasing interface " + to_string(board.interface) + " for " + board.name + " Id " + to_string(board.boardId));
+	LogInfo("Releasing interface " + to_string(board.interface) + " Id " + to_string(board.boardId));
 	libusb_release_interface(handle, board.interface);
 	libusb_close(handle);
 	handle = nullptr;
@@ -47,12 +47,12 @@ void ConnectionUSB::initialize() {
 
 void ConnectionUSB::connect() {
 
-	LogInfo("Connecting to " + Utility::hex2str(board.vendor) + ":" + Utility::hex2str(board.product) + " " + board.name);
+	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getName());
 
-	handle = libusb_open_device_with_vid_pid(usbSession, board.vendor, board.product);
+	handle = libusb_open_device_with_vid_pid(usbSession, getVendor(), getProduct());
 
 	if (not handle)
-		throw Error("Unable to connect to " + Utility::hex2str(board.vendor) + ":" + Utility::hex2str(board.product) + " " + board.name);
+		throw Error("Unable to connect to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getName());
 
 	libusb_set_auto_detach_kernel_driver(handle, true);
 }
@@ -61,7 +61,7 @@ void ConnectionUSB::claimInterface() {
 
 	LogInfo("Claiming interface " + to_string(board.interface));
 	if (libusb_claim_interface(handle, board.interface))
-		throw Error("Unable to claim interface to " + to_string(board.vendor) + ":" + to_string(board.product) + " " + board.name);
+		throw Error("Unable to claim interface to " + to_string(getVendor()) + ":" + to_string(getProduct()) + " " + getName());
 }
 
 void ConnectionUSB::openSession() {
@@ -100,7 +100,13 @@ void ConnectionUSB::terminate() {
 #endif
 }
 
+uint8_t ConnectionUSB::getNumberOfLeds() {
+	return LEDs.size();
+}
+
 void ConnectionUSB::transferData(vector<uint8_t>& data) {
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
 #ifdef DRY_RUN
 	uint8_t count = MAX_DUMP_COLUMNS;
@@ -124,8 +130,6 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		data.size(),
 		TIMEOUT
 	);
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
 	if (responseCode >= 0)
 		return;

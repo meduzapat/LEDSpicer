@@ -60,6 +60,27 @@ public:
 	virtual void transfer() = 0;
 
 	/**
+	 * Returns the number of LEDs (pins) this board controls.
+	 * @return
+	 */
+	uint8_t getNumberOfLeds();
+
+	/**
+	 * @return the vendor's code.
+	 */
+	virtual uint16_t getVendor() = 0;
+
+	/**
+	 * @return the vendor's code.
+	 */
+	virtual uint16_t getProduct() = 0;
+
+	/**
+	 * @return the device name.
+	 */
+	virtual string getName() = 0;
+
+	/**
 	 * Transfers miscellaneous data.
 	 * @param data
 	 */
@@ -79,21 +100,14 @@ protected:
 
 	/// Internal structure to keep initialization information
 	struct ConnectionData {
-		const char* name = nullptr;
 		uint16_t
-			/// Vendor ID
-			vendor  = 0,
-			/// Product ID
-			product = 0,
 			/// The value field for the setup packet.
-			value   = 0;
+			value = 0;
 		uint8_t
 			/// Interface number
 			interface = 0,
 			/// Board ID
-			boardId   = 0,
-			/// Number of board LEDs
-			LEDs      = 0;
+			boardId   = 0;
 	} board;
 
 	vector<uint8_t> LEDs;

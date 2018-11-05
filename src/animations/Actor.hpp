@@ -104,6 +104,16 @@ public:
 	 */
 	bool isLastFrame() const;
 
+	/**
+	 * @return true if the direction is forward or forward with bouncing.
+	 */
+	bool isDirectionForward();
+
+	/**
+	 * @return true if the direction is backward or backward with bouncing.
+	 */
+	bool isDirectionBackward();
+
 protected:
 
 	uint8_t
