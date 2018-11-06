@@ -153,13 +153,13 @@ void DataLoader::processLayout() {
 		if (this->layout.count(tempAttr["name"]))
 			throw LEDError("Duplicated group " + tempAttr["name"]);
 
-		layout.emplace(tempAttr["name"], Group());
-		processGroupElements(element, tempAttr["name"]);
+		layout.emplace(tempAttr["name"], Group(tempAttr["name"]));
+		processGroupElements(element, layout[tempAttr["name"]]);
 	}
 
 	// Create a group with all elements on it called All if not defined.
 	if (not this->layout.count("All")) {
-		Group group;
+		Group group("All");
 		for (auto& gp : allElements)
 			group.linkElement(gp.second);
 		group.shrinkToFit();
@@ -170,32 +170,31 @@ void DataLoader::processLayout() {
 
 }
 
-void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, const string& name) {
+void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
 
 	tinyxml2::XMLElement* element = groupNode->FirstChildElement("element");
 
 	if (not element)
 		throw LEDError("Empty group section");
 
-	uint8_t numPins = 0;
-	umap<string, Group*> groupElements;
+	umap<string, bool> groupElements;
 	for (; element; element = element->NextSiblingElement("element")) {
 		umap<string, string> elementAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "group element");
 
 		// Check dupes and add
 		if (groupElements.count(elementAttr["name"]))
-			throw LEDError("Duplicated element name " + elementAttr["name"] + " in group '" + name + "'");
+			throw LEDError("Duplicated element name " + elementAttr["name"] + " in group '" + group.getName() + "'");
 
 		if (allElements.count(elementAttr["name"])) {
-			layout[name].linkElement(allElements[elementAttr["name"]]);
-			groupElements.emplace(elementAttr["name"], &layout[name]);
+			group.linkElement(allElements[elementAttr["name"]]);
+			groupElements.emplace(elementAttr["name"], true);
 		}
 		else {
-			throw LEDError("Invalid element " + elementAttr["name"] + " in group '" + name + "'");
+			throw LEDError("Invalid element " + elementAttr["name"] + " in group '" + group.getName() + "'");
 		}
 	}
-	layout[name].shrinkToFit();
+	group.shrinkToFit();
 }
 
 Profile* DataLoader::processProfile(const string& name) {

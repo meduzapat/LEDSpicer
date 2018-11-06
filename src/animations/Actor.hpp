@@ -94,13 +94,17 @@ public:
 	bool isBouncing() const;
 
 	/**
+	 * @return true if the animation is a bouncer.
+	 */
+	bool isBouncer() const;
+
+	/**
 	 * @return true if the current frame is the first frame.
 	 */
 	bool isFirstFrame() const;
 
 	/**
 	 * @return true if the current frame is the last frame,
-	 * for bouncing directions will return the moment when the bounce starts.
 	 */
 	bool isLastFrame() const;
 

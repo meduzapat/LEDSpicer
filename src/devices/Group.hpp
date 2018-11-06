@@ -24,15 +24,14 @@ public:
 
 	Group() {}
 
-	Group(const vector<Element*>& elements) : elements(elements) {}
+	Group(const string& name) : name(name) {}
 
 	virtual ~Group() {}
 
 	void drawElements();
 
 	/**
-	 * Returns the number of elements.
-	 * @return
+	 * @return the number of elements.
 	 */
 	uint8_t size() const;
 
@@ -48,27 +47,27 @@ public:
 	void shrinkToFit();
 
 	/**
-	 * Returns a reference to the pointers to the internal elements.
-	 * @return
+	 * @return a reference to the pointers to the internal elements.
 	 */
 	const vector<Element*>& getElements() const;
 
 	/**
-	 * Returns a reference to the internal element.
 	 * @param index
-	 * @return
+	 * @return a reference to the internal element.
 	 */
 	Element* getElement(uint8_t index);
 
 	/**
-	 * Writes the internal buffer.
+	 * @return the group name.
 	 */
-//	void writeBuffer(Color::Filters filter);
+	const string& getName() const;
 
 protected:
 
 	/// Elements on this group.
 	vector<Element*> elements;
+
+	string name = "";
 
 };
 

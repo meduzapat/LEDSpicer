@@ -125,6 +125,12 @@ protected:
 	/// List of Groups by name that need the color to be changed.
 	umap<string, const Color* const> groupsOverwrite;
 
+private:
+
+	/**
+	 * Restarts the profile actors.
+	 */
+	void restartActors();
 };
 
 }} /* namespace LEDSpicer */

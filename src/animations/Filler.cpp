@@ -18,10 +18,6 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	totalActorFrames = group->size();
 	restart();
 	switch (mode) {
-	case Modes::Linear:
-		// need to check if the direction is bouncing and change cdirection for backward into forward
-		filling = cDirection == Directions::Forward;
-		break;
 	case Modes::Random:
 	case Modes::RandomSimple:
 		std::srand(std::time(nullptr));
@@ -31,38 +27,76 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	}
 }
 
+void Filler::advanceActorFrame() {
+
+	if (willChange()) {
+		changeFrame = 1;
+
+		if (mode == Modes::Linear) {
+
+			if (isBouncer()) {
+				if (cDirection == Directions::Forward and currentActorFrame == totalActorFrames) {
+					if (filling) {
+						filling = false;
+						currentActorFrame = 1;
+						return;
+					}
+					filling = true;
+				}
+				if (cDirection == Directions::Backward and currentActorFrame == 1) {
+					if (filling) {
+						filling = false;
+						currentActorFrame = totalActorFrames;
+						return;
+					}
+					filling = true;
+				}
+				Actor::advanceActorFrame();
+				return;
+			}
+
+			if (isLastFrame()) {
+				if (filling) {
+					// restart forward.
+					if (cDirection == Directions::Forward) {
+						filling = false;
+						currentActorFrame = 1;
+						return;
+					}
+					// restart backward.
+					if (cDirection == Directions::Backward) {
+						filling = false;
+						currentActorFrame = totalActorFrames;
+						return;
+					}
+				}
+				filling = true;
+			}
+		}
+		Actor::advanceActorFrame();
+		return;
+	}
+	changeFrame++;
+}
+
 void Filler::calculateElements() {
 
 	switch (mode) {
 	case Modes::Linear:
-		// using filling for backward.
-		if (cDirection == Directions::Forward) {
+	case Modes::LinearSimple:
+
+		if (cDirection == Directions::Forward)
 			fillElementsLinear(
-				//        forward             backward
-				filling ? 0                 : totalActorFrames - currentActorFrame,
+				filling ? 0                 : currentActorFrame - 1,
 				filling ? currentActorFrame : totalActorFrames
 			);
-			if (
-				willChange() and
-				(
-					(isDirectionForward() and isLastFrame()) or
-					(isDirectionBackward() and isFirstFrame())
-				)
-			)
-				filling = not filling;
-			break;
-		}
-		fillElementsLinear(
-			filling ? 0 : totalActorFrames - currentActorFrame ,
-			filling ? currentActorFrame : totalActorFrames
-		);
-		break;
-	case Modes::LinearSimple:
-		if (isDirectionForward())
-			fillElementsLinear(0, currentActorFrame);
 		else
-			fillElementsLinear(currentActorFrame - 1, totalActorFrames);
+			fillElementsLinear(
+				filling ? currentActorFrame - 1 : 0,
+				filling ? totalActorFrames  : currentActorFrame
+			);
 		break;
+
 	// Forward or backward will work in the same way for random modes.
 	case Modes::Random:
 		fillElementsRandom(filling);
@@ -76,7 +110,7 @@ void Filler::calculateElements() {
 }
 
 void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
-	for (uint8_t c = begin; c != end; ++c)
+	for (uint8_t c = begin; c < end; ++c)
 		changeElementColor(c, color, filter);
 }
 

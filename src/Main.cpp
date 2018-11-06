@@ -106,7 +106,7 @@ void Main::run() {
 	profiles[0]->terminate();
 
 	// Wait for termination.
-	while (not profiles[0]->isRunning())
+	while (profiles[0]->isRunning())
 		profiles[0]->runFrame();
 }
 

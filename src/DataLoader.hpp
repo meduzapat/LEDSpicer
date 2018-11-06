@@ -119,7 +119,7 @@ protected:
 	 * @param groupNode
 	 * @param name
 	 */
-	void processGroupElements(tinyxml2::XMLElement* groupNode, const string& name);
+	void processGroupElements(tinyxml2::XMLElement* groupNode, Group& group);
 
 	/**
 	 * Reads an animation file.

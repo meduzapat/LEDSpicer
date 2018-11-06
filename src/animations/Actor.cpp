@@ -38,7 +38,8 @@ bool Actor::drawFrame() {
 
 void Actor::drawConfig() {
 	cout <<
-		"Speed: "       << speed2str(speed)          <<
+		"Group: "       << group->getName()          <<
+		", Speed: "       << speed2str(speed)        <<
 		", Filter: "    << Color::filter2str(filter) <<
 		", Direction: " << direction2str(direction)  << endl;
 }
@@ -141,6 +142,10 @@ bool Actor::isBouncing() const {
 	}
 }
 
+bool Actor::isBouncer() const {
+	return direction == Directions::ForwardBouncing or direction == Directions::BackwardBouncing;
+}
+
 bool Actor::isFirstFrame() const {
 	switch (direction) {
 	case Directions::Forward:
@@ -160,12 +165,12 @@ bool Actor::isFirstFrame() const {
 bool Actor::isLastFrame() const {
 	switch (direction) {
 	case Directions::Forward:
-	case Directions::ForwardBouncing:
+	case Directions::BackwardBouncing:
 		if (cDirection == Directions::Forward and currentActorFrame == totalActorFrames)
 			return true;
 		break;
 	case Directions::Backward:
-	case Directions::BackwardBouncing:
+	case Directions::ForwardBouncing:
 		if (cDirection == Directions::Backward and currentActorFrame == 1)
 			return true;
 		break;

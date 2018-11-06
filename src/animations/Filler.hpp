@@ -29,6 +29,8 @@ public:
 
 	virtual ~Filler() {}
 
+	virtual void advanceActorFrame();
+
 	void calculateElements();
 
 	void drawConfig();
@@ -66,6 +68,7 @@ private:
 	 * Draw the random values.
 	 */
 	void drawRandom();
+
 };
 
 } /* namespace Animations */

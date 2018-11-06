@@ -42,26 +42,6 @@ Element* Group::getElement(uint8_t index) {
 	return elements.at(index);
 }
 
-/*
-void Group::writeBuffer(Color::Filters filter) {
-	for (uint8_t eleC = 0; eleC < elements.size(); ++eleC) {
-		for (uint8_t pinC = 0; pinC < elements[eleC]->getPins().size(); ++pinC) {
-			switch (filter) {
-			case Color::Filters::Normal:
-				elements[eleC]->setPinValue(pinC, internalCopy[eleC].getPinValue(pinC));
-			break;
-			case Color::Filters::Combine:
-				elements[eleC]->setPinValue(
-					pinC,
-					Color::transition(
-						elements[eleC]->getPinValue(pinC),
-						internalCopy[eleC].getPinValue(pinC),
-						50
-					)
-				);
-			}
-		}
-	}
+const string& Group::getName() const {
+	return name;
 }
-
-*/

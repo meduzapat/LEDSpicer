@@ -81,9 +81,7 @@ void Profile::runFrame() {
 void Profile::reset() {
 
 	running = true;
-	for (auto& anim : animations)
-		for (auto actor : anim.second)
-			actor->restart();
+	restartActors();
 
 	if (start) {
 		actual = start;
@@ -92,10 +90,17 @@ void Profile::reset() {
 }
 
 void Profile::terminate() {
-	actual = end;
-	if (actual)
+	if (end) {
+		actual = end;
 		actual->restart();
-	running = actual != nullptr;
+	}
+	running = end != nullptr;
+}
+
+void Profile::restartActors() {
+	for (auto& anim : animations)
+		for (auto actor : anim.second)
+			actor->restart();
 }
 
 bool Profile::isTransiting() const {
