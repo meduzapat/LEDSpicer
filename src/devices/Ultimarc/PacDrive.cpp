@@ -1,28 +1,34 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      UltimarcPacDrive.cpp
+ * @file      PacDrive.cpp
  * @since     Sep 19, 2018
  * @author    Patricio A. Rossi (MeduZa)
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "UltimarcPacDrive.hpp"
+#include "PacDrive.hpp"
 
-using namespace LEDSpicer::Devices;
+using namespace LEDSpicer::Devices::Ultimarc;
 
-UltimarcPacDrive::UltimarcPacDrive(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, PAC_DRIVE_LEDS) {
-	// TODO: move this to a generic place where every board should populate their levels.
-	if (not Utility::verifyValue(boardId, 1, PAC_DRIVE_MAX_BOARDS, false))
-			throw Error("Device id should be a number between 1 and " + to_string(PAC_DRIVE_MAX_BOARDS));
-	board.interface = PAC_DRIVE_INTERFACE;
-	board.boardId   = boardId;
-	board.value     = PAC_DRIVE_VALUE;
+PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
+	Ultimarc(
+		ULTIMARC_REQUEST_TYPE,
+		ULTIMARC_REQUEST,
+		PAC_DRIVE_WVALUE,
+		PAC_DRIVE_INTERFACE,
+		PAC_DRIVE_LEDS,
+		PAC_DRIVE_MAX_BOARDS,
+		boardId
+	) {
+
 	if (options.count("changePoint"))
-		changePoint = Utility::parseNumber(options["changePoint"], "Invalid value for changePoint device " + getName() + " Id " + to_string(getId()));
+		changePoint = Utility::parseNumber(
+			options["changePoint"],
+			"Invalid value for changePoint device " IPAC_DRIVE_NAME " Id " + to_string(boardId)
+		);
 }
 
-void UltimarcPacDrive::drawHardwarePinMap() {
+void PacDrive::drawHardwarePinMap() {
 	uint8_t half = PAC_DRIVE_LEDS / 2;
 	cout
 		<< getName() << " Pins " << PAC_DRIVE_LEDS << endl
@@ -39,7 +45,7 @@ void UltimarcPacDrive::drawHardwarePinMap() {
 	cout << endl;
 }
 
-void UltimarcPacDrive::transfer() {
+void PacDrive::transfer() {
 
 	vector<uint8_t> load = {0, 0, 0, 0};
 
@@ -55,13 +61,13 @@ void UltimarcPacDrive::transfer() {
 	transferData(load);
 }
 
-uint16_t UltimarcPacDrive::getProduct() {
-	return PAC_DRIVE_PRODUCT;
+uint16_t PacDrive::getProduct() {
+	return PAC_DRIVE_PRODUCT + board.boardId - 1;
 }
 
-string UltimarcPacDrive::getName() {
+string PacDrive::getName() {
 	return IPAC_DRIVE_NAME;
 }
 
-void UltimarcPacDrive::afterConnect() {}
+void PacDrive::afterConnect() {}
 

@@ -44,7 +44,15 @@ class ConnectionUSB {
 
 public:
 
-	ConnectionUSB(uint16_t requestType, uint16_t request, uint8_t elements);
+	ConnectionUSB(
+		uint16_t requestType,
+		uint16_t request,
+		uint16_t wValue,
+		uint8_t  interface,
+		uint8_t  elements,
+		uint8_t  maxBoards,
+		uint8_t  boardId
+	);
 
 	virtual ~ConnectionUSB();
 
@@ -76,9 +84,21 @@ public:
 	virtual uint16_t getProduct() = 0;
 
 	/**
+	 * Returns the board Id.
+	 * @return
+	 */
+	uint8_t getId();
+
+	/**
 	 * @return the device name.
 	 */
 	virtual string getName() = 0;
+
+	/**
+	 * Populates the pins with the correct pin number and
+	 * displays the pin in a similar way they are found on the hardware.
+	 */
+	virtual void drawHardwarePinMap() = 0;
 
 	/**
 	 * Transfers miscellaneous data.

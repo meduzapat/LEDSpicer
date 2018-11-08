@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      UltimarcPacDrive.hpp
+ * @file      PacDrive.hpp
  * @since     Sep 19, 2018
  * @author    Patricio A. Rossi (MeduZa)
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
@@ -15,24 +15,25 @@
 
 #define IPAC_DRIVE_NAME     "Ultimarc Pac Drive Controller"
 #define PAC_DRIVE_PRODUCT    0x1500
-#define PAC_DRIVE_VALUE      0x0200
+#define PAC_DRIVE_WVALUE     0x0200
 #define PAC_DRIVE_INTERFACE  0
 #define PAC_DRIVE_LEDS       16
 #define PAC_DRIVE_MAX_BOARDS 4
 
 namespace LEDSpicer {
 namespace Devices {
+namespace Ultimarc {
 
 /**
  * LEDSpicer::PacLED
  */
-class UltimarcPacDrive: public Ultimarc {
+class PacDrive : public Ultimarc {
 
 public:
 
-	UltimarcPacDrive(uint8_t boardId, umap<string, string>& options);
+	PacDrive(uint8_t boardId, umap<string, string>& options);
 
-	virtual ~UltimarcPacDrive() {}
+	virtual ~PacDrive() {}
 
 	virtual void drawHardwarePinMap();
 
@@ -49,6 +50,6 @@ protected:
 	virtual void afterConnect();
 };
 
-}} /* namespace LEDSpicer */
+}}} /* namespace LEDSpicer */
 
 #endif /* PACDRIVE_HPP_ */

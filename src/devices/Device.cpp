@@ -34,10 +34,6 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 	return &LEDs.at(ledPos);
 }
 
-uint8_t Device::getId() {
-	return board.boardId;
-}
-
 void Device::registerElement(const string& name, uint8_t led) {
 	validateLed(led);
 	elementsByName.emplace(name, Element(name, &LEDs[led]));

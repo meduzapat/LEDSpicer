@@ -18,7 +18,7 @@ AC_MSG_CHECKING([Programs])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
-
+AC_PROG_AWK
 
 AC_ARG_ENABLE(develop, AS_HELP_STRING([--enable-develop], [enable develop mode]),
 	AC_DEFINE([DEVELOP],[1],[Enables development mode])

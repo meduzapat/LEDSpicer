@@ -6,27 +6,16 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "UltimarcUltimate.hpp"
+#include "Ultimate.hpp"
 
-using namespace LEDSpicer::Devices;
+using namespace LEDSpicer::Devices::Ultimarc;
 
-UltimarcUltimate::UltimarcUltimate(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(ULTIMARC_REQUEST_TYPE, ULTIMARC_REQUEST, IPAC_ULTIMATE_LEDS)
-	{
-	// TODO: move this to a generic place where every board should populate their levels.
-	if (not Utility::verifyValue(boardId, 1, IPAC_ULTIMAGE_MAX_BOARDS, false))
-		throw Error("Board id should be a number between 1 and " + to_string(IPAC_ULTIMAGE_MAX_BOARDS));
-	board.interface = 0;
-	board.boardId   = boardId;
-	board.value     = IPAC_ULTIMATE_VALUE;
-}
-
-UltimarcUltimate::~UltimarcUltimate() {
+Ultimate::~Ultimate() {
 	setLeds(0);
 	transfer();
 }
 
-void UltimarcUltimate::afterConnect() {
+void Ultimate::afterConnect() {
 
 	// Detect interface.
 	LogDebug("Detecting interface");
@@ -58,13 +47,13 @@ void UltimarcUltimate::afterConnect() {
 	}
 }
 
-void UltimarcUltimate::afterClaimInterface() {
+void Ultimate::afterClaimInterface() {
 	vector<uint8_t> data = {0x03, 0, 0, 0xC0, 0};
 	transferData(data);
 	Device::afterClaimInterface();
 }
 
-void UltimarcUltimate::drawHardwarePinMap() {
+void Ultimate::drawHardwarePinMap() {
 	uint8_t
 		half    = IPAC_ULTIMATE_LEDS / 2,
 		fillerL = 1,
@@ -88,7 +77,7 @@ void UltimarcUltimate::drawHardwarePinMap() {
 	cout << endl;
 }
 
-void UltimarcUltimate::transfer() {
+void Ultimate::transfer() {
 
 	vector<uint8_t> load;
 	load.push_back(0x04);
@@ -96,10 +85,10 @@ void UltimarcUltimate::transfer() {
 	transferData(load);
 }
 
-uint16_t UltimarcUltimate::getProduct() {
+uint16_t Ultimate::getProduct() {
 	return IPAC_ULTIMATE_PRODUCT;
 }
 
-string UltimarcUltimate::getName() {
+string Ultimate::getName() {
 	return IPAC_ULTIMATE_NAME;
 }

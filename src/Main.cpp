@@ -370,8 +370,7 @@ Device* Main::selectDevice() {
 		uint8_t deviceIndex;
 		cout << "Select a device:" << endl;
 		for (uint8_t c = 0; c < DataLoader::devices.size(); ++c)
-			// TODO: add device id.
-			cout << c+1 << ": " << DataLoader::devices[c]->getName() << endl;
+			cout << c+1 << ": " << DataLoader::devices[c]->getName() << " id: " << DataLoader::devices[c]->getId() << endl;
 		std::getline(std::cin, inp);
 		if (inp == "q")
 			return nullptr;

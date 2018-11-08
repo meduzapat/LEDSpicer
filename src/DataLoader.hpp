@@ -8,8 +8,6 @@
 
 #include "config.h"
 #include "utility/XMLHelper.hpp"
-#include "devices/UltimarcUltimate.hpp"
-#include "devices/UltimarcPacDrive.hpp"
 #include "utility/Color.hpp"
 #include "devices/Profile.hpp"
 #include "animations/Serpentine.hpp"
@@ -17,6 +15,9 @@
 #include "animations/Gradient.hpp"
 #include "animations/Random.hpp"
 #include "animations/Filler.hpp"
+#include "devices/Ultimarc/PacDrive.hpp"
+#include "devices/Ultimarc/Ultimate.hpp"
+#include "devices/LedWiz/LedWiz32.hpp"
 
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
@@ -37,12 +38,13 @@ using Animations::Pulse;
 using Animations::Gradient;
 using Animations::Random;
 using Animations::Filler;
-using Devices::UltimarcUltimate;
-using Devices::UltimarcPacDrive;
 using Devices::Device;
 using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
+using Devices::Ultimarc::Ultimate;
+using Devices::Ultimarc::PacDrive;
+using Devices::LedWiz::LedWiz32;
 
 /**
  * LEDSpicer::DataLoader

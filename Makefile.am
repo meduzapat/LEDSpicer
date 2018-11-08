@@ -13,29 +13,29 @@ bin_PROGRAMS = \
 	ledspicerd \
 	emitter
 
-ledspicerd_SOURCES =                 \
-	src/utility/Log.cpp              \
-	src/utility/Error.cpp            \
-	src/utility/Utility.cpp          \
-	src/utility/Socks.cpp            \
-	src/utility/XMLHelper.cpp        \
-	src/utility/Color.cpp            \
-	src/DataLoader.cpp               \
-	src/ConnectionUSB.cpp            \
-	src/devices/Element.cpp          \
-	src/devices/Group.cpp            \
-	src/devices/Device.cpp           \
-	src/devices/UltimarcUltimate.cpp \
-	src/devices/UltimarcPacDrive.cpp \
-	src/animations/Actor.cpp         \
-	src/animations/TimedActor.cpp    \
-	src/animations/Gradient.cpp      \
-	src/animations/Pulse.cpp         \
-	src/animations/Serpentine.cpp    \
-	src/animations/Random.cpp        \
-	src/animations/Filler.cpp        \
-	src/devices/Profile.cpp          \
-	src/Messages.cpp                 \
+ledspicerd_SOURCES =                  \
+	src/utility/Log.cpp               \
+	src/utility/Error.cpp             \
+	src/utility/Utility.cpp           \
+	src/utility/Socks.cpp             \
+	src/utility/XMLHelper.cpp         \
+	src/utility/Color.cpp             \
+	src/DataLoader.cpp                \
+	src/ConnectionUSB.cpp             \
+	src/devices/Element.cpp           \
+	src/devices/Group.cpp             \
+	src/devices/Device.cpp            \
+	src/devices/Ultimarc/Ultimate.cpp \
+	src/devices/Ultimarc/PacDrive.cpp \
+	src/animations/Actor.cpp          \
+	src/animations/TimedActor.cpp     \
+	src/animations/Gradient.cpp       \
+	src/animations/Pulse.cpp          \
+	src/animations/Serpentine.cpp     \
+	src/animations/Random.cpp         \
+	src/animations/Filler.cpp         \
+	src/devices/Profile.cpp           \
+	src/Messages.cpp                  \
 	src/Main.cpp
 
 ledspicerd_CPPFLAGS =                     \

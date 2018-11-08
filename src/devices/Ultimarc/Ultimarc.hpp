@@ -6,7 +6,7 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "Device.hpp"
+#include "../Device.hpp"
 
 #ifndef ULTIMARC_HPP_
 #define ULTIMARC_HPP_ 1
@@ -20,9 +20,10 @@
 
 namespace LEDSpicer {
 namespace Devices {
+namespace Ultimarc {
 
 /**
- * Ultimarc only data and definitions.
+ * Ultimarc family data and definitions.
  */
 class Ultimarc : public Device {
 
@@ -34,6 +35,6 @@ class Ultimarc : public Device {
 
 };
 
-}}
+}}}
 
 #endif /* ULTIMARC_HPP_ */

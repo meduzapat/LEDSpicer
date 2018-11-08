@@ -53,18 +53,6 @@ public:
 	uint8_t* getLed(uint8_t ledPos);
 
 	/**
-	 * Returns the board Id.
-	 * @return
-	 */
-	uint8_t getId();
-
-	/**
-	 * Populates the pins with the correct pin number and
-	 * displays the pin in a similar way they are found on the hardware.
-	 */
-	virtual void drawHardwarePinMap() = 0;
-
-	/**
 	 * Register a new Element with a single LED.
 	 * @param name
 	 * @param led

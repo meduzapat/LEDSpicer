@@ -37,7 +37,10 @@ void DataLoader::readConfiguration() {
 
 	portNumber =  tempAttr["port"];
 
-	processColorFile(string(PACKAGE_DATA_DIR).append("/").append(tempAttr["colors"]).append(".xml"));
+	processColorFile(string(PACKAGE_DATA_DIR)
+		.append("/")
+		.append(tempAttr["colors"])
+		.append(".xml"));
 
 	processDevices();
 
@@ -202,7 +205,10 @@ Profile* DataLoader::processProfile(const string& name) {
 	if (profiles.count(name))
 		return profiles[name];
 
-	XMLHelper profile(string(PACKAGE_DATA_DIR).append("/profiles/").append(name).append(".xml"), "Profile");
+	XMLHelper profile(string(PACKAGE_DATA_DIR)
+		.append("/profiles/")
+		.append(name)
+		.append(".xml"), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
@@ -249,7 +255,10 @@ Profile* DataLoader::processProfile(const string& name) {
 
 vector<Actor*> DataLoader::processAnimation(const string& name) {
 
-	XMLHelper animation(string(PACKAGE_DATA_DIR).append("/animations/").append(name).append(".xml"), "Animation");
+	XMLHelper animation(string(PACKAGE_DATA_DIR)
+		.append("/animations/")
+		.append(name)
+		.append(".xml"), "Animation");
 
 	umap<string, string> actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement("actor");
@@ -271,10 +280,10 @@ Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
 
 	if (deviceData["name"] == IPAC_ULTIMATE)
-		return new UltimarcUltimate(devId, deviceData);
+		return new Ultimate(devId, deviceData);
 
 	if (deviceData["name"] == PAC_DRIVE)
-		return new UltimarcPacDrive(devId, deviceData);
+		return new PacDrive(devId, deviceData);
 
 
 	throw LEDError("Unknown board name " + deviceData["name"]);

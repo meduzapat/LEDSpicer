@@ -15,7 +15,15 @@ using namespace LEDSpicer;
 libusb_context* ConnectionUSB::usbSession = nullptr;
 uint8_t         ConnectionUSB::waitTime   = 0;
 
-ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request, uint8_t elements) :
+ConnectionUSB::ConnectionUSB(
+		uint16_t requestType,
+		uint16_t request,
+		uint16_t wValue,
+		uint8_t  interface,
+		uint8_t  elements,
+		uint8_t  maxBoards,
+		uint8_t  boardId
+) :
 	requestType(requestType),
 	request(request)
 {
@@ -23,6 +31,14 @@ ConnectionUSB::ConnectionUSB(uint16_t requestType, uint16_t request, uint8_t ele
 	if (not usbSession)
 		throw Error("USB session not initialized");
 #endif
+
+	if (not Utility::verifyValue(boardId, 1, maxBoards, false))
+		throw Error("Board id should be a number between 1 and " + to_string(maxBoards));
+
+	board.interface = interface;
+	board.boardId   = boardId;
+	board.value     = wValue;
+
 	LEDs.resize(elements);
 	LEDs.shrink_to_fit();
 }
@@ -102,6 +118,10 @@ void ConnectionUSB::terminate() {
 
 uint8_t ConnectionUSB::getNumberOfLeds() {
 	return LEDs.size();
+}
+
+uint8_t ConnectionUSB::getId() {
+	return board.boardId;
 }
 
 void ConnectionUSB::transferData(vector<uint8_t>& data) {

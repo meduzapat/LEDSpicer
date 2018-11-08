@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      UltimarcUltimate.hpp
+ * @file      Ultimate.hpp
  * @since     Jun 23, 2018
  * @author    Patricio A. Rossi (MeduZa)
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
@@ -11,14 +11,14 @@
 
 #include "Ultimarc.hpp"
 
-#ifndef ULTIMARCULTIMATE_HPP_
-#define ULTIMARCULTIMATE_HPP_ 1
+#ifndef ULTIMATE_HPP_
+#define ULTIMATE_HPP_ 1
 
 #define IPAC_ULTIMATE "IPAC_ULTIMATE"
 
 #define IPAC_ULTIMATE_NAME          "Ultimarc Ipac Ultimate IO"
 #define IPAC_ULTIMATE_PRODUCT       0x0410
-#define IPAC_ULTIMATE_VALUE         0x0203
+#define IPAC_ULTIMATE_WVALUE        0x0203
 #define IPAC_ULTIMATE_INTERFACE     3
 #define IPAC_ULTIMATE_NGC_INTERFACE 2
 #define IPAC_ULTIMATE_LEDS          96
@@ -26,21 +26,31 @@
 
 namespace LEDSpicer {
 namespace Devices {
+namespace Ultimarc {
 
 /**
- * LEDSpicer::Devices::UltimarcUltimate
+ * LEDSpicer::Devices::Ultimate
  * Class to keep Ultimate I/O data and functionality.
  */
-class UltimarcUltimate: public Ultimarc {
+class Ultimate : public Ultimarc {
 
 public:
 
 	/**
 	 * @param boardId
 	 */
-	UltimarcUltimate(uint8_t boardId, umap<string, string>& options);
+	Ultimate(uint8_t boardId, umap<string, string>& options) :
+	Ultimarc(
+		ULTIMARC_REQUEST_TYPE,
+		ULTIMARC_REQUEST,
+		IPAC_ULTIMATE_WVALUE,
+		0, // to be defined.
+		IPAC_ULTIMATE_LEDS,
+		IPAC_ULTIMAGE_MAX_BOARDS,
+		boardId
+	) {}
 
-	virtual ~UltimarcUltimate();
+	virtual ~Ultimate();
 
 	virtual void drawHardwarePinMap();
 
@@ -58,6 +68,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+}}} /* namespace LEDSpicer */
 
-#endif /* ULTIMARCULTIMATE_HPP_ */
+#endif /* ULTIMATE_HPP_ */
