@@ -43,11 +43,12 @@ protected:
 
 	Modes mode;
 
+	float
+		/// the calculated increment
+		increment = 0;
 	uint8_t
 		/// The color for the 1st element.
 		currentColor,
-		/// the calculated increment
-		increment = 0,
 		/// Keeps the transition percent.
 		currentPercent = 0;
 
@@ -57,7 +58,10 @@ private:
 
 	void calculateSingle();
 
+	void calculateSequential();
+
 	void calculateMultiple();
+
 };
 
 } /* namespace Animations */

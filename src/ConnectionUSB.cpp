@@ -129,6 +129,9 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
 #ifdef DRY_RUN
+	#ifdef NO_OUTPUT
+	return;
+	#endif;
 	uint8_t count = MAX_DUMP_COLUMNS;
 	for (auto pin : data) {
 		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';

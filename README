@@ -41,7 +41,7 @@ Libraries:
 Debian/Ubuntu based systems just get them by:
 	apt install build-essential libtinyxml2-dev libusb-1.0-0-dev
 
-If documentation is needed:
+If development documentation is needed:
 	doxygen
 	dot (for diagrams)
 
@@ -59,6 +59,7 @@ Or for developers: will enable debug level 3 and disable optimizations.
 	./configure --enable-develop
 Developers also can add CXXFLAGS='-DDRY_RUN' to test without connecting to any USB hardware, will print the data to screen.
 	./configure --enable-develop CXXFLAGS='-DDRY_RUN'
+If no print out is needed use -DNO_OUPUT with DRY_RUN
 
 then compile with:
 	make

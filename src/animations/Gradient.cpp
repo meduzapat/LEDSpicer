@@ -19,20 +19,21 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	colors = extractColors(parameters["colors"]);
 	if (colors.size() < 2)
 		throw Error("You need two or more colors for actor Gradient to do something.");
-
+	float steps;
 	switch (mode) {
 	case Modes::All:
-		increment = 20;
-		break;
 	case Modes::Sequential:
-		increment = 40;
+		steps = (static_cast<uint8_t>(speed) + 1) * 4;
+		increment = 100 / steps;
+		totalActorFrames = steps * colors.size();
+		changeFrameTotal = 1;
 		break;
 	case Modes::Cyclic:
-		increment = 100 / (getNumberOfElements() / colors.size());
+		steps = getNumberOfElements() / colors.size();
+		increment = 100 / steps;
 		break;
 	}
-	changeFrameTotal = (static_cast<uint8_t>(speed) * 5) + 1;
-	currentColor     = cDirection == Directions::Forward ? 1 : colors.size();
+	currentColor = cDirection == Directions::Forward ? 1 : colors.size();
 }
 
 void Gradient::calculateElements() {
@@ -82,8 +83,11 @@ void Gradient::calculateSingle() {
 
 	Directions currentColorDir = colorDirection;
 	uint8_t nextColor = calculateNextOf(currentColorDir, currentColor, direction, colors.size());
-
-	changeElementsColor(colors[currentColor - 1]->transition(*colors[nextColor - 1], currentPercent), filter);
+	changeElementsColor(
+		colors[currentColor - 1]->transition(*colors[nextColor - 1],
+		currentPercent),
+		filter
+	);
 	currentPercent += increment;
 	if (currentPercent >= 100) {
 		currentPercent = 0;
@@ -106,10 +110,13 @@ void Gradient::calculateMultiple() {
 			nextColor = calculateNextOf(colorDir, nextColor, direction, colors.size());
 			percent   = 0;
 		}
+
 		changeElementColor(c, colors[color - 1]->transition(*colors[nextColor - 1], percent), filter);
 		percent += increment;
 	}
-	currentPercent += increment;
+	if (willChange())
+		currentPercent += increment;
+
 	if (currentPercent >= 100) {
 		currentColor = calculateNextOf(colorDirection, currentColor, direction, colors.size());
 		currentPercent = 0;
