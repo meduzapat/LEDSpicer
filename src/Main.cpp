@@ -25,6 +25,12 @@ void signalHandler(int sig) {
 		return;
 	}
 
+	if (sig == SIGHUP) {
+		LogNotice(PACKAGE_NAME " received re load configuration signal");
+		// TODO: reload the profiles and restart everything?
+		return;
+	}
+
 	// display back trace
 #ifdef DEVELOP
 	void* array[10];
@@ -90,11 +96,10 @@ void Main::run() {
 				}
 				if (profiles.back()->isTerminating()) {
 					LogNotice("Profile " + profiles.back()->getName() + " is finishing, try later.");
+					break;
 				}
-				else {
-					LogNotice("Profile " + profiles.back()->getName() + " changed state to finishing.");
-					profiles.back()->terminate();
-				}
+				LogNotice("Profile " + profiles.back()->getName() + " changed state to finishing.");
+				profiles.back()->terminate();
 				break;
 
 			default:
@@ -210,6 +215,7 @@ int main(int argc, char **argv) {
 	signal(SIGSEGV, signalHandler);
 #endif
 	signal(SIGTERM, signalHandler);
+	signal(SIGHUP, signalHandler);
 
 	// Process command line options.
 	string commandline, configFile = "";
@@ -360,12 +366,12 @@ void Main::runCurrentProfile() {
 }
 
 Device* Main::selectDevice() {
+
+	if (DataLoader::devices.size() == 1)
+		return DataLoader::devices[0];
+
 	string inp;
 	while (true) {
-		if (DataLoader::devices.size() == 1) {
-			return DataLoader::devices[0];
-			break;
-		}
 		std::cin.clear();
 		uint8_t deviceIndex;
 		cout << "Select a device:" << endl;

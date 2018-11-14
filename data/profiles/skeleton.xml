@@ -3,15 +3,34 @@
 <LEDSpicer
 	version="1.0"
 	type="Profile"
-	defaultColorOn=""
-	defaultColorOff=""
-	startAnimation=""
-	stopAnimation=""
+	backgroundColor=""
 >
+	<!-- Sample start transition -->
+	<startTransition
+		type="Pulse"
+		color="White"
+		speed="Fast"
+		filter="Combine"
+		direction="ForwardBouncing"
+	/>
+	<!-- Sample end transition -->
+	<endTransition
+		type="Pulse"
+		color="White"
+		speed="Fast"
+		filter="Combine"
+		direction="ForwardBouncing"
+	/>
+	<!-- Define one or more animation files to run -->
 	<animations>
+		<animation name="" />
 	</animations>
+	<!-- Defines overwrites for elements backgrond, always on color -->
 	<elements>
+		<element name="" />
 	</elements>
+	<!-- Defines overwrites for groups backgrond, always on color -->
 	<groups>
+		<group name="" />
 	</groups>
 </LEDSpicer>

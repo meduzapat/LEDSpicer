@@ -45,6 +45,7 @@ emitter
 *.lo
 *.Plo
 *.o
+data/ledspicerd.service
 
 # Compiled Dynamic libraries
 *.so

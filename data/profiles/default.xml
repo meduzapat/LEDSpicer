@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Profile"
+	backgroundColor="Black"
+>
+	<startTransition
+		type="Pulse"
+		color="White"
+		speed="Fast"
+		filter="Combine"
+		direction="ForwardBouncing"
+	/>
+	<endTransition
+		type="Pulse"
+		color="White"
+		speed="Fast"
+		filter="Combine"
+		direction="ForwardBouncing"
+	/>
+	<animations>
+		<animation name="example" />
+	</animations>
+</LEDSpicer>

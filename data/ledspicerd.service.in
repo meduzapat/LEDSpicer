@@ -1,0 +1,29 @@
+# @PACKAGE_STRING@
+# Copyright © 2018 Patricio A. Rossi (MeduZa)
+# Author: Patricio A. Rossi (MeduZa)
+
+# This file is for starting the ledspicerd daemon as a service with systemd.
+# Project url: @PACKAGE_URL@
+# Report bugs to: @PACKAGE_BUGREPORT@
+
+# LEDSpicer is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# LEDSpicer is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+
+[Unit]
+Description=@PACKAGE_NAME@ is a LEDs controller daemon that will handle the output of different programs based on their configurations.
+
+[Service]
+Type=forking
+ExecStart=@bindir@/ledspicerd
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

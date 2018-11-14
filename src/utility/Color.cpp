@@ -173,8 +173,8 @@ string Color::filter2str(Filters filter) {
 		return "Normal";
 	case Filters::Combine:
 		return "Combine";
-	case Filters::Diff:
-		return "Diff";
+	case Filters::Difference:
+		return "Difference";
 	}
 	return "";
 }
@@ -184,8 +184,8 @@ Color::Filters Color::str2filter(const string& filter) {
 		return Filters::Normal;
 	if (filter == "Combine")
 		return Filters::Combine;
-	if (filter == "Diff")
-		return Filters::Diff;
+	if (filter == "Difference")
+		return Filters::Difference;
 	LogError("Invalid filter type " + filter + " assuming Combine");
 	return Filters::Combine;
 }

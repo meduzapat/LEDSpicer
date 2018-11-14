@@ -41,7 +41,7 @@ public:
 	 * Combine: will combine with the background.
 	 * Diff: Will difference with the background.
 	 */
-	enum class Filters : uint8_t {Normal, Combine, Diff};
+	enum class Filters : uint8_t {Normal, Combine, Difference};
 
 	enum Channels : uint8_t {Red, Green, Blue};
 

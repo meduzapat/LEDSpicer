@@ -50,6 +50,7 @@ ConnectionUSB::~ConnectionUSB() {
 
 	LogInfo("Releasing interface " + to_string(board.interface) + " Id " + to_string(board.boardId));
 	libusb_release_interface(handle, board.interface);
+	libusb_reset_device(handle);
 	libusb_close(handle);
 	handle = nullptr;
 }
