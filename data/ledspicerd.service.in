@@ -22,7 +22,7 @@ Description=@PACKAGE_NAME@ is a LEDs controller daemon that will handle the outp
 
 [Service]
 Type=forking
-ExecStart=@bindir@/ledspicerd
+ExecStart=@BINDIR@/ledspicerd
 KillMode=process
 
 [Install]

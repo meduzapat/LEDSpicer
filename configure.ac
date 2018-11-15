@@ -4,11 +4,11 @@ AC_INIT([LEDSpicer],[0.2.1],[https://sourceforge.net/p/ledspicer/tickets],[ledsp
 AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES
-AC_CONFIG_MACRO_DIR([m4])
 
 dnl *******************
 dnl * Needed Programs *
@@ -57,6 +57,9 @@ AC_SUBST(LEDSPICER_LIBS)
 
 LEDSPICER_CPPFLAGS+=" $LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS"
 AC_SUBST(LEDSPICER_CPPFLAGS)
+
+dnl expand bindir on configuration files.
+AS_AC_EXPAND(BINDIR, $bindir)
 
 dnl *****************
 dnl * Needed header *

@@ -31,7 +31,6 @@ ledspicerd_SOURCES =                  \
 
 ledspicerd_CPPFLAGS =                     \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
-	-DPACKAGE_SRC_DIR=\"$(srcdir)\"       \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)\"  \
 	$(LEDSPICER_CPPFLAGS)
 
