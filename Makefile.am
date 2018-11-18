@@ -82,9 +82,10 @@ systemdsystemunit_DATA =    \
 DISTCLEANFILES = \
 	$(systemdsystemunit_DATA)
 
-dist_doc_DATA = \
-	README      \
-	COPYING
+dist_doc_DATA =             \
+	README                  \
+	COPYING                 \
+	data/21-ledspicer.rules
 
 EXTRA_DIST =                          \
 	autogen.sh                        \
@@ -123,7 +124,6 @@ EXTRA_DIST =                          \
 	data/animations/skeleton.xml      \
 	data/profiles/default.xml         \
 	data/profiles/skeleton.xml        \
-	data/21-ledspicer.rules           \
 	AUTHORS                           \
 	ChangeLog                         \
 	NEWS

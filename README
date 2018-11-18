@@ -1,4 +1,4 @@
-ledspicer - RGB LED Manager
+#ledspicer - RGB LED Manager
 
 	Copyright (C) 2018 Patricio A. Rossi
 
@@ -27,42 +27,5 @@ Copyright note:
 	Led-Wiz™ is property of Ithaca Digital Visual Technologies Inc.
 	For more information about Led-Wiz visit their website at https://groovygamegear.com
 
-Building LEDSpicer
+For more information read the ledspicer wiki at https://sourceforge.net/p/ledspicer/wiki/Home/
 
-Essential:
-	build-essential
-	autoconf
-	libtool
-
-Libraries:
-	libusb-1.0
-	tinyxml2
-
-Debian/Ubuntu based systems just get them by:
-	apt install build-essential libtinyxml2-dev libusb-1.0-0-dev
-
-If development documentation is needed:
-	doxygen
-	dot (for diagrams)
-
-Prepare tools:
-	./autogen.sh
-	./configure
-
-Or for optimized version:
-	./configure CXXFLAGS='-g0 -O3'
-I normally use something like this:
-	./configure CXXFLAGS='-g0 -O3' --prefix=/usr --sysconfdir=/etc
-The data directory can also be changed with --datarootdir=DIR
-
-Or for developers: will enable debug level 3 and disable optimizations.
-	./configure --enable-develop
-Developers also can add CXXFLAGS='-DDRY_RUN' to test without connecting to any USB hardware, will print the data to screen.
-	./configure --enable-develop CXXFLAGS='-DDRY_RUN'
-If no print out is needed use -DNO_OUPUT with DRY_RUN
-
-then compile with:
-	make
-
-Optional install (needs root access except the destination is on a user's writable destination):
-	make install
