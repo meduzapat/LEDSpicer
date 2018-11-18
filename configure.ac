@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.2.1],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.2.3],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -95,8 +95,13 @@ AC_ARG_WITH([systemdsystemunitdir],
 	AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
 	[Directory for systemd service files]),
 	[],
-	[with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+	[with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)]
+	if test x"$with_systemdsystemunitdir" = x; then
+		AC_MSG_NOTICE([Could not detect systemd unit directory])
+	fi
+)
 AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+AC_MSG_RESULT([Using systemd unit directory: $systemdsystemunitdir])
 
 dnl *************
 dnl * Makefiles *
@@ -114,7 +119,6 @@ Program      : ${PACKAGE_NAME}
 Version      : ${PACKAGE_VERSION}
 WebSite      : ${PACKAGE_URL}
 Build system : ${build_cpu}-${build_vendor}-${build_os}
-SystemD      : ${systemdsystemunitdir}
 --------- build settings -----------
 C++ compiler : ${CXX}
 Preprocessor :${LEDSPICER_CPPFLAGS}

@@ -50,7 +50,7 @@ ConnectionUSB::~ConnectionUSB() {
 	if (not handle)
 		return;
 
-	LogInfo("Releasing interface: " + to_string(board.interface) + " Id: " + to_string(board.boardId));
+	LogInfo("Releasing interface: " + to_string(board.interface));
 	libusb_release_interface(handle, board.interface);
 	auto r = libusb_reset_device(handle);
 	if (r)

@@ -57,7 +57,7 @@ emitter_LDFLAGS =    \
 
 ledspicerdconfdir=$(sysconfdir)
 ledspicerdconf_DATA = \
-	data/ledspicerd.conf
+	data/ledspicer.conf
 
 sampledir=$(pkgdatadir)
 sample_DATA =            \
@@ -117,14 +117,14 @@ EXTRA_DIST =                          \
 	src/Message.hpp                   \
 	src/Main.hpp                      \
 	src/Emitter.hpp                   \
-	data/ledspicerd.conf              \
+	data/ledspicer.conf               \
 	data/basicColors.xml              \
 	data/webColors.xml                \
 	data/animations/example.xml       \
 	data/animations/skeleton.xml      \
 	data/profiles/default.xml         \
 	data/profiles/skeleton.xml        \
-	data/21-ledspicerd.rules          \
+	data/21-ledspicer.rules           \
 	AUTHORS                           \
 	ChangeLog                         \
 	NEWS
