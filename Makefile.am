@@ -73,7 +73,6 @@ sample_profilesdir=$(pkgdatadir)/profiles
 sample_profiles_DATA =        \
 	data/profiles/default.xml \
 	data/profiles/skeleton.xml
-
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir='$$(prefix)/$(systemdsystemunitdir)'
 
