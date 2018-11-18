@@ -47,7 +47,8 @@ public:
 		0, // to be defined.
 		IPAC_ULTIMATE_LEDS,
 		IPAC_ULTIMAGE_MAX_BOARDS,
-		boardId
+		boardId,
+		IPAC_ULTIMATE_NAME
 	) {}
 
 	virtual ~Ultimate();
@@ -57,8 +58,6 @@ public:
 	void transfer();
 
 	uint16_t getProduct();
-
-	string getName();
 
 protected:
 

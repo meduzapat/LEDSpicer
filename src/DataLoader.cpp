@@ -83,7 +83,7 @@ void DataLoader::processDevices() {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, "device");
 		auto device = createDevice(deviceAttr);
-		LogInfo("Initializing board " + device->getName() + " Id: " + std::to_string(device->getId()));
+		LogInfo("Initializing " + device->getFullName());
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}
@@ -95,7 +95,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	tinyxml2::XMLElement* element = deviceNode->FirstChildElement("element");
 	if (not element)
-		throw LEDError("Empty elements section in board " + device->getName());
+		throw LEDError("Empty elements section in " + device->getFullName());
 
 	for (; element; element = element->NextSiblingElement("element")) {
 		umap<string, string> tempAttr = processNode(element);
@@ -107,7 +107,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		// Single color.
 		if (tempAttr.count("led")) {
-			uint8_t pin = Utility::parseNumber(tempAttr["led"], "Invalid Value for pin in board " + device->getName()) - 1;
+			uint8_t pin = Utility::parseNumber(tempAttr["led"], "Invalid Value for pin in " + device->getFullName()) - 1;
 			device->registerElement(tempAttr["name"], pin);
 			pinCheck[pin] = true;
 		}
@@ -115,9 +115,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr["name"]);
 			uint8_t
-				r = Utility::parseNumber(tempAttr["red"], "Invalid Value for red pin in board " + device->getName()) - 1,
-				g = Utility::parseNumber(tempAttr["green"], "Invalid Value for green pin in board " + device->getName()) - 1,
-				b = Utility::parseNumber(tempAttr["blue"], "Invalid Value for blue pin in board " + device->getName()) - 1;
+				r = Utility::parseNumber(tempAttr["red"], "Invalid Value for red pin in " + device->getFullName()) - 1,
+				g = Utility::parseNumber(tempAttr["green"], "Invalid Value for green pin in " + device->getFullName()) - 1,
+				b = Utility::parseNumber(tempAttr["blue"], "Invalid Value for blue pin in " + device->getFullName()) - 1;
 			device->registerElement(tempAttr["name"], r, g , b);
 			pinCheck[r] = true;
 			pinCheck[g] = true;
@@ -127,10 +127,14 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	}
 
 	// Checks orphan Pins.
-	LogInfo(device->getName() + " with " + to_string(device->getNumberOfElements()) + " elements and " + to_string(pinCheck.size()) + " LEDs");
+	LogInfo(
+		device->getFullName() +
+		" with " + to_string(device->getNumberOfElements()) +
+		" elements and " + to_string(pinCheck.size()) + " LEDs"
+	);
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
-			LogNotice("Pin " + to_string(pin + 1) + " is not set for device " + device->getName());
+			LogNotice("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
 }
 
 void DataLoader::processLayout() {

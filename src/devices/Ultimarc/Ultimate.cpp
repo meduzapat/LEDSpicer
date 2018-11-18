@@ -59,7 +59,7 @@ void Ultimate::drawHardwarePinMap() {
 		fillerL = 1,
 		fillerR = half + 1,
 		rLed    = half;
-	cout << getName() << " Pins " << IPAC_ULTIMATE_LEDS << endl;
+	cout << getFullName() << " Pins " << IPAC_ULTIMATE_LEDS << endl;
 	cout << "Hardware pin map:"    << endl <<
 			"R  G  B     B  G  R"  << endl;
 	for (uint8_t lLed = 0; lLed < half; ++lLed) {
@@ -86,9 +86,5 @@ void Ultimate::transfer() {
 }
 
 uint16_t Ultimate::getProduct() {
-	return IPAC_ULTIMATE_PRODUCT;
-}
-
-string Ultimate::getName() {
-	return IPAC_ULTIMATE_NAME;
+	return IPAC_ULTIMATE_PRODUCT + board.boardId - 1;
 }

@@ -36,7 +36,7 @@ protected:
 		newColors,
 		oldColors;
 
-	void calculateElements();
+	const vector<bool> calculateElements();
 
 	void generateNewColors();
 

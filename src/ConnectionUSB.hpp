@@ -51,7 +51,8 @@ public:
 		uint8_t  interface,
 		uint8_t  elements,
 		uint8_t  maxBoards,
-		uint8_t  boardId
+		uint8_t  boardId,
+		char const* name
 	);
 
 	virtual ~ConnectionUSB();
@@ -90,9 +91,9 @@ public:
 	uint8_t getId();
 
 	/**
-	 * @return the device name.
+	 * @return the device name with Id.
 	 */
-	virtual string getName() = 0;
+	string getFullName();
 
 	/**
 	 * Populates the pins with the correct pin number and
@@ -114,6 +115,9 @@ protected:
 
 	/// USB device handle.
 	libusb_device_handle* handle = nullptr;
+
+	/// pinter to the board name.
+	char const* name = nullptr;
 
 	/// App wide libusb session.
 	static libusb_context *usbSession;

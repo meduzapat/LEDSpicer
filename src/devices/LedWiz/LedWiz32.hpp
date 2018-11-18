@@ -41,7 +41,8 @@ public:
 		LEDWIZ32_INTERFACE,
 		LEDWIZ32_LEDS,
 		LEDWIZ32_MAX_BOARDS,
-		boardId
+		boardId,
+		LEDWIZ32_NAME
 	) {}
 
 	virtual ~LedWiz32();
@@ -52,7 +53,6 @@ public:
 
 	uint16_t getProduct();
 
-	string getName();
 };
 
 } /* namespace LedWiz */

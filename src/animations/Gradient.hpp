@@ -52,7 +52,7 @@ protected:
 		/// Keeps the transition percent.
 		currentPercent = 0;
 
-	void calculateElements();
+	const vector<bool> calculateElements();
 
 private:
 

@@ -13,7 +13,7 @@
 
 #define PAC_DRIVE "PAC_DRIVE"
 
-#define IPAC_DRIVE_NAME     "Ultimarc Pac Drive Controller"
+#define PAC_DRIVE_NAME      "Ultimarc Pac Drive Controller"
 #define PAC_DRIVE_PRODUCT    0x1500
 #define PAC_DRIVE_WVALUE     0x0200
 #define PAC_DRIVE_INTERFACE  0
@@ -40,8 +40,6 @@ public:
 	void transfer();
 
 	uint16_t getProduct();
-
-	string getName();
 
 protected:
 

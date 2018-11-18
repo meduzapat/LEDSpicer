@@ -74,42 +74,6 @@ vector<string> Utility::explode(const string& text, const char delimiter, const 
 	return std::move(temp);
 }
 
-bool Utility::verifyValue(int& val, int min, int max, bool truncate) {
-	if (val < min) {
-		if (truncate) {
-			val = min;
-			return true;
-		}
-		return false;
-	}
-	if (val > max) {
-		if (truncate) {
-			val = max;
-			return true;
-		}
-		return false;
-	}
-	return true;
-}
-
-bool Utility::verifyValue(uint8_t& val, uint8_t min, uint8_t max, bool truncate) {
-	if (val < min) {
-		if (truncate) {
-			val = min;
-			return true;
-		}
-		return false;
-	}
-	if (val > max) {
-		if (truncate) {
-			val = max;
-			return true;
-		}
-		return false;
-	}
-	return true;
-}
-
 string Utility::hex2str(int number) {
 	std::stringstream stream;
 	stream << std::hex << std::showbase << number;

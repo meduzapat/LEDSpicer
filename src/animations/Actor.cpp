@@ -26,7 +26,16 @@ Actor::Actor(umap<string, string>& parameters, Group* const group) :
 
 bool Actor::drawFrame() {
 
-	calculateElements();
+	const vector<bool>& affected = calculateElements();
+	switch (filter) {
+	case Color::Filters::Mask:
+		// turn off any other element.
+		for (uint8_t elIdx = 0; elIdx < getNumberOfElements(); ++elIdx) {
+			if (affected[elIdx])
+				continue;
+			changeElementColor(elIdx, Color::getColor("Black"), Color::Filters::Normal, 100);
+		}
+	}
 	advanceActorFrame();
 	if (
 		(isDirectionForward() and currentActorFrame == 1) or
@@ -38,8 +47,8 @@ bool Actor::drawFrame() {
 
 void Actor::drawConfig() {
 	cout <<
-		"Group: "       << group->getName()          <<
-		", Speed: "       << speed2str(speed)        <<
+		"Group: ["      << group->getName()          <<
+		"], Speed: "    << speed2str(speed)          <<
 		", Filter: "    << Color::filter2str(filter) <<
 		", Direction: " << direction2str(direction)  << endl;
 }
@@ -192,14 +201,27 @@ uint8_t Actor::getNumberOfElements() const {
 
 void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 
+	auto elementTmp = group->getElement(index);
+
 	switch (filter) {
 	case Color::Filters::Normal:
-		group->getElement(index)->setColor(color);
+		elementTmp->setColor(color);
 		break;
 	case Color::Filters::Combine:
-		group->getElement(index)->setColor(
-			group->getElement(index)->getColor().transition(color, percent)
+		elementTmp->setColor(
+			elementTmp->getColor().transition(color, percent)
 		);
+		break;
+	case Color::Filters::Mask:
+		elementTmp->setColor(
+			elementTmp->getColor().mask(color.getMonochrome())
+		);
+		break;
+	case Color::Filters::Invert:
+		elementTmp->setColor(
+			elementTmp->getColor().invert()
+		);
+		break;
 	}
 }
 

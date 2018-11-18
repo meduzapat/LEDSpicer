@@ -44,7 +44,7 @@ protected:
 
 	void calculateTailPosition();
 
-	virtual void calculateElements();
+	const vector<bool> calculateElements();
 };
 
 }} /* namespace LEDSpicer */

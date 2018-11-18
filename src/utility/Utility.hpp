@@ -93,22 +93,29 @@ public:
 	 * @param truncate
 	 *        if set to true, the value will be changed to min or max depending on what it fails,
 	 *        this mode always returns true.
-	 * @return
+	 * @return true if the value is acceptable.
 	 */
-	static bool verifyValue(int& val, int min, int max, bool truncate = true);
+	template <typename T>
+	static bool verifyValue(T& val, T min, T max, bool truncate = true) {
+		if (val < min) {
+			if (truncate) {
+				val = min;
+				return true;
+			}
+			return false;
+		}
+		if (val > max) {
+			if (truncate) {
+				val = max;
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
 
 	/**
-	 * Same but for smaller numbers.
-	 * @param val
-	 * @param min
-	 * @param max
-	 * @param truncate
-	 * @return
-	 */
-	static bool verifyValue(uint8_t& val, uint8_t min, uint8_t max, bool truncate = true);
-
-	/**
-	 * converts an integer into is hexadecimal representation.
+	 * Converts an integer into is hexadecimal representation.
 	 * @param number
 	 * @return
 	 */

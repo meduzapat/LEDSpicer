@@ -18,20 +18,21 @@ PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
 		PAC_DRIVE_INTERFACE,
 		PAC_DRIVE_LEDS,
 		PAC_DRIVE_MAX_BOARDS,
-		boardId
+		boardId,
+		PAC_DRIVE_NAME
 	) {
 
 	if (options.count("changePoint"))
 		changePoint = Utility::parseNumber(
 			options["changePoint"],
-			"Invalid value for changePoint device " IPAC_DRIVE_NAME " Id " + to_string(boardId)
+			"Invalid value for changePoint device " PAC_DRIVE_NAME " Id " + to_string(boardId)
 		);
 }
 
 void PacDrive::drawHardwarePinMap() {
 	uint8_t half = PAC_DRIVE_LEDS / 2;
 	cout
-		<< getName() << " Pins " << PAC_DRIVE_LEDS << endl
+		<< getFullName() << " Pins " << PAC_DRIVE_LEDS << endl
 		<< "Hardware pin map:" << endl << "L     R"  << endl;
 	for (uint8_t r = 0; r < half; ++r) {
 		uint8_t l = PAC_DRIVE_LEDS - r - 1;
@@ -63,10 +64,6 @@ void PacDrive::transfer() {
 
 uint16_t PacDrive::getProduct() {
 	return PAC_DRIVE_PRODUCT + board.boardId - 1;
-}
-
-string PacDrive::getName() {
-	return IPAC_DRIVE_NAME;
 }
 
 void PacDrive::afterConnect() {}

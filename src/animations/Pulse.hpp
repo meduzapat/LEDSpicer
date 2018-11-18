@@ -35,7 +35,7 @@ protected:
 
 	Color color;
 
-	virtual void calculateElements();
+	const vector<bool> calculateElements();
 
 };
 

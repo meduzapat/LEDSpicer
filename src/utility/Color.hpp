@@ -12,6 +12,11 @@
 	#define umap std::unordered_map
 #endif
 
+// To handle IO stream.
+#include <iostream>
+using std::cout;
+using std::endl;
+
 // For ints.
 #include <cstdint>
 
@@ -22,7 +27,7 @@ using std::string;
 #include <vector>
 using std::vector;
 
-#include "Log.hpp"
+#include "Error.hpp"
 
 #ifndef COLOR_HPP_
 #define COLOR_HPP_ 1
@@ -37,11 +42,12 @@ class Color {
 public:
 
 	/**
-	 * Normal: will overwrite the background.
-	 * Combine: will combine with the background.
-	 * Diff: Will difference with the background.
+	 * Normal:     Will overwrite the background.
+	 * Combine:    Will combine with the background.
+	 * Mask:       Will cover the background with a mask.
+	 * Invert:     Will Revert the background color.
 	 */
-	enum class Filters : uint8_t {Normal, Combine, Difference};
+	enum class Filters : uint8_t {Normal, Combine, Mask, Invert};
 
 	enum Channels : uint8_t {Red, Green, Blue};
 
@@ -123,7 +129,26 @@ public:
 	 * @param percent
 	 * @return
 	 */
-	Color transition(const Color& destination, uint8_t percent) const;
+	Color transition(const Color& destination, float percent) const;
+
+	/**
+	 * Subtracts a color from another color.
+	 * @param destination
+	 * @return
+	 */
+	Color difference(const Color& destination) const;
+
+	/**
+	 * Creates a mask over the color, more intense the mask, more visible the color.
+	 * @param intensity 0 not visible 255 full visible
+	 * @return
+	 */
+	Color mask(float intensity) const;
+
+	/**
+	 * @return Returns the color inverted.
+	 */
+	Color invert() const;
 
 	/**
 	 * Returns the monochrome version of the color.

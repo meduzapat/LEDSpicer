@@ -15,7 +15,7 @@ using std::vector;
 
 #include "../devices/Group.hpp"
 #include "../utility/Color.hpp"
-#include "../utility/Error.hpp"
+#include "../utility/Log.hpp"
 #include "../utility/Utility.hpp"
 
 #ifndef ANIMATION_HPP_
@@ -139,17 +139,39 @@ protected:
 	Color::Filters filter = Color::Filters::Normal;
 
 	static uint8_t
+		/// Hardware current frame.
 		currentFrame,
+		/// Hardware frames per second.
 		FPS;
 
-	virtual void calculateElements() = 0;
+	/**
+	 * Do the elements calculation.
+	 * @return an array with the affected elements.
+	 */
+	virtual const vector<bool> calculateElements() = 0;
 
 	uint8_t getNumberOfElements() const;
 
+	/**
+	 * Changes the color with a new one applying filters.
+	 * @param index the element to change.
+	 * @param color the new color, only used by filter Normal, Combine, Difference, Mask.
+	 * @param filter
+	 * @param percent the amount of effect to apply, only used by Combine.
+	 */
 	void changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent = 50);
 
+	/**
+	 * Changes the colors with a new one applying filters.
+	 * @param color the new color, only used by filter Normal, Combine, Difference and Mask.
+	 * @param filter
+	 * @param percent the amount of effect to apply, only used by Combine.
+	 */
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
 
+	/**
+	 * Moves the frame to the next one.
+	 */
 	virtual void advanceActorFrame();
 
 	/**

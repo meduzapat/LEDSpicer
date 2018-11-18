@@ -79,47 +79,45 @@ void Filler::advanceActorFrame() {
 	changeFrame++;
 }
 
-void Filler::calculateElements() {
+const vector<bool> Filler::calculateElements() {
 
 	switch (mode) {
-	case Modes::Linear:
-	case Modes::LinearSimple:
-
+	default:
 		if (cDirection == Directions::Forward)
-			fillElementsLinear(
+			return fillElementsLinear(
 				filling ? 0                 : currentActorFrame - 1,
 				filling ? currentActorFrame : totalActorFrames
 			);
-		else
-			fillElementsLinear(
-				filling ? currentActorFrame - 1 : 0,
-				filling ? totalActorFrames  : currentActorFrame
-			);
-		break;
+		return fillElementsLinear(
+			filling ? currentActorFrame - 1 : 0,
+			filling ? totalActorFrames  : currentActorFrame
+		);
 
 	// Forward or backward will work in the same way for random modes.
 	case Modes::Random:
-		fillElementsRandom(filling);
-		break;
+		return fillElementsRandom(filling);
 	case Modes::RandomSimple:
 		if (isFirstFrame() and not isSameFrame())
 			std::fill(elementsOn.begin(), elementsOn.end(), false);
-		fillElementsRandom(true);
-		break;
+		return fillElementsRandom(true);
 	}
 }
 
-void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
-	for (uint8_t c = begin; c < end; ++c)
+const vector<bool> Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
+	vector<bool> elements(getNumberOfElements(), false);
+	for (uint8_t c = begin; c < end; ++c) {
 		changeElementColor(c, color, filter);
+		elements[c] = true;
+	}
+	return elements;
 }
 
-void Filler::fillElementsRandom(bool val) {
+const vector<bool> Filler::fillElementsRandom(bool val) {
 
 	// Draw.
 	if (isSameFrame()) {
 		drawRandom();
-		return;
+		return elementsOn;
 	}
 
 	// Extract candidates.
@@ -142,6 +140,8 @@ void Filler::fillElementsRandom(bool val) {
 		filling = not filling;
 		currentActorFrame = totalActorFrames;
 	}
+
+	return elementsOn;
 }
 
 void Filler::drawRandom() {

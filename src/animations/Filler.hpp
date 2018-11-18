@@ -31,13 +31,15 @@ public:
 
 	virtual void advanceActorFrame();
 
-	void calculateElements();
-
 	void drawConfig();
 
 	string mode2str(Modes mode);
 
 	Modes str2mode(const string& mode);
+
+protected:
+
+	const vector<bool> calculateElements();
 
 private:
 
@@ -55,14 +57,16 @@ private:
 
 	/**
 	 * Fills the group in a linear way.
+	 * @return The elements that changed.
 	 */
-	void fillElementsLinear(uint8_t begin, uint8_t end);
+	const vector<bool> fillElementsLinear(uint8_t begin, uint8_t end);
 
 	/**
 	 * Fills the group in a random way.
 	 * @param val
+	 * @return The elements that changed.
 	 */
-	void fillElementsRandom(bool val);
+	const vector<bool> fillElementsRandom(bool val);
 
 	/**
 	 * Draw the random values.

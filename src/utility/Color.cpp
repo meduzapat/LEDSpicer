@@ -105,24 +105,54 @@ Color Color::fade(uint percent) const {
 	return color;
 }
 
-Color Color::transition(const Color& destination, uint8_t percent) const {
-	if (not percent)
+Color Color::transition(const Color& destination, float percent) const {
+	if (percent < 1)
 		return *this;
 
-	if (percent == 100)
+	if (percent > 99)
 		return destination;
 
-	Color rColor(
+	return Color(
 		transition(r, destination.r, percent),
 		transition(g, destination.g, percent),
 		transition(b, destination.b, percent)
 	);
+}
 
-	return rColor;
+Color Color::difference(const Color& destination) const {
+	return Color(
+		r - destination.r,
+		g - destination.g,
+		b - destination.b
+	);
+}
+
+Color Color::mask(float intensity) const {
+	if (intensity > 254)
+		return *this;
+	if (intensity < 1)
+		return Color();
+	return Color(
+		r * static_cast<float>(intensity) / 255,
+		g * static_cast<float>(intensity) / 255,
+		b * static_cast<float>(intensity) / 255
+	);
+}
+
+Color Color::invert() const {
+	return Color(
+		255 - r,
+		255 - g,
+		255 - b
+	);
 }
 
 uint8_t Color::getMonochrome() const {
-	return static_cast<uint8_t>(0.301 * (float)r + 0.587 * (float)g + 0.114 * (float)b);
+	return static_cast<uint8_t>(
+		0.301 * static_cast<float>(r) +
+		0.587 * static_cast<float>(g) +
+		0.114 * static_cast<float>(b)
+	);
 }
 
 uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
@@ -173,10 +203,12 @@ string Color::filter2str(Filters filter) {
 		return "Normal";
 	case Filters::Combine:
 		return "Combine";
-	case Filters::Difference:
-		return "Difference";
+	case Filters::Mask:
+		return "Mask";
+	case Filters::Invert:
+		return "Invert";
 	}
-	return "";
+	throw Error("Invalid filter");
 }
 
 Color::Filters Color::str2filter(const string& filter) {
@@ -184,10 +216,11 @@ Color::Filters Color::str2filter(const string& filter) {
 		return Filters::Normal;
 	if (filter == "Combine")
 		return Filters::Combine;
-	if (filter == "Difference")
-		return Filters::Difference;
-	LogError("Invalid filter type " + filter + " assuming Combine");
-	return Filters::Combine;
+	if (filter == "Mask")
+		return Filters::Mask;
+	if (filter == "Invert")
+		return Filters::Invert;
+	throw Error("Invalid filter type " + filter);
 }
 
 const vector<string>& Color::getNames() {
@@ -204,6 +237,5 @@ string Color::getName() const {
 const Color& Color::getColor(const string& color) {
 	if (colors.count(color))
 		return colors[color];
-	LogError("Unknown color " + color);
-	return colors["White"];
+	throw Error("Unknown color " + color);
 }

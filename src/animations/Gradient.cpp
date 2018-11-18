@@ -36,7 +36,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	currentColor = cDirection == Directions::Forward ? 1 : colors.size();
 }
 
-void Gradient::calculateElements() {
+const vector<bool> Gradient::calculateElements() {
 	switch (mode) {
 	case Modes::All:
 		calculateSingle();
@@ -46,10 +46,11 @@ void Gradient::calculateElements() {
 		calculateMultiple();
 		break;
 	}
+	return vector<bool>(getNumberOfElements(), true);
 }
 
 void Gradient::drawConfig() {
-	cout << "Actor Type: Gradient" << endl << "Mode: " << mode2str(mode) << ", ";
+	cout << "Actor Type: Gradient" << ", Mode: " << mode2str(mode) << endl;
 	Actor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);

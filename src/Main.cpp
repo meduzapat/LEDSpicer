@@ -65,7 +65,7 @@ Main::Main(Modes mode) :
 Main::~Main() {
 
 	for (auto d : DataLoader::devices) {
-		LogInfo("Closing " + d->getName());
+		LogInfo("Closing " + d->getFullName());
 		delete d;
 	}
 
@@ -207,6 +207,7 @@ void Main::dumpConfiguration() {
 	}
 	cout << endl << "Default Profile:" << endl;
 	DataLoader::defaultProfile->drawConfig();
+	cout << endl;
 }
 
 int main(int argc, char **argv) {
@@ -376,7 +377,7 @@ Device* Main::selectDevice() {
 		uint8_t deviceIndex;
 		cout << "Select a device:" << endl;
 		for (uint8_t c = 0; c < DataLoader::devices.size(); ++c)
-			cout << c+1 << ": " << DataLoader::devices[c]->getName() << " id: " << DataLoader::devices[c]->getId() << endl;
+			cout << c + 1 << ": " << DataLoader::devices[c]->getFullName() << endl;
 		std::getline(std::cin, inp);
 		if (inp == "q")
 			return nullptr;

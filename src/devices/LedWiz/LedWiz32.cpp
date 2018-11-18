@@ -18,7 +18,7 @@ LedWiz32::~LedWiz32() {
 void LedWiz32::drawHardwarePinMap() {
 	uint8_t half = LEDWIZ32_LEDS / 2;
 	cout
-		<< getName() << " Pins " << LEDWIZ32_LEDS << endl
+		<< getFullName() << " Pins " << LEDWIZ32_LEDS << endl
 		<< "Hardware pin map:" << endl << "L     R"  << endl;
 	for (uint8_t r = 0; r < half; ++r) {
 		uint8_t l = LEDWIZ32_LEDS - r - 1;
@@ -42,8 +42,4 @@ void LedWiz32::transfer() {
 
 uint16_t LedWiz32::getProduct() {
 	return LEDWIZ32_PRODUCT + board.boardId - 1;
-}
-
-string LedWiz32::getName() {
-	return LEDWIZ32_NAME;
 }

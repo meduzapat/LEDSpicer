@@ -35,7 +35,7 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 	generateNewColors();
 }
 
-void Random::calculateElements() {
+const vector<bool> Random::calculateElements() {
 
 	uint8_t percent = (currentActorFrame * 100) / totalActorFrames;
 
@@ -46,6 +46,7 @@ void Random::calculateElements() {
 		oldColors = std::move(newColors);
 		generateNewColors();
 	}
+	return vector<bool>(getNumberOfElements(), true);
 }
 
 void Random::generateNewColors() {

@@ -22,8 +22,10 @@ ConnectionUSB::ConnectionUSB(
 		uint8_t  interface,
 		uint8_t  elements,
 		uint8_t  maxBoards,
-		uint8_t  boardId
+		uint8_t  boardId,
+		char const* name
 ) :
+	name(name),
 	requestType(requestType),
 	request(request)
 {
@@ -32,7 +34,7 @@ ConnectionUSB::ConnectionUSB(
 		throw Error("USB session not initialized");
 #endif
 
-	if (not Utility::verifyValue(boardId, 1, maxBoards, false))
+	if (not Utility::verifyValue<uint8_t>(boardId, 1, maxBoards, false))
 		throw Error("Board id should be a number between 1 and " + to_string(maxBoards));
 
 	board.interface = interface;
@@ -48,9 +50,11 @@ ConnectionUSB::~ConnectionUSB() {
 	if (not handle)
 		return;
 
-	LogInfo("Releasing interface " + to_string(board.interface) + " Id " + to_string(board.boardId));
+	LogInfo("Releasing interface: " + to_string(board.interface) + " Id: " + to_string(board.boardId));
 	libusb_release_interface(handle, board.interface);
-	libusb_reset_device(handle);
+	auto r = libusb_reset_device(handle);
+	if (r)
+		LogWarning(getFullName() + string(libusb_error_name(r)));
 	libusb_close(handle);
 	handle = nullptr;
 }
@@ -64,12 +68,16 @@ void ConnectionUSB::initialize() {
 
 void ConnectionUSB::connect() {
 
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getName());
+	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
 
 	handle = libusb_open_device_with_vid_pid(usbSession, getVendor(), getProduct());
 
 	if (not handle)
-		throw Error("Unable to connect to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getName());
+		throw Error(
+			"Unable to connect to " +
+			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
+			" " + getFullName()
+		);
 
 	libusb_set_auto_detach_kernel_driver(handle, true);
 }
@@ -78,7 +86,11 @@ void ConnectionUSB::claimInterface() {
 
 	LogInfo("Claiming interface " + to_string(board.interface));
 	if (libusb_claim_interface(handle, board.interface))
-		throw Error("Unable to claim interface to " + to_string(getVendor()) + ":" + to_string(getProduct()) + " " + getName());
+		throw Error(
+			"Unable to claim interface to " +
+			to_string(getVendor()) + ":" + to_string(getProduct()) +
+			" " + getFullName()
+		);
 }
 
 void ConnectionUSB::openSession() {
@@ -132,7 +144,7 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 #ifdef DRY_RUN
 	#ifdef NO_OUTPUT
 	return;
-	#endif;
+	#endif
 	uint8_t count = MAX_DUMP_COLUMNS;
 	for (auto pin : data) {
 		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)pin << ' ';
@@ -165,20 +177,7 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		" wIndex: "       + Utility::hex2str(board.interface) +
 		" wLength: "      + to_string(data.size())
 	);
-	switch (responseCode) {
-	case LIBUSB_ERROR_TIMEOUT:
-		throw Error("Transfer timed out");
-	case LIBUSB_ERROR_PIPE:
-		throw Error("control request was not supported by the device");
-	case LIBUSB_ERROR_NO_DEVICE:
-		throw Error("Device has been disconnected");
-	case LIBUSB_ERROR_BUSY:
-		throw Error("Busy");
-	case LIBUSB_ERROR_INVALID_PARAM:
-		throw Error ("transfer size is larger than the operating system and/or hardware can support");
-	default:
-		throw Error ("Libusb error " + to_string(responseCode));
-	}
+	throw Error(string(libusb_error_name(responseCode)) + " for " + getFullName());
 #endif
 }
 
@@ -191,4 +190,6 @@ uint8_t ConnectionUSB::getInterval() {
 	return waitTime;
 }
 
-
+string ConnectionUSB::getFullName() {
+	return "device: " + string(name) + " Id: " + to_string(board.boardId);
+}
