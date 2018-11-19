@@ -111,6 +111,14 @@ public:
 	void set(const string& color);
 	void set(const Color& color);
 
+	/**
+	 * Applies a color with a filter.
+	 * @param color
+	 * @param filter
+	 * @return self
+	 */
+	Color* set(const Color& color, const Filters& filter, uint8_t percent = 50);
+
 	uint8_t getR() const;
 	uint8_t getG() const;
 	uint8_t getB() const;

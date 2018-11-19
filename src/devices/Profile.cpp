@@ -130,3 +130,19 @@ uint8_t Profile::getAnimationsCount() const {
 const string& Profile::getName() const {
 	return name;
 }
+
+const umap<string, const LEDSpicer::Color*>& Profile::getElementsOverwrite() const {
+	return elementsOverwrite;
+}
+
+void Profile::addElementOverwrite(const string& element ,const string& color) {
+	this->elementsOverwrite.emplace(element, &Color::getColor(color));
+}
+
+const umap<string, const LEDSpicer::Color*>& Profile::getGroupsOverwrite() const {
+	return groupsOverwrite;
+}
+
+void Profile::addGroupOverwrite(const string& group, const string& color) {
+	this->groupsOverwrite.emplace(group, &Color::getColor(color));
+}

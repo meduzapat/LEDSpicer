@@ -54,7 +54,7 @@ ConnectionUSB::~ConnectionUSB() {
 	libusb_release_interface(handle, board.interface);
 	auto r = libusb_reset_device(handle);
 	if (r)
-		LogWarning(getFullName() + string(libusb_error_name(r)));
+		LogWarning(getFullName() + " " + string(libusb_error_name(r)));
 	libusb_close(handle);
 	handle = nullptr;
 }

@@ -71,6 +71,34 @@ void Color::set(const Color& color) {
 	set(color.r, color.g, color.b);
 }
 
+Color* Color::set(const Color& color, const Filters& filter, uint8_t percent) {
+
+	switch (filter) {
+	case Color::Filters::Normal:
+		set(color);
+		break;
+
+	case Color::Filters::Combine:
+		set(
+			this->transition(color, percent)
+		);
+		break;
+
+	case Color::Filters::Mask:
+		set(
+			this->mask(color.getMonochrome())
+		);
+		break;
+
+	case Color::Filters::Invert:
+		set(
+			this->invert()
+		);
+		break;
+	}
+	return this;
+}
+
 uint8_t Color::getR() const {
 	return r;
 }

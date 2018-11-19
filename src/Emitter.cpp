@@ -9,67 +9,124 @@
 #include "Emitter.hpp"
 
 using namespace LEDSpicer;
+
 int main(int argc, char **argv) {
 
-	string commandline;
-
-	if (argc < 2) {
-		cout << "invalid input" << endl;
-		return 0;
-	}
+	string
+		commandline,
+		configFile = "",
+		rawMessage;
 
 	Message msg;
-	try {
-		msg.type = static_cast<Message::Types>(std::stoi(argv[1]));
-	}
-	catch (...) {
-		cout << "Invalid message received" << endl;
-		return false;
-	}
 
-	for (int i = 2; i < argc; i++) {
-		msg.data.push_back(argv[i]);
-	}
+	for (int i = 1; i < argc; i++) {
 
-	int sockfd;
-	addrinfo
-		hints,
-		* servinfo,
-		* p;
+		commandline = argv[i];
 
-	int rv;
-	int numbytes;
+		// Help text.
+		if (commandline == "-h" or commandline == "--help") {
+			cout <<
+				"Emitter command line usage:\n"
+				"Emitter <options> <command>\n\n"
+				"command:\n" <<
+				Message::type2str(Message::Types::LoadProfile) <<
+				" profile1 profile2 ... profileX  Attempts to load the first valid profile from a list of profiles.\n" <<
+				Message::type2str(Message::Types::LoadProofileByEmulator) <<
+				" emulator rom         Attempts to load a profile based on the emulator and the ROM.\n" <<
+				Message::type2str(Message::Types::FinishLastProfile) <<
+				"                           Terminates the current profile (doens't affect the default).\n" <<
+				Message::type2str(Message::Types::SetElement) <<
+				" elementName color filter         Changes an element's background color until the profile ends.\n" <<
+				Message::type2str(Message::Types::ClearElement) <<
+				" elementName                    Removes an element's background color.\n" <<
+				Message::type2str(Message::Types::ClearAllElements) <<
+				"                            Removes all element's background color.\n" <<
+				Message::type2str(Message::Types::SetGroup) <<
+				" groupName color filter             Changes a group's background color until the profile ends.\n" <<
+				Message::type2str(Message::Types::ClearGroup) <<
+				" groupName                        Removes a group's background color.\n" <<
+				Message::type2str(Message::Types::ClearAllGroups) <<
+				"                              Changes all group's background color.\n\n"
+				"options:\n"
+				"-c <conf> or --config <conf> Use an alternative configuration file\n"
+				"-v or --version              Display version information\n"
+				"-h or --help                 Display this help screen.\n"
+				"If -c or --config is not provided emitter will use " CONFIG_FILE
+				<< endl;
+			return EXIT_SUCCESS;
+		}
 
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
+		// Version Text.
+		if (commandline == "-v" or commandline == "--version") {
+			cout
+				<< endl <<
+				"Emitter is part of " PACKAGE_STRING << endl <<
+				PACKAGE_STRING " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
+				"For more information visit <" PACKAGE_URL ">\n\n"
+				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
+				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				<< endl;
+			return EXIT_SUCCESS;
+		}
 
-	if ((rv = getaddrinfo("127.0.0.1", "16161", &hints, &servinfo)) != 0)
-		throw Error(gai_strerror(rv));
-
-	// loop through all the results and make a socket
-	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-			cout << "Emitter: socket" << endl;
+		// Alternative configuration.
+		if (commandline == "-c" or commandline == "--config") {
+			configFile = argv[++i];
 			continue;
 		}
 
-		break;
+		if (msg.getType() == Message::Types::Invalid) {
+			try {
+				msg.setType(Message::str2type(commandline));
+				continue;
+			}
+			catch (Error& e) {
+				LogError(e.getMessage());
+				return EXIT_FAILURE;
+			}
+		}
+		else {
+			msg.addData(commandline);
+		}
 	}
 
-	freeaddrinfo (servinfo);
+	if (msg.getType() == Message::Types::Invalid) {
+		LogError("Nothing to do");
+		return EXIT_SUCCESS;
+	}
 
-	if (p == NULL)
-		throw Error("Emitter: failed to create socket\n");
+	Log::initialize(true);
 
-	if ((numbytes = ::sendto(sockfd, msg.toString().c_str(), msg.toString().size(), 0, p->ai_addr, p->ai_addrlen)) == -1)
-		throw Error("Emitter: sendto");
+	if (configFile.empty())
+		configFile = CONFIG_FILE;
 
+	try {
 
-	printf("talker: sent %d bytes to %s\n", numbytes, argv[1]);
-	close (sockfd);
+		// Read Configuration.
+		XMLHelper config(configFile, "Configuration");
+		umap<string, string> configValues;
+		const tinyxml2::XMLAttribute* pAttrib = config.getRoot()->FirstAttribute();
+		while (pAttrib) {
+			string value = pAttrib->Value();
+			configValues.emplace(pAttrib->Name(), value);
+			pAttrib = pAttrib->Next();
+		}
+		Utility::checkAttributes({"port"}, configValues, "root");
 
-	return 0;
+		// Set log level.
+		if (configValues.count("logLevel"))
+			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
 
+		// Open connection and send message.
+		Socks sock(LOCALHOST, configValues["port"]);
+		bool r = sock.send(msg.toString());
+		LogDebug("Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
+	}
+	catch(Error& e) {
+		LogError("Error: " + e.getMessage());
+		return EXIT_FAILURE;
+	}
 
+	return EXIT_SUCCESS;
 }

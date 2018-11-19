@@ -18,22 +18,20 @@ bool Messages::read() {
 			return false;
 		Message msg;
 		vector<string> chunks = Utility::explode(buffer, DELIMITER);
-		if (chunks.size() < 2) {
+		if (not chunks.size()) {
 			LogNotice("Malformed message received");
 			return false;
 		}
-		// Discard trash
-		chunks.pop_back();
 
 		try {
-			msg.type = static_cast<Message::Types>(std::stoi(chunks.back()));
+			msg.setType(static_cast<Message::Types>(std::stoi(chunks.back())));
 		}
 		catch (...) {
 			LogNotice("Invalid message type received");
 			return false;
 		}
 		chunks.pop_back();
-		msg.data = std::move(chunks);
+		msg.setData(std::move(chunks));
 		messages.push(msg);
 	}
 	return messages.size() > 0;

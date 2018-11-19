@@ -23,19 +23,40 @@ namespace LEDSpicer {
 
 struct Message {
 
-	enum class Types : uint8_t {LoadProfile, FinishLastProfile, SetLed, SetElement};
+	enum class Types : uint8_t {
+		Invalid,
+		LoadProfile,
+		LoadProofileByEmulator,
+		FinishLastProfile,
+		SetElement,
+		ClearElement,
+		ClearAllElements,
+		SetGroup,
+		ClearGroup,
+		ClearAllGroups
+	};
 
-	Types type;
+	string toString();
+
+	static string type2str(Types type);
+
+	static Types str2type(const string& type);
+
+	const vector<string>& getData() const;
+
+	void setData(const vector<string>& data);
+
+	void addData(const string& data);
+
+	Types getType() const;
+
+	void setType(Types type);
+
+protected:
+
+	Types type = Types::Invalid;
 
 	vector<string> data;
-
-	string toString() {
-		string ret;
-		for (auto& s : data)
-			ret.append(s).push_back(DELIMITER);
-		ret.append(to_string(static_cast<uint8_t>(type))).push_back(DELIMITER);
-		return ret;
-	}
 };
 
 }

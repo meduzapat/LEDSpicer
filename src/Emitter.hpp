@@ -8,35 +8,22 @@
 
 #include <sys/socket.h>
 #include <netdb.h>
+
 #include <iostream>
 using std::cout;
 using std::endl;
+
 #include <unistd.h>
+
 #include <cstring>
 
-#include "Message.hpp"
+#include "Messages.hpp"
+#include "utility/XMLHelper.hpp"
 
 #ifndef EMITTER_HPP_
 #define EMITTER_HPP_ 1
 
-namespace LEDSpicer {
-
-/**
- * LEDSpicer::Emitter
- */
-class Emitter {
-
-public:
-
-	Emitter() {
-		//"127.0.0.1", "16161"
-
-	}
-
-	virtual ~Emitter() {
-	}
-
-};
+#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
 
 /**
  * Main function.
@@ -47,8 +34,5 @@ public:
  * @return exit code.
  */
 int main(int argc, char **argv);
-
-}
-/* namespace LEDSpicer */
 
 #endif /* EMITTER_HPP_ */

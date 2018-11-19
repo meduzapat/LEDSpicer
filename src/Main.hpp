@@ -26,21 +26,10 @@
  *
  */
 
-// To handle daemonization.
-#include <unistd.h>
-
-// To handle c signals.
-#include <csignal>
-using std::signal;
-
-#include "Messages.hpp"
-#include "DataLoader.hpp"
-#include "devices/Group.hpp"
+#include "MainBase.hpp"
 
 #ifndef MAIN_HPP_
 #define MAIN_HPP_ 1
-
-#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
 
 namespace LEDSpicer {
 
@@ -49,26 +38,11 @@ using Devices::Device;
 /**
  * LEDSpicer::main
  */
-class Main {
+class Main : public MainBase {
 
 public:
 
-	enum class Modes : uint8_t {
-		/// Do not detach from head.
-		Foreground,
-		/// Dump Config and exit.
-		Dump,
-		/// Run as a daemon.
-		Normal,
-		/// Run LEDs test.
-		TestLed,
-		/// Run Elements test.
-		TestElement
-	};
-
-	Main(Modes mode);
-
-	virtual ~Main();
+	using MainBase::MainBase;
 
 	/**
 	 * Starts the main loop.
@@ -76,58 +50,14 @@ public:
 	void run();
 
 	/**
-	 * Starts the the LEDs test.
+	 * Executes the current profile.
 	 */
-	void testLeds();
-
-	/**
-	 * Starts the Elements test.
-	 */
-	void testElements();
+	void runCurrentProfile();
 
 	/**
 	 * Stops the main loop.
 	 */
 	static void terminate();
-
-	/**
-	 * Starts the dump configuration.
-	 */
-	void dumpConfiguration();
-
-protected:
-
-	/// Flag for the main loop.
-	static bool running;
-
-	/// Keeps messages incoming.
-	Messages messages;
-
-	/**
-	 * Stack of profiles.
-	 */
-	vector<Profile*> profiles;
-
-	/**
-	 * Executes the current profile.
-	 */
-	void runCurrentProfile();
-
-private:
-
-	/**
-	 * Functionality for test programs.
-	 * @return
-	 */
-	Device* selectDevice();
-
-	/**
-	 * Attempts to load profiles from a list of names.
-	 * @param data
-	 * @return nullptr if all failed.
-	 */
-	Profile* tryProfiles(const vector<string>& data);
-
 };
 
 /**

@@ -46,11 +46,15 @@ public:
 	virtual ~Element() {}
 
 	/**
-	 * Translates a color into pin values.
+	 * Replaces the pin values with a new color.
 	 * @param color
 	 */
 	void setColor(const Color& color);
 
+	/**
+	 * Covert the pin values into color.
+	 * @return
+	 */
 	Color getColor();
 
 	/**

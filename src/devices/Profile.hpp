@@ -97,6 +97,14 @@ public:
 	 */
 	const string& getName() const;
 
+	const umap<string, const Color*>& getElementsOverwrite() const;
+
+	void addElementOverwrite(const string& element ,const string& color);
+
+	const umap<string, const Color*>& getGroupsOverwrite() const;
+
+	void addGroupOverwrite(const string& group, const string& color);
+
 protected:
 
 	/// Color to use when cleaning up.
@@ -120,10 +128,10 @@ protected:
 	umap<string, vector<Actor*>> animations;
 
 	/// List of Elements by name that need the color to be changed.
-	umap<string, const Color* const> elementsOverwrite;
+	umap<string, const Color*> elementsOverwrite;
 
 	/// List of Groups by name that need the color to be changed.
-	umap<string, const Color* const> groupsOverwrite;
+	umap<string, const Color*> groupsOverwrite;
 
 private:
 

@@ -26,7 +26,9 @@ ledspicerd_SOURCES =                  \
 	src/animations/Random.cpp         \
 	src/animations/Filler.cpp         \
 	src/devices/Profile.cpp           \
+	src/Message.cpp                   \
 	src/Messages.cpp                  \
+	src/MainBase.cpp                  \
 	src/Main.cpp
 
 ledspicerd_CPPFLAGS =                     \
@@ -41,12 +43,20 @@ ledspicerd_CXXFLAGS =    \
 ledspicerd_LDFLAGS =    \
 	${LEDSPICER_LIBS}
 
-emitter_SOURCES =           \
-	src/utility/Log.cpp     \
-	src/utility/Error.cpp   \
-	src/utility/Utility.cpp \
-	src/utility/Socks.cpp   \
+emitter_SOURCES =             \
+	src/utility/Log.cpp       \
+	src/utility/Error.cpp     \
+	src/utility/Utility.cpp   \
+	src/utility/Socks.cpp     \
+	src/utility/XMLHelper.cpp \
+	src/Message.cpp           \
+	src/Messages.cpp          \
 	src/Emitter.cpp
+
+emitter_CPPFLAGS =                        \
+	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
+	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)\"  \
+	$(LEDSPICER_CPPFLAGS)
 
 emitter_CXXFLAGS =     \
 	${CXXFLAGS}        \
@@ -115,6 +125,7 @@ EXTRA_DIST =                          \
 	src/devices/Profile.hpp           \
 	src/Messages.hpp                  \
 	src/Message.hpp                   \
+	src/MainBase.hpp                  \
 	src/Main.hpp                      \
 	src/Emitter.hpp                   \
 	data/ledspicer.conf               \

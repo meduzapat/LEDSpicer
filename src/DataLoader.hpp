@@ -22,6 +22,8 @@
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
 
+#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
+
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
 #define REQUIRED_PARAM_DEVICE         {"name", "boardId"}

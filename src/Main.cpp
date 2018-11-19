@@ -15,8 +15,6 @@
 
 using namespace LEDSpicer;
 
-bool Main::running = false;
-
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
@@ -40,52 +38,23 @@ void signalHandler(int sig) {
 	exit(EXIT_FAILURE);
 }
 
-Main::Main(Modes mode) :
-	messages(mode == Modes::Normal or mode == Modes::Foreground ? DataLoader::portNumber : "")
-{
-	profiles.push_back(DataLoader::defaultProfile);
-	if (mode == Modes::Dump)
-		return;
-
-#ifndef DRY_RUN
-	if (mode == Modes::Normal) {
-		LogDebug("Daemonizing");
-		if (daemon(0, 0) == -1) {
-			throw Error("Unable to daemonize.");
-		}
-		LogDebug("Daemonized");
-	}
-	for (auto device : DataLoader::devices)
-		device->initialize();
-#endif
-
-	running = true;
-}
-
-Main::~Main() {
-
-	for (auto d : DataLoader::devices) {
-		LogInfo("Closing " + d->getFullName());
-		delete d;
-	}
-
-	for (auto p : DataLoader::profiles)
-		delete p.second;
-
-	ConnectionUSB::terminate();
-}
-
 void Main::run() {
 
 	LogInfo("LEDSpicer Running");
+
+	const char* invalidMessage = "Invalid message ";
+	const char* invalidElement = "Unknown element ";
+	const char* invalidGroup   = "Unknown group ";
 
 	while (running) {
 
 		if (messages.read()) {
 			Message msg = messages.getMessage();
-			switch (msg.type) {
+			LogDebug("Received message: task: " + Message::type2str(msg.getType()) + " data: " + msg.toString());
+			switch (msg.getType()) {
+
 			case Message::Types::LoadProfile:
-				if (not tryProfiles(msg.data))
+				if (not tryProfiles(msg.getData()))
 					LogNotice("All requested profiles failed");
 				break;
 
@@ -94,7 +63,7 @@ void Main::run() {
 					LogDebug("Cannot terminate the default profile.");
 					break;
 				}
-				if (profiles.back()->isTerminating()) {
+				if (profiles.back()->isTransiting()) {
 					LogNotice("Profile " + profiles.back()->getName() + " is finishing, try later.");
 					break;
 				}
@@ -102,6 +71,89 @@ void Main::run() {
 				profiles.back()->terminate();
 				break;
 
+			case Message::Types::SetElement:
+				if (msg.getData().size() != 3) {
+					LogNotice(invalidMessage);
+					break;
+				}
+				if (not DataLoader::allElements.count(msg.getData()[0])) {
+					LogNotice(invalidElement + msg.getData()[0]);
+					break;
+				}
+				try {
+					if (alwaysOnElements.count(msg.getData()[0]))
+						alwaysOnElements[msg.getData()[0]] = ElementItem{
+						DataLoader::allElements[msg.getData()[0]],
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					};
+					else
+						alwaysOnElements.emplace(msg.getData()[0], ElementItem{
+							DataLoader::allElements[msg.getData()[0]],
+							&Color::getColor(msg.getData()[1]),
+							Color::str2filter(msg.getData()[2])
+						});
+				}
+				catch (Error& e) {
+					LogNotice(e.getMessage());
+				}
+				break;
+
+			case Message::Types::ClearElement:
+				if (msg.getData().size() != 1) {
+					LogNotice(invalidMessage + msg.getData()[0]);
+					break;
+				}
+				if (alwaysOnElements.count(msg.getData()[0]))
+					alwaysOnElements.erase(msg.getData()[0]);
+				break;
+
+			case Message::Types::ClearAllElements:
+				alwaysOnElements.clear();
+				break;
+
+			case Message::Types::SetGroup:
+				if (msg.getData().size() != 3) {
+					LogNotice(invalidMessage);
+					break;
+				}
+				if (not DataLoader::layout.count(msg.getData()[0])) {
+					LogNotice(invalidGroup + msg.getData()[0]);
+					break;
+				}
+				try {
+					if (alwaysOnGroups.count(msg.getData()[0]))
+						alwaysOnGroups[msg.getData()[0]] = GroupItem{
+							&DataLoader::layout[msg.getData()[0]],
+							&Color::getColor(msg.getData()[1]),
+							Color::str2filter(msg.getData()[2])
+						};
+					else
+						alwaysOnGroups.emplace(msg.getData()[0], GroupItem{
+							&DataLoader::layout[msg.getData()[0]],
+							&Color::getColor(msg.getData()[1]),
+							Color::str2filter(msg.getData()[2])
+						});
+				}
+				catch (Error& e) {
+					LogNotice(e.getMessage());
+				}
+				break;
+
+			case Message::Types::ClearGroup:
+				if (msg.getData().size() != 1) {
+					LogNotice(invalidGroup + msg.getData()[0]);
+					break;
+				}
+				if (alwaysOnGroups.count(msg.getData()[0]))
+					alwaysOnGroups.erase(msg.getData()[0]);
+				break;
+
+			case Message::Types::ClearAllGroups:
+				alwaysOnGroups.clear();
+				break;
+
+			// Other request that are not handled by ledspicerd.
 			default:
 				break;
 			}
@@ -115,99 +167,8 @@ void Main::run() {
 		profiles[0]->runFrame();
 }
 
-void Main::testLeds() {
-	cout << "Test LEDs (q to quit)" << endl;
-	string inp;
-	Device* device = selectDevice();
-	if (not device)
-		return;
-
-	while (true) {
-		uint8_t led;
-		std::cin.clear();
-		cout << endl << "Select a Led (r to reset, q to quit):" << endl;
-		std::getline(std::cin, inp);
-
-		if (inp == "r") {
-			device->setLeds(0);
-			device->transfer();
-			continue;
-		}
-
-		if (inp == "q")
-			return;
-
-		try {
-			led = std::stoi(inp) - 1;
-			if (led >= device->getNumberOfLeds())
-				throw "";
-			device->setLed(led, 255);
-			device->transfer();
-		}
-		catch (...) {
-			cerr << "Invalid pin number" << endl;
-		}
-	}
-}
-
-void Main::testElements() {
-	cout << "Test Elements (q to quit)" << endl;
-	string inp;
-	Device* device = selectDevice();
-	if (not device)
-		return;
-
-	while (true) {
-		std::cin.clear();
-
-		for (auto e : *device->getElements())
-			cout << e.second.getName() << endl;
-		cout << endl << "Enter an element name (r to reset, q to quit):" << endl;
-
-		std::getline(std::cin, inp);
-
-		if (inp == "r") {
-			device->setLeds(0);
-			device->transfer();
-			continue;
-		}
-
-		if (inp == "q")
-			return;
-
-		try {
-			Element* element = device->getElement(inp);
-			element->setColor(Color::getColor("White"));
-			device->transfer();
-		}
-		catch (...) {
-			cerr << "Invalid pin number" << endl;
-		}
-	}
-}
-
 void Main::terminate() {
 	running = false;
-}
-
-void Main::dumpConfiguration() {
-	cout << endl << "System Configuration:" << endl << "Colors:" << endl;
-	Color::drawColors();
-	cout  << endl << "Hardware:" << endl;
-	for (auto d : DataLoader::devices)
-		d->drawHardwarePinMap();
-	cout <<
-		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
-		"Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl <<
-		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
-		"Layout:";
-	for (auto group : DataLoader::layout) {
-		cout << endl << "Group: '" << group.first << "' with ";
-		group.second.drawElements();
-	}
-	cout << endl << "Default Profile:" << endl;
-	DataLoader::defaultProfile->drawConfig();
-	cout << endl;
 }
 
 int main(int argc, char **argv) {
@@ -219,7 +180,9 @@ int main(int argc, char **argv) {
 	signal(SIGHUP, signalHandler);
 
 	// Process command line options.
-	string commandline, configFile = "";
+	string
+		commandline,
+		configFile = "";
 
 	// Run in the background.
 	Main::Modes mode = Main::Modes::Normal;
@@ -340,10 +303,6 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 
-//################
-//# Helper stuff #
-//################
-
 void Main::runCurrentProfile() {
 
 	// Reset elements.
@@ -352,11 +311,20 @@ void Main::runCurrentProfile() {
 
 	profiles.back()->runFrame();
 
+	// Set always on groups
+	for (auto& gE : alwaysOnGroups)
+		for (auto eE : gE.second.group->getElements())
+			eE->setColor(*eE->getColor().set(*gE.second.color, gE.second.filter));
+
+	// Set always on elements
+	for (auto& eE : alwaysOnElements)
+		eE.second.element->setColor(*eE.second.element->getColor().set(*eE.second.color, eE.second.filter));
+
 	// Send data.
 	for (auto device : DataLoader::devices)
 		device->transfer();
 
-	// profiles are cached.
+	// Profiles are cached.
 	if (not profiles.back()->isRunning()) {
 		profiles.pop_back();
 		profiles.back()->reset();
@@ -364,50 +332,4 @@ void Main::runCurrentProfile() {
 	else {
 		Actor::advanceFrame();
 	}
-}
-
-Device* Main::selectDevice() {
-
-	if (DataLoader::devices.size() == 1)
-		return DataLoader::devices[0];
-
-	string inp;
-	while (true) {
-		std::cin.clear();
-		uint8_t deviceIndex;
-		cout << "Select a device:" << endl;
-		for (uint8_t c = 0; c < DataLoader::devices.size(); ++c)
-			cout << c + 1 << ": " << DataLoader::devices[c]->getFullName() << endl;
-		std::getline(std::cin, inp);
-		if (inp == "q")
-			return nullptr;
-		try {
-			deviceIndex = std::stoi(inp);
-			if (deviceIndex > DataLoader::devices.size() or deviceIndex < 1)
-				throw "";
-			return DataLoader::devices[deviceIndex - 1];
-			break;
-		}
-		catch (...) {
-			cerr << "Invalid device number" << endl;
-		}
-	}
-}
-
-Profile* Main::tryProfiles(const vector<string>& data) {
-	Profile* profile = nullptr;
-	for (auto& p : data) {
-		LogInfo("changing profile to " + p);
-		try {
-			profile = DataLoader::processProfile(p);
-			profiles.push_back(profile);
-			profile->reset();
-			break;
-		}
-		catch(Error& e) {
-			LogDebug("Profile failed: " + e.getMessage());
-			continue;
-		}
-	}
-	return profile;
 }

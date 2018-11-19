@@ -200,29 +200,8 @@ uint8_t Actor::getNumberOfElements() const {
 }
 
 void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
-
-	auto elementTmp = group->getElement(index);
-
-	switch (filter) {
-	case Color::Filters::Normal:
-		elementTmp->setColor(color);
-		break;
-	case Color::Filters::Combine:
-		elementTmp->setColor(
-			elementTmp->getColor().transition(color, percent)
-		);
-		break;
-	case Color::Filters::Mask:
-		elementTmp->setColor(
-			elementTmp->getColor().mask(color.getMonochrome())
-		);
-		break;
-	case Color::Filters::Invert:
-		elementTmp->setColor(
-			elementTmp->getColor().invert()
-		);
-		break;
-	}
+	Element* e = group->getElement(index);
+	e->setColor(*e->getColor().set(color, filter, percent));
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
