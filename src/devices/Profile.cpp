@@ -48,18 +48,18 @@ void Profile::drawConfig() {
 			actor->drawConfig();
 	}
 
-	if (groupsOverwrite.size()) {
+	if (alwaysOnGroups.size()) {
 		cout << endl << "Groups Overwrite Color: " << endl;
-		for (auto& g : groupsOverwrite) {
-			cout << g.first << " ";
-			g.second->drawColor();
+		for (auto& g : alwaysOnGroups) {
+			cout << g.group->getName() << " ";
+			g.color->drawColor();
 		}
 	}
-	if (elementsOverwrite.size()) {
+	if (alwaysOnElements.size()) {
 		cout << endl << "Elements Overwrite Color: " << endl;
-		for (auto& e : elementsOverwrite) {
-			cout << e.first << " ";
-			e.second->drawColor();
+		for (auto& e : alwaysOnElements) {
+			cout << e.element->getName() << " ";
+			e.color->drawColor();
 		}
 	}
 }
@@ -79,6 +79,12 @@ void Profile::runFrame() {
 }
 
 void Profile::reset() {
+	running = true;
+	actual = nullptr;
+	restartActors();
+}
+
+void Profile::restart() {
 
 	running = true;
 	restartActors();
@@ -131,18 +137,18 @@ const string& Profile::getName() const {
 	return name;
 }
 
-const umap<string, const LEDSpicer::Color*>& Profile::getElementsOverwrite() const {
-	return elementsOverwrite;
+const vector<Profile::ElementItem>& Profile::getAlwaysOnElements() const {
+	return alwaysOnElements;
 }
 
-void Profile::addElementOverwrite(const string& element ,const string& color) {
-	this->elementsOverwrite.emplace(element, &Color::getColor(color));
+void Profile::addAlwaysOnElement(Element* element ,const string& color) {
+	alwaysOnElements.push_back(ElementItem{element, &Color::getColor(color), Color::Filters::Normal});
 }
 
-const umap<string, const LEDSpicer::Color*>& Profile::getGroupsOverwrite() const {
-	return groupsOverwrite;
+const vector<Profile::GroupItem> & Profile::getAlwaysOnGroups() const {
+	return alwaysOnGroups;
 }
 
-void Profile::addGroupOverwrite(const string& group, const string& color) {
-	this->groupsOverwrite.emplace(group, &Color::getColor(color));
+void Profile::addAlwaysOnGroup(Group* group, const string& color) {
+	alwaysOnGroups.push_back(GroupItem{group, &Color::getColor(color), Color::Filters::Normal});
 }

@@ -70,34 +70,18 @@ protected:
 	/// Keeps messages incoming.
 	Messages messages;
 
+	static Profile* currentProfile;
+
 	/**
 	 * Stack of profiles.
 	 */
-	vector<Profile*> profiles;
-
-	/**
-	 * Structure to handle always on elements.
-	 */
-	struct ElementItem {
-		Element* element = nullptr;
-		const Color* color = nullptr;
-		Color::Filters filter;
-	};
-
-	/**
-	 * Structure to handle always on groups.
-	 */
-	struct GroupItem {
-		const Group* group = nullptr;
-		const Color* color = nullptr;
-		Color::Filters filter;
-	};
+	static vector<Profile*> profiles;
 
 	/// Keeps a list of always on elements.
-	umap<string, ElementItem> alwaysOnElements;
+	umap<string, Profile::ElementItem> alwaysOnElements;
 
 	/// Keeps a list of always on groups.
-	umap<string, GroupItem> alwaysOnGroups;
+	umap<string, Profile::GroupItem> alwaysOnGroups;
 
 	/**
 	 * Functionality for test programs.

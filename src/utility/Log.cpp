@@ -11,7 +11,7 @@
 using namespace LEDSpicer;
 
 // Default to info
-int Log::minLevel = LOG_INFO;
+int Log::minLevel = LOG_NOTICE;
 
 void (*Log::logFn)(const string&, int) = Log::logIntoStdOut;
 

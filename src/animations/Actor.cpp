@@ -37,12 +37,7 @@ bool Actor::drawFrame() {
 		}
 	}
 	advanceActorFrame();
-	if (
-		(isDirectionForward() and currentActorFrame == 1) or
-		(isDirectionBackward() and currentActorFrame == totalActorFrames)
-	)
-		return true;
-	return false;
+	return isLastFrame();
 }
 
 void Actor::drawConfig() {

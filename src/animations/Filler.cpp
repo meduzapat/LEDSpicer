@@ -34,6 +34,9 @@ void Filler::advanceActorFrame() {
 
 		if (mode == Modes::Linear) {
 
+			/*
+			 this will generate an double run when the actor is working as a transition.
+			 */
 			if (isBouncer()) {
 				if (cDirection == Directions::Forward and currentActorFrame == totalActorFrames) {
 					if (filling) {

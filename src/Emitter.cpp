@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::ClearGroup) <<
 				" groupName                        Removes a group's background color.\n" <<
 				Message::type2str(Message::Types::ClearAllGroups) <<
-				"                              Changes all group's background color.\n\n"
+				"                              Removes all group's background color.\n\n"
 				"options:\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
 				"-v or --version              Display version information\n"
@@ -102,6 +102,16 @@ int main(int argc, char **argv) {
 		configFile = CONFIG_FILE;
 
 	try {
+
+		// Convert LoadProofileByEmulator to LoadProofile
+		if (msg.getType() == Message::Types::LoadProofileByEmulator) {
+			if (msg.getData().size() < 2)
+				throw Error("Invalid Command");
+
+
+
+			return EXIT_SUCCESS;
+		}
 
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");

@@ -28,6 +28,24 @@ class Profile {
 
 public:
 
+	/**
+	 * Structure to handle always on elements.
+	 */
+	struct ElementItem {
+		Element* element = nullptr;
+		const Color* color = nullptr;
+		Color::Filters filter;
+	};
+
+	/**
+	 * Structure to handle always on groups.
+	 */
+	struct GroupItem {
+		const Group* group = nullptr;
+		const Color* color = nullptr;
+		Color::Filters filter;
+	};
+
 	Profile(
 		const string& name,
 		const Color& backgroundColor,
@@ -53,9 +71,14 @@ public:
 	void runFrame();
 
 	/**
-	 * Leave it ready to restart.
+	 * Leave the actor ready to run (no start sequence).
 	 */
 	void reset();
+
+	/**
+	 * Leave the actor ready to run from the start sequence.
+	 */
+	void restart();
 
 	/**
 	 * Initialize the ending sequence.
@@ -97,13 +120,13 @@ public:
 	 */
 	const string& getName() const;
 
-	const umap<string, const Color*>& getElementsOverwrite() const;
+	const vector<ElementItem>& getAlwaysOnElements() const;
 
-	void addElementOverwrite(const string& element ,const string& color);
+	void addAlwaysOnElement(Element* element, const string& color);
 
-	const umap<string, const Color*>& getGroupsOverwrite() const;
+	const vector<GroupItem>& getAlwaysOnGroups() const;
 
-	void addGroupOverwrite(const string& group, const string& color);
+	void addAlwaysOnGroup(Group* group, const string& color);
 
 protected:
 
@@ -127,11 +150,11 @@ protected:
 	/// List of animations to run.
 	umap<string, vector<Actor*>> animations;
 
-	/// List of Elements by name that need the color to be changed.
-	umap<string, const Color*> elementsOverwrite;
+	/// Keeps a list of always on elements.
+	vector<ElementItem> alwaysOnElements;
 
-	/// List of Groups by name that need the color to be changed.
-	umap<string, const Color*> groupsOverwrite;
+	/// Keeps a list of always on groups.
+	vector<GroupItem> alwaysOnGroups;
 
 private:
 

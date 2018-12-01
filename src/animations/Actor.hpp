@@ -51,7 +51,7 @@ public:
 
 	/**
 	 * Draws the next frame.
-	 * @return the true if the cycle ended.
+	 * @return true if the cycle ended.
 	 */
 	bool drawFrame();
 

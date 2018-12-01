@@ -253,6 +253,30 @@ Profile* DataLoader::processProfile(const string& name) {
 			profilePtr->addAnimation(tempAttr["name"], processAnimation(tempAttr["name"]));
 		}
 	}
+	// Check for always on elements.
+	element = profile.getRoot()->FirstChildElement("alwaysOnElements");
+	if (element) {
+		element = element->FirstChildElement("element");
+		for (; element; element = element->NextSiblingElement("element")) {
+			tempAttr = processNode(element);
+			Utility::checkAttributes(REQUIRED_PARAM_COLOR, tempAttr, "alwaysOnElements for profile " + name);
+			if (not allElements.count(tempAttr["name"]))
+				throw LEDError("Unknown element [" + tempAttr["name"] + "] for always on element on profile " + name);
+			profilePtr->addAlwaysOnElement(allElements[tempAttr["name"]], tempAttr["color"]);
+		}
+	}
+	// Check for always on elements.
+	element = profile.getRoot()->FirstChildElement("alwaysOnGroups");
+	if (element) {
+		element = element->FirstChildElement("group");
+		for (; element; element = element->NextSiblingElement("group")) {
+			tempAttr = processNode(element);
+			Utility::checkAttributes(REQUIRED_PARAM_COLOR, tempAttr, "alwaysOnGroups for profile " + name);
+			if (not layout.count(tempAttr["name"]))
+				throw LEDError("Unknown group [" + tempAttr["name"] + "] for always on group on profile " + name);
+			profilePtr->addAlwaysOnGroup(&layout[tempAttr["name"]], tempAttr["color"]);
+		}
+	}
 	profiles[name] = profilePtr;
 	return profilePtr;
 }

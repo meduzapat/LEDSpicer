@@ -45,12 +45,14 @@ void Main::run() {
 	const char* invalidMessage = "Invalid message ";
 	const char* invalidElement = "Unknown element ";
 	const char* invalidGroup   = "Unknown group ";
+	currentProfile = DataLoader::defaultProfile;
+	currentProfile->restart();
 
 	while (running) {
 
 		if (messages.read()) {
 			Message msg = messages.getMessage();
-			LogDebug("Received message: task: " + Message::type2str(msg.getType()) + " data: " + msg.toString());
+			LogDebug("Received message: task: " + Message::type2str(msg.getType()) + ", data: " + msg.toString());
 			switch (msg.getType()) {
 
 			case Message::Types::LoadProfile:
@@ -63,12 +65,15 @@ void Main::run() {
 					LogDebug("Cannot terminate the default profile.");
 					break;
 				}
-				if (profiles.back()->isTransiting()) {
-					LogNotice("Profile " + profiles.back()->getName() + " is finishing, try later.");
+				if (currentProfile->isTransiting()) {
+					LogNotice("Profile " + currentProfile->getName() + " is finishing, try later.");
 					break;
 				}
-				LogNotice("Profile " + profiles.back()->getName() + " changed state to finishing.");
-				profiles.back()->terminate();
+				LogNotice("Profile " + currentProfile->getName() + " changed state to finishing.");
+				// Deactivate overwrites.
+				alwaysOnGroups.clear();
+				alwaysOnElements.clear();
+				currentProfile->terminate();
 				break;
 
 			case Message::Types::SetElement:
@@ -82,13 +87,13 @@ void Main::run() {
 				}
 				try {
 					if (alwaysOnElements.count(msg.getData()[0]))
-						alwaysOnElements[msg.getData()[0]] = ElementItem{
+						alwaysOnElements[msg.getData()[0]] = Profile::ElementItem{
 						DataLoader::allElements[msg.getData()[0]],
 						&Color::getColor(msg.getData()[1]),
 						Color::str2filter(msg.getData()[2])
 					};
 					else
-						alwaysOnElements.emplace(msg.getData()[0], ElementItem{
+						alwaysOnElements.emplace(msg.getData()[0], Profile::ElementItem{
 							DataLoader::allElements[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
@@ -123,13 +128,13 @@ void Main::run() {
 				}
 				try {
 					if (alwaysOnGroups.count(msg.getData()[0]))
-						alwaysOnGroups[msg.getData()[0]] = GroupItem{
+						alwaysOnGroups[msg.getData()[0]] = Profile::GroupItem{
 							&DataLoader::layout[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
 						};
 					else
-						alwaysOnGroups.emplace(msg.getData()[0], GroupItem{
+						alwaysOnGroups.emplace(msg.getData()[0], Profile::GroupItem{
 							&DataLoader::layout[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
@@ -307,9 +312,17 @@ void Main::runCurrentProfile() {
 
 	// Reset elements.
 	for (auto& eD : DataLoader::allElements)
-		eD.second->setColor(profiles.back()->getBackgroundColor());
+		eD.second->setColor(currentProfile->getBackgroundColor());
 
-	profiles.back()->runFrame();
+	for (auto& gE : currentProfile->getAlwaysOnGroups())
+		for (auto eE : gE.group->getElements())
+			eE->setColor(*eE->getColor().set(*gE.color, gE.filter));
+
+	// Set always on elements
+	for (auto& eE : currentProfile->getAlwaysOnElements())
+		eE.element->setColor(*eE.element->getColor().set(*eE.color, eE.filter));
+
+	currentProfile->runFrame();
 
 	// Set always on groups
 	for (auto& gE : alwaysOnGroups)
@@ -324,10 +337,11 @@ void Main::runCurrentProfile() {
 	for (auto device : DataLoader::devices)
 		device->transfer();
 
-	// Profiles are cached.
-	if (not profiles.back()->isRunning()) {
+	// Profiles are cached and reused.
+	if (not currentProfile->isRunning()) {
 		profiles.pop_back();
-		profiles.back()->reset();
+		currentProfile = profiles.back();
+		currentProfile->reset();
 	}
 	else {
 		Actor::advanceFrame();

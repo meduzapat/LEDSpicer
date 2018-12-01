@@ -11,6 +11,8 @@
 using namespace LEDSpicer;
 
 bool MainBase::running = false;
+Profile* MainBase::currentProfile = nullptr;
+vector<Profile*> MainBase::profiles;
 
 MainBase::MainBase(Modes mode) :
 	messages(mode == Modes::Normal or mode == Modes::Foreground ? DataLoader::portNumber : "")
@@ -173,23 +175,11 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 		try {
 			profile = DataLoader::processProfile(profileName);
 			profiles.push_back(profile);
-			profile->reset();
-			// Set Always on elements for profile.
+			currentProfile = profile;
+			profile->restart();
+			// Deactivate any overwrite.
 			alwaysOnElements.clear();
-			for (auto& e : profile->getElementsOverwrite())
-				alwaysOnElements.emplace(e.first, ElementItem{
-					DataLoader::allElements[e.first],
-					e.second,
-					Color::Filters::Normal
-				});
-			// Set Always on groups for profile.
 			alwaysOnGroups.clear();
-			for (auto& e : profile->getGroupsOverwrite())
-				alwaysOnGroups.emplace(e.first, GroupItem{
-					&DataLoader::layout[e.first],
-					e.second,
-					Color::Filters::Normal
-				});
 			break;
 		}
 		catch(Error& e) {
