@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
 				"command:\n" <<
 				Message::type2str(Message::Types::LoadProfile) <<
 				" profile1 profile2 ... profileX  Attempts to load the first valid profile from a list of profiles.\n" <<
-				Message::type2str(Message::Types::LoadProofileByEmulator) <<
-				" emulator rom         Attempts to load a profile based on the emulator and the ROM.\n" <<
+				Message::type2str(Message::Types::LoadProfileByEmulator) <<
+				" binary rom emulator  Attempts to load a profile based on the emulator and the ROM.\n" <<
 				Message::type2str(Message::Types::FinishLastProfile) <<
 				"                           Terminates the current profile (doens't affect the default).\n" <<
 				Message::type2str(Message::Types::SetElement) <<
@@ -103,30 +103,39 @@ int main(int argc, char **argv) {
 
 	try {
 
-		// Convert LoadProofileByEmulator to LoadProofile
-		if (msg.getType() == Message::Types::LoadProofileByEmulator) {
-			if (msg.getData().size() < 2)
-				throw Error("Invalid Command");
-
-
-
-			return EXIT_SUCCESS;
-		}
-
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");
-		umap<string, string> configValues;
-		const tinyxml2::XMLAttribute* pAttrib = config.getRoot()->FirstAttribute();
-		while (pAttrib) {
-			string value = pAttrib->Value();
-			configValues.emplace(pAttrib->Name(), value);
-			pAttrib = pAttrib->Next();
-		}
+		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
+
 		Utility::checkAttributes({"port"}, configValues, "root");
 
 		// Set log level.
 		if (configValues.count("logLevel"))
 			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
+
+		// Check request.
+		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
+			if (msg.getData().size() < 3) {
+				LogError("Error: Invalid request");
+				return EXIT_FAILURE;
+			}
+			string
+				binary = msg.getData()[0],
+				load   = msg.getData()[1],
+				name   = msg.getData()[2];
+			Message msgTemp;
+
+			msgTemp.setType(Message::Types::LoadProfile);
+			msgTemp.addData(string(name).append("/").append(load));
+			// mame
+			if (name == "mame") {
+				for (string& p : parseMame(binary, load))
+					if (not p.empty())
+						msgTemp.addData(p);
+			}
+			msgTemp.addData(name);
+			msg = msgTemp;
+		}
 
 		// Open connection and send message.
 		Socks sock(LOCALHOST, configValues["port"]);
@@ -140,3 +149,72 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 }
+
+vector<string> parseMame(const string& binary, const string& rom) {
+
+	vector<string> result(2);
+	string
+		output,
+		cmd = binary + " -lx " + rom + "|grep -E '<control|<input'"; //" 2>&1"
+	LogDebug("Calling MAME: " + cmd);
+
+	std::array<char, 128> buffer;
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (not pipe) {
+		LogError("Failed to call MAME");
+		return result;
+	}
+
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+		output += buffer.data();
+	output += "</input>";
+	tinyxml2::XMLDocument xml;
+	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS) {
+		LogError("Invalid MAME response" + output);
+		return result;
+	}
+
+	LogDebug("MAME response: " + output);
+/* Possible types
+<control type="joy" player="2" buttons="1" ways="2|4|8"/>
+<control type="stick" player="1" buttons="4" minimum="0" maximum="255" sensitivity="30" keydelta="30" reverse="yes"/>
+<control type="keypad" player="1" buttons="24"/>
+<control type="paddle" buttons="2" minimum="0" maximum="63" sensitivity="100" keydelta="1"/>
+<control type="pedal" buttons="3" minimum="0" maximum="31" sensitivity="100" keydelta="1"/>
+<control type="dial" buttons="4" minimum="0" maximum="255" sensitivity="25" keydelta="20"/>
+<control type="gambling" buttons="21"/>
+<control type="mahjong" player="1" buttons="26"/>
+<control type="only_buttons" buttons="7"/>
+<control type="keyboard" player="1" buttons="46"/>
+<control type="mouse" player="1" minimum="0" maximum="255" sensitivity="100" keydelta="5"/>
+<control type="lightgun" player="1" buttons="1" minimum="0" maximum="255" sensitivity="70" keydelta="10"/>
+<control type="trackball" player="1" buttons="1" minimum="0" maximum="255" sensitivity="100" keydelta="10" reverse="yes"/>
+<control type="doublejoy" buttons="1" ways="8" ways2="8"/>
+
+*/
+	umap<string, string> tempAttr;
+	uint8_t
+		players = 0,
+		buttons = 0;
+	tinyxml2::XMLElement* element = xml.RootElement();
+	if (!element) {
+		LogError("Missing MAME input node");
+		return result;
+	}
+	tempAttr = XMLHelper::processNode(element);
+
+	result[1] = "P" + tempAttr["players"] + "_B";
+
+	element = element->FirstChildElement("control");
+//	for (; element; element = element->NextSiblingElement("control")) {
+//	}
+	tempAttr = XMLHelper::processNode(element);
+	result[0] = tempAttr["type"] + "_B";
+	if (tempAttr.count("buttons")) {
+		result[0].append(tempAttr["buttons"]);
+		result[1].append(tempAttr["buttons"]);
+	}
+	return result;
+}
+
+

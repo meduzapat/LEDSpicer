@@ -160,7 +160,6 @@ void Filler::drawConfig() {
 	color.drawColor();
 }
 
-
 string Filler::mode2str(Modes mode) {
 	switch (mode) {
 	case Modes::Linear:

@@ -37,10 +37,7 @@ void DataLoader::readConfiguration() {
 
 	portNumber =  tempAttr["port"];
 
-	processColorFile(string(PACKAGE_DATA_DIR)
-		.append("/")
-		.append(tempAttr["colors"])
-		.append(".xml"));
+	processColorFile(createFilename(tempAttr["colors"]));
 
 	processDevices();
 
@@ -209,10 +206,7 @@ Profile* DataLoader::processProfile(const string& name) {
 	if (profiles.count(name))
 		return profiles[name];
 
-	XMLHelper profile(string(PACKAGE_DATA_DIR)
-		.append("/profiles/")
-		.append(name)
-		.append(".xml"), "Profile");
+	XMLHelper profile(createFilename("profiles/" + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
@@ -283,10 +277,7 @@ Profile* DataLoader::processProfile(const string& name) {
 
 vector<Actor*> DataLoader::processAnimation(const string& name) {
 
-	XMLHelper animation(string(PACKAGE_DATA_DIR)
-		.append("/animations/")
-		.append(name)
-		.append(".xml"), "Animation");
+	XMLHelper animation(createFilename("animations/" + name), "Animation");
 
 	umap<string, string> actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement("actor");
@@ -344,4 +335,13 @@ Actor* DataLoader::createAnimation(const string& name, umap<string, string>& act
 		return new Filler(actorData, &layout.at(groupName));
 	}
 	throw LEDError("Invalid actor type '" + actorData["type"] + "' inside " + name);
+}
+
+string DataLoader::createFilename(const string& name) {
+	return (
+		string(PACKAGE_DATA_DIR)
+			.append("/")
+			.append(Utility::removeChar(name, '.'))
+			.append(".xml")
+	);
 }

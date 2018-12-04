@@ -120,6 +120,14 @@ public:
 	 * @return
 	 */
 	static string hex2str(int number);
+
+	/**
+	 * Removes characters from string.
+	 * @param str
+	 * @param c
+	 * @return
+	 */
+	static string removeChar(const string& str, char c);
 };
 
 } // namespace

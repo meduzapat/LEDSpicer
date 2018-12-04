@@ -23,8 +23,8 @@ string Message::type2str(Types type) {
 	switch (type) {
 	case Types::LoadProfile:
 		return "LoadProfile";
-	case Types::LoadProofileByEmulator:
-		return "LoadProofileByEmulator";
+	case Types::LoadProfileByEmulator:
+		return "LoadProfileByEmulator";
 	case Types::FinishLastProfile:
 		return "FinishLastProfile";
 	case Types::SetElement:
@@ -46,8 +46,8 @@ string Message::type2str(Types type) {
 Message::Types Message::str2type(const string& type) {
 	if (type == "LoadProfile")
 		return Types::LoadProfile;
-	if (type == "LoadProofileByEmulator")
-		return Types::LoadProofileByEmulator;
+	if (type == "LoadProfileByEmulator")
+		return Types::LoadProfileByEmulator;
 	if (type == "FinishLastProfile")
 		return Types::FinishLastProfile;
 	if (type == "SetElement")

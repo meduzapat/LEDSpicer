@@ -79,3 +79,11 @@ string Utility::hex2str(int number) {
 	stream << std::hex << std::showbase << number;
 	return string(stream.str());
 }
+
+string Utility::removeChar(const string& str, char c) {
+	string result;
+	for (char currentChar : str)
+		if (currentChar != c)
+			result += currentChar;
+	return result;
+}

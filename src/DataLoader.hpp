@@ -6,6 +6,8 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
+#include <algorithm>
+
 #include "config.h"
 #include "utility/XMLHelper.hpp"
 #include "utility/Color.hpp"
@@ -149,6 +151,12 @@ protected:
 	 */
 	static Actor* createAnimation(const string& name, umap<string, string>& actorData);
 
+	/**
+	 * Prepares the filenames.
+	 * @param name
+	 * @return
+	 */
+	static string createFilename(const string& name);
 };
 
 } /* namespace LEDSpicer */

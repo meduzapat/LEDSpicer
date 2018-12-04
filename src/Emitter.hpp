@@ -17,6 +17,8 @@ using std::endl;
 
 #include <cstring>
 
+#include <memory>
+
 #include "Messages.hpp"
 #include "utility/XMLHelper.hpp"
 
@@ -34,5 +36,7 @@ using std::endl;
  * @return exit code.
  */
 int main(int argc, char **argv);
+
+vector<string> parseMame(const string& binary, const string& rom);
 
 #endif /* EMITTER_HPP_ */

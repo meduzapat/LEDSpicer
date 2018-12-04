@@ -26,7 +26,7 @@ struct Message {
 	enum class Types : uint8_t {
 		Invalid,
 		LoadProfile,
-		LoadProofileByEmulator,
+		LoadProfileByEmulator,
 		FinishLastProfile,
 		SetElement,
 		ClearElement,

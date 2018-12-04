@@ -18,13 +18,13 @@ using namespace LEDSpicer;
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		LogNotice(PACKAGE_NAME " terminated by signal");
+		LogNotice(Error::SIGTERM_LABEL);
 		Main::terminate();
 		return;
 	}
 
 	if (sig == SIGHUP) {
-		LogNotice(PACKAGE_NAME " received re load configuration signal");
+		LogNotice(Error::SIGHUP_LABEL);
 		// TODO: reload the profiles and restart everything?
 		return;
 	}
@@ -40,11 +40,8 @@ void signalHandler(int sig) {
 
 void Main::run() {
 
-	LogInfo("LEDSpicer Running");
+	LogInfo(Error::RUNNING_LABEL);
 
-	const char* invalidMessage = "Invalid message ";
-	const char* invalidElement = "Unknown element ";
-	const char* invalidGroup   = "Unknown group ";
 	currentProfile = DataLoader::defaultProfile;
 	currentProfile->restart();
 
@@ -78,11 +75,11 @@ void Main::run() {
 
 			case Message::Types::SetElement:
 				if (msg.getData().size() != 3) {
-					LogNotice(invalidMessage);
+					LogNotice(Error::INVALID_MESSAGE_LABEL);
 					break;
 				}
 				if (not DataLoader::allElements.count(msg.getData()[0])) {
-					LogNotice(invalidElement + msg.getData()[0]);
+					LogNotice(Error::INVALID_ELEMENT_LABEL + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -106,7 +103,7 @@ void Main::run() {
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
-					LogNotice(invalidMessage + msg.getData()[0]);
+					LogNotice(Error::INVALID_MESSAGE_LABEL + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnElements.count(msg.getData()[0]))
@@ -119,11 +116,11 @@ void Main::run() {
 
 			case Message::Types::SetGroup:
 				if (msg.getData().size() != 3) {
-					LogNotice(invalidMessage);
+					LogNotice(Error::INVALID_MESSAGE_LABEL);
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice(invalidGroup + msg.getData()[0]);
+					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -147,7 +144,7 @@ void Main::run() {
 
 			case Message::Types::ClearGroup:
 				if (msg.getData().size() != 1) {
-					LogNotice(invalidGroup + msg.getData()[0]);
+					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnGroups.count(msg.getData()[0]))
@@ -301,7 +298,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(Error& e) {
-		LogError("Program terminated by error: " + e.getMessage());
+		LogError(Error::TERMINATED_BY_ERROR_LABEL + e.getMessage());
 		return EXIT_FAILURE;
 	}
 
