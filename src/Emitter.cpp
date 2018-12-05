@@ -209,7 +209,7 @@ vector<string> parseMame(const string& binary, const string& rom) {
 //	for (; element; element = element->NextSiblingElement("control")) {
 //	}
 	tempAttr = XMLHelper::processNode(element);
-	result[0] = tempAttr["type"] + "_B";
+	result[0] = tempAttr["type"] + tempAttr["players"] + "_B";
 	if (tempAttr.count("buttons")) {
 		result[0].append(tempAttr["buttons"]);
 		result[1].append(tempAttr["buttons"]);
