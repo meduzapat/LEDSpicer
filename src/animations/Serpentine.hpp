@@ -6,7 +6,7 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "../utility/Color.hpp"
+#include "utility/Color.hpp"
 #include "TimedActor.hpp"
 
 #ifndef SERPENTINE_HPP_
@@ -48,5 +48,7 @@ protected:
 };
 
 }} /* namespace LEDSpicer */
+
+actorFactory(LEDSpicer::Animations::Serpentine)
 
 #endif /* SERPENTINE_HPP_ */

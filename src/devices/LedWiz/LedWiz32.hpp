@@ -29,7 +29,7 @@ namespace LedWiz {
  *
  * Led-Wiz 32 controller class.
  */
-class LedWiz32: public LedWiz {
+class LedWiz32 : public LedWiz {
 
 public:
 
@@ -53,10 +53,15 @@ public:
 
 	uint16_t getProduct();
 
+protected:
+
+	virtual void afterConnect() {}
 };
 
 } /* namespace LedWiz */
 } /* namespace Devices */
 } /* namespace LEDSpicer */
+
+deviceFactory(LEDSpicer::Devices::LedWiz::LedWiz32)
 
 #endif /* LEDWIZ32_HPP_ */

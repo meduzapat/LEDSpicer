@@ -8,8 +8,8 @@
 
 #include "Element.hpp"
 #include "Group.hpp"
-#include "../animations/Actor.hpp"
-#include "../utility/Color.hpp"
+#include "animations/Actor.hpp"
+#include "utility/Color.hpp"
 
 #ifndef PROFILE_HPP_
 #define PROFILE_HPP_ 1
@@ -59,7 +59,7 @@ public:
 		end(end)
 	{}
 
-	virtual ~Profile();
+	virtual ~Profile() = default;
 
 	void addAnimation(const string& animationName, const vector<Actor*>& animation);
 

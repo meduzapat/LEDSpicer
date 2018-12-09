@@ -52,4 +52,6 @@ protected:
 } /* namespace Animations */
 } /* namespace LEDSpicer */
 
+actorFactory(LEDSpicer::Animations::Random)
+
 #endif /* RANDOM_HPP_ */

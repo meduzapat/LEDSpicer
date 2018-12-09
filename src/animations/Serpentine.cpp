@@ -15,7 +15,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	color(parameters["color"]),
 	tailColor(parameters["tailColor"])
 {
-
+	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, parameters, "actor Serpentine");
 	totalActorFrames = group->size();
 	uint8_t
 		tailLength    = 0,

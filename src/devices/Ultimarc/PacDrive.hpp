@@ -45,9 +45,11 @@ protected:
 
 	uint8_t changePoint = 64;
 
-	virtual void afterConnect();
+	virtual void afterConnect() {}
 };
 
 }}} /* namespace LEDSpicer */
+
+deviceFactory(LEDSpicer::Devices::Ultimarc::PacDrive)
 
 #endif /* PACDRIVE_HPP_ */

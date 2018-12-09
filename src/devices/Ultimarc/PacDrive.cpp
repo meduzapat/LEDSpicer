@@ -65,6 +65,3 @@ void PacDrive::transfer() {
 uint16_t PacDrive::getProduct() {
 	return PAC_DRIVE_PRODUCT + board.boardId - 1;
 }
-
-void PacDrive::afterConnect() {}
-

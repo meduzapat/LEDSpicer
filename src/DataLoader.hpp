@@ -12,19 +12,13 @@
 #include "utility/XMLHelper.hpp"
 #include "utility/Color.hpp"
 #include "devices/Profile.hpp"
-#include "animations/Serpentine.hpp"
-#include "animations/Pulse.hpp"
-#include "animations/Gradient.hpp"
-#include "animations/Random.hpp"
-#include "animations/Filler.hpp"
-#include "devices/Ultimarc/PacDrive.hpp"
-#include "devices/Ultimarc/Ultimate.hpp"
-#include "devices/LedWiz/LedWiz32.hpp"
+#include "animations/ActorHandler.hpp"
+#include "devices/DeviceHandler.hpp"
 
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
 
-#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
+#define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
@@ -37,18 +31,13 @@
 namespace LEDSpicer {
 
 using Animations::Actor;
-using Animations::Serpentine;
-using Animations::Pulse;
-using Animations::Gradient;
-using Animations::Random;
-using Animations::Filler;
+using Animations::ActorHandler;
+using Devices::DeviceHandler;
 using Devices::Device;
 using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
-using Devices::Ultimarc::Ultimate;
-using Devices::Ultimarc::PacDrive;
-using Devices::LedWiz::LedWiz32;
+using Devices::Device;
 
 /**
  * LEDSpicer::DataLoader
@@ -95,6 +84,18 @@ public:
 	/// Port number to use for listening.
 	static string portNumber;
 
+	/// Keeps references to device handlers.
+	static umap<string, DeviceHandler*> deviceHandlers;
+
+	/// Maps handlers with devices.
+	static umap<Device*, DeviceHandler*> deviceMap;
+
+	/// Keeps references to actor handlers.
+	static umap<string, ActorHandler*> actorHandlers;
+
+	/// Maps handlers with actors.
+	static umap<Actor*, ActorHandler*> actorMap;
+
 protected:
 
 	/**
@@ -135,7 +136,6 @@ protected:
 
 	/**
 	 * Creates a device object.
-	 * TODO: In a future will be cool to move devices into plugins so they are loaded dynamically.
 	 * @param name
 	 * @param boardId
 	 * @return
@@ -144,12 +144,10 @@ protected:
 
 	/**
 	 * Creates a new animation object.
-	 * TODO: In a future will be cool to move animations into plugins so they are loaded dynamically.
-	 * @param name
 	 * @param actorData
 	 * @return
 	 */
-	static Actor* createAnimation(const string& name, umap<string, string>& actorData);
+	static Actor* createAnimation(umap<string, string>& actorData);
 
 	/**
 	 * Prepares the filenames.

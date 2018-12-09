@@ -16,6 +16,10 @@ umap<string, Group> DataLoader::layout;
 Profile* DataLoader::defaultProfile;
 umap<string, Profile*> DataLoader::profiles;
 string DataLoader::portNumber;
+umap<string, DeviceHandler*> DataLoader::deviceHandlers;
+umap<Device*, DeviceHandler*> DataLoader::deviceMap;
+umap<string, ActorHandler*> DataLoader::actorHandlers;
+umap<Actor*, ActorHandler*> DataLoader::actorMap;
 
 void DataLoader::readConfiguration() {
 
@@ -219,7 +223,7 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		start = createAnimation(name, tempAttr);
+		start = createAnimation(tempAttr);
 	}
 
 	element = profile.getRoot()->FirstChildElement("endTransition");
@@ -227,7 +231,7 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		end = createAnimation(name, tempAttr);
+		end = createAnimation(tempAttr);
 	}
 
 	Profile* profilePtr = new Profile(
@@ -288,7 +292,7 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 	for (; element; element = element->NextSiblingElement("actor")) {
 		actorData = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + name);
-		actors.push_back(createAnimation(name, actorData));
+		actors.push_back(createAnimation(actorData));
 	}
 
 	return actors;
@@ -297,50 +301,33 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 
 	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
-
-	if (deviceData["name"] == IPAC_ULTIMATE)
-		return new Ultimate(devId, deviceData);
-
-	if (deviceData["name"] == PAC_DRIVE)
-		return new PacDrive(devId, deviceData);
-
-
-	throw LEDError("Unknown board name " + deviceData["name"]);
+	string deviceName = deviceData["name"];
+	if (not deviceHandlers.count(deviceName))
+		deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
+	Device* d = deviceHandlers[deviceName]->createDevice(devId, deviceData);
+	deviceMap.emplace(d, deviceHandlers[deviceName]);
+	return d;
 }
 
-Actor* DataLoader::createAnimation(const string& name, umap<string, string>& actorData) {
+Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 
-	string groupName = actorData["group"];
+	string
+		groupName = actorData["group"],
+		actorName = actorData["type"];
+
 	if (not layout.count(groupName))
-		throw LEDError(groupName + " is not a valid group name in animation " + name);
+		throw LEDError(groupName + " is not a valid group name in animation " + actorName);
 
-	if (actorData["type"] == "Serpentine") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, actorData, "actor Serpentine");
-		return new Serpentine(actorData, &layout.at(groupName));
-	}
-	if (actorData["type"] == "Pulse") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, actorData, "actor Pulse");
-		return new Pulse(actorData, &layout.at(groupName));
-	}
-	if (actorData["type"] == "Gradient") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_GRADIENT, actorData, "actor Gradient");
-		return new Gradient(actorData, &layout.at(groupName));
-	}
-	if (actorData["type"] == "Random") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_RANDOM, actorData, "actor Random");
-		return new Random(actorData, &layout.at(groupName));
-	}
-	if (actorData["type"] == "Filler") {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_FILLER, actorData, "actor Filler");
-		return new Filler(actorData, &layout.at(groupName));
-	}
-	throw LEDError("Invalid actor type '" + actorData["type"] + "' inside " + name);
+	if (not actorHandlers.count(actorName))
+		actorHandlers.emplace(actorName, new ActorHandler(actorName));
+	Actor* a = actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
+	actorMap.emplace(a, actorHandlers[actorName]);
+	return a;
 }
 
 string DataLoader::createFilename(const string& name) {
 	return (
 		string(PACKAGE_DATA_DIR)
-			.append("/")
 			.append(Utility::removeChar(name, '.'))
 			.append(".xml")
 	);

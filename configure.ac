@@ -20,12 +20,30 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_MKDIR_P
+AC_PROG_LN_S
+AC_LIBTOOL_DLOPEN
+LT_INIT([disable-static dlopen])
 
-AC_ARG_ENABLE(develop, AS_HELP_STRING([--enable-develop], [enable develop mode]),
+dnl Enable copy of extra files: conf and samples.
+AC_ARG_ENABLE(samples,
+	AS_HELP_STRING([--enable-samples],
+	[copy sample conf and data files @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) samples=yes ;;
+		no)  samples=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-samples]) ;;
+	esac],
+	[samples=no])
+AM_CONDITIONAL([COPY_SAMPLES],[test x$samples = xyes])
+
+dnl Enable develop mode
+AC_ARG_ENABLE(develop,
+	AS_HELP_STRING([--enable-develop],
+	[enable develop mode]),
 	AC_DEFINE([DEVELOP],[1],[Enables development mode])
-	DEVELOP_MODE=1
+	DEVELOP_MODE=yes
 	CXXFLAGS='-g3 -O0',
-	DEVELOP_MODE=0
+	DEVELOP_MODE=no
 )
 
 dnl ********************
@@ -33,30 +51,21 @@ dnl * Needed Libraries *
 dnl ********************
 AC_MSG_NOTICE([Checking for dependencies])
 
-LIBUSB_VER=1.0.21
-LIBTINYXML_VER=2.2
-
-PKG_CHECK_MODULES([LIBUSB],[libusb-1.0 >= $LIBUSB_VER],
+PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.21],
 	echo -e "\tlibusb 1.0 ver `pkg-config --short-errors --modversion libusb-1.0` found",
 	AC_MSG_ERROR([libusb-1.0 development library not found.])
 )
 
-PKG_CHECK_MODULES([TINYXML2],[tinyxml2 >= LIBTINYXML_VER],
+PKG_CHECK_MODULES([TINYXML2], [tinyxml2 >= 2.2],
 	echo -e "\ttinyxml2 ver `pkg-config --short-errors --modversion tinyxml2` found",
 	AC_MSG_ERROR([tinyxml2 not found.])
 )
 
-PKG_CHECK_MODULES(PTHREADSTUBS,pthread-stubs,
+PKG_CHECK_MODULES([PTHREADSTUBS], pthread-stubs,
 	echo -e "\tpthread found"
-	[LEDSPICER_LIBS+=" -lpthread"],
+	[PTHREADSTUBS_LIBS="-lpthread"],
 	AC_MSG_ERROR([pthread development library not found.])
 )
-
-LEDSPICER_LIBS+=" $LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS"
-AC_SUBST(LEDSPICER_LIBS)
-
-LEDSPICER_CPPFLAGS+=" $LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS"
-AC_SUBST(LEDSPICER_CPPFLAGS)
 
 dnl expand bindir on configuration files.
 AS_AC_EXPAND(BINDIR, $bindir)
@@ -86,6 +95,18 @@ dnl * Checks for library functions *
 dnl ********************************
 AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([gethostbyname memset select socket strerror])
+
+dnl dlopen
+AC_CHECK_LIB([dl], [dlopen],
+	[LINKER_LIBS="-ldl"],
+	AC_MSG_ERROR([You must have the dl development files installed to build.])
+)
+AC_SUBST([LINKER_LIBS])
+
+ACTORS_DIR=["${libdir}/${PACKAGE_TARNAME}/actors"]
+AC_SUBST([ACTORS_DIR])
+DEVICES_DIR=["${libdir}/${PACKAGE_TARNAME}/devices"]
+AC_SUBST([DEVICES_DIR])
 
 dnl *************************
 dnl * Daemon initialization *
@@ -121,12 +142,9 @@ WebSite      : ${PACKAGE_URL}
 Build system : ${build_cpu}-${build_vendor}-${build_os}
 --------- build settings -----------
 C++ compiler : ${CXX}
-Preprocessor :${LEDSPICER_CPPFLAGS}
-Libraries    :${LEDSPICER_LIBS}
+Preprocessor :${LIBUSB_CFLAGS} ${TINYXML2_CFLAGS} ${PTHREADSTUBS_CFLAGS} ${LINKER_CFLAGS}
+Libraries    :${LIBUSB_LIBS} ${TINYXML2_LIBS} ${PTHREADSTUBS_LIBS} ${LINKER_LIBS}
 C++ Flags    : ${CXXFLAGS}
 Prefix       : ${prefix}"
-if test "${DEVELOP_MODE}" = "1"; then
-    echo "Develop mode : On"
-else
-    echo "Develop mode : Off"
-fi
+echo "Develop mode : ${DEVELOP_MODE}"
+echo "Copy samples : ${samples}"

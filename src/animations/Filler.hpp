@@ -78,4 +78,6 @@ private:
 } /* namespace Animations */
 } /* namespace LEDSpicer */
 
+actorFactory(LEDSpicer::Animations::Filler)
+
 #endif /* FILLER_HPP_ */

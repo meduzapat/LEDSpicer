@@ -67,4 +67,6 @@ private:
 } /* namespace Animations */
 } /* namespace LEDSpicer */
 
+actorFactory(LEDSpicer::Animations::Gradient)
+
 #endif /* GRADIENT_HPP_ */

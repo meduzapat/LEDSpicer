@@ -52,7 +52,7 @@ public:
 		uint8_t  elements,
 		uint8_t  maxBoards,
 		uint8_t  boardId,
-		char const* name
+		const string& name
 	);
 
 	virtual ~ConnectionUSB();
@@ -116,8 +116,8 @@ protected:
 	/// USB device handle.
 	libusb_device_handle* handle = nullptr;
 
-	/// pinter to the board name.
-	char const* name = nullptr;
+	/// The device name.
+	string name;
 
 	/// App wide libusb session.
 	static libusb_context *usbSession;

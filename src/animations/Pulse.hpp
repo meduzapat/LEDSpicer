@@ -25,7 +25,9 @@ public:
 
 	Pulse(umap<string, string>& parameters, Group* const layout):
 		Actor(parameters, layout),
-		color(parameters["color"]) {}
+		color(parameters["color"]) {
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, parameters, "actor Pulse");
+	}
 
 	virtual ~Pulse() {}
 
@@ -41,5 +43,7 @@ protected:
 
 } /* namespace Animations */
 } /* namespace LEDSpicer */
+
+actorFactory(LEDSpicer::Animations::Pulse)
 
 #endif /* PULSE_HPP_ */

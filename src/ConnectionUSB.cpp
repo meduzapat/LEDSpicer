@@ -23,7 +23,7 @@ ConnectionUSB::ConnectionUSB(
 		uint8_t  elements,
 		uint8_t  maxBoards,
 		uint8_t  boardId,
-		char const* name
+		const string& name
 ) :
 	name(name),
 	requestType(requestType),
@@ -191,5 +191,5 @@ uint8_t ConnectionUSB::getInterval() {
 }
 
 string ConnectionUSB::getFullName() {
-	return "device: " + string(name) + " Id: " + to_string(board.boardId);
+	return "device: " + name + " Id: " + to_string(board.boardId);
 }

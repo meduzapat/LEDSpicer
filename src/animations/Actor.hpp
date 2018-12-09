@@ -13,18 +13,13 @@
 #include <vector>
 using std::vector;
 
-#include "../devices/Group.hpp"
-#include "../utility/Color.hpp"
-#include "../utility/Log.hpp"
-#include "../utility/Utility.hpp"
+#include "devices/Group.hpp"
+#include "utility/Color.hpp"
+#include "utility/Log.hpp"
+#include "utility/Utility.hpp"
 
-#ifndef ANIMATION_HPP_
-#define ANIMATION_HPP_ 1
-
-#define DIRECTION_NONE     0
-#define DIRECTION_FORWARD  1
-#define DIRECTION_BACKWARD 2
-#define DIRECTION_BOUNCING 4
+#ifndef ACTOR_HPP_
+#define ACTOR_HPP_ 1
 
 #define REQUIRED_PARAM_ACTOR {"type", "group", "speed", "direction", "filter"}
 
@@ -47,7 +42,9 @@ public:
 
 	Actor(umap<string, string>& parameters, Group* const group);
 
-	virtual ~Actor() {}
+	Actor() = delete;
+
+	virtual ~Actor() = default;
 
 	/**
 	 * Draws the next frame.
@@ -197,6 +194,11 @@ private:
 	Group* const group;
 };
 
+// The functions to create and destroy actors.
+#define actorFactory(plugin) \
+	extern "C" LEDSpicer::Animations::Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
+	extern "C" void destroyActor(LEDSpicer::Animations::Actor* instance) { delete instance; }
+
 }} /* namespace LEDSpicer::Animations */
 
-#endif /* ANIMATION_HPP_ */
+#endif /* ACTOR_HPP_ */

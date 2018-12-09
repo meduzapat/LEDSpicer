@@ -24,9 +24,8 @@ MainBase::MainBase(Modes mode) :
 #ifndef DRY_RUN
 	if (mode == Modes::Normal) {
 		LogDebug("Daemonizing");
-		if (daemon(0, 0) == -1) {
+		if (daemon(0, 0) == -1)
 			throw Error("Unable to daemonize.");
-		}
 		LogDebug("Daemonized");
 	}
 	for (auto device : DataLoader::devices)
@@ -38,13 +37,24 @@ MainBase::MainBase(Modes mode) :
 
 MainBase::~MainBase() {
 
-	for (auto d : DataLoader::devices) {
-		LogInfo("Closing " + d->getFullName());
-		delete d;
-	}
+	// destroy devices and handlers.
+	for (auto& dm : DataLoader::deviceMap)
+		dm.second->destroyDevice(dm.first);
+
+	for (auto& dh : DataLoader::deviceHandlers)
+		delete dh.second;
+
+	// destroy actors and handlers.
+	for (auto& am : DataLoader::actorMap)
+		am.second->destroyActor(am.first);
+
+	for (auto& ah : DataLoader::actorHandlers)
+		delete ah.second;
 
 	for (auto p : DataLoader::profiles)
 		delete p.second;
+
+
 
 	ConnectionUSB::terminate();
 }

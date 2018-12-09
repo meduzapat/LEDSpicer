@@ -10,22 +10,6 @@
 
 using namespace LEDSpicer::Devices;
 
-Profile::~Profile() {
-
-	for (auto& a : animations) {
-		for (auto actor : a.second)
-			delete actor;
-		a.second.clear();
-	}
-	animations.clear();
-
-	if (start)
-		delete start;
-
-	if (end)
-		delete end;
-}
-
 void Profile::addAnimation(const string& animationName, const vector<Actor*>& animation) {
 	animations[animationName] = std::move(animation);
 }
@@ -53,6 +37,7 @@ void Profile::drawConfig() {
 		for (auto& g : alwaysOnGroups) {
 			cout << g.group->getName() << " ";
 			g.color->drawColor();
+			cout << endl;
 		}
 	}
 	if (alwaysOnElements.size()) {
@@ -60,6 +45,7 @@ void Profile::drawConfig() {
 		for (auto& e : alwaysOnElements) {
 			cout << e.element->getName() << " ";
 			e.color->drawColor();
+			cout << endl;
 		}
 	}
 }

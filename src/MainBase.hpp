@@ -15,7 +15,6 @@ using std::signal;
 
 #include "Messages.hpp"
 #include "DataLoader.hpp"
-#include "devices/Group.hpp"
 
 #ifndef MAINBASE_HPP_
 #define MAINBASE_HPP_ 1

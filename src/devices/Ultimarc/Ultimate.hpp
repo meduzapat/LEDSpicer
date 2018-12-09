@@ -69,4 +69,6 @@ protected:
 
 }}} /* namespace LEDSpicer */
 
+deviceFactory(LEDSpicer::Devices::Ultimarc::Ultimate)
+
 #endif /* ULTIMATE_HPP_ */

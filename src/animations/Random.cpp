@@ -13,7 +13,7 @@ using namespace LEDSpicer::Animations;
 Random::Random(umap<string, string>& parameters, Group* const layout) :
 	Actor(parameters, layout)
 {
-
+	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_RANDOM, parameters, "actor Random");
 	std::srand(Utility::parseNumber(parameters["seed"], "Invalid number for seed"));
 
 	oldColors.reserve(getNumberOfElements());

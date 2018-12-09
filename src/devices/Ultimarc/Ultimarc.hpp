@@ -6,7 +6,7 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "../Device.hpp"
+#include "devices/Device.hpp"
 
 #ifndef ULTIMARC_HPP_
 #define ULTIMARC_HPP_ 1

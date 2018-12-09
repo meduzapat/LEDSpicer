@@ -14,6 +14,7 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	TimedActor(parameters, group),
 	color(parameters["color"])
 {
+	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_FILLER, parameters, "actor Filler");
 	mode = str2mode(parameters["mode"]);
 	totalActorFrames = group->size();
 	restart();

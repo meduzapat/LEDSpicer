@@ -13,8 +13,8 @@
 #include <vector>
 using std::vector;
 
-#include "../utility/Color.hpp"
-#include "../utility/Error.hpp"
+#include "utility/Color.hpp"
+#include "utility/Error.hpp"
 
 #ifndef ELEMENT_HPP_
 #define ELEMENT_HPP_ 1

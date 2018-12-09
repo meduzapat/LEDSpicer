@@ -206,7 +206,9 @@ int main(int argc, char **argv) {
 				"-e or --elements\t\tTest registered elements.\n"
 				"-v or --version\t\t\tDisplay version information\n"
 				"-h or --help\t\t\tDisplay this help screen.\n"
-				"Data directory: " PACKAGE_DATA_DIR "/\n"
+				"Data directory: " PACKAGE_DATA_DIR "\n"
+				"Actors directory: " ACTORS_DIR "\n"
+				"Devices directory: " DEVICES_DIR "\n"
 				"If -c or --config is not provided " PACKAGE_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;

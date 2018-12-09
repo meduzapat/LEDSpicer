@@ -7,7 +7,7 @@
  * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
  */
 
-#include "../ConnectionUSB.hpp"
+#include "ConnectionUSB.hpp"
 #include "Group.hpp"
 
 #ifndef DEVICE_HPP_
@@ -19,8 +19,6 @@ namespace Devices {
 /**
  * LEDSpicer::Devices::Device
  * Generic Device settings and functionality.
- * Note: in the future if different brands or types of devices are
- * added, this file will need to be split into specialized Devices kinds.
  */
 class Device : public ConnectionUSB {
 
@@ -28,7 +26,7 @@ public:
 
 	using ConnectionUSB::ConnectionUSB;
 
-	virtual ~Device() {}
+	virtual ~Device() = default;
 
 	/**
 	 * Set a LED to an intensity
@@ -94,6 +92,11 @@ protected:
 	void afterClaimInterface();
 
 };
+
+// The functions to create and destroy devices.
+#define deviceFactory(plugin) \
+	extern "C" LEDSpicer::Devices::Device* createDevice(uint8_t boardId, umap<string, string>& options) { return new plugin(boardId, options); } \
+	extern "C" void destroyDevice(LEDSpicer::Devices::Device* instance) { delete instance; }
 
 }} /* namespace LEDSpicer */
 
