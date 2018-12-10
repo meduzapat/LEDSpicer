@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@/@PACKAGE@
+libdir=@libdir@/@PACKAGE@
+
+Name: @PACKAGE_NAME@
+Description: LEDSpicer is a LEDs controler and animator program.
+Version: @PACKAGE_VERSION@
+Cflags: -I${includedir}
+Libs: -L${libdir} -lledspicer

@@ -24,6 +24,12 @@ AC_PROG_LN_S
 AC_LIBTOOL_DLOPEN
 LT_INIT([disable-static dlopen])
 
+m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/pkgconfig))
+
+AC_SUBST([LIB_VERSION], [1:0:0])
+DATA_VERSION=["1.0"]
+AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
+
 dnl Enable copy of extra files: conf and samples.
 AC_ARG_ENABLE(samples,
 	AS_HELP_STRING([--enable-samples],
@@ -41,8 +47,7 @@ AC_ARG_ENABLE(develop,
 	AS_HELP_STRING([--enable-develop],
 	[enable develop mode]),
 	AC_DEFINE([DEVELOP],[1],[Enables development mode])
-	DEVELOP_MODE=yes
-	CXXFLAGS='-g3 -O0',
+	DEVELOP_MODE=yes,
 	DEVELOP_MODE=no
 )
 
@@ -122,7 +127,6 @@ AC_ARG_WITH([systemdsystemunitdir],
 	fi
 )
 AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
-AC_MSG_RESULT([Using systemd unit directory: $systemdsystemunitdir])
 
 dnl *************
 dnl * Makefiles *
@@ -130,21 +134,29 @@ dnl *************
 AC_CONFIG_FILES([
 	Makefile
 	data/ledspicerd.service
+	data/ledspicer.pc
 ])
 
 AC_OUTPUT
 
 dnl Dump the build configuration for the developer
 echo -e "\n--------- build environment -----------
-Program      : ${PACKAGE_NAME}
-Version      : ${PACKAGE_VERSION}
-WebSite      : ${PACKAGE_URL}
-Build system : ${build_cpu}-${build_vendor}-${build_os}
+Program      : $PACKAGE_NAME
+Version      : $PACKAGE_VERSION
+WebSite      : $PACKAGE_URL
+liblespicer  : $LIB_VERSION
+DATA Version : $DATA_VERSION
+Build system : $build_cpu-$build_vendor-$build_os
 --------- build settings -----------
-C++ compiler : ${CXX}
-Preprocessor :${LIBUSB_CFLAGS} ${TINYXML2_CFLAGS} ${PTHREADSTUBS_CFLAGS} ${LINKER_CFLAGS}
-Libraries    :${LIBUSB_LIBS} ${TINYXML2_LIBS} ${PTHREADSTUBS_LIBS} ${LINKER_LIBS}
-C++ Flags    : ${CXXFLAGS}
-Prefix       : ${prefix}"
-echo "Develop mode : ${DEVELOP_MODE}"
-echo "Copy samples : ${samples}"
+C++ Compiler : $CXX $CPPFLAGS $CXXFLAGS
+Linker       : $LD $LDFLAGS $LIBS
+Includes     :$LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS $LINKER_CFLAGS
+Libraries    :$LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS $LINKER_LIBS
+Prefix       : $prefix
+Systemd      : $systemdsystemunitdir
+Devices dir  : $DEVICES_DIR
+Actors dir   : $ACTORS_DIR
+Data dir     : $datadir
+Config dir   : $sysconfdir
+Develop mode : $DEVELOP_MODE
+Copy samples : $samples"

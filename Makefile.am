@@ -1,12 +1,14 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS =          \
-	-I$(top_srcdir)/src\
-	${LIBUSB_CFLAGS}
+AM_CPPFLAGS =           \
+	-I$(top_srcdir)/src \
+	-Wl,--no-as-needed  \
+	$(LIBUSB_CFLAGS)
 
-AM_LDFLAGS = \
-	${LIBUSB_LIBS}
+AM_LDFLAGS =                     \
+	-version-info $(LIB_VERSION) \
+	$(LIBUSB_LIBS)
 
 ##################
 # Shared Library #
@@ -58,6 +60,11 @@ animationsheader_HEADERS =        \
 	src/animations/Actor.hpp      \
 	src/animations/TimedActor.hpp
 
+ledspicer_pcdir = $(pkgconfigdir)
+
+ledspicer_pc_DATA =  \
+	data/ledspicer.pc
+
 ##############
 # ledspicerd #
 ##############
@@ -77,23 +84,20 @@ ledspicerd_SOURCES =                \
 ledspicerd_CPPFLAGS =                     \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)/\" \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
-	-DACTORS_DIR=\"$(ACTORS_DIR)/\"        \
-	-DDEVICES_DIR=\"$(DEVICES_DIR)/\"      \
-	${TINYXML2_CFLAGS}                    \
-	${PTHREADSTUBS_CFLAGS}                \
-	${LINKER_CFLAGS}                      \
-	${LIBUSB_CFLAGS}
-
-ledspicerd_CXXFLAGS =   \
-	-I$(top_srcdir)/src \
-	${CXXFLAGS}         \
+	-DACTORS_DIR=\"$(ACTORS_DIR)/\"       \
+	-DDEVICES_DIR=\"$(DEVICES_DIR)/\"     \
+	$(TINYXML2_CFLAGS)                    \
+	$(PTHREADSTUBS_CFLAGS)                \
+	$(LINKER_CFLAGS)                      \
+	$(LIBUSB_CFLAGS)                      \
+	-I$(top_srcdir)/src                   \
 	-Wl,--no-as-needed
 
 ledspicerd_LDFLAGS =     \
-	${TINYXML2_LIBS}     \
-	${PTHREADSTUBS_LIBS} \
-	${LINKER_LIBS}       \
-	${LIBUSB_LIBS}
+	$(TINYXML2_LIBS)     \
+	$(PTHREADSTUBS_LIBS) \
+	$(LINKER_LIBS)       \
+	$(LIBUSB_LIBS)
 
 ledspicerd_LDADD = \
 	libledspicer.la
@@ -105,17 +109,14 @@ ledspicerd_LDADD = \
 emitter_SOURCES = \
 	src/Emitter.cpp
 
-emitter_CPPFLAGS =    \
+emitter_CPPFLAGS =                       \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\" \
-	${TINYXML2_CFLAGS}
-
-emitter_CXXFLAGS =      \
-	-I$(top_srcdir)/src \
-	${CXXFLAGS}         \
+	$(TINYXML2_CFLAGS)                   \
+	-I$(top_srcdir)/src                  \
 	-Wl,--no-as-needed
 
 emitter_LDFLAGS = \
-	${TINYXML2_LIBS}
+	$(TINYXML2_LIBS)
 
 emitter_LDADD = \
 	libledspicer.la
@@ -315,9 +316,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 systemdsystemunit_DATA =    \
 	data/ledspicerd.service
 
-DISTCLEANFILES = \
-	$(systemdsystemunit_DATA)
-
 #################
 # documentation #
 #################
@@ -330,6 +328,10 @@ dist_doc_DATA =             \
 ######################
 # extra distribution #
 ######################
+
+DISTCLEANFILES =              \
+	$(systemdsystemunit_DATA) \
+	$(ledspicer_pc_DATA)
 
 EXTRA_DIST =                          \
 	autogen.sh                        \

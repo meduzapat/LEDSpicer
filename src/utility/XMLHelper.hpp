@@ -15,8 +15,6 @@
 #ifndef SRC_LEDSPICER_XMLHELPER_HPP_
 #define SRC_LEDSPICER_XMLHELPER_HPP_ 1
 
-#define DataDocumentVersion "1.0"
-
 // Conflicting with tinyxml2 Error function, global shit :(
 using LEDError = LEDSpicer::Error;
 
