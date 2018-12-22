@@ -11,9 +11,8 @@
 using namespace LEDSpicer::Animations;
 
 Random::Random(umap<string, string>& parameters, Group* const layout) :
-	Actor(parameters, layout)
+	Actor(parameters, layout, REQUIRED_PARAM_ACTOR_RANDOM)
 {
-	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_RANDOM, parameters, "actor Random");
 	std::srand(Utility::parseNumber(parameters["seed"], "Invalid number for seed"));
 
 	oldColors.reserve(getNumberOfElements());
@@ -33,6 +32,7 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 		oldColors.push_back(&Color::getColor("Black"));
 
 	generateNewColors();
+	affectAllElements(true);
 }
 
 const vector<bool> Random::calculateElements() {
@@ -46,7 +46,7 @@ const vector<bool> Random::calculateElements() {
 		oldColors = std::move(newColors);
 		generateNewColors();
 	}
-	return vector<bool>(getNumberOfElements(), true);
+	return affectedElements;
 }
 
 void Random::generateNewColors() {

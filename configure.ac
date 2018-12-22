@@ -42,6 +42,18 @@ AC_ARG_ENABLE(samples,
 	[samples=no])
 AM_CONDITIONAL([COPY_SAMPLES],[test x$samples = xyes])
 
+dnl Enable pulseaudio plugin.
+AC_ARG_ENABLE(pulseaudio,
+	AS_HELP_STRING([--enable-pulseaudio],
+	[Enables the pulseaudio plugin @<:@default=yes@:>@]),
+	[case "${enableval}" in
+		yes) pulseaudio=yes ;;
+		no)  pulseaudio=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-pulseaudio]) ;;
+	esac],
+	[pulseaudio=yes])
+AM_CONDITIONAL([PULSEAUDIO],[test x$pulseaudio = xyes])
+
 dnl Enable develop mode
 AC_ARG_ENABLE(develop,
 	AS_HELP_STRING([--enable-develop],
@@ -54,7 +66,7 @@ AC_ARG_ENABLE(develop,
 dnl ********************
 dnl * Needed Libraries *
 dnl ********************
-AC_MSG_NOTICE([Checking for dependencies])
+AC_MSG_CHECKING([dependencies])
 
 PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.21],
 	echo -e "\tlibusb 1.0 ver `pkg-config --short-errors --modversion libusb-1.0` found",
@@ -71,6 +83,16 @@ PKG_CHECK_MODULES([PTHREADSTUBS], pthread-stubs,
 	[PTHREADSTUBS_LIBS="-lpthread"],
 	AC_MSG_ERROR([pthread development library not found.])
 )
+if test x$pulseaudio = xyes ; then
+	AC_MSG_NOTICE([User $USER will be used to allow pulseaudio to work, change it if needed in service file])
+	PKG_CHECK_MODULES([LIBPULSE], libpulse >= 0.9.7,
+		echo -e "\tlibpulse ver `pkg-config --short-errors --modversion libpulse` found"
+		USERNAME=$USER
+		AC_SUBST(USERNAME)
+		AC_SUBST([PULSEAUDIO]),
+		AC_MSG_ERROR([libpulse development library not found.])
+	)
+fi
 
 dnl expand bindir on configuration files.
 AS_AC_EXPAND(BINDIR, $bindir)
@@ -152,6 +174,7 @@ C++ Compiler : $CXX $CPPFLAGS $CXXFLAGS
 Linker       : $LD $LDFLAGS $LIBS
 Includes     :$LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS $LINKER_CFLAGS
 Libraries    :$LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS $LINKER_LIBS
+Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
 Prefix       : $prefix
 Systemd      : $systemdsystemunitdir
 Devices dir  : $DEVICES_DIR

@@ -12,7 +12,7 @@ using namespace LEDSpicer::Animations;
 
 const vector<bool> Pulse::calculateElements() {
 	changeElementsColor(color.fade((static_cast<uint>(currentActorFrame) * 100) / totalActorFrames), filter);
-	return vector<bool>(getNumberOfElements(), true);
+	return affectedElements;
 }
 
 void Pulse::drawConfig() {

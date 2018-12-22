@@ -13,12 +13,19 @@ using namespace LEDSpicer::Animations;
 uint8_t Actor::currentFrame = 1;
 uint8_t Actor::FPS          = 0;
 
-Actor::Actor(umap<string, string>& parameters, Group* const group) :
+Actor::Actor(
+	umap<string, string>& parameters,
+	Group* const group,
+	const vector<string>& requiredParameters
+) :
 	direction(str2direction(parameters["direction"])),
 	filter(Color::str2filter(parameters["filter"])),
 	group(group),
 	speed(str2speed(parameters["speed"]))
 {
+	affectedElements.resize(group->size(), false);
+	affectedElements.shrink_to_fit();
+	Utility::checkAttributes(requiredParameters, parameters, "actor.");
 	// default frames calculation.
 	totalActorFrames = FPS * (static_cast<uint8_t>(speed) + 1) / 2;
 	restart();
@@ -27,15 +34,16 @@ Actor::Actor(umap<string, string>& parameters, Group* const group) :
 bool Actor::drawFrame() {
 
 	const vector<bool>& affected = calculateElements();
-	switch (filter) {
-	case Color::Filters::Mask:
-		// turn off any other element.
-		for (uint8_t elIdx = 0; elIdx < getNumberOfElements(); ++elIdx) {
-			if (affected[elIdx])
-				continue;
-			changeElementColor(elIdx, Color::getColor("Black"), Color::Filters::Normal, 100);
+	if (not affected.empty())
+		switch (filter) {
+		case Color::Filters::Mask:
+			// turn off any other element.
+			for (uint8_t elIdx = 0; elIdx < getNumberOfElements(); ++elIdx) {
+				if (affected[elIdx])
+					continue;
+				changeElementColor(elIdx, Color::getColor("Black"), Color::Filters::Normal, 100);
+			}
 		}
-	}
 	advanceActorFrame();
 	return isLastFrame();
 }
@@ -256,4 +264,8 @@ vector<const LEDSpicer::Color*> Actor::extractColors(string colors) {
 	}
 	r.shrink_to_fit();
 	return r;
+}
+
+void Actor::affectAllElements(bool value) {
+	affectedElements.assign(getNumberOfElements(), value);
 }

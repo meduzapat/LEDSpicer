@@ -1,14 +1,17 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS =           \
-	-I$(top_srcdir)/src \
-	-Wl,--no-as-needed  \
+AM_CPPFLAGS =          \
+	-I$(srcdir)/src    \
+	-Wl,--no-as-needed \
+	-fexceptions       \
 	$(LIBUSB_CFLAGS)
 
 AM_LDFLAGS =                     \
 	-version-info $(LIB_VERSION) \
 	$(LIBUSB_LIBS)
+
+EXTRA_DIST =
 
 ##################
 # Shared Library #
@@ -17,7 +20,7 @@ AM_LDFLAGS =                     \
 pkglib_LTLIBRARIES = \
 	libledspicer.la
 
-libledspicer_la_SOURCES = \
+libledspicer_la_SOURCES =         \
 	src/utility/Log.cpp           \
 	src/utility/Error.cpp         \
 	src/utility/Utility.cpp       \
@@ -34,9 +37,9 @@ libledspicer_la_SOURCES = \
 	src/Message.cpp               \
 	src/Messages.cpp
 
-pkginclude_HEADERS = \
-	src/ConnectionUSB.hpp         \
-	src/Message.hpp               \
+pkginclude_HEADERS =      \
+	src/ConnectionUSB.hpp \
+	src/Message.hpp       \
 	src/Messages.hpp
 
 utilityheaderdir=$(pkgincludedir)/utility
@@ -60,9 +63,10 @@ animationsheader_HEADERS =        \
 	src/animations/Actor.hpp      \
 	src/animations/TimedActor.hpp
 
-ledspicer_pcdir = $(pkgconfigdir)
+ledspicer_pcdir = \
+	$(pkgconfigdir)
 
-ledspicer_pc_DATA =  \
+ledspicer_pc_DATA = \
 	data/ledspicer.pc
 
 ##############
@@ -91,7 +95,8 @@ ledspicerd_CPPFLAGS =                     \
 	$(LINKER_CFLAGS)                      \
 	$(LIBUSB_CFLAGS)                      \
 	-I$(top_srcdir)/src                   \
-	-Wl,--no-as-needed
+	-Wl,--no-as-needed                    \
+	-fexceptions
 
 ledspicerd_LDFLAGS =     \
 	$(TINYXML2_LIBS)     \
@@ -149,7 +154,8 @@ Gradient_la_LDFLAGS = \
 	-module           \
 	-shared           \
 	-export-dynamic   \
-	-avoid-version
+	-avoid-version    \
+	-fexceptions
 
 #########
 # Pulse #
@@ -165,7 +171,8 @@ Pulse_la_LDFLAGS =  \
 	-module         \
 	-shared         \
 	-export-dynamic \
-	-avoid-version
+	-avoid-version  \
+	-fexceptions
 
 ##############
 # Serpentine #
@@ -181,7 +188,8 @@ Serpentine_la_LDFLAGS = \
 	-module             \
 	-shared             \
 	-export-dynamic     \
-	-avoid-version
+	-avoid-version      \
+	-fexceptions
 
 ##########
 # Random #
@@ -193,11 +201,12 @@ Random_la_SOURCES = \
 Random_la_LIBADD = \
 	libledspicer.la
 
-Random_la_LDFLAGS =    \
+Random_la_LDFLAGS = \
 	-module         \
 	-shared         \
 	-export-dynamic \
-	-avoid-version
+	-avoid-version  \
+	-fexceptions
 
 ##########
 # Filler #
@@ -209,11 +218,39 @@ Filler_la_SOURCES = \
 Filler_la_LIBADD = \
 	libledspicer.la
 
-Filler_la_LDFLAGS =    \
+Filler_la_LDFLAGS = \
 	-module         \
 	-shared         \
 	-export-dynamic \
-	-avoid-version
+	-avoid-version  \
+	-fexceptions
+
+##############
+# PulseAudio #
+##############
+
+if PULSEAUDIO
+actors_LTLIBRARIES += \
+	PulseAudio.la
+
+PulseAudio_la_SOURCES = \
+	src/animations/PulseAudio.cpp
+
+PulseAudio_la_LIBADD = \
+	libledspicer.la    \
+	$(LIBPULSE_LIBS)
+
+PulseAudio_la_LDFLAGS = \
+	$(LIBPULSE)         \
+	-module             \
+	-shared             \
+	-export-dynamic     \
+	-avoid-version      \
+	-fexceptions
+else
+EXTRA_DIST += \
+	src/animations/PulseAudio.cpp
+endif
 
 ###########
 # devices #
@@ -238,10 +275,11 @@ UltimarcUltimate_la_LIBADD = \
 	libledspicer.la
 
 UltimarcUltimate_la_LDFLAGS = \
-	-module                   \
-	-shared                   \
-	-export-dynamic           \
-	-avoid-version
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
 
 #####################
 # Ultimarc PacDrive #
@@ -254,10 +292,11 @@ UltimarcPacDrive_la_LIBADD = \
 	libledspicer.la
 
 UltimarcPacDrive_la_LDFLAGS = \
-	-module                   \
-	-shared                   \
-	-export-dynamic           \
-	-avoid-version
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
 
 ##########
 # LedWiz #
@@ -269,11 +308,12 @@ LedWiz32_la_SOURCES = \
 LedWiz32_la_LIBADD = \
 	libledspicer.la
 
-LedWiz32_la_LDFLAGS =  \
-	-module            \
-	-shared            \
-	-export-dynamic    \
-	-avoid-version
+LedWiz32_la_LDFLAGS = \
+	-module           \
+	-shared           \
+	-export-dynamic   \
+	-avoid-version    \
+	-fexceptions
 
 if COPY_SAMPLES
 
@@ -333,7 +373,7 @@ DISTCLEANFILES =              \
 	$(systemdsystemunit_DATA) \
 	$(ledspicer_pc_DATA)
 
-EXTRA_DIST =                          \
+EXTRA_DIST +=                         \
 	autogen.sh                        \
 	src/Handler.hpp                   \
 	src/animations/ActorHandler.hpp   \
@@ -349,6 +389,7 @@ EXTRA_DIST =                          \
 	src/animations/Serpentine.hpp     \
 	src/animations/Random.hpp         \
 	src/animations/Filler.hpp         \
+	src/animations/PulseAudio.hpp     \
 	src/MainBase.hpp                  \
 	src/Main.hpp                      \
 	src/Emitter.hpp                   \

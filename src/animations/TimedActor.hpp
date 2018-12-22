@@ -23,7 +23,7 @@ class TimedActor: public Animations::Actor {
 
 public:
 
-	TimedActor(umap<string, string>& parameters, Group* const group);
+	TimedActor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters);
 
 	~TimedActor() {}
 

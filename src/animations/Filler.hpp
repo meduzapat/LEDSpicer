@@ -39,7 +39,7 @@ public:
 
 protected:
 
-	const vector<bool> calculateElements();
+	virtual const vector<bool> calculateElements();
 
 private:
 
@@ -52,21 +52,18 @@ private:
 	/// Keeps track if the process is filling the group or cleaning.
 	bool filling = true;
 
-	/// Keeps flags for random mode.
-	vector<bool> elementsOn;
-
 	/**
 	 * Fills the group in a linear way.
 	 * @return The elements that changed.
 	 */
-	const vector<bool> fillElementsLinear(uint8_t begin, uint8_t end);
+	void fillElementsLinear(uint8_t begin, uint8_t end);
 
 	/**
 	 * Fills the group in a random way.
 	 * @param val
 	 * @return The elements that changed.
 	 */
-	const vector<bool> fillElementsRandom(bool val);
+	void fillElementsRandom(bool val);
 
 	/**
 	 * Draw the random values.

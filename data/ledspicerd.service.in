@@ -18,12 +18,13 @@
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
 [Unit]
-Description=@PACKAGE_NAME@ is a LEDs controller daemon that will handle the output of different programs based on their configurations.
+Description=@PACKAGE_NAME@ a LEDs controller and animation daemon that will handle LEDs of different devices.
 
 [Service]
 Type=forking
 ExecStart=@BINDIR@/ledspicerd
 KillMode=process
+User=@USERNAME@
 
 [Install]
 WantedBy=multi-user.target

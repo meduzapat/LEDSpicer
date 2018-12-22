@@ -10,8 +10,8 @@
 
 using namespace LEDSpicer::Animations;
 
-TimedActor::TimedActor(umap<string, string>& parameters, Group* const group) :
-	Actor(parameters, group)
+TimedActor::TimedActor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters) :
+	Actor(parameters, group, requiredParameters)
 {
 	changeFrameTotal = static_cast<uint8_t>(speed) + 1;
 }

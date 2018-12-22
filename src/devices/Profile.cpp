@@ -15,33 +15,36 @@ void Profile::addAnimation(const string& animationName, const vector<Actor*>& an
 }
 
 void Profile::drawConfig() {
-	cout << "Background color: ";
-	backgroundColor.drawColor();
+	cout << "* Background color: " << backgroundColor.getName() << endl;
 	if (start) {
-		cout << endl << "Start transition:" << endl;
+		cout << endl << "* Start transition:" << endl;
 		start->drawConfig();
 	}
 	if (end) {
-		cout << endl << "Ending transition:" << endl;
+		cout << endl << endl << "* Ending transition:" << endl;
 		end->drawConfig();
 	}
 
-	for (auto& a : animations) {
-		cout << endl << "Animation " << a.first << ": " << endl;
-		for(auto actor : a.second)
-			actor->drawConfig();
+	if (animations.size()) {
+		cout << endl << "* Animations:" << endl;
+		for (auto& a : animations) {
+			cout << endl << "Animation " << a.first << ": " << endl;
+			for(auto actor : a.second)
+				actor->drawConfig();
+		}
 	}
 
 	if (alwaysOnGroups.size()) {
-		cout << endl << "Groups Overwrite Color: " << endl;
+		cout << endl << "* Groups Overwrite Color: " << endl;
 		for (auto& g : alwaysOnGroups) {
 			cout << g.group->getName() << " ";
 			g.color->drawColor();
 			cout << endl;
 		}
 	}
+
 	if (alwaysOnElements.size()) {
-		cout << endl << "Elements Overwrite Color: " << endl;
+		cout << endl << "* Elements Overwrite Color: " << endl;
 		for (auto& e : alwaysOnElements) {
 			cout << e.element->getName() << " ";
 			e.color->drawColor();

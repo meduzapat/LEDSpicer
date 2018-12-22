@@ -11,11 +11,10 @@
 using namespace LEDSpicer::Animations;
 
 Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group),
+	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
 	mode(str2mode(parameters["mode"])),
 	colorDirection(cDirection)
 {
-	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_GRADIENT, parameters, "actor Gradient");
 	colors = extractColors(parameters["colors"]);
 	if (colors.size() < 2)
 		throw Error("You need two or more colors for actor Gradient to do something.");
@@ -34,6 +33,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		break;
 	}
 	currentColor = cDirection == Directions::Forward ? 1 : colors.size();
+	affectAllElements(true);
 }
 
 const vector<bool> Gradient::calculateElements() {
@@ -46,7 +46,7 @@ const vector<bool> Gradient::calculateElements() {
 		calculateMultiple();
 		break;
 	}
-	return vector<bool>(getNumberOfElements(), true);
+	return affectedElements;
 }
 
 void Gradient::drawConfig() {

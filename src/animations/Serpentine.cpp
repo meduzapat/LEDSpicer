@@ -11,11 +11,10 @@
 using namespace LEDSpicer::Animations;
 
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group),
+	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	color(parameters["color"]),
 	tailColor(parameters["tailColor"])
 {
-	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_SERPENTINE, parameters, "actor Serpentine");
 	totalActorFrames = group->size();
 	uint8_t
 		tailLength    = 0,
@@ -47,8 +46,8 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 
 const vector<bool> Serpentine::calculateElements() {
 
-	vector<bool> elements(getNumberOfElements(), false);
-	elements[currentActorFrame -1] = true;
+	affectAllElements();
+	affectedElements[currentActorFrame -1] = true;
 
 	changeElementColor(currentActorFrame - 1, color, filter);
 	calculateTailPosition();
@@ -60,11 +59,10 @@ const vector<bool> Serpentine::calculateElements() {
 		default:
 			changeElementColor(data.position - 1, tailColor, filter, data.percent);
 		}
-		elements[data.position -1] = true;
+		affectedElements[data.position -1] = true;
 	}
 
-	elements.shrink_to_fit();
-	return elements;
+	return affectedElements;
 }
 
 void Serpentine::calculateTailPosition() {

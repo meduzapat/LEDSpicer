@@ -40,7 +40,13 @@ public:
 
 	enum class Speed      : uint8_t {VeryFast, Fast, Normal, Slow, VerySlow};
 
-	Actor(umap<string, string>& parameters, Group* const group);
+	/**
+	 * Create a new actor object
+	 * @param parameters A list of parameters from the animation file.
+	 * @param group the group where the actors will act.
+	 * @param requiredParameters A list of mandatory parameters.
+	 */
+	Actor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters);
 
 	Actor() = delete;
 
@@ -142,6 +148,11 @@ protected:
 		FPS;
 
 	/**
+	 * Array with a list of affected elements.
+	 */
+	vector<bool> affectedElements;
+
+	/**
 	 * Do the elements calculation.
 	 * @return an array with the affected elements.
 	 */
@@ -182,11 +193,17 @@ protected:
 	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
 
 	/**
-	 * Creates an array of colors from a string of comma separted color names.
+	 * Creates an array of colors from a string of comma separated color names.
 	 * @param colors
 	 * @return
 	 */
 	static vector<const Color*> extractColors(string colors);
+
+	/**
+	 * Sets the affected elements to the desired stated.
+	 * @param value
+	 */
+	void affectAllElements(bool value = false);
 
 private:
 

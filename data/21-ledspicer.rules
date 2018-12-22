@@ -1,1 +1,1 @@
-SUBSYSTEM=="usb", ATTRS{idVendor}=="d209", GROUP="users", MODE="0666"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="d209", GROUP="users", MODE="0666"

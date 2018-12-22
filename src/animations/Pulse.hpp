@@ -24,9 +24,9 @@ class Pulse : public Actor {
 public:
 
 	Pulse(umap<string, string>& parameters, Group* const layout):
-		Actor(parameters, layout),
+		Actor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
 		color(parameters["color"]) {
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR_PULSE, parameters, "actor Pulse");
+		affectAllElements(true);
 	}
 
 	virtual ~Pulse() {}

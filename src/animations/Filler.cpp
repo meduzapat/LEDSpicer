@@ -11,10 +11,9 @@
 using namespace LEDSpicer::Animations;
 
 Filler::Filler(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group),
+	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
 	color(parameters["color"])
 {
-	Utility::checkAttributes(REQUIRED_PARAM_ACTOR_FILLER, parameters, "actor Filler");
 	mode = str2mode(parameters["mode"]);
 	totalActorFrames = group->size();
 	restart();
@@ -22,7 +21,6 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	case Modes::Random:
 	case Modes::RandomSimple:
 		std::srand(std::time(nullptr));
-		elementsOn.resize(totalActorFrames, false);
 		direction  = Directions::Forward;
 		cDirection = direction;
 	}
@@ -87,47 +85,52 @@ const vector<bool> Filler::calculateElements() {
 
 	switch (mode) {
 	default:
-		if (cDirection == Directions::Forward)
-			return fillElementsLinear(
+		if (cDirection == Directions::Forward) {
+			fillElementsLinear(
 				filling ? 0                 : currentActorFrame - 1,
 				filling ? currentActorFrame : totalActorFrames
 			);
-		return fillElementsLinear(
+			break;
+		}
+		fillElementsLinear(
 			filling ? currentActorFrame - 1 : 0,
 			filling ? totalActorFrames  : currentActorFrame
 		);
+		break;
 
 	// Forward or backward will work in the same way for random modes.
 	case Modes::Random:
-		return fillElementsRandom(filling);
+		fillElementsRandom(filling);
+		break;
 	case Modes::RandomSimple:
 		if (isFirstFrame() and not isSameFrame())
-			std::fill(elementsOn.begin(), elementsOn.end(), false);
-		return fillElementsRandom(true);
+			affectAllElements();
+		fillElementsRandom(true);
+		break;
 	}
+	return affectedElements;
 }
 
-const vector<bool> Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
-	vector<bool> elements(getNumberOfElements(), false);
+void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
+	affectAllElements();
 	for (uint8_t c = begin; c < end; ++c) {
 		changeElementColor(c, color, filter);
-		elements[c] = true;
+		affectedElements[c] = true;
 	}
-	return elements;
 }
 
-const vector<bool> Filler::fillElementsRandom(bool val) {
+void Filler::fillElementsRandom(bool val) {
 
 	// Draw.
 	if (isSameFrame()) {
 		drawRandom();
-		return elementsOn;
+		return;
 	}
 
 	// Extract candidates.
 	vector<int8_t> posibleElements;
-	for (uint8_t e = 0; e < elementsOn.size(); ++e)
-		if (elementsOn[e] != val)
+	for (uint8_t e = 0; e < affectedElements.size(); ++e)
+		if (affectedElements[e] != val)
 			posibleElements.push_back(e);
 
 	// Roll dice.
@@ -136,7 +139,7 @@ const vector<bool> Filler::fillElementsRandom(bool val) {
 		r = rand() / ((RAND_MAX + 1u) / (posibleElements.size() - 1));
 
 	// Set dice and draw.
-	elementsOn[posibleElements[r]] = val;
+	affectedElements[posibleElements[r]] = val;
 	drawRandom();
 
 	// Check direction and force last frame.
@@ -144,13 +147,11 @@ const vector<bool> Filler::fillElementsRandom(bool val) {
 		filling = not filling;
 		currentActorFrame = totalActorFrames;
 	}
-
-	return elementsOn;
 }
 
 void Filler::drawRandom() {
-	for (uint8_t e = 0; e < elementsOn.size(); ++e)
-		if (elementsOn[e])
+	for (uint8_t e = 0; e < affectedElements.size(); ++e)
+		if (affectedElements[e])
 			changeElementColor(e, color, filter);
 }
 
