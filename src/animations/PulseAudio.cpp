@@ -346,13 +346,12 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 	std::lock_guard<std::mutex> lock(mutex);
 	const int16_t* buffer = static_cast<const int16_t*>(data);
 	vector<int16_t> rawData(buffer, buffer + (length / 2));
+	singleData.l = singleData.r = 0;
+	vuData.assign(vuData.size(), Values());
+	if (rawData.empty())
+		return;
 	switch (userPref->mode) {
 	default:
-		if (rawData.empty()) {
-			singleData.l = singleData.r = 0;
-			vuData.assign(vuData.size(), Values());
-			return;
-		}
 		processRawData(rawData, userPref);
 	}
 	pa_stream_drop(stream);
@@ -380,34 +379,25 @@ void PulseAudio::processRawData(vector<int16_t>& rawData, UserPref* userPref) {
 		v   = 0,
 		rec = 0;
 
-	// reset both datasets.
-	singleData = {0, 0};
-	for (Values& val : vuData)
-		val.l = val.r = 0;
-
 	for (size_t c = 0; c < rawData.size(); ++c) {
 
 		v = abs(rawData[c]);
 
 		// Even for left, odd for right.
 		if (c % 2) {
-			if ((userPref->channel & Channels::Left)) {
-				if (v > singleData.l)
-					singleData.l = v;
-				if (v > vuData[rec].l)
-					vuData[rec].l = v;
-			}
+			if (v > singleData.l)
+				singleData.l = v;
+			if (v > vuData[rec].l)
+				vuData[rec].l = v;
 		}
 		else {
-			if ((userPref->channel & Channels::Right)) {
-				if (v > singleData.r)
-					singleData.r = v;
-				if (v > vuData[rec].r)
-					vuData[rec].r = v;
-			}
-		++rec;
-		if (rec >= vuData.size() / 2)
-			rec = 0;
+			if (v > singleData.r)
+				singleData.r = v;
+			if (v > vuData[rec].r)
+				vuData[rec].r = v;
+			++rec;
+			if (rec >= vuData.size() / 2)
+				rec = 0;
 		}
 	}
 
@@ -485,20 +475,22 @@ void PulseAudio::vuMeters() {
 #define TO_PERC(x) round(x * 100.00 / peak)
 
 void PulseAudio::levels() {
+	uint8_t e = userPref.channel == Channels::Both ? total : 0;
 	for (uint8_t c = 0; c < total; ++c) {
 		if (userPref.channel & Channels::Left)
 			changeElementColor(c, detectColor(TO_PERC(vuData[c].l)), filter);
 		if (userPref.channel & Channels::Right)
-			changeElementColor(total + c, detectColor(TO_PERC(vuData[c].r)), filter);
+			changeElementColor(e + c, detectColor(TO_PERC(vuData[c].r)), filter);
 	}
 }
 
 void PulseAudio::single() {
+	uint8_t e = userPref.channel == Channels::Both ? total : 0;
 	for (uint8_t c = 0; c < total; ++c) {
 		if (userPref.channel & Channels::Left)
 			changeElementColor(c, detectColor(TO_PERC(singleData.l)), filter);
 		if (userPref.channel & Channels::Right)
-			changeElementColor(total + c, detectColor(TO_PERC(singleData.r)), filter);
+			changeElementColor(e + c, detectColor(TO_PERC(singleData.r)), filter);
 	}
 }
 
