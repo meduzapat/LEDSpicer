@@ -7,6 +7,7 @@
  */
 
 #include "Actor.hpp"
+#include <cmath>
 
 #ifndef PULSE_HPP_
 #define PULSE_HPP_ 1

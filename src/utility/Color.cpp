@@ -125,10 +125,7 @@ Color Color::fade(uint percent) const {
 
 	Color color;
 
-	if (percent)
-		color.set(r * percent / 100, g * percent / 100, b * percent / 100);
-	else
-		color.set(*this);
+	color.set(r * percent / 100, g * percent / 100, b * percent / 100);
 
 	return color;
 }

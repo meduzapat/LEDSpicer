@@ -39,7 +39,7 @@ public:
 
 	enum class Modes : uint8_t {VuMeter, Levels, Single};
 
-	enum Channels : uint8_t {Left = 1, Right, Both};
+	enum Channels : uint8_t {Left = 1, Right, Both, Mono};
 
 	PulseAudio(umap<string, string>& parameters, Group* const layout);
 
