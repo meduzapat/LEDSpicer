@@ -31,12 +31,7 @@ void Ultimate::afterConnect() {
 
 	libusb_get_device_descriptor(device, &descriptor);
 
-	/*
-	 * Not sure if this is correct but looks like is working fine,
-	 * my theory is that when the board is on game controller mode
-	 * another interface is listed in between, so the number increases by one.
-	 * Also I not sure why 0x40.
-	 */
+	// Detect Game Controller mode.
 	if ((descriptor.bcdDevice & 0x40)) {
 		LogInfo("No Game Controller mode detected");
 		board.interface = IPAC_ULTIMATE_NGC_INTERFACE;

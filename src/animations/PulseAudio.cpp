@@ -66,7 +66,6 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	if (not tml)
 		throw Error("Failed create pulseaudio main loop");
 
-
 	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PACKAGE_STRING);
 	if (not context)
 		throw Error("Failed to create pulseaudio context");

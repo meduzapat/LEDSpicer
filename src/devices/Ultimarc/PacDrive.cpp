@@ -12,8 +12,6 @@ using namespace LEDSpicer::Devices::Ultimarc;
 
 PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
 	Ultimarc(
-		ULTIMARC_REQUEST_TYPE,
-		ULTIMARC_REQUEST,
 		PAC_DRIVE_WVALUE,
 		PAC_DRIVE_INTERFACE,
 		PAC_DRIVE_LEDS,

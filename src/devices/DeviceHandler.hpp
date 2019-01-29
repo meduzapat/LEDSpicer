@@ -35,9 +35,8 @@ public:
 
 protected:
 
-//	Device*(*createFunction)(uint8_t, umap<string, string>&) = nullptr;
 	std::function<Device*(uint8_t, umap<string, string>&)> createFunction;
-//	void(*destroyFunction)(Device*) = nullptr;
+
 	std::function<void(Device*)> destroyFunction;
 };
 

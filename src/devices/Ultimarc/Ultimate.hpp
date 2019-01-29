@@ -41,8 +41,6 @@ public:
 	 */
 	Ultimate(uint8_t boardId, umap<string, string>& options) :
 	Ultimarc(
-		ULTIMARC_REQUEST_TYPE,
-		ULTIMARC_REQUEST,
 		IPAC_ULTIMATE_WVALUE,
 		0, // to be defined.
 		IPAC_ULTIMATE_LEDS,

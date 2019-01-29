@@ -15,6 +15,13 @@ LedWiz32::~LedWiz32() {
 	transfer();
 }
 
+void LedWiz32::afterClaimInterface() {
+	// This will initialize the 4 controllers and set the pulse to off.
+	vector<uint8_t> data = {64, 255, 255, 255, 255, 1, 0, 0};
+	transferData(data);
+	Device::afterClaimInterface();
+}
+
 void LedWiz32::drawHardwarePinMap() {
 	uint8_t half = LEDWIZ32_LEDS / 2;
 	cout
@@ -25,19 +32,26 @@ void LedWiz32::drawHardwarePinMap() {
 		setLed(r, r + 1);
 		setLed(l, l + 1);
 		cout <<
-			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(r) <<
-			"   " <<
+			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(r) << "   " <<
 			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(l) << endl;
 	}
 	cout << endl;
 }
 
 void LedWiz32::transfer() {
-
+	/*
+	 * This device transfers chunks of 8 bits from 0 to 63.
+	 * 0 to 48 with modulation.
+	 * 49 to 63 without.
+	 */
 	vector<uint8_t> load;
-	load.push_back(0x04);
-	load.insert(load.end(), LEDs.begin(), LEDs.end());
-	transferData(load);
+	for (auto l : LEDs) {
+		load.push_back(63 * (l / 255.00));
+		if (load.size() == 8) {
+			transferData(load);
+			load.clear();
+		}
+	}
 }
 
 uint16_t LedWiz32::getProduct() {

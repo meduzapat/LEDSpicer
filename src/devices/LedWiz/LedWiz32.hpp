@@ -35,8 +35,6 @@ public:
 
 	LedWiz32(uint8_t boardId, umap<string, string>& options) :
 	LedWiz(
-		LEDWIZ_REQUEST_TYPE,
-		LEDWIZ_REQUEST,
 		LEDWIZ32_WVALUE,
 		LEDWIZ32_INTERFACE,
 		LEDWIZ32_LEDS,
@@ -56,6 +54,8 @@ public:
 protected:
 
 	virtual void afterConnect() {}
+
+	virtual void afterClaimInterface();
 };
 
 } /* namespace LedWiz */

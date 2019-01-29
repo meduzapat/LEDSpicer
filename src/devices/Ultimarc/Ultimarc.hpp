@@ -12,11 +12,7 @@
 #define ULTIMARC_HPP_ 1
 
 /// Ultimarc USB vendor code.
-#define ULTIMARC_VENDOR       0xD209
-/// The request type field for the setup packet.
-#define ULTIMARC_REQUEST_TYPE 0x21
-/// The request field for the setup packet.
-#define ULTIMARC_REQUEST      9
+#define ULTIMARC_VENDOR 0xD209
 
 namespace LEDSpicer {
 namespace Devices {

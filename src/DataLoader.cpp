@@ -129,9 +129,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	// Checks orphan Pins.
 	LogInfo(
-		device->getFullName() +
-		" with " + to_string(device->getNumberOfElements()) +
-		" elements and " + to_string(pinCheck.size()) + " LEDs"
+		device->getFullName() + " with " +
+		to_string(pinCheck.size()) + " LEDs divided into " +
+		to_string(device->getNumberOfElements()) + " elements"
 	);
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])

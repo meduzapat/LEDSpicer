@@ -12,11 +12,7 @@
 #define LEDWIZ_HPP_ 1
 
 /// Led-Wiz USB vendor code.
-#define LEDWIZ_VENDOR       0xFAFA
-/// The request type field for the setup packet.
-#define LEDWIZ_REQUEST_TYPE 0x21
-/// The request field for the setup packet.
-#define LEDWIZ_REQUEST      0x09
+#define LEDWIZ_VENDOR 0xFAFA
 
 namespace LEDSpicer {
 namespace Devices {

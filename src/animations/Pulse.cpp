@@ -14,7 +14,7 @@ const vector<bool> Pulse::calculateElements() {
 	float c = static_cast<float>(currentActorFrame);
 	c = round((c * c) / totalActorFrames);
 #ifdef DEVELOP
-	cout << "frame: " << to_string(currentActorFrame) << " = " << to_string(c) << endl;
+	cout << "frame: " << to_string(currentActorFrame) << " = " << to_string(c * 100 / totalActorFrames) << endl;
 #endif
 	changeElementsColor(color.fade(c * 100 / totalActorFrames), filter);
 	return affectedElements;

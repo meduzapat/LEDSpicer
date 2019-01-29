@@ -89,7 +89,7 @@ protected:
 	umap<string, Element> elementsByName;
 
 	/// Basic
-	void afterClaimInterface();
+	virtual void afterClaimInterface();
 
 };
 

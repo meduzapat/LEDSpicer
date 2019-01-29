@@ -26,6 +26,11 @@ using std::vector;
 #ifndef CONNECTIONUSB_HPP_
 #define CONNECTIONUSB_HPP_ 1
 
+/// The request type field for the setup packet.
+#define REQUEST_TYPE 0x21
+/// The request field for the setup packet.
+#define REQUEST      0x09
+
 /// Default USB timeout
 #define TIMEOUT 1500
 
@@ -45,8 +50,6 @@ class ConnectionUSB {
 public:
 
 	ConnectionUSB(
-		uint16_t requestType,
-		uint16_t request,
 		uint16_t wValue,
 		uint8_t  interface,
 		uint8_t  elements,
@@ -136,10 +139,6 @@ protected:
 
 	vector<uint8_t> LEDs;
 
-	uint8_t
-		requestType = 0,
-		request     = 0;
-
 	static uint8_t waitTime;
 
 	virtual void afterConnect() = 0;
@@ -147,12 +146,12 @@ protected:
 	/**
 	 * Connect to the USB board.
 	 */
-	void connect();
+	virtual void connect();
 
 	/**
 	 * Detach from kernel and claim the interface.
 	 */
-	void claimInterface();
+	virtual void claimInterface();
 
 	/**
 	 * if anything needs to be initialized after claiming goes here.

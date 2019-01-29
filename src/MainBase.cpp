@@ -38,23 +38,41 @@ MainBase::MainBase(Modes mode) :
 MainBase::~MainBase() {
 
 	// destroy devices and handlers.
-	for (auto& dm : DataLoader::deviceMap)
+	for (auto& dm : DataLoader::deviceMap) {
+#ifdef DEVELOP
+		LogDebug(dm.first->getFullName() + " instance deleted");
+#endif
 		dm.second->destroyDevice(dm.first);
+	}
 
-	for (auto& dh : DataLoader::deviceHandlers)
+	for (auto& dh : DataLoader::deviceHandlers) {
+#ifdef DEVELOP
+		LogDebug("Device Handler " + dh.first + " instance deleted");
+#endif
 		delete dh.second;
+	}
 
 	// destroy actors and handlers.
-	for (auto& am : DataLoader::actorMap)
+	for (auto& am : DataLoader::actorMap) {
+#ifdef DEVELOP
+		LogDebug("Actor instance deleted");
+#endif
 		am.second->destroyActor(am.first);
+	}
 
-	for (auto& ah : DataLoader::actorHandlers)
+	for (auto& ah : DataLoader::actorHandlers) {
+#ifdef DEVELOP
+		LogDebug("Actor Handler " + ah.first + " instance deleted");
+#endif
 		delete ah.second;
+	}
 
-	for (auto p : DataLoader::profiles)
+	for (auto p : DataLoader::profiles) {
+#ifdef DEVELOP
+		LogDebug("Profile " + p.first + " instance deleted");
+#endif
 		delete p.second;
-
-
+	}
 
 	ConnectionUSB::terminate();
 }

@@ -16,8 +16,6 @@ libusb_context* ConnectionUSB::usbSession = nullptr;
 uint8_t         ConnectionUSB::waitTime   = 0;
 
 ConnectionUSB::ConnectionUSB(
-		uint16_t requestType,
-		uint16_t request,
 		uint16_t wValue,
 		uint8_t  interface,
 		uint8_t  elements,
@@ -25,9 +23,7 @@ ConnectionUSB::ConnectionUSB(
 		uint8_t  boardId,
 		const string& name
 ) :
-	name(name),
-	requestType(requestType),
-	request(request)
+	name(name)
 {
 #ifndef DRY_RUN
 	if (not usbSession)
@@ -158,8 +154,8 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 
 	auto responseCode = libusb_control_transfer(
 		handle,
-		requestType,
-		request,
+		REQUEST_TYPE,
+		REQUEST,
 		board.value,
 		board.interface,
 		data.data(),
@@ -171,11 +167,9 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 		return;
 
 	LogDebug(
-		"bmRequestType: " + Utility::hex2str(requestType) +
-		" bRequest: "     + Utility::hex2str(request) +
-		" wValue: "       + Utility::hex2str(board.value) +
-		" wIndex: "       + Utility::hex2str(board.interface) +
-		" wLength: "      + to_string(data.size())
+		"wValue: "  + Utility::hex2str(board.value) +
+		" wIndex: "  + Utility::hex2str(board.interface) +
+		" wLength: " + to_string(data.size())
 	);
 	throw Error(string(libusb_error_name(responseCode)) + " for " + getFullName());
 #endif
