@@ -43,7 +43,7 @@ public:
 		LEDWIZ32_NAME
 	) {}
 
-	virtual ~LedWiz32();
+	virtual ~LedWiz32() {}
 
 	virtual void drawHardwarePinMap();
 

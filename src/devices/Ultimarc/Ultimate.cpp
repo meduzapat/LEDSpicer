@@ -10,11 +10,6 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-Ultimate::~Ultimate() {
-	setLeds(0);
-	transfer();
-}
-
 void Ultimate::afterConnect() {
 
 	// Detect interface.

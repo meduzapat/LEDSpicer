@@ -10,13 +10,8 @@
 
 using namespace LEDSpicer::Devices::LedWiz;
 
-LedWiz32::~LedWiz32() {
-	setLeds(0);
-	transfer();
-}
-
 void LedWiz32::afterClaimInterface() {
-	// This will initialize the 4 controllers and set the pulse to off.
+	// This will initialize the 4 controllers and set the pulse to 1.
 	vector<uint8_t> data = {64, 255, 255, 255, 255, 1, 0, 0};
 	transferData(data);
 	Device::afterClaimInterface();

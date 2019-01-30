@@ -61,7 +61,7 @@ public:
 
 	virtual ~Profile() = default;
 
-	void addAnimation(const string& animationName, const vector<Actor*>& animation);
+	void addAnimation(const vector<Actor*>& animation);
 
 	void drawConfig();
 
@@ -147,8 +147,8 @@ protected:
 		/// The ending animation.
 		* end;
 
-	/// List of animations to run.
-	umap<string, vector<Actor*>> animations;
+	/// List of animations by group to run.
+	vector<Actor*> animations;
 
 	/// Keeps a list of always on elements.
 	vector<ElementItem> alwaysOnElements;

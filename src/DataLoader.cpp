@@ -210,7 +210,7 @@ Profile* DataLoader::processProfile(const string& name) {
 	if (profiles.count(name))
 		return profiles[name];
 
-	XMLHelper profile(createFilename("profiles/" + name), "Profile");
+	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
@@ -248,7 +248,7 @@ Profile* DataLoader::processProfile(const string& name) {
 		for (; element; element = element->NextSiblingElement("animation")) {
 			tempAttr = processNode(element);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for profile " + name);
-			profilePtr->addAnimation(tempAttr["name"], processAnimation(tempAttr["name"]));
+			profilePtr->addAnimation(processAnimation(tempAttr["name"]));
 		}
 	}
 	// Check for always on elements.
@@ -281,7 +281,7 @@ Profile* DataLoader::processProfile(const string& name) {
 
 vector<Actor*> DataLoader::processAnimation(const string& name) {
 
-	XMLHelper animation(createFilename("animations/" + name), "Animation");
+	XMLHelper animation(createFilename(ACTOR_DIR + name), "Animation");
 
 	umap<string, string> actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement("actor");

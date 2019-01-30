@@ -49,7 +49,7 @@ public:
 		IPAC_ULTIMATE_NAME
 	) {}
 
-	virtual ~Ultimate();
+	virtual ~Ultimate() {}
 
 	virtual void drawHardwarePinMap();
 

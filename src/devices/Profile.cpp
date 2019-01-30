@@ -10,8 +10,8 @@
 
 using namespace LEDSpicer::Devices;
 
-void Profile::addAnimation(const string& animationName, const vector<Actor*>& animation) {
-	animations[animationName] = std::move(animation);
+void Profile::addAnimation(const vector<Actor*>& animation) {
+	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
 
 void Profile::drawConfig() {
@@ -26,12 +26,9 @@ void Profile::drawConfig() {
 	}
 
 	if (animations.size()) {
-		cout << endl << "* Animations:" << endl;
-		for (auto& a : animations) {
-			cout << endl << "Animation " << a.first << ": " << endl;
-			for(auto actor : a.second)
-				actor->drawConfig();
-		}
+		cout << endl << "* Animation Actors:" << endl;
+		for(auto actor : animations)
+			actor->drawConfig();
 	}
 
 	if (alwaysOnGroups.size()) {
@@ -62,9 +59,8 @@ void Profile::runFrame() {
 	}
 
 	if (not actual and running)
-		for (auto& anim : animations)
-			for (auto actor : anim.second)
-				actor->drawFrame();
+		for (auto actor : animations)
+			actor->drawFrame();
 }
 
 void Profile::reset() {
@@ -93,9 +89,8 @@ void Profile::terminate() {
 }
 
 void Profile::restartActors() {
-	for (auto& anim : animations)
-		for (auto actor : anim.second)
-			actor->restart();
+	for (auto actor : animations)
+		actor->restart();
 }
 
 bool Profile::isTransiting() const {
