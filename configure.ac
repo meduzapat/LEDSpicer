@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.3.2],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.3.3],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
-AC_COPYRIGHT([Copyright © 2018 Patricio A. Rossi])
+AC_COPYRIGHT([Copyright © 2018 - 2019 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -26,7 +26,7 @@ LT_INIT([disable-static dlopen])
 
 m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/pkgconfig))
 
-AC_SUBST([LIB_VERSION], [1:0:0])
+AC_SUBST([LIB_VERSION], [1:1:0])
 DATA_VERSION=["1.0"]
 AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
 

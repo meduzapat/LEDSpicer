@@ -3,7 +3,7 @@
  * @file      Emiter.cpp
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
 #include "Emitter.hpp"
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 			cout
 				<< endl <<
 				"Emitter is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " Copyright © 2018 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " Copyright © 2018 - 2019 - Patricio A. Rossi (MeduZa)\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"

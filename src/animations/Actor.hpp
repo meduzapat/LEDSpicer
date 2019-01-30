@@ -3,7 +3,7 @@
  * @file      Actor.hpp
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
 // For ints.

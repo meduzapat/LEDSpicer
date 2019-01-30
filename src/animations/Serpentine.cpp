@@ -3,7 +3,7 @@
  * @file      Serpentine.cpp
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
 #include "Serpentine.hpp"

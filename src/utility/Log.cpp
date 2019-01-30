@@ -3,7 +3,7 @@
  * @file      Log.cpp
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
 #include "Log.hpp"

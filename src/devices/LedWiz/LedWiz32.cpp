@@ -3,7 +3,7 @@
  * @file      LedWiz32.cpp
  * @since     Nov 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
 #include "LedWiz32.hpp"

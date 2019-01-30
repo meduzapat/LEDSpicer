@@ -1,0 +1,10 @@
+prefix=/home/meduza/workspaces/C++/LEDSpicer/test
+exec_prefix=${prefix}
+includedir=${prefix}/include/ledspicer
+libdir=${exec_prefix}/lib/ledspicer
+
+Name: LEDSpicer
+Description: LEDSpicer is a LEDs controler and animator program.
+Version: 0.3.3
+Cflags: -I${includedir}
+Libs: -L${libdir} -lledspicer
