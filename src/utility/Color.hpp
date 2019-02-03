@@ -129,7 +129,7 @@ public:
 	 * @param percent 0 to 100, invisible to visible.
 	 * @return
 	 */
-	Color fade(uint percent) const;
+	Color fade(float percent) const;
 
 	/**
 	 * Calculates the transition between this color and a destination color.

@@ -11,7 +11,7 @@
 #ifndef GRADIENT_HPP_
 #define GRADIENT_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_GRADIENT {"colors", "mode"}
+#define REQUIRED_PARAM_ACTOR_GRADIENT {"speed", "direction", "colors", "mode"}
 
 namespace LEDSpicer {
 namespace Animations {

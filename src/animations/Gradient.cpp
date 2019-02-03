@@ -19,7 +19,9 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	if (colors.size() < 2)
 		throw Error("You need two or more colors for actor Gradient to do something.");
 	float steps;
+	// Cyclic needs timedActor but others don't.
 	switch (mode) {
+
 	case Modes::All:
 	case Modes::Sequential:
 		steps = (static_cast<uint8_t>(speed) + 1) * 4;
@@ -27,6 +29,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		totalActorFrames = steps * colors.size();
 		changeFrameTotal = 1;
 		break;
+
 	case Modes::Cyclic:
 		steps = getNumberOfElements() / colors.size();
 		increment = 100 / steps;

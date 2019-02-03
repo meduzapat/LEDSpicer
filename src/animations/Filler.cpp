@@ -21,8 +21,7 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	case Modes::Random:
 	case Modes::RandomSimple:
 		std::srand(std::time(nullptr));
-		direction  = Directions::Forward;
-		cDirection = direction;
+		cDirection = direction  = Directions::Forward;
 	}
 }
 
@@ -120,6 +119,8 @@ void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
 }
 
 void Filler::fillElementsRandom(bool val) {
+
+	// camniar aca: dibujar lo q esta on, el nuevo guardarlo en una property, y dibujarlo faded
 
 	// Draw.
 	if (isSameFrame()) {

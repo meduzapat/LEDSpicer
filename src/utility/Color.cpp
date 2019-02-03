@@ -121,12 +121,9 @@ uint32_t Color::getRGB() const {
 	return number;
 }
 
-Color Color::fade(uint percent) const {
-
+Color Color::fade(float percent) const {
 	Color color;
-
 	color.set(r * percent / 100, g * percent / 100, b * percent / 100);
-
 	return color;
 }
 

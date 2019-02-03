@@ -21,7 +21,7 @@ using std::vector;
 #ifndef ACTOR_HPP_
 #define ACTOR_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR {"type", "group", "speed", "direction", "filter"}
+#define REQUIRED_PARAM_ACTOR {"type", "group", "filter"}
 
 namespace LEDSpicer {
 namespace Animations {

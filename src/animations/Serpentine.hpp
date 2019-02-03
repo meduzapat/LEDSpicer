@@ -12,7 +12,7 @@
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_SERPENTINE {"tailLength", "tailColor", "tailIntensity"}
+#define REQUIRED_PARAM_ACTOR_SERPENTINE {"speed", "direction", "tailLength", "tailColor", "tailIntensity"}
 
 namespace LEDSpicer {
 namespace Animations {

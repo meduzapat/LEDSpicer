@@ -11,8 +11,6 @@
 #ifndef LEDWIZ32_HPP_
 #define LEDWIZ32_HPP_ 1
 
-#define LEDWIZ32 "LED-WIZ"
-
 #define LEDWIZ32_NAME          "Led-Wiz 32"
 #define LEDWIZ32_PRODUCT       0x00f0
 #define LEDWIZ32_WVALUE        0x0200

@@ -14,8 +14,6 @@
 #ifndef ULTIMATE_HPP_
 #define ULTIMATE_HPP_ 1
 
-#define IPAC_ULTIMATE "IPAC_ULTIMATE"
-
 #define IPAC_ULTIMATE_NAME          "Ultimarc Ipac Ultimate IO"
 #define IPAC_ULTIMATE_PRODUCT       0x0410
 #define IPAC_ULTIMATE_WVALUE        0x0203

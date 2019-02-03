@@ -11,8 +11,6 @@
 #ifndef PACDRIVE_HPP_
 #define PACDRIVE_HPP_ 1
 
-#define PAC_DRIVE "PAC_DRIVE"
-
 #define PAC_DRIVE_NAME      "Ultimarc Pac Drive Controller"
 #define PAC_DRIVE_PRODUCT    0x1500
 #define PAC_DRIVE_WVALUE     0x0200
