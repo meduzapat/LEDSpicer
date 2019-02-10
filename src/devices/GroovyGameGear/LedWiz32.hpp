@@ -6,7 +6,7 @@
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
  */
 
-#include "LedWiz.hpp"
+#include "GroovyGameGear.hpp"
 
 #ifndef LEDWIZ32_HPP_
 #define LEDWIZ32_HPP_ 1
@@ -20,19 +20,19 @@
 
 namespace LEDSpicer {
 namespace Devices {
-namespace LedWiz {
+namespace GroovyGameGear {
 
 /**
- * LEDSpicer::Devices::LedWiz32
+ * LEDSpicer::Devices::GroovyGameGear::LedWiz32
  *
  * Led-Wiz 32 controller class.
  */
-class LedWiz32 : public LedWiz {
+class LedWiz32 : public GroovyGameGear {
 
 public:
 
 	LedWiz32(uint8_t boardId, umap<string, string>& options) :
-	LedWiz(
+	GroovyGameGear(
 		LEDWIZ32_WVALUE,
 		LEDWIZ32_INTERFACE,
 		LEDWIZ32_LEDS,
@@ -56,10 +56,10 @@ protected:
 	virtual void afterClaimInterface();
 };
 
-} /* namespace LedWiz */
+} /* namespace GroovyGameGear */
 } /* namespace Devices */
 } /* namespace LEDSpicer */
 
-deviceFactory(LEDSpicer::Devices::LedWiz::LedWiz32)
+deviceFactory(LEDSpicer::Devices::GroovyGameGear::LedWiz32)
 
 #endif /* LEDWIZ32_HPP_ */

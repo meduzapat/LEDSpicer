@@ -22,8 +22,6 @@ void Ultimate::afterConnect() {
 
 	libusb_device_descriptor descriptor;
 
-	uint8_t value = 0;
-
 	libusb_get_device_descriptor(device, &descriptor);
 
 	// Detect Game Controller mode.
