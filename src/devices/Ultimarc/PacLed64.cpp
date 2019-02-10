@@ -8,11 +8,9 @@
 
 #include "PacLed64.hpp"
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+using namespace LEDSpicer::Devices::Ultimarc;
 
-
+// TODO: if this is the same function for io, nano, and this, move this code to ultimarc class
 void PacLed64::transfer() {
 	vector<uint8_t> load;
 	load.push_back(0x04);
@@ -24,6 +22,12 @@ uint16_t PacLed64::getProduct() {
 	return PAC_LED64_PRODUCT + board.boardId - 1;
 }
 
-} /* namespace Ultimarc */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+void PacLed64::drawHardwarePinMap() {
+
+}
+
+void PacLed64::afterClaimInterface() {
+	vector<uint8_t> data = {0x03, 0, 0, 0xC0, 0};
+	transferData(data);
+	Device::afterClaimInterface();
+}

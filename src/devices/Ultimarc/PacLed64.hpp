@@ -13,9 +13,9 @@
 
 #define PAC_LED64_NAME       "Ultimarc PacLed 64"
 #define PAC_LED64_PRODUCT    0x1401
-#define PAC_LED64_WVALUE     0x0203
-#define PAC_LED64_INTERFACE  3
-#define PAC_LED64_LEDS       96
+#define PAC_LED64_WVALUE     0x0200
+#define PAC_LED64_INTERFACE  1
+#define PAC_LED64_LEDS       64
 #define PAC_LED64_MAX_BOARDS 4
 
 namespace LEDSpicer {
@@ -54,7 +54,7 @@ public:
 
 protected:
 
-	virtual void afterConnect();
+	virtual void afterConnect() {}
 
 	virtual void afterClaimInterface();
 };
@@ -62,5 +62,7 @@ protected:
 } /* namespace Ultimarc */
 } /* namespace Devices */
 } /* namespace LEDSpicer */
+
+deviceFactory(LEDSpicer::Devices::Ultimarc::PacLed64)
 
 #endif /* PACLED64_HPP_ */
