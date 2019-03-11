@@ -22,11 +22,11 @@ class Group {
 
 public:
 
-	Group() {}
+	Group() = default;
 
 	Group(const string& name) : name(name) {}
 
-	virtual ~Group() {}
+	virtual ~Group() = default;
 
 	void drawElements();
 

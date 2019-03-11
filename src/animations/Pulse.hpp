@@ -30,7 +30,7 @@ public:
 		affectAllElements(true);
 	}
 
-	virtual ~Pulse() {}
+	virtual ~Pulse() = default;
 
 	void drawConfig();
 

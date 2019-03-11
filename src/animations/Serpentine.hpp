@@ -26,7 +26,7 @@ public:
 
 	Serpentine(umap<string, string>& parameters, Group* const layout);
 
-	virtual ~Serpentine() {}
+	virtual ~Serpentine() = default;
 
 	virtual void drawConfig();
 

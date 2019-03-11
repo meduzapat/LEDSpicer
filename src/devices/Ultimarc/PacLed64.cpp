@@ -22,7 +22,6 @@ void PacLed64::resetLeds() {
 	transferData(data);
 }
 
-// TODO: if this is the same function for io, nano, and this, move this code to ultimarc class
 void PacLed64::transfer() {
 
 	// Send FE00 command.

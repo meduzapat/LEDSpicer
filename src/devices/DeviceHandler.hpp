@@ -27,7 +27,7 @@ public:
 
 	DeviceHandler(const string& deviceName);
 
-	virtual ~DeviceHandler() {}
+	virtual ~DeviceHandler() = default;
 
 	Device* createDevice(uint8_t boardId, umap<string, string>& options);
 

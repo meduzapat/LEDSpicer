@@ -33,9 +33,6 @@ public:
 
 	PacLed64();
 
-	/**
-	 * @param boardId
-	 */
 	PacLed64(uint8_t boardId, umap<string, string>& options) :
 	Ultimarc(
 		PAC_LED64_WVALUE,
@@ -46,15 +43,13 @@ public:
 		PAC_LED64_NAME
 	) {}
 
-	virtual ~PacLed64() {}
+	virtual ~PacLed64() = default;
 
 	virtual void drawHardwarePinMap();
 
 	void transfer();
 
 	uint16_t getProduct();
-
-	virtual void resetLeds();
 
 	virtual void resetLeds();
 
