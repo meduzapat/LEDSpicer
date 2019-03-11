@@ -11,7 +11,7 @@
 #ifndef FILLER_HPP_
 #define FILLER_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_FILLER {"mode", "color"}
+#define REQUIRED_PARAM_ACTOR_FILLER {"speed", "direction", "mode", "color"}
 
 namespace LEDSpicer {
 namespace Animations {

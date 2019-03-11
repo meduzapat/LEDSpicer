@@ -10,6 +10,18 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
+void Ultimate::resetLeds() {
+
+	// Set Off Ramp Speed.
+	vector<uint8_t> data ULTIMAGE_MSG(0xC0, 0);
+	transferData(data);
+
+	// Turn off all LEDs and internal buffer.
+	setLeds(0);
+	data[3] = 0x80;
+	transferData(data);
+}
+
 void Ultimate::afterConnect() {
 
 	// Detect interface.
@@ -22,25 +34,17 @@ void Ultimate::afterConnect() {
 
 	libusb_device_descriptor descriptor;
 
-	uint8_t value = 0;
-
 	libusb_get_device_descriptor(device, &descriptor);
 
-	// Detect Game Controller mode.
+	// Detect Game Controller mode (will shift the interface by one).
 	if ((descriptor.bcdDevice & 0x40)) {
 		LogInfo("No Game Controller mode detected");
-		board.interface = IPAC_ULTIMATE_NGC_INTERFACE;
+		board.interface = IPAC_ULTIMATE_INTERFACE;
 	}
 	else {
 		LogInfo("Game Controller mode detected");
-		board.interface = IPAC_ULTIMATE_INTERFACE;
+		board.interface = IPAC_ULTIMATE_INTERFACE + 1;
 	}
-}
-
-void Ultimate::afterClaimInterface() {
-	vector<uint8_t> data = {0x03, 0, 0, 0xC0, 0};
-	transferData(data);
-	Device::afterClaimInterface();
 }
 
 void Ultimate::drawHardwarePinMap() {

@@ -34,11 +34,11 @@ void Color::setR(uint8_t color) {
 }
 
 void Color::setG(uint8_t color) {
-	 g = color;
+	g = color;
 }
 
 void Color::setB(uint8_t color) {
-	 b = color;
+	b = color;
 }
 
 void Color::set(uint8_t r, uint8_t g, uint8_t b) {
@@ -121,12 +121,9 @@ uint32_t Color::getRGB() const {
 	return number;
 }
 
-Color Color::fade(uint percent) const {
-
+Color Color::fade(float percent) const {
 	Color color;
-
 	color.set(r * percent / 100, g * percent / 100, b * percent / 100);
-
 	return color;
 }
 

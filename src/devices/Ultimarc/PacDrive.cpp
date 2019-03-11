@@ -10,6 +10,11 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
+void PacDrive::resetLeds() {
+	setLeds(0);
+	transfer();
+}
+
 PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
 	Ultimarc(
 		PAC_DRIVE_WVALUE,

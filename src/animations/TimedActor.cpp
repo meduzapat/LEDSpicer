@@ -24,6 +24,47 @@ bool TimedActor::willChange() const {
 	return changeFrame == changeFrameTotal;
 }
 
+void TimedActor::changeFrameElement(const Color& color, bool fade) {
+
+	uint8_t index = currentActorFrame - 1;
+
+	if (speed == Speed::VeryFast) {
+		changeElementColor(index, color, filter);
+		return;
+	}
+
+	affectedElements[index] = true;
+	float percent = (changeFrame - 1) * 100.00 / changeFrameTotal;
+	if (fade)
+		changeElementColor(index, color.fade(100 - percent), filter);
+	else
+		changeElementColor(index, color, filter);
+
+	Directions dir = cDirection;
+	uint8_t next = calculateNextOf(dir, currentActorFrame, direction, totalActorFrames);
+	changeElementColor(next - 1, color.fade(percent), filter);
+	affectedElements[next - 1] = true;
+}
+
+void TimedActor::changeFrameElement(const Color& color, const Color& colorNext) {
+
+	uint8_t index = currentActorFrame - 1;
+
+	if (speed == Speed::VeryFast) {
+		changeElementColor(index, colorNext, filter);
+		return;
+	}
+
+	affectedElements[index] = true;
+	float percent = (changeFrame - 1) * 100.00 / changeFrameTotal;
+	changeElementColor(index, colorNext.transition(color, percent), filter);
+
+	Directions dir = cDirection;
+	uint8_t next = calculateNextOf(dir, currentActorFrame, direction, totalActorFrames);
+	changeElementColor(next - 1, colorNext.fade(percent), filter);
+	affectedElements[next - 1] = true;
+}
+
 void TimedActor::advanceActorFrame() {
 	if (willChange()) {
 		changeFrame = 1;

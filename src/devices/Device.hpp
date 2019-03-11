@@ -76,12 +76,17 @@ public:
 	void validateLed(uint8_t led) const;
 
 	/**
-	 * Returs the number of registered elements.
+	 * Returns the number of registered elements.
 	 * @return
 	 */
 	uint8_t getNumberOfElements() const;
 
 	umap<string, Element>* getElements();
+
+	/**
+	 * Sets all LEDs off.
+	 */
+	virtual void resetLeds() = 0;
 
 protected:
 

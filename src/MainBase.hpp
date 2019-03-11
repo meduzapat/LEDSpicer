@@ -76,10 +76,10 @@ protected:
 	 */
 	static vector<Profile*> profiles;
 
-	/// Keeps a list of always on elements.
+	/// Keeps a list of always on elements for the current profile.
 	umap<string, Profile::ElementItem> alwaysOnElements;
 
-	/// Keeps a list of always on groups.
+	/// Keeps a list of always on groups for the current profile.
 	umap<string, Profile::GroupItem> alwaysOnGroups;
 
 	/**

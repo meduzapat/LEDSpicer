@@ -110,9 +110,22 @@ public:
 	 */
 	virtual void transferData(vector<uint8_t>& data);
 
+	/**
+	 * Sets the interval ms.
+	 * @param waitTime
+	 */
 	static void setInterval(uint8_t waitTime);
 
+	/**
+	 * Returns the interval ms.
+	 * @return
+	 */
 	static uint8_t getInterval();
+
+	/**
+	 * Waits for a defined amount of ms.
+	 */
+	static void wait();
 
 protected:
 

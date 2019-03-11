@@ -16,7 +16,7 @@
 #ifndef PULSEAUDIO_HPP_
 #define PULSEAUDIO_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSEAUDIO {"mode", "off", "low", "mid", "high", "channel"}
+#define REQUIRED_PARAM_ACTOR_PULSEAUDIO {"direction", "mode", "off", "low", "mid", "high", "channel"}
 #define VU_MIN_ELEMETS 6
 #define STREAM_NAME "Peek Reader"
 #define MIN_MAX_PEAK 10

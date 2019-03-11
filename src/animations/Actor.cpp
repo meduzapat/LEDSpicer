@@ -18,11 +18,17 @@ Actor::Actor(
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	direction(str2direction(parameters["direction"])),
 	filter(Color::str2filter(parameters["filter"])),
-	group(group),
-	speed(str2speed(parameters["speed"]))
+	group(group)
 {
+	if (parameters.count("direction"))
+		direction = str2direction(parameters["direction"]);
+	else
+		direction = Directions::Forward;
+	if (parameters.count("speed"))
+		speed = str2speed(parameters["speed"]);
+	else
+		speed = Speed::Normal;
 	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");

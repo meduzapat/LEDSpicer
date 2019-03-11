@@ -162,11 +162,12 @@ void Main::run() {
 		}
 		runCurrentProfile();
 	}
-	profiles[0]->terminate();
+	currentProfile = profiles[0];
+	currentProfile->terminate();
 
 	// Wait for termination.
-	while (profiles[0]->isRunning())
-		profiles[0]->runFrame();
+	while (currentProfile->isRunning())
+		currentProfile->runFrame();
 }
 
 void Main::terminate() {
@@ -313,36 +314,42 @@ void Main::runCurrentProfile() {
 	for (auto& eD : DataLoader::allElements)
 		eD.second->setColor(currentProfile->getBackgroundColor());
 
+	// Set always on groups from profile.
 	for (auto& gE : currentProfile->getAlwaysOnGroups())
 		for (auto eE : gE.group->getElements())
 			eE->setColor(*eE->getColor().set(*gE.color, gE.filter));
 
-	// Set always on elements
+	// Set always on elements from profile.
 	for (auto& eE : currentProfile->getAlwaysOnElements())
 		eE.element->setColor(*eE.element->getColor().set(*eE.color, eE.filter));
 
 	currentProfile->runFrame();
 
-	// Set always on groups
+	// Set always on groups from config
 	for (auto& gE : alwaysOnGroups)
 		for (auto eE : gE.second.group->getElements())
 			eE->setColor(*eE->getColor().set(*gE.second.color, gE.second.filter));
 
-	// Set always on elements
+	// Set always on elements from config
 	for (auto& eE : alwaysOnElements)
 		eE.second.element->setColor(*eE.second.element->getColor().set(*eE.second.color, eE.second.filter));
 
 	// Send data.
+	// TODO: need to test speed: single thread or running one thread per device.
 	for (auto device : DataLoader::devices)
 		device->transfer();
 
-	// Profiles are cached and reused.
-	if (not currentProfile->isRunning()) {
-		profiles.pop_back();
-		currentProfile = profiles.back();
-		currentProfile->reset();
-	}
-	else {
+	// Wait...
+	// TODO: if the process takes too long, will be a good idea to subtract the wasted time from the wait time.
+	ConnectionUSB::wait();
+
+	if (currentProfile->isRunning()) {
 		Actor::advanceFrame();
+		return;
 	}
+
+	// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
+	profiles.pop_back();
+	currentProfile = profiles.back();
+	currentProfile->reset();
 }

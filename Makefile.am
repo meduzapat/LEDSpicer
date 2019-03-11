@@ -259,6 +259,7 @@ endif
 devices_LTLIBRARIES =   \
 	UltimarcUltimate.la \
 	UltimarcPacDrive.la \
+	UltimarcPacLed64.la \
 	LedWiz32.la
 
 devicesdir = \
@@ -298,12 +299,29 @@ UltimarcPacDrive_la_LDFLAGS = \
 	-avoid-version  \
 	-fexceptions
 
-##########
-# LedWiz #
-##########
+#####################
+# Ultimarc PacLed64 #
+#####################
+
+UltimarcPacLed64_la_SOURCES = \
+	src/devices/Ultimarc/PacLed64.cpp
+
+UltimarcPacLed64_la_LIBADD = \
+	libledspicer.la
+
+UltimarcPacLed64_la_LDFLAGS = \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
+
+##################
+# GroovyGameGear #
+##################
 
 LedWiz32_la_SOURCES = \
-	src/devices/LedWiz/LedWiz32.cpp
+	src/devices/GroovyGameGear/LedWiz32.cpp
 
 LedWiz32_la_LIBADD = \
 	libledspicer.la
@@ -379,27 +397,28 @@ EXTRA_DIST +=                         \
 	src/animations/ActorHandler.hpp   \
 	src/devices/DeviceHandler.hpp     \
 	src/DataLoader.hpp                \
-	src/devices/LedWiz/LedWiz.hpp     \
-	src/devices/LedWiz/LedWiz32.hpp   \
+	src/devices/GroovyGameGear/LedWiz.hpp   \
+	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/Ultimarc.hpp \
 	src/devices/Ultimarc/Ultimate.hpp \
 	src/devices/Ultimarc/PacDrive.hpp \
-	src/animations/Gradient.hpp       \
-	src/animations/Pulse.hpp          \
-	src/animations/Serpentine.hpp     \
-	src/animations/Random.hpp         \
-	src/animations/Filler.hpp         \
-	src/animations/PulseAudio.hpp     \
-	src/MainBase.hpp                  \
-	src/Main.hpp                      \
-	src/Emitter.hpp                   \
-	data/ledspicer.conf               \
-	data/basicColors.xml              \
-	data/webColors.xml                \
-	data/animations/example.xml       \
-	data/animations/skeleton.xml      \
-	data/profiles/default.xml         \
-	data/profiles/skeleton.xml        \
-	AUTHORS                           \
-	ChangeLog                         \
+	src/devices/Ultimarc/PacLed64.hpp \
+	src/animations/Gradient.hpp   \
+	src/animations/Pulse.hpp      \
+	src/animations/Serpentine.hpp \
+	src/animations/Random.hpp     \
+	src/animations/Filler.hpp     \
+	src/animations/PulseAudio.hpp \
+	src/MainBase.hpp \
+	src/Main.hpp     \
+	src/Emitter.hpp  \
+	data/ledspicer.conf          \
+	data/basicColors.xml         \
+	data/webColors.xml           \
+	data/animations/example.xml  \
+	data/animations/skeleton.xml \
+	data/profiles/default.xml    \
+	data/profiles/skeleton.xml   \
+	AUTHORS                      \
+	ChangeLog                    \
 	NEWS

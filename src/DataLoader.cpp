@@ -135,7 +135,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	);
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
-			LogNotice("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
+			LogInfo("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
 }
 
 void DataLoader::processLayout() {

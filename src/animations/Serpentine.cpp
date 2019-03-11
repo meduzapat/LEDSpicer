@@ -30,26 +30,31 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 
 	tailData.resize(tailLength);
 	tailData.shrink_to_fit();
-	tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
-	if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
-		throw Error("Invalid tailIntensity, enter a number 0-100");
+	if (tailData.size()) {
+		tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
+		if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
+			throw Error("Invalid tailIntensity, enter a number 0-100");
 
-	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
-	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
-	uint8_t firstTail = calculateNextOf(tailDirection, currentActorFrame, tailDirection, totalActorFrames);
-	if (tailData.size())
+		float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
+		Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
+		uint8_t firstTail = calculateNextOf(tailDirection, currentActorFrame, tailDirection, totalActorFrames);
 		for (uint8_t c = 0; c < tailData.size(); c++) {
 			tailData[c].percent  = tailweight * (tailData.size() - c);
 			tailData[c].position = firstTail - c;
 		}
+	}
 }
 
 const vector<bool> Serpentine::calculateElements() {
 
 	affectAllElements();
-	affectedElements[currentActorFrame -1] = true;
 
-	changeElementColor(currentActorFrame - 1, color, filter);
+	if (not tailData.size()) {
+		changeFrameElement(color, true);
+		return affectedElements;
+	}
+
+	changeFrameElement(tailColor, color);
 	calculateTailPosition();
 	for (auto& data : tailData) {
 		switch (filter) {
@@ -57,7 +62,12 @@ const vector<bool> Serpentine::calculateElements() {
 			changeElementColor(data.position - 1, tailColor.fade(data.percent), filter);
 			break;
 		default:
-			changeElementColor(data.position - 1, tailColor, filter, data.percent);
+			changeElementColor(
+				data.position - 1,
+				tailColor,
+				Color::Filters::Combine,
+				data.percent
+			);
 		}
 		affectedElements[data.position -1] = true;
 	}
@@ -66,10 +76,6 @@ const vector<bool> Serpentine::calculateElements() {
 }
 
 void Serpentine::calculateTailPosition() {
-
-	if (not tailData.size())
-		return;
-
 	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
 	uint8_t lastTail = calculateNextOf(tailDirection, currentActorFrame, tailDirection, totalActorFrames);
 	// Avoid changing the tail when doing the same frame.

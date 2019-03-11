@@ -45,6 +45,20 @@ protected:
 		/// Total number of frames to actually move to the next actor frame.
 		changeFrameTotal;
 
+	/**
+	 * Changes the current element and fade the next one based on time.
+	 * @param color
+	 * @param fade
+	 */
+	void changeFrameElement(const Color& color, bool fade = false);
+
+	/**
+	 * Changes the current element with a transition between color and colorNext based on time.
+	 * @param color
+	 * @param colorNext
+	 */
+	void changeFrameElement(const Color& color, const Color& colorNext);
+
 	void virtual advanceActorFrame();
 };
 
