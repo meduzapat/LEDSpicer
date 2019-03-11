@@ -53,7 +53,7 @@ public:
 
 	using XMLHelper::XMLHelper;
 
-	virtual ~DataLoader() {}
+	virtual ~DataLoader() = default;
 
 	/**
 	 * Reads and process the configuration file.

@@ -14,12 +14,12 @@
 #ifndef ULTIMATE_HPP_
 #define ULTIMATE_HPP_ 1
 
-#define IPAC_ULTIMATE_NAME          "Ultimarc Ipac Ultimate IO"
-#define IPAC_ULTIMATE_PRODUCT       0x0410
-#define IPAC_ULTIMATE_WVALUE        0x0203
-#define IPAC_ULTIMATE_INTERFACE     2
-#define IPAC_ULTIMATE_LEDS          96
-#define IPAC_ULTIMAGE_MAX_BOARDS    4
+#define IPAC_ULTIMATE_NAME       "Ultimarc Ipac Ultimate IO"
+#define IPAC_ULTIMATE_PRODUCT    0x0410
+#define IPAC_ULTIMATE_WVALUE     0x0203
+#define IPAC_ULTIMATE_INTERFACE  2
+#define IPAC_ULTIMATE_LEDS       96
+#define IPAC_ULTIMAGE_MAX_BOARDS 4
 
 #define ULTIMAGE_MSG(byte1, byte2) {0x03, 0, 0, byte1, byte2}
 
@@ -48,7 +48,7 @@ public:
 		IPAC_ULTIMATE_NAME
 	) {}
 
-	virtual ~Ultimate() {}
+	virtual ~Ultimate() = default;
 
 	virtual void drawHardwarePinMap();
 

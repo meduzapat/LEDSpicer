@@ -39,7 +39,7 @@ class Log {
 
 public:
 
-	virtual ~Log() {}
+	virtual ~Log() = default;
 
 	/**
 	 * Function to initialize the logs, other case they will output to the terminal.

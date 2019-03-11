@@ -26,7 +26,7 @@ public:
 
 	ActorHandler(const string& actorName);
 
-	virtual ~ActorHandler() {}
+	virtual ~ActorHandler() = default;
 
 	Actor* createActor(umap<string, string>& parameters, Group* const group);
 

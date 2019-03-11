@@ -25,7 +25,7 @@ public:
 
 	TimedActor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters);
 
-	~TimedActor() {}
+	~TimedActor() = default;
 
 	/**
 	 * @return return true if the frame is the same than before.

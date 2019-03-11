@@ -29,7 +29,7 @@ public:
 
 	Messages(const string& port) : Socks(LOCALHOST, port, true) {}
 
-	virtual ~Messages() {}
+	virtual ~Messages() = default;
 
 	Message getMessage();
 

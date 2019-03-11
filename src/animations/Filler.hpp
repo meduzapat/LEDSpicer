@@ -27,7 +27,7 @@ public:
 
 	Filler(umap<string, string>& parameters, Group* const group);
 
-	virtual ~Filler() {}
+	virtual ~Filler() = default;
 
 	virtual void advanceActorFrame();
 

@@ -31,7 +31,7 @@ public:
 
 	PacDrive(uint8_t boardId, umap<string, string>& options);
 
-	virtual ~PacDrive() {}
+	virtual ~PacDrive() = default;
 
 	virtual void drawHardwarePinMap();
 

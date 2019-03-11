@@ -54,7 +54,7 @@ public:
 	/**
 	 * Creates a new Color class (black color).
 	 */
-	Color() {}
+	Color() = default;
 
 	/**
 	 * Creates a new Color class from RGB independent values.
@@ -77,7 +77,7 @@ public:
 	 */
 	Color(const string& color, const string& format);
 
-	virtual ~Color() {}
+	virtual ~Color() = default;
 
 	/**
 	 * Compare same color.

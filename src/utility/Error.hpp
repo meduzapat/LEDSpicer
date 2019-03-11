@@ -38,7 +38,7 @@ public:
 
 	Error(const string& errorMessage) : error(errorMessage) {}
 
-	virtual ~Error() {}
+	virtual ~Error() = default;
 
 	/**
 	 * Returns and resets the error message.

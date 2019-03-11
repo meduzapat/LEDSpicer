@@ -46,7 +46,7 @@ public:
 	/**
 	 * Creates a new socket instance, but does not connect.
 	 */
-	Socks() {}
+	Socks() = default;
 
 	/**
 	 * Creates a new socked connection to hostAddress on the port hostPort.

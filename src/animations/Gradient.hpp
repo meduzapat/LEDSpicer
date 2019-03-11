@@ -27,7 +27,7 @@ public:
 
 	Gradient(umap<string, string>& parameters, Group* const layout);
 
-	virtual ~Gradient() {}
+	virtual ~Gradient() = default;
 
 	void drawConfig();
 

@@ -43,7 +43,7 @@ public:
 
 	Element(Element* other);
 
-	virtual ~Element() {}
+	virtual ~Element() = default;
 
 	/**
 	 * Replaces the pin values with a new color.

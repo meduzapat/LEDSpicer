@@ -27,7 +27,7 @@ public:
 
 	Random(umap<string, string>& parameters, Group* const layout);
 
-	virtual ~Random() {}
+	virtual ~Random() = default;
 
 protected:
 
