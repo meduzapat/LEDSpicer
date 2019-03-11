@@ -18,6 +18,8 @@
 #define PAC_LED64_LEDS       64
 #define PAC_LED64_MAX_BOARDS 4
 
+#define LED64_MSG(byte1, byte2) {byte1, byte2}
+
 namespace LEDSpicer {
 namespace Devices {
 namespace Ultimarc {
@@ -52,11 +54,13 @@ public:
 
 	uint16_t getProduct();
 
+	virtual void resetLeds();
+
+	virtual void resetLeds();
+
 protected:
 
 	virtual void afterConnect() {}
-
-	virtual void afterClaimInterface();
 };
 
 } /* namespace Ultimarc */

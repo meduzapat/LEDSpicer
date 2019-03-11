@@ -49,6 +49,8 @@ public:
 
 	uint16_t getProduct();
 
+	void resetLeds();
+
 protected:
 
 	virtual void afterConnect() {}

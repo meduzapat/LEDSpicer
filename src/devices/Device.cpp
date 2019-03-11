@@ -13,8 +13,7 @@ using namespace LEDSpicer::Devices;
 
 void Device::afterClaimInterface() {
 	LogDebug("Initializing board");
-	setLeds(0);
-	transfer();
+	resetLeds();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {

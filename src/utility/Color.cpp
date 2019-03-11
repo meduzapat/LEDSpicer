@@ -34,11 +34,11 @@ void Color::setR(uint8_t color) {
 }
 
 void Color::setG(uint8_t color) {
-	 g = color;
+	g = color;
 }
 
 void Color::setB(uint8_t color) {
-	 b = color;
+	b = color;
 }
 
 void Color::set(uint8_t r, uint8_t g, uint8_t b) {

@@ -39,6 +39,8 @@ public:
 
 	uint16_t getProduct();
 
+	virtual void resetLeds();
+
 protected:
 
 	uint8_t changePoint = 64;

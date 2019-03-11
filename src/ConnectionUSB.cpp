@@ -135,8 +135,6 @@ uint8_t ConnectionUSB::getId() {
 
 void ConnectionUSB::transferData(vector<uint8_t>& data) {
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
-
 #ifdef DRY_RUN
 	#ifdef NO_OUTPUT
 	return;
@@ -186,4 +184,8 @@ uint8_t ConnectionUSB::getInterval() {
 
 string ConnectionUSB::getFullName() {
 	return "device: " + name + " Id: " + to_string(board.boardId);
+}
+
+void ConnectionUSB::wait() {
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 }

@@ -25,7 +25,7 @@ Actor::Actor(
 		direction = str2direction(parameters["direction"]);
 	else
 		direction = Directions::Forward;
-	if (parameters.count("direction"))
+	if (parameters.count("speed"))
 		speed = str2speed(parameters["speed"]);
 	else
 		speed = Speed::Normal;

@@ -10,6 +10,11 @@
 
 using namespace LEDSpicer::Devices::GroovyGameGear;
 
+void LedWiz32::resetLeds() {
+	setLeds(0);
+	transfer();
+}
+
 void LedWiz32::afterClaimInterface() {
 	// This will initialize the 4 controllers and set the pulse to 1.
 	vector<uint8_t> data = {64, 255, 255, 255, 255, 1, 0, 0};
