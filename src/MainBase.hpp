@@ -29,20 +29,7 @@ class MainBase {
 
 public:
 
-	enum class Modes : uint8_t {
-		/// Do not detach from head.
-		Foreground,
-		/// Dump Config and exit.
-		Dump,
-		/// Run as a daemon.
-		Normal,
-		/// Run LEDs test.
-		TestLed,
-		/// Run Elements test.
-		TestElement
-	};
-
-	MainBase(Modes mode);
+	MainBase();
 
 	virtual ~MainBase();
 
@@ -60,6 +47,11 @@ public:
 	 * Starts the dump configuration.
 	 */
 	void dumpConfiguration();
+
+	/**
+	 * Starts the dump profile.
+	 */
+	void dumpProfile();
 
 protected:
 

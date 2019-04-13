@@ -51,6 +51,21 @@ class DataLoader: public XMLHelper {
 
 public:
 
+	enum class Modes : uint8_t {
+		/// Do not detach from head.
+		Foreground,
+		/// Dump Config and exit.
+		Dump,
+		/// Dump Profile and exit.
+		Profile,
+		/// Run as a daemon.
+		Normal,
+		/// Run LEDs test.
+		TestLed,
+		/// Run Elements test.
+		TestElement
+	};
+
 	using XMLHelper::XMLHelper;
 
 	virtual ~DataLoader() = default;
@@ -98,7 +113,21 @@ public:
 	/// Maps handlers with actors.
 	static umap<Actor*, ActorHandler*> actorMap;
 
+	/**
+	 * Returns the current mode.
+	 * @return
+	 */
+	static Modes getMode();
+
+	/**
+	 * Sets the mode.
+	 * @param mode
+	 */
+	static void setMode(Modes mode);
+
 protected:
+
+	static Modes mode;
 
 	/**
 	 * Loads the color File

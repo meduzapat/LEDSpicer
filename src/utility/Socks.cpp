@@ -43,7 +43,6 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 	memset((char *)&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;  // AF_UNIX
 	hints.ai_socktype = SOCK_DGRAM;  //SOCK_STREAM | SOCK_NONBLOCK;
-//	hints.ai_protocol = IPPROTO_TCP; //IPPROTO_UDP;
 	if (bind)
 		hints.ai_flags = AI_PASSIVE;  //AI_CANONNAME;
 
@@ -120,14 +119,12 @@ bool Socks::recive(string& buffer) {
 		// There is nothing to receive (or error).
 		return false;
 
-	char* bufferp = new char[BUFFER_SIZE];
-	n = recv(sockFB, bufferp, BUFFER_SIZE, 0);// MSG_DONTWAIT
+	char bufferp[BUFFER_SIZE];
+	n = recv(sockFB, &bufferp, BUFFER_SIZE, 0);// MSG_DONTWAIT
 	if (n >= 0) {
 		buffer = bufferp;
-		delete[] bufferp;
 		return true;
 	}
-	delete[] bufferp;
 	return false;
 }
 
