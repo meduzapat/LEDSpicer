@@ -14,15 +14,23 @@ bool MainBase::running = false;
 Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
 
-MainBase::MainBase(Modes mode) :
-	messages(mode == Modes::Normal or mode == Modes::Foreground ? DataLoader::portNumber : "")
+MainBase::MainBase() :
+	messages(
+		DataLoader::getMode() == DataLoader::Modes::Normal or
+		DataLoader::getMode() == DataLoader::Modes::Foreground ? DataLoader::portNumber : ""
+	)
 {
+
 	profiles.push_back(DataLoader::defaultProfile);
-	if (mode == Modes::Dump)
+
+	switch (DataLoader::getMode()) {
+	case DataLoader::Modes::Dump:
+	case DataLoader::Modes::Profile:
 		return;
+	}
 
 #ifndef DRY_RUN
-	if (mode == Modes::Normal) {
+	if (DataLoader::getMode() == DataLoader::Modes::Normal) {
 		LogDebug("Daemonizing");
 		if (daemon(0, 0) == -1)
 			throw Error("Unable to daemonize.");
@@ -163,6 +171,9 @@ void MainBase::dumpConfiguration() {
 		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
 	}
+}
+
+void MainBase::dumpProfile() {
 	cout << endl << "Default Profile:" << endl;
 	DataLoader::defaultProfile->drawConfig();
 	cout << endl;

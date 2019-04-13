@@ -51,7 +51,7 @@ void PacDrive::drawHardwarePinMap() {
 
 void PacDrive::transfer() {
 
-	vector<uint8_t> load = {0, 0, 0, 0};
+	vector<uint8_t> load {0, 0, 0, 0};
 
 	for (uint8_t led = 0; led < PAC_DRIVE_LEDS; ++led) {
 		if (LEDs[led] > changePoint) {

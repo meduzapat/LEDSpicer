@@ -9,7 +9,7 @@
 #ifndef NANOLED_HPP_
 #define NANOLED_HPP_ 1
 
-#include "PacLed64.hpp"
+#include "FF00SharedCode.hpp"
 
 #define NANO_LED_NAME       "Ultimarc NanoLed"
 #define NANO_LED_PRODUCT    0x1481
@@ -27,12 +27,12 @@ namespace Ultimarc {
  *
  * This library contains the code to control the Ultimarc Nanoled board.
  */
-class NanoLed: public PacLed64 {
+class NanoLed: public FF00SharedCode {
 
 public:
 
 	NanoLed(uint8_t boardId, umap<string, string>& options) :
-	Ultimarc(
+	FF00SharedCode(
 		NANO_LED_WVALUE,
 		0, // to be defined.
 		NANO_LED_LEDS,

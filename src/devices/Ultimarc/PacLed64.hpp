@@ -6,10 +6,11 @@
  * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  */
 
+#include "FF00SharedCode.hpp"
+
 #ifndef PACLED64_HPP_
 #define PACLED64_HPP_ 1
 
-#include "Ultimarc.hpp"
 
 #define PAC_LED64_NAME       "Ultimarc PacLed 64"
 #define PAC_LED64_PRODUCT    0x1401
@@ -18,8 +19,6 @@
 #define PAC_LED64_LEDS       64
 #define PAC_LED64_MAX_BOARDS 4
 
-#define LED64_MSG(byte1, byte2) {byte1, byte2}
-
 namespace LEDSpicer {
 namespace Devices {
 namespace Ultimarc {
@@ -27,14 +26,14 @@ namespace Ultimarc {
 /**
  * LEDSpicer::Devices::Ultimarc::PacLed64
  */
-class PacLed64: public Ultimarc {
+class PacLed64: public FF00SharedCode {
 
 public:
 
 	PacLed64();
 
 	PacLed64(uint8_t boardId, umap<string, string>& options) :
-	Ultimarc(
+	FF00SharedCode(
 		PAC_LED64_WVALUE,
 		0, // to be defined.
 		PAC_LED64_LEDS,
@@ -47,15 +46,8 @@ public:
 
 	virtual void drawHardwarePinMap();
 
-	void transfer();
-
 	uint16_t getProduct();
 
-	virtual void resetLeds();
-
-protected:
-
-	virtual void afterConnect() {}
 };
 
 } /* namespace Ultimarc */

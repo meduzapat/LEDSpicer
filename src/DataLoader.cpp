@@ -20,6 +20,15 @@ umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<Device*, DeviceHandler*> DataLoader::deviceMap;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
 umap<Actor*, ActorHandler*> DataLoader::actorMap;
+DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
+
+DataLoader::Modes DataLoader::getMode() {
+	return mode;
+}
+
+void DataLoader::setMode(Modes mode) {
+	DataLoader::mode = mode;
+}
 
 void DataLoader::readConfiguration() {
 
@@ -27,7 +36,7 @@ void DataLoader::readConfiguration() {
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
 	// set log level.
-	if (tempAttr.count("logLevel"))
+	if ((mode != Modes::Dump or mode != Modes::Profile) and tempAttr.count("logLevel"))
 		Log::setLogLevel(Log::str2level(tempAttr["logLevel"]));
 
 	// set FPS.
@@ -39,7 +48,7 @@ void DataLoader::readConfiguration() {
 	ConnectionUSB::openSession();
 	Actor::setFPS((fps > 30 ? 30 : fps));
 
-	portNumber =  tempAttr["port"];
+	portNumber = tempAttr["port"];
 
 	processColorFile(createFilename(tempAttr["colors"]));
 

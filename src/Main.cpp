@@ -185,10 +185,8 @@ int main(int argc, char **argv) {
 	// Process command line options.
 	string
 		commandline,
+		profile,
 		configFile = "";
-
-	// Run in the background.
-	Main::Modes mode = Main::Modes::Normal;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -203,6 +201,7 @@ int main(int argc, char **argv) {
 				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
 				"-f or --foreground\t\tRun on foreground\n"
 				"-d or --dump\t\t\tDump configuration files and quit\n"
+				"-p <profile> or --profile <profile>\t\t\tDump a profile by name and quit\n"
 				"-l or --leds\t\t\tTest LEDs.\n"
 				"-e or --elements\t\tTest registered elements.\n"
 				"-v or --version\t\t\tDisplay version information\n"
@@ -236,30 +235,37 @@ int main(int argc, char **argv) {
 
 		// Dump configuration.
 		if (commandline == "-d" or commandline == "--dump") {
-			mode = Main::Modes::Dump;
+			DataLoader::setMode(DataLoader::Modes::Dump);
+			continue;
+		}
+
+		// Dump profile.
+		if (commandline == "-p" or commandline == "--profile") {
+			DataLoader::setMode(DataLoader::Modes::Profile);
+			profile = argv[++i];
 			continue;
 		}
 
 		// Test LEDs.
 		if (commandline == "-l" or commandline == "--leds") {
-			mode = Main::Modes::TestLed;
+			DataLoader::setMode(DataLoader::Modes::TestLed);
 			continue;
 		}
 
 		// Test Elements
 		if (commandline == "-e" or commandline == "--elements") {
-			mode = Main::Modes::TestElement;
+			DataLoader::setMode(DataLoader::Modes::TestElement);
 			continue;
 		}
 
 		// Force foreground.
-		if (mode == Main::Modes::Normal and (commandline == "-f" or commandline == "--foreground")) {
-			mode = Main::Modes::Foreground;
+		if (DataLoader::getMode() == DataLoader::Modes::Normal and (commandline == "-f" or commandline == "--foreground")) {
+			DataLoader::setMode(DataLoader::Modes::Foreground);
 			continue;
 		}
 	}
 
-	Log::initialize(mode != Main::Modes::Normal);
+	Log::initialize(DataLoader::getMode() != DataLoader::Modes::Normal);
 
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
@@ -268,6 +274,9 @@ int main(int argc, char **argv) {
 	try {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
+
+		if (DataLoader::getMode() == DataLoader::Modes::Profile)
+			DataLoader::defaultProfile = DataLoader::processProfile(profile);
 	}
 	catch(Error& e) {
 		LogError("Error: " + e.getMessage());
@@ -275,24 +284,29 @@ int main(int argc, char **argv) {
 	}
 
 #ifndef DEVELOP
-	Log::logToStdErr(mode != Main::Modes::Normal);
+	// force debug mode logging.
+	Log::logToStdErr(DataLoader::getMode() != DataLoader::Modes::Normal);
+	Log::setLogLevel(LOG_DEBUG);
 #endif
 
 	// Run mode.
 	try {
 
-		Main ledspicer(mode);
+		Main ledspicer;
 
-		switch (mode) {
-		case Main::Modes::Dump:
+		switch (DataLoader::getMode()) {
+		case DataLoader::Modes::Profile:
+			ledspicer.dumpProfile();
+			break;
+		case DataLoader::Modes::Dump:
 			ledspicer.dumpConfiguration();
 			break;
 
-		case Main::Modes::TestLed:
+		case DataLoader::Modes::TestLed:
 			ledspicer.testLeds();
 			break;
 
-		case Main::Modes::TestElement:
+		case DataLoader::Modes::TestElement:
 			ledspicer.testElements();
 			break;
 

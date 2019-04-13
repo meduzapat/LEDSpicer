@@ -10,33 +10,6 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-void PacLed64::resetLeds() {
-
-	// Set Off Ramp Speed.
-	vector<uint8_t> data LED64_MSG(0xC0, 0);
-	transferData(data);
-
-	// Turn off all LEDs and internal buffer.
-	setLeds(0);
-	data[3] = 0x80;
-	transferData(data);
-}
-
-void PacLed64::transfer() {
-
-	// Send FE00 command.
-	vector<uint8_t> data LED64_MSG(0xFE, 0);
-	transferData(data);
-
-	// Send 32 pairs.
-	for (uint8_t c = 0; c < LEDs.size(); c+=2) {
-		data.clear();
-		data.push_back(LEDs[c]);
-		data.push_back(LEDs[c + 1]);
-		transferData(data);
-	}
-}
-
 uint16_t PacLed64::getProduct() {
 	return PAC_LED64_PRODUCT + board.boardId - 1;
 }

@@ -256,35 +256,40 @@ endif
 # devices #
 ###########
 
-devices_LTLIBRARIES =   \
-	UltimarcUltimate.la \
-	UltimarcPacDrive.la \
-	UltimarcPacLed64.la \
-	LedWiz32.la
+devices_LTLIBRARIES =
 
-devicesdir = \
-	$(DEVICES_DIR)
+####################
+# Ultimarc NanoLed #
+####################
+if NANOLED
 
-#####################
-# Ultimarc Ultimate #
-#####################
+devices_LTLIBRARIES += \
+	UltimarcNanoLed.la
 
-UltimarcUltimate_la_SOURCES = \
-	src/devices/Ultimarc/Ultimate.cpp
+UltimarcNanoLed_la_SOURCES =                \
+	src/devices/Ultimarc/FF00SharedCode.cpp \
+	src/devices/Ultimarc/NanoLed.cpp
 
-UltimarcUltimate_la_LIBADD = \
+UltimarcNanoLed_la_LIBADD = \
 	libledspicer.la
 
-UltimarcUltimate_la_LDFLAGS = \
+UltimarcNanoLed_la_LDFLAGS = \
 	-module         \
 	-shared         \
 	-export-dynamic \
 	-avoid-version  \
 	-fexceptions
+else
+EXTRA_DIST += \
+	src/devices/Ultimarc/NanoLed.cpp
+endif
 
 #####################
 # Ultimarc PacDrive #
 #####################
+if PACDRIVE
+devices_LTLIBRARIES += \
+	UltimarcPacDrive.la
 
 UltimarcPacDrive_la_SOURCES = \
 	src/devices/Ultimarc/PacDrive.cpp
@@ -298,12 +303,20 @@ UltimarcPacDrive_la_LDFLAGS = \
 	-export-dynamic \
 	-avoid-version  \
 	-fexceptions
+else
+EXTRA_DIST += \
+	src/devices/Ultimarc/PacDrive.cpp
+endif
 
 #####################
 # Ultimarc PacLed64 #
 #####################
+if PACLED64
+devices_LTLIBRARIES += \
+	UltimarcPacLed64.la
 
-UltimarcPacLed64_la_SOURCES = \
+UltimarcPacLed64_la_SOURCES =               \
+	src/devices/Ultimarc/FF00SharedCode.cpp \
 	src/devices/Ultimarc/PacLed64.cpp
 
 UltimarcPacLed64_la_LIBADD = \
@@ -315,10 +328,41 @@ UltimarcPacLed64_la_LDFLAGS = \
 	-export-dynamic \
 	-avoid-version  \
 	-fexceptions
+else
+EXTRA_DIST += \
+	src/devices/Ultimarc/PacLed64.cpp
+endif
 
-##################
-# GroovyGameGear #
-##################
+#####################
+# Ultimarc Ultimate #
+#####################
+if ULTIMATEIO
+devices_LTLIBRARIES += \
+	UltimarcUltimate.la
+
+UltimarcUltimate_la_SOURCES = \
+	src/devices/Ultimarc/Ultimate.cpp
+
+UltimarcUltimate_la_LIBADD = \
+	libledspicer.la
+
+UltimarcUltimate_la_LDFLAGS = \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
+else
+EXTRA_DIST += \
+	src/devices/Ultimarc/Ultimate.cpp
+endif
+
+#############
+# LEDWiz 32 #
+#############
+if LEDWIZ32
+devices_LTLIBRARIES += \
+	LedWiz32.la
 
 LedWiz32_la_SOURCES = \
 	src/devices/GroovyGameGear/LedWiz32.cpp
@@ -332,6 +376,13 @@ LedWiz32_la_LDFLAGS = \
 	-export-dynamic   \
 	-avoid-version    \
 	-fexceptions
+else
+EXTRA_DIST += \
+	src/devices/GroovyGameGear/LedWiz32.cpp
+endif
+
+devicesdir = \
+	$(DEVICES_DIR)
 
 if COPY_SAMPLES
 
@@ -399,6 +450,8 @@ EXTRA_DIST +=                         \
 	src/DataLoader.hpp                \
 	src/devices/GroovyGameGear/LedWiz.hpp   \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
+	src/devices/Ultimarc/FF00SharedCode.hpp \
+	src/devices/Ultimarc/FF00SharedCode.cpp \
 	src/devices/Ultimarc/Ultimarc.hpp \
 	src/devices/Ultimarc/Ultimate.hpp \
 	src/devices/Ultimarc/PacDrive.hpp \
