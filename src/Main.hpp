@@ -23,7 +23,7 @@
  * @mainpage LEDSpicer LEDs controller.
  * <p>LEDSpicer is a LEDs controllers daemon that will handle the output of different programs based on their configurations.<br>
  * Most of that programs will be emulators and games, but can be used with other applications in mind.</p>
-  */
+ */
 
 #include "MainBase.hpp"
 

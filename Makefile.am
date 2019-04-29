@@ -448,7 +448,7 @@ EXTRA_DIST +=                         \
 	src/animations/ActorHandler.hpp   \
 	src/devices/DeviceHandler.hpp     \
 	src/DataLoader.hpp                \
-	src/devices/GroovyGameGear/LedWiz.hpp   \
+	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \
 	src/devices/Ultimarc/FF00SharedCode.cpp \
@@ -456,6 +456,7 @@ EXTRA_DIST +=                         \
 	src/devices/Ultimarc/Ultimate.hpp \
 	src/devices/Ultimarc/PacDrive.hpp \
 	src/devices/Ultimarc/PacLed64.hpp \
+	src/devices/Ultimarc/NanoLed.hpp  \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \
