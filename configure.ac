@@ -132,7 +132,7 @@ dnl * Needed Libraries *
 dnl ********************
 AC_MSG_CHECKING([dependencies])
 
-PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.21],
+PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.~],
 	echo -e "\tlibusb 1.0 ver `pkg-config --short-errors --modversion libusb-1.0` found",
 	AC_MSG_ERROR([libusb-1.0 development library not found.])
 )
@@ -149,7 +149,7 @@ PKG_CHECK_MODULES([PTHREADSTUBS], pthread-stubs,
 )
 if test x$pulseaudio = xyes ; then
 	AC_MSG_NOTICE([User $USER will be used to allow pulseaudio to work, change it if needed in service file])
-	PKG_CHECK_MODULES([LIBPULSE], libpulse >= 0.9.7,
+	PKG_CHECK_MODULES([LIBPULSE], [libpulse >= 0.9.~],
 		echo -e "\tlibpulse ver `pkg-config --short-errors --modversion libpulse` found"
 		USERNAME=$USER
 		AC_SUBST(USERNAME)
