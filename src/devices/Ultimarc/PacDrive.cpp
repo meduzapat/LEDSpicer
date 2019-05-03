@@ -70,10 +70,10 @@ void PacDrive::transfer() {
 	for (uint8_t led = 0; led < PAC_DRIVE_LEDS; ++led) {
 		if (LEDs[led] > changePoint) {
 			// two groups of 8 bits.
-			if (led < 9)
+			if (led < 8)
 				load[3] |= 1 << led;
 			else
-				load[2] |= 1 << (led - 9);
+				load[2] |= 1 << (led - 8);
 		}
 	}
 	transferData(load);
