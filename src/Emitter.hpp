@@ -40,6 +40,11 @@ using std::endl;
 #define EMITTER_HPP_ 1
 
 #define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
+#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
+#define CONTROL "C"
+#define PLAYERS "ps"
+#define TYPE "t"
+#define BUTTONS "b"
 
 /**
  * Main function.
@@ -51,6 +56,6 @@ using std::endl;
  */
 int main(int argc, char **argv);
 
-vector<string> parseMame(const string& binary, const string& rom);
+vector<string> parseMame(const string& rom);
 
 #endif /* EMITTER_HPP_ */

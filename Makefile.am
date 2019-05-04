@@ -114,10 +114,11 @@ ledspicerd_LDADD = \
 emitter_SOURCES = \
 	src/Emitter.cpp
 
-emitter_CPPFLAGS =                       \
-	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\" \
-	$(TINYXML2_CFLAGS)                   \
-	-I$(top_srcdir)/src                  \
+emitter_CPPFLAGS =                        \
+	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
+	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
+	$(TINYXML2_CFLAGS)                    \
+	-I$(top_srcdir)/src                    \
 	-Wl,--no-as-needed
 
 emitter_LDFLAGS = \
@@ -384,6 +385,14 @@ endif
 devicesdir = \
 	$(DEVICES_DIR)
 
+##############
+# games data #
+##############
+
+gamesdatadir=$(pkgdatadir)
+gamesdata_DATA =      \
+	data/gameData.xml
+
 if COPY_SAMPLES
 
 ##########
@@ -469,6 +478,7 @@ EXTRA_DIST +=                         \
 	data/ledspicer.conf          \
 	data/basicColors.xml         \
 	data/webColors.xml           \
+	data/gameData.xml            \
 	data/animations/example.xml  \
 	data/animations/skeleton.xml \
 	data/profiles/default.xml    \
