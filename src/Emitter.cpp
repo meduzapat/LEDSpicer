@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::LoadProfile) <<
 				" profile1 profile2 ... profileX  Attempts to load the first valid profile from a list of profiles.\n" <<
 				Message::type2str(Message::Types::LoadProfileByEmulator) <<
-				" binary rom emulator  Attempts to load a profile based on the emulator and the ROM.\n" <<
+				" rom platform  Attempts to load a profile based on the platform and the ROM name.\n" <<
 				Message::type2str(Message::Types::FinishLastProfile) <<
 				"                           Terminates the current profile (doens't affect the default).\n" <<
 				Message::type2str(Message::Types::SetElement) <<
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
 
 		// Check request.
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
-			if (msg.getData().size() < 3) {
+			if (msg.getData().size() < 2) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}

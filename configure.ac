@@ -248,7 +248,7 @@ Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 Copy samples : $samples
 --------- Output Plugins -----------
-NanoLed     : $pulseaudio
+NanoLed     : $naoled
 PacDrive    : $pacdrive
 PacLed64    : $pacled64
 Ultimate IO : $ultimateio
