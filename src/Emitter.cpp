@@ -134,15 +134,14 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 			}
 			string
-				binary = msg.getData()[0],
-				load   = msg.getData()[1],
-				name   = msg.getData()[2];
+				load   = msg.getData()[0],
+				name   = msg.getData()[1];
 			Message msgTemp;
 
 			msgTemp.setType(Message::Types::LoadProfile);
 			msgTemp.addData(string(name).append("/").append(load));
-			// mame
-			if (name == "mame") {
+			// arcades (mame and others)
+			if (name == "arcade") {
 				for (string& p : parseMame(load))
 					if (not p.empty())
 						msgTemp.addData(p);
