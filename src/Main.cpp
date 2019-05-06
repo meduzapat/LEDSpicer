@@ -87,6 +87,17 @@ void Main::run() {
 				currentProfile->terminate();
 				break;
 
+			case Message::Types::FinishAllProfiles:
+				if (profiles.size() > 1) {
+					// Deactivate overwrites.
+					alwaysOnGroups.clear();
+					alwaysOnElements.clear();
+					profiles.clear();
+					currentProfile = DataLoader::defaultProfile;
+					profiles.push_back(currentProfile);
+				}
+				break;
+
 			case Message::Types::SetElement:
 				if (msg.getData().size() != 3) {
 					LogNotice(Error::INVALID_MESSAGE_LABEL);

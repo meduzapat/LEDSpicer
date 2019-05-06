@@ -42,7 +42,7 @@ PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
 	if (options.count("changePoint"))
 		changePoint = Utility::parseNumber(
 			options["changePoint"],
-			"Invalid value for changePoint device " PAC_DRIVE_NAME " Id " + to_string(boardId)
+			"Invalid value for changePoint " + getFullName()
 		);
 }
 

@@ -42,6 +42,7 @@ struct Message {
 		LoadProfile,
 		LoadProfileByEmulator,
 		FinishLastProfile,
+		FinishAllProfiles,
 		SetElement,
 		ClearElement,
 		ClearAllElements,

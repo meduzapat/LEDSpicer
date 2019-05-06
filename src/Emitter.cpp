@@ -49,6 +49,8 @@ int main(int argc, char **argv) {
 				" rom platform  Attempts to load a profile based on the platform and the ROM name.\n" <<
 				Message::type2str(Message::Types::FinishLastProfile) <<
 				"                           Terminates the current profile (doens't affect the default).\n" <<
+				Message::type2str(Message::Types::FinishAllProfiles) <<
+				"                           Removes every profile (doens't affect the default).\n" <<
 				Message::type2str(Message::Types::SetElement) <<
 				" elementName color filter         Changes an element's background color until the profile ends.\n" <<
 				Message::type2str(Message::Types::ClearElement) <<

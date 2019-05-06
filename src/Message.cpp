@@ -41,6 +41,8 @@ string Message::type2str(Types type) {
 		return "LoadProfileByEmulator";
 	case Types::FinishLastProfile:
 		return "FinishLastProfile";
+	case Types::FinishAllProfiles:
+		return "FinishAllProfiles";
 	case Types::SetElement:
 		return "SetElement";
 	case Types::ClearElement:
@@ -64,6 +66,8 @@ Message::Types Message::str2type(const string& type) {
 		return Types::LoadProfileByEmulator;
 	if (type == "FinishLastProfile")
 		return Types::FinishLastProfile;
+	if (type == "FinishAllProfiles")
+		return Types::FinishAllProfiles;
 	if (type == "SetElement")
 		return Types::SetElement;
 	if (type == "ClearElement")
