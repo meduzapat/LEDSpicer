@@ -50,7 +50,7 @@ void Mame::process() {
 	}
 
 	auto parts = Utility::explode(buffer, '=');
-	if (parts.size != 2)
+	if (parts.size() != 2)
 		return;
 
 	Utility::trim(parts[0]);
