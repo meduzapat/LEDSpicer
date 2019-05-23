@@ -28,6 +28,7 @@
 #include "devices/Profile.hpp"
 #include "animations/ActorHandler.hpp"
 #include "devices/DeviceHandler.hpp"
+#include "inputs/InputHandler.hpp"
 
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
@@ -43,6 +44,7 @@
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
+#define REQUIRED_PARAM_MAP            {"type", "target", "trigger", "color", "filter"}
 
 namespace LEDSpicer {
 
@@ -54,6 +56,8 @@ using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
 using Devices::Device;
+using Inputs::Input;
+using Inputs::InputHandler;
 
 /**
  * LEDSpicer::DataLoader
@@ -92,6 +96,7 @@ public:
 	/**
 	 * Reads an profile file.
 	 * @param name
+	 * @param isDefault
 	 */
 	static Profile* processProfile(const string& name);
 
@@ -126,6 +131,18 @@ public:
 
 	/// Maps handlers with actors.
 	static umap<Actor*, ActorHandler*> actorMap;
+
+	/// Keeps references to inputs handlers.
+	static umap<string, InputHandler*> inputHandlers;
+
+	/// Maps handlers with actors.
+	static umap<Input*, InputHandler*> inputMap;
+
+	/// Keeps a list of global elements that can be turn on/off by input plugins.
+	static umap<string, Element::Item*> controlledElements;
+
+	/// Keeps a list of global groups that can be turn on/off by input plugins.
+	static umap<string, Group::Item*> controlledGroups;
 
 	/**
 	 * Returns the current mode.
@@ -193,6 +210,18 @@ protected:
 	 * @return
 	 */
 	static Actor* createAnimation(umap<string, string>& actorData);
+
+	/**
+	 * Loads an input object.
+	 */
+	static Input* createInput(umap<string, string>& inputData);
+
+	/**
+	 * Extracts input map data.
+	 * @param inputNode
+	 * @param input
+	 */
+	static void processInputMap(tinyxml2::XMLElement* inputNode, Input* input);
 
 	/**
 	 * Prepares the filenames.

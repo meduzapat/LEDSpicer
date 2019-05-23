@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.3.5],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.3.6],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2019 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -198,6 +198,8 @@ ACTORS_DIR=["${libdir}/${PACKAGE_TARNAME}/actors"]
 AC_SUBST([ACTORS_DIR])
 DEVICES_DIR=["${libdir}/${PACKAGE_TARNAME}/devices"]
 AC_SUBST([DEVICES_DIR])
+INPUTS_DIR=["${libdir}/${PACKAGE_TARNAME}/inputs"]
+AC_SUBST([INPUTS_DIR])
 
 dnl *************************
 dnl * Daemon initialization *
@@ -248,7 +250,7 @@ Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 Copy samples : $samples
 --------- Output Plugins -----------
-NanoLed     : $naoled
+NanoLed     : $nanoled
 PacDrive    : $pacdrive
 PacLed64    : $pacled64
 Ultimate IO : $ultimateio

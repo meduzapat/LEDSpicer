@@ -80,11 +80,10 @@ void Log::logIntoStdOut(const string& message, int level) {
 	if (level > minLevel)
 		return;
 
-	if (level == LOG_ERR) {
+	if (level == LOG_ERR)
 		cerr << message << endl;
-		return;
-	}
-	cout << message << endl;
+	else
+		cout << message << endl;
 }
 
 void Log::terminate() {

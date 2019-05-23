@@ -31,6 +31,7 @@
 using std::vector;
 
 #include <chrono>
+using std::chrono::milliseconds;
 #include <thread>
 
 #include "utility/Error.hpp"
@@ -134,12 +135,13 @@ public:
 	 * Returns the interval ms.
 	 * @return
 	 */
-	static uint8_t getInterval();
+	static milliseconds getInterval();
 
 	/**
 	 * Waits for a defined amount of ms.
+	 * @param milliseconds wasted keeps track of the wasted milliseconds.
 	 */
-	static void wait();
+	static void wait(milliseconds wasted);
 
 protected:
 
@@ -166,7 +168,7 @@ protected:
 
 	vector<uint8_t> LEDs;
 
-	static uint8_t waitTime;
+	static milliseconds waitTime;
 
 	virtual void afterConnect() = 0;
 

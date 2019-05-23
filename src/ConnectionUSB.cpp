@@ -27,7 +27,7 @@
 using namespace LEDSpicer;
 
 libusb_context* ConnectionUSB::usbSession = nullptr;
-uint8_t         ConnectionUSB::waitTime   = 0;
+milliseconds ConnectionUSB::waitTime;
 
 ConnectionUSB::ConnectionUSB(
 		uint16_t wValue,
@@ -188,11 +188,11 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 }
 
 void ConnectionUSB::setInterval(uint8_t waitTime) {
-	LogInfo("Set interval to " + to_string(waitTime) + "ms");
-	ConnectionUSB::waitTime = waitTime;
+	ConnectionUSB::waitTime = milliseconds(waitTime);
+	LogInfo("Set interval to " + to_string(ConnectionUSB::waitTime.count()) + "ms");
 }
 
-uint8_t ConnectionUSB::getInterval() {
+milliseconds ConnectionUSB::getInterval() {
 	return waitTime;
 }
 
@@ -200,6 +200,9 @@ string ConnectionUSB::getFullName() {
 	return "device: " + name + " Id: " + to_string(board.boardId);
 }
 
-void ConnectionUSB::wait() {
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+void ConnectionUSB::wait(milliseconds wasted) {
+	if (wasted < waitTime)
+		std::this_thread::sleep_for(waitTime - wasted);
+	else
+		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(waitTime.count()) + "ms)");
 }

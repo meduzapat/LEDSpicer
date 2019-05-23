@@ -34,7 +34,11 @@ umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<Device*, DeviceHandler*> DataLoader::deviceMap;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
 umap<Actor*, ActorHandler*> DataLoader::actorMap;
+umap<string, InputHandler*> DataLoader::inputHandlers;
+umap<Input*, InputHandler*> DataLoader::inputMap;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
+umap<string, Element::Item*> DataLoader::controlledElements;
+umap<string, Group::Item*> DataLoader::controlledGroups;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -45,6 +49,8 @@ void DataLoader::setMode(Modes mode) {
 }
 
 void DataLoader::readConfiguration() {
+
+	Input::setInputControllers(&controlledElements, &controlledGroups);
 
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
@@ -69,6 +75,7 @@ void DataLoader::readConfiguration() {
 	processDevices();
 
 	processLayout();
+
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -201,6 +208,7 @@ void DataLoader::processLayout() {
 
 }
 
+
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
 
 	tinyxml2::XMLElement* element = groupNode->FirstChildElement("element");
@@ -298,6 +306,22 @@ Profile* DataLoader::processProfile(const string& name) {
 			profilePtr->addAlwaysOnGroup(&layout[tempAttr["name"]], tempAttr["color"]);
 		}
 	}
+
+	// Check for input plugins.
+	element = profile.getRoot()->FirstChildElement("inputs");
+	if (element) {
+		element = element->FirstChildElement("input");
+		if (element) {
+			for (; element; element = element->NextSiblingElement("input")) {
+				umap<string, string> elementAttr = processNode(element);
+				Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "input node");
+				Input* input =  createInput(elementAttr);
+				processInputMap(element, input);
+				profilePtr->addInput(elementAttr["name"], input);
+			}
+		}
+	}
+
 	profiles[name] = profilePtr;
 	return profilePtr;
 }
@@ -346,6 +370,58 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 	Actor* a = actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
 	actorMap.emplace(a, actorHandlers[actorName]);
 	return a;
+}
+
+Input* DataLoader::createInput(umap<string, string>& inputData) {
+	string inputName = inputData["name"];
+	if (not inputHandlers.count(inputName))
+		inputHandlers.emplace(inputName, new InputHandler(inputName));
+	Input* i = inputHandlers[inputName]->createInput(inputData);
+	inputMap.emplace(i, inputHandlers[inputName]);
+	return i;
+}
+
+void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, Input* input) {
+
+	umap<string, Element::Item> elementMap;
+	umap<string, Group::Item> groupMap;
+
+	tinyxml2::XMLElement* maps = inputNode->FirstChildElement("map");
+	for (; maps; maps = maps->NextSiblingElement("map")) {
+		umap<string, string> elementAttr = processNode(maps);
+		Utility::checkAttributes(REQUIRED_PARAM_MAP, elementAttr, "map maps");
+
+		if (elementAttr["type"] == "Element") {
+			if (not allElements.count(elementAttr["target"]))
+				throw LEDError("Unknown Element " + elementAttr["target"] + " on map file");
+
+			// Check dupes and add
+			if (elementMap.count(elementAttr["trigger"]) and elementMap[elementAttr["trigger"]].element->getName() == elementAttr["target"])
+				throw LEDError("Duplicated element map for " + elementAttr["target"] + " map " + elementAttr["value"]);
+
+			elementMap.emplace(elementAttr["trigger"], Element::Item {
+				allElements[elementAttr["target"]],
+				&Color::getColor(elementAttr["color"]),
+				Color::str2filter(elementAttr["filter"])
+			});
+		}
+
+		if (elementAttr["type"] == "Group") {
+			if (not layout.count(elementAttr["target"]))
+				throw LEDError("Unknown Group " + elementAttr["target"] + " on map file");
+
+			// Check dupes and add
+			if (groupMap.count(elementAttr["trigger"]) and groupMap[elementAttr["trigger"]].group->getName() == elementAttr["target"])
+				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
+
+			groupMap.emplace(elementAttr["trigger"], Group::Item {
+				&layout[elementAttr["target"]],
+				&Color::getColor(elementAttr["color"]),
+				Color::str2filter(elementAttr["filter"])
+			});
+		}
+	}
+	input->setMaps(elementMap, groupMap);
 }
 
 string DataLoader::createFilename(const string& name) {

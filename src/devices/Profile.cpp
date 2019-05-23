@@ -62,9 +62,20 @@ void Profile::drawConfig() {
 			cout << endl;
 		}
 	}
+
+	if (inputs.size()) {
+		cout << endl << endl << "* Input plugins:" << endl;
+		for (auto i : inputs) {
+			cout << "Plugin " << i.first << endl;
+			i.second->drawConfig();
+		}
+	}
 }
 
 void Profile::runFrame() {
+
+	for (auto i : inputs)
+		i.second->process();
 
 	if (actual and actual->drawFrame()) {
 		if (actual == end)
@@ -84,7 +95,6 @@ void Profile::reset() {
 }
 
 void Profile::restart() {
-
 	running = true;
 	restartActors();
 
@@ -95,6 +105,9 @@ void Profile::restart() {
 }
 
 void Profile::terminate() {
+	for (auto i : inputs)
+		i.second->deactivate();
+
 	if (end) {
 		actual = end;
 		actual->restart();
@@ -103,6 +116,8 @@ void Profile::terminate() {
 }
 
 void Profile::restartActors() {
+	for (auto i : inputs)
+		i.second->activate();
 	for (auto actor : animations)
 		actor->restart();
 }
@@ -135,18 +150,24 @@ const string& Profile::getName() const {
 	return name;
 }
 
-const vector<Profile::ElementItem>& Profile::getAlwaysOnElements() const {
+const vector<Element::Item>& Profile::getAlwaysOnElements() const {
 	return alwaysOnElements;
 }
 
 void Profile::addAlwaysOnElement(Element* element ,const string& color) {
-	alwaysOnElements.push_back(ElementItem{element, &Color::getColor(color), Color::Filters::Normal});
+	alwaysOnElements.push_back(Element::Item{element, &Color::getColor(color), Color::Filters::Normal});
 }
 
-const vector<Profile::GroupItem> & Profile::getAlwaysOnGroups() const {
+const vector<Group::Item> & Profile::getAlwaysOnGroups() const {
 	return alwaysOnGroups;
 }
 
 void Profile::addAlwaysOnGroup(Group* group, const string& color) {
-	alwaysOnGroups.push_back(GroupItem{group, &Color::getColor(color), Color::Filters::Normal});
+	alwaysOnGroups.push_back(Group::Item{group, &Color::getColor(color), Color::Filters::Normal});
+}
+
+void Profile::addInput(string name, Input* input) {
+	if (inputs.count(name))
+		throw Error(name + " already exist, only one input plugin of this type can be assigned");
+	inputs.emplace(name, input);
 }

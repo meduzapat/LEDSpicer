@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Emitter.hpp
- * @since     Jul 8, 2018
+ * @file      InputHandler.cpp
+ * @since     May 7, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using std::cout;
-using std::endl;
+#include "InputHandler.hpp"
 
-#include <unistd.h>
+using namespace LEDSpicer::Inputs;
 
-#include <cstring>
+InputHandler::InputHandler(const string& inputName) :
+	Handler(INPUTS_DIR + inputName + ".so"),
+	createFunction(reinterpret_cast<Input*(*)(umap<string, string>&)>(dlsym(handler, "createInput"))),
+	destroyFunction(reinterpret_cast<void(*)(Input*)>(dlsym(handler, "destroyInput")))
+{
+	if (not handler or not createFunction or not destroyFunction) {
+		string e = "Failed to load input " + inputName;
+		if (char *errstr = dlerror())
+			e += string(errstr);
+		throw Error(e);
+	}
+}
 
-#include <memory>
+Input* InputHandler::createInput(umap<string, string>& parameters) {
+	return createFunction(parameters);
+}
 
-#include "Messages.hpp"
-#include "utility/XMLHelper.hpp"
-
-#ifndef EMITTER_HPP_
-#define EMITTER_HPP_ 1
-
-#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
-#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
-#define CONTROL "C"
-#define PLAYERS "ps"
-#define TYPE "t"
-#define BUTTONS "b"
-
-/**
- * Main function.
- * Handles command line and executes the program.
- *
- * @param argc
- * @param argv
- * @return exit code.
- */
-int main(int argc, char **argv);
-
-vector<string> parseMame(const string& rom);
-
-#endif /* EMITTER_HPP_ */
+void InputHandler::destroyInput(Input* input) {
+	destroyFunction(input);
+}

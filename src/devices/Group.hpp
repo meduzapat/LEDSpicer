@@ -40,6 +40,15 @@ public:
 
 	Group(const string& name) : name(name) {}
 
+	/**
+	 * Structure to handle groups with properties.
+	 */
+	struct Item {
+		const Group* group = nullptr;
+		const Color* color = nullptr;
+		Color::Filters filter;
+	};
+
 	virtual ~Group() = default;
 
 	void drawElements();

@@ -57,6 +57,15 @@ public:
 
 	Element(Element* other);
 
+	/**
+	 * Structure to elements with properties.
+	 */
+	struct Item {
+		Element* element      = nullptr;
+		const Color* color    = nullptr;
+		Color::Filters filter = Color::Filters::Normal;
+	};
+
 	virtual ~Element() = default;
 
 	/**

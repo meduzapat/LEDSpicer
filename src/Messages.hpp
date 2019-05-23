@@ -30,8 +30,6 @@ using std::queue;
 #ifndef MESSAGES_HPP_
 #define MESSAGES_HPP_ 1
 
-#define LOCALHOST "127.0.0.1"
-
 namespace LEDSpicer {
 
 /**

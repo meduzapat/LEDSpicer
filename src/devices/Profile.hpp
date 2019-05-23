@@ -24,6 +24,7 @@
 #include "Group.hpp"
 #include "animations/Actor.hpp"
 #include "utility/Color.hpp"
+#include "inputs/Input.hpp"
 
 #ifndef PROFILE_HPP_
 #define PROFILE_HPP_ 1
@@ -34,6 +35,7 @@ namespace LEDSpicer {
 namespace Devices {
 
 using Animations::Actor;
+using Inputs::Input;
 
 /**
  * LEDSpicer::Profile
@@ -41,24 +43,6 @@ using Animations::Actor;
 class Profile {
 
 public:
-
-	/**
-	 * Structure to handle always on elements.
-	 */
-	struct ElementItem {
-		Element* element = nullptr;
-		const Color* color = nullptr;
-		Color::Filters filter;
-	};
-
-	/**
-	 * Structure to handle always on groups.
-	 */
-	struct GroupItem {
-		const Group* group = nullptr;
-		const Color* color = nullptr;
-		Color::Filters filter;
-	};
 
 	Profile(
 		const string& name,
@@ -77,6 +61,9 @@ public:
 
 	void addAnimation(const vector<Actor*>& animation);
 
+	/**
+	 * Displays the internal information.
+	 */
 	void drawConfig();
 
 	/**
@@ -134,13 +121,18 @@ public:
 	 */
 	const string& getName() const;
 
-	const vector<ElementItem>& getAlwaysOnElements() const;
+	const vector<Element::Item>& getAlwaysOnElements() const;
+	const vector<Group::Item>& getAlwaysOnGroups() const;
 
 	void addAlwaysOnElement(Element* element, const string& color);
-
-	const vector<GroupItem>& getAlwaysOnGroups() const;
-
 	void addAlwaysOnGroup(Group* group, const string& color);
+
+	/**
+	 * Adds an input plugin to this profile.
+	 * @param name
+	 * @param input
+	 */
+	void addInput(string name, Input* input);
 
 protected:
 
@@ -165,10 +157,13 @@ protected:
 	vector<Actor*> animations;
 
 	/// Keeps a list of always on elements.
-	vector<ElementItem> alwaysOnElements;
+	vector<Element::Item> alwaysOnElements;
 
 	/// Keeps a list of always on groups.
-	vector<GroupItem> alwaysOnGroups;
+	vector<Group::Item> alwaysOnGroups;
+
+	/// Input plugins
+	umap<string, Input*> inputs;
 
 private:
 

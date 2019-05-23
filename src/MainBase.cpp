@@ -27,6 +27,8 @@ using namespace LEDSpicer;
 bool MainBase::running = false;
 Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
+umap<string, Element::Item> MainBase::alwaysOnElements;
+umap<string, Group::Item> MainBase::alwaysOnGroups;
 
 MainBase::MainBase() :
 	messages(
@@ -90,6 +92,21 @@ MainBase::~MainBase() {
 		LogDebug("Actor Handler " + ah.first + " instance deleted");
 #endif
 		delete ah.second;
+	}
+
+	// destroy inputs and handlers.
+	for (auto& am : DataLoader::inputMap) {
+#ifdef DEVELOP
+		LogDebug("Input instance deleted");
+#endif
+		am.second->destroyInput(am.first);
+	}
+
+	for (auto i : DataLoader::inputHandlers) {
+	#ifdef DEVELOP
+		LogDebug("Input Handler " + i.first + " instance deleted");
+	#endif
+		delete i.second;
 	}
 
 	for (auto p : DataLoader::profiles) {
@@ -181,7 +198,7 @@ void MainBase::dumpConfiguration() {
 		d->drawHardwarePinMap();
 	cout <<
 		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
-		"Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl <<
+		"Interval: " << ConnectionUSB::getInterval().count() << "ms" << endl <<
 		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
 		"Layout:";
 	for (auto group : DataLoader::layout) {

@@ -37,13 +37,13 @@ Socks::Socks(const string& hostAddress, const string& hostPort, bool bind) {
 		prepare(hostAddress, hostPort, bind);
 }
 
-void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind) {
+void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind, int sockType) {
 
 	if (sockFB)
 		throw Error("Already prepared.");
 
 	if (bind) {
-		LogInfo("Binding " + hostAddress + " port " + hostPort);
+		LogInfo("Listening on " + hostAddress + " port " + hostPort);
 	}
 	else {
 		LogInfo("Connecting to " + hostAddress + " port " + hostPort);
@@ -56,7 +56,7 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 
 	memset((char *)&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;  // AF_UNIX
-	hints.ai_socktype = SOCK_DGRAM;  //SOCK_STREAM | SOCK_NONBLOCK;
+	hints.ai_socktype = sockType; // SOCK_DGRAM, SOCK_STREAM | SOCK_NONBLOCK;
 	if (bind)
 		hints.ai_flags = AI_PASSIVE;  //AI_CANONNAME;
 
@@ -75,19 +75,15 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 			continue;
 		}
 		int errcode = 0;
-		if (bind) {
+		if (bind)
 			errcode = ::bind(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
-			if (not errcode)
-				break;
-			LogDebug(string(gai_strerror(errcode)));
-		}
-		else {
+		else
 			errcode = ::connect(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
-			if (not errcode)
-				break;
-			LogDebug(string(gai_strerror(errcode)));
-		}
+		if (not errcode)
+			break;
+		LogDebug(string(gai_strerror(errcode)));
 		::close(sockFB);
+		sockFB = 0;
 	}
 
 	if (serverInfo == nullptr) {

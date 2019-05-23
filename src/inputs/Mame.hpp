@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Emitter.hpp
- * @since     Jul 8, 2018
+ * @file      Mame.hpp
+ * @since     May 12, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,39 +20,46 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using std::cout;
-using std::endl;
+#include "utility/Socks.hpp"
+using LEDSpicer::Socks;
+#include "Input.hpp"
 
-#include <unistd.h>
+#ifndef MAME_HPP_
+#define MAME_HPP_ 1
 
-#include <cstring>
+#define MAME_PORT    "8000"
 
-#include <memory>
-
-#include "Messages.hpp"
-#include "utility/XMLHelper.hpp"
-
-#ifndef EMITTER_HPP_
-#define EMITTER_HPP_ 1
-
-#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
-#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
-#define CONTROL "C"
-#define PLAYERS "ps"
-#define TYPE "t"
-#define BUTTONS "b"
+namespace LEDSpicer {
+namespace Inputs {
 
 /**
- * Main function.
- * Handles command line and executes the program.
- *
- * @param argc
- * @param argv
- * @return exit code.
+ * LEDSpicer::Inputs::Mame
+ * This input plugin connects to MAME output network port 8000 and read the output states.
  */
-int main(int argc, char **argv);
+class Mame: public Input {
 
-vector<string> parseMame(const string& rom);
+public:
 
-#endif /* EMITTER_HPP_ */
+	using Input::Input;
+
+	virtual ~Mame() {}
+
+	virtual void process();
+
+	virtual void activate();
+
+	virtual void deactivate();
+
+protected:
+
+	Socks socks;
+
+	bool active = true;
+};
+
+} /* namespace Inputs */
+} /* namespace LEDSpicer */
+
+inputFactory(LEDSpicer::Inputs::Mame)
+
+#endif /* MAME_HPP_ */

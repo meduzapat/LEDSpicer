@@ -35,7 +35,7 @@ int Utility::parseNumber(const string& number, const string& errorMessage) {
 void Utility::ltrim(string& text) {
 	size_t chars = 0;
 	for (size_t c = 0; c < text.size(); c++) {
-		if (text[c] != ' ' and text[c] != '\n' and text[c] != '\t')
+		if (text[c] > 32)
 			break;
 		chars ++;
 	}
@@ -46,7 +46,7 @@ void Utility::ltrim(string& text) {
 void Utility::rtrim(string& text) {
 	size_t chars = 0;
 	for (size_t c = text.size(); c > 0; c--) {
-		if (text[c] != ' ' and c != '\n' and c != '\t')
+		if (text[c] > 32)
 			break;
 		chars ++;
 	}

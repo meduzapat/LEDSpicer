@@ -32,6 +32,7 @@ libledspicer_la_SOURCES =         \
 	src/devices/Device.cpp        \
 	src/animations/Actor.cpp      \
 	src/animations/TimedActor.cpp \
+	src/inputs/Input.cpp          \
 	src/devices/Profile.cpp       \
 	src/utility/Socks.cpp         \
 	src/Message.cpp               \
@@ -63,6 +64,10 @@ animationsheader_HEADERS =        \
 	src/animations/Actor.hpp      \
 	src/animations/TimedActor.hpp
 
+inputsheaderdir=$(pkgincludedir)/inputs
+inputsheader_HEADERS =   \
+	src/inputs/Input.hpp
+
 ledspicer_pcdir = \
 	$(pkgconfigdir)
 
@@ -81,6 +86,7 @@ ledspicerd_SOURCES =                \
 	src/Handler.cpp                 \
 	src/animations/ActorHandler.cpp \
 	src/devices/DeviceHandler.cpp   \
+	src/inputs/InputHandler.cpp     \
 	src/DataLoader.cpp              \
 	src/MainBase.cpp                \
 	src/Main.cpp
@@ -90,6 +96,7 @@ ledspicerd_CPPFLAGS =                     \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
 	-DACTORS_DIR=\"$(ACTORS_DIR)/\"       \
 	-DDEVICES_DIR=\"$(DEVICES_DIR)/\"     \
+	-DINPUTS_DIR=\"$(INPUTS_DIR)/\"       \
 	$(TINYXML2_CFLAGS)                    \
 	$(PTHREADSTUBS_CFLAGS)                \
 	$(LINKER_CFLAGS)                      \
@@ -385,6 +392,33 @@ endif
 devicesdir = \
 	$(DEVICES_DIR)
 
+##########
+# inputs #
+##########
+
+inputs_LTLIBRARIES = \
+	Mame.la
+
+inputsdir = \
+	$(INPUTS_DIR)
+
+########
+# MAME #
+########
+
+Mame_la_SOURCES = \
+	src/inputs/Mame.cpp
+
+Mame_la_LIBADD = \
+	libledspicer.la
+
+Mame_la_LDFLAGS =   \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
+
 ##############
 # games data #
 ##############
@@ -451,12 +485,13 @@ DISTCLEANFILES =              \
 	$(systemdsystemunit_DATA) \
 	$(ledspicer_pc_DATA)
 
-EXTRA_DIST +=                         \
-	autogen.sh                        \
-	src/Handler.hpp                   \
-	src/animations/ActorHandler.hpp   \
-	src/devices/DeviceHandler.hpp     \
-	src/DataLoader.hpp                \
+EXTRA_DIST +=                       \
+	autogen.sh                      \
+	src/Handler.hpp                 \
+	src/animations/ActorHandler.hpp \
+	src/devices/DeviceHandler.hpp   \
+	src/inputs/InputHandler.hpp     \
+	src/DataLoader.hpp              \
 	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \
@@ -472,6 +507,7 @@ EXTRA_DIST +=                         \
 	src/animations/Random.hpp     \
 	src/animations/Filler.hpp     \
 	src/animations/PulseAudio.hpp \
+	src/inputs/Mame.hpp           \
 	src/MainBase.hpp \
 	src/Main.hpp     \
 	src/Emitter.hpp  \
