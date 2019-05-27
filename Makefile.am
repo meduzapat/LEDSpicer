@@ -396,11 +396,12 @@ devicesdir = \
 # inputs #
 ##########
 
-inputs_LTLIBRARIES = \
-	Mame.la
-
 inputsdir = \
 	$(INPUTS_DIR)
+
+inputs_LTLIBRARIES = \
+	Mame.la          \
+	Impulse.la
 
 ########
 # MAME #
@@ -417,6 +418,24 @@ Mame_la_LDFLAGS =   \
 	-shared         \
 	-export-dynamic \
 	-avoid-version  \
+	-fexceptions
+
+###########
+# IMPULSE #
+###########
+
+Impulse_la_SOURCES =      \
+	src/inputs/Reader.cpp \
+	src/inputs/Impulse.cpp
+
+Impulse_la_LIBADD = \
+	libledspicer.la
+
+Impulse_la_LDFLAGS = \
+	-module          \
+	-shared          \
+	-export-dynamic  \
+	-avoid-version   \
 	-fexceptions
 
 ##############
@@ -508,6 +527,8 @@ EXTRA_DIST +=                       \
 	src/animations/Filler.hpp     \
 	src/animations/PulseAudio.hpp \
 	src/inputs/Mame.hpp           \
+	src/inputs/Reader.hpp         \
+	src/inputs/Impulse.hpp        \
 	src/MainBase.hpp \
 	src/Main.hpp     \
 	src/Emitter.hpp  \

@@ -1,1 +1,4 @@
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="d209", GROUP="users", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="d209", GROUP="users", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="fafa", GROUP="users", MODE="0666"
+
+KERNEL=="event*", NAME="input/%k", MODE="0666", GROUP="input"
