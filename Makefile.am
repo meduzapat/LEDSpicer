@@ -25,6 +25,8 @@ libledspicer_la_SOURCES =         \
 	src/utility/Error.cpp         \
 	src/utility/Utility.cpp       \
 	src/utility/XMLHelper.cpp     \
+	src/utility/Speed.cpp         \
+	src/utility/Direction.cpp     \
 	src/utility/Color.cpp         \
 	src/devices/Element.cpp       \
 	src/devices/Group.cpp         \
@@ -33,6 +35,7 @@ libledspicer_la_SOURCES =         \
 	src/animations/Actor.cpp      \
 	src/animations/TimedActor.cpp \
 	src/inputs/Input.cpp          \
+	src/inputs/Reader.cpp         \
 	src/devices/Profile.cpp       \
 	src/utility/Socks.cpp         \
 	src/Message.cpp               \
@@ -50,6 +53,8 @@ utilityheader_HEADERS =       \
 	src/utility/Utility.hpp   \
 	src/utility/Socks.hpp     \
 	src/utility/XMLHelper.hpp \
+	src/utility/Speed.hpp     \
+	src/utility/Direction.hpp \
 	src/utility/Color.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
@@ -65,8 +70,9 @@ animationsheader_HEADERS =        \
 	src/animations/TimedActor.hpp
 
 inputsheaderdir=$(pkgincludedir)/inputs
-inputsheader_HEADERS =   \
-	src/inputs/Input.hpp
+inputsheader_HEADERS =    \
+	src/inputs/Input.hpp  \
+	src/inputs/Reader.hpp
 
 ledspicer_pcdir = \
 	$(pkgconfigdir)
@@ -401,7 +407,8 @@ inputsdir = \
 
 inputs_LTLIBRARIES = \
 	Mame.la          \
-	Impulse.la
+	Impulse.la       \
+	Actions.la
 
 ########
 # MAME #
@@ -425,7 +432,6 @@ Mame_la_LDFLAGS =   \
 ###########
 
 Impulse_la_SOURCES =      \
-	src/inputs/Reader.cpp \
 	src/inputs/Impulse.cpp
 
 Impulse_la_LIBADD = \
@@ -436,6 +442,23 @@ Impulse_la_LDFLAGS = \
 	-shared          \
 	-export-dynamic  \
 	-avoid-version   \
+	-fexceptions
+
+###########
+# Actions #
+###########
+
+Actions_la_SOURCES =      \
+	src/inputs/Actions.cpp
+
+Actions_la_LIBADD = \
+	libledspicer.la
+
+Actions_la_LDFLAGS =   \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
 	-fexceptions
 
 ##############
@@ -529,6 +552,7 @@ EXTRA_DIST +=                       \
 	src/inputs/Mame.hpp           \
 	src/inputs/Reader.hpp         \
 	src/inputs/Impulse.hpp        \
+	src/inputs/Actions.hpp        \
 	src/MainBase.hpp \
 	src/Main.hpp     \
 	src/Emitter.hpp  \

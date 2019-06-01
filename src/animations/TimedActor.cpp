@@ -42,7 +42,7 @@ void TimedActor::changeFrameElement(const Color& color, bool fade) {
 
 	uint8_t index = currentActorFrame - 1;
 
-	if (speed == Speed::VeryFast) {
+	if (speed == Speeds::VeryFast) {
 		changeElementColor(index, color, filter);
 		return;
 	}
@@ -64,7 +64,7 @@ void TimedActor::changeFrameElement(const Color& color, const Color& colorNext) 
 
 	uint8_t index = currentActorFrame - 1;
 
-	if (speed == Speed::VeryFast) {
+	if (speed == Speeds::VeryFast) {
 		changeElementColor(index, colorNext, filter);
 		return;
 	}

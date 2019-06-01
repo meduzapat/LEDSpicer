@@ -31,6 +31,8 @@ using std::vector;
 #include "utility/Color.hpp"
 #include "utility/Log.hpp"
 #include "utility/Utility.hpp"
+#include "utility/Speed.hpp"
+#include "utility/Direction.hpp"
 
 #ifndef ACTOR_HPP_
 #define ACTOR_HPP_ 1
@@ -46,13 +48,9 @@ using Devices::Element;
 /**
  * LEDSpicer::Animation
  */
-class Actor {
+class Actor : public Speed, public Direction {
 
 public:
-
-	enum class Directions : uint8_t {Stop, Forward, Backward, ForwardBouncing, BackwardBouncing};
-
-	enum class Speed      : uint8_t {VeryFast, Fast, Normal, Slow, VerySlow};
 
 	/**
 	 * Create a new actor object
@@ -81,12 +79,6 @@ public:
 	 * Reset the animation back to begin.
 	 */
 	virtual void restart();
-
-	static string direction2str(Directions direction);
-	static Directions str2direction(const string& direction);
-
-	static string speed2str(Speed speed);
-	static Speed str2speed(const string& speed);
 
 	/**
 	 * Sets the system FPS.
@@ -143,14 +135,8 @@ protected:
 		/// Total actor frames.
 		totalActorFrames;
 
-	Directions
-		/// Current Direction
-		cDirection,
-		/// Direction
-		direction;
-
-	/// The current speed.
-	Speed speed;
+	/// Current Direction
+	Directions cDirection;
 
 	/// How the color information will be draw back.
 	Color::Filters filter = Color::Filters::Normal;

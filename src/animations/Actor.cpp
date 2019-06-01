@@ -32,17 +32,12 @@ Actor::Actor(
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
+	Speed(parameters.count("speed") ? parameters["speed"] : ""),
+	Direction(parameters.count("direction") ? parameters["direction"] : ""),
 	filter(Color::str2filter(parameters["filter"])),
 	group(group)
 {
-	if (parameters.count("direction"))
-		direction = str2direction(parameters["direction"]);
-	else
-		direction = Directions::Forward;
-	if (parameters.count("speed"))
-		speed = str2speed(parameters["speed"]);
-	else
-		speed = Speed::Normal;
+
 	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
@@ -85,67 +80,6 @@ void Actor::restart() {
 		currentActorFrame = totalActorFrames;
 		cDirection = Directions::Backward;
 	}
-}
-
-string Actor::direction2str(Directions direction) {
-	switch (direction) {
-	case Directions::Stop:
-		return "None";
-	case Directions::Forward:
-		return "Forward";
-	case Directions::Backward:
-		return "Backward";
-	case Directions::ForwardBouncing:
-		return "Forward Bouncing";
-	case Directions::BackwardBouncing:
-		return "Backward Bouncing";
-	}
-	return "";
-}
-
-Actor::Directions Actor::str2direction(const string& direction) {
-
-	if (direction == "Stop")
-		return Directions::Stop;
-	if (direction == "Forward")
-		return Directions::Forward;
-	if (direction == "Backward")
-		return Directions::Backward;
-	if (direction == "ForwardBouncing")
-		return Directions::ForwardBouncing;
-	if (direction == "BackwardBouncing")
-		return Directions::BackwardBouncing;
-	throw Error("Invalid direction " + direction);
-}
-
-string Actor::speed2str(Speed speed) {
-	switch (speed) {
-	case Speed::VeryFast:
-		return "Very Fast";
-	case Speed::Fast:
-		return "Fast";
-	case Speed::Normal:
-		return "Normal";
-	case Speed::Slow:
-		return "Slow";
-	case Speed::VerySlow:
-		return "Very Slow";
-	}
-	return "";
-}
-
-Actor::Speed Actor::str2speed(const string& speed) {
-	if (speed == "VeryFast")
-		return Speed::VeryFast;
-	if (speed == "Fast")
-		return Speed::Fast;
-	if (speed == "Normal")
-		return Speed::Normal;
-	if (speed == "Slow")
-		return Speed::Slow;
-	if (speed == "VerySlow")
-		return Speed::VerySlow;
-	throw Error("Invalid speed " + speed);
 }
 
 void Actor::setFPS(uint8_t FPS) {

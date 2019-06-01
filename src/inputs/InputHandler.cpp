@@ -29,12 +29,8 @@ InputHandler::InputHandler(const string& inputName) :
 	createFunction(reinterpret_cast<Input*(*)(umap<string, string>&)>(dlsym(handler, "createInput"))),
 	destroyFunction(reinterpret_cast<void(*)(Input*)>(dlsym(handler, "destroyInput")))
 {
-	if (not handler or not createFunction or not destroyFunction) {
-		string e = "Failed to load input " + inputName;
-		if (char *errstr = dlerror())
-			e += string(errstr);
-		throw Error(e);
-	}
+	if (char *errstr = dlerror())
+		throw Error("Failed to load input " + inputName + " " + errstr);
 }
 
 Input* InputHandler::createInput(umap<string, string>& parameters) {

@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ActorHandler.cpp
- * @since     Dec 8, 2018
+ * @file      Speed.hpp
+ * @since     May 27, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,23 +20,42 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ActorHandler.hpp"
+#include <cstdint>
+#include <string>
+using std::string;
+#include "Error.hpp"
 
-using namespace LEDSpicer::Animations;
+#ifndef SPEED_HPP_
+#define SPEED_HPP_ 1
 
-ActorHandler::ActorHandler(const string& actorName) :
-	Handler(ACTORS_DIR + actorName + ".so"),
-	createFunction(reinterpret_cast<Actor*(*)(umap<string, string>&, Group* const)>(dlsym(handler, "createActor"))),
-	destroyFunction(reinterpret_cast<void(*)(Actor*)>(dlsym(handler, "destroyActor")))
-{
-	if (char *errstr = dlerror())
-		throw Error("Failed to load actor " + actorName + " " + errstr);
-}
+namespace LEDSpicer {
 
-Actor* ActorHandler::createActor(umap<string, string>& parameters, Group* const group) {
-	return createFunction(parameters, group);
-}
+/**
+ * LEDSpicer::Speed
+ * Helper class with speed options.
+ */
+class Speed {
 
-void ActorHandler::destroyActor(Actor* actor) {
-	destroyFunction(actor);
-}
+public:
+
+	enum class Speeds : uint8_t {VeryFast, Fast, Normal, Slow, VerySlow};
+
+	Speed() = default;
+
+	Speed(string speed);
+
+	virtual ~Speed() = default;
+
+	static string speed2str(Speeds speed);
+
+	static Speeds str2speed(const string& speed);
+
+protected:
+
+	/// The current speed.
+	Speeds speed = Speeds::Normal;
+};
+
+} /* namespace LEDSpicer */
+
+#endif /* SPEED_HPP_ */

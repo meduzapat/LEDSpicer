@@ -62,6 +62,7 @@ protected:
 	 * list of input device and their resource.
 	 */
 	static umap<string, int> listenEvents;
+
 	/**
 	 * Reads all the events.
 	 * @param who

@@ -205,9 +205,7 @@ void DataLoader::processLayout() {
 	}
 
 	defaultProfile = processProfile(defaultProfileStr);
-
 }
-
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
 

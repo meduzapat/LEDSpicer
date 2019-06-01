@@ -86,16 +86,16 @@ public:
 
 protected:
 
-	/// Output list of mapped elements by element name.
+	/// Output list of mapped elements by trigger + element name.
 	static umap<string, Element::Item*>* controlledElements;
 
-	/// Output list of mapped groups by group name.
+	/// Output list of mapped groups by trigger + group name.
 	static umap<string, Group::Item*>* controlledGroups;
 
-	/// Profile specific map.
+	/// Profile specific map. trigger -> Item.
 	umap<string, Element::Item> elementMap;
 
-	/// Profile specific settings.
+	/// Profile specific settings. trigger -> Item.
 	umap<string, Group::Item> groupMap;
 };
 
