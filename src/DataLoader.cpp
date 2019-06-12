@@ -3,7 +3,21 @@
  * @file      DataLoader.cpp
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "DataLoader.hpp"
@@ -20,7 +34,11 @@ umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<Device*, DeviceHandler*> DataLoader::deviceMap;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
 umap<Actor*, ActorHandler*> DataLoader::actorMap;
+umap<string, InputHandler*> DataLoader::inputHandlers;
+umap<Input*, InputHandler*> DataLoader::inputMap;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
+umap<string, Element::Item*> DataLoader::controlledElements;
+umap<string, Group::Item*> DataLoader::controlledGroups;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -31,6 +49,8 @@ void DataLoader::setMode(Modes mode) {
 }
 
 void DataLoader::readConfiguration() {
+
+	Input::setInputControllers(&controlledElements, &controlledGroups);
 
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
@@ -55,6 +75,7 @@ void DataLoader::readConfiguration() {
 	processDevices();
 
 	processLayout();
+
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -184,7 +205,6 @@ void DataLoader::processLayout() {
 	}
 
 	defaultProfile = processProfile(defaultProfileStr);
-
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
@@ -284,6 +304,22 @@ Profile* DataLoader::processProfile(const string& name) {
 			profilePtr->addAlwaysOnGroup(&layout[tempAttr["name"]], tempAttr["color"]);
 		}
 	}
+
+	// Check for input plugins.
+	element = profile.getRoot()->FirstChildElement("inputs");
+	if (element) {
+		element = element->FirstChildElement("input");
+		if (element) {
+			for (; element; element = element->NextSiblingElement("input")) {
+				umap<string, string> elementAttr = processNode(element);
+				Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "input node");
+				Input* input =  createInput(elementAttr);
+				processInputMap(element, input);
+				profilePtr->addInput(elementAttr["name"], input);
+			}
+		}
+	}
+
 	profiles[name] = profilePtr;
 	return profilePtr;
 }
@@ -332,6 +368,58 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 	Actor* a = actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
 	actorMap.emplace(a, actorHandlers[actorName]);
 	return a;
+}
+
+Input* DataLoader::createInput(umap<string, string>& inputData) {
+	string inputName = inputData["name"];
+	if (not inputHandlers.count(inputName))
+		inputHandlers.emplace(inputName, new InputHandler(inputName));
+	Input* i = inputHandlers[inputName]->createInput(inputData);
+	inputMap.emplace(i, inputHandlers[inputName]);
+	return i;
+}
+
+void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, Input* input) {
+
+	umap<string, Element::Item> elementMap;
+	umap<string, Group::Item> groupMap;
+
+	tinyxml2::XMLElement* maps = inputNode->FirstChildElement("map");
+	for (; maps; maps = maps->NextSiblingElement("map")) {
+		umap<string, string> elementAttr = processNode(maps);
+		Utility::checkAttributes(REQUIRED_PARAM_MAP, elementAttr, "map maps");
+
+		if (elementAttr["type"] == "Element") {
+			if (not allElements.count(elementAttr["target"]))
+				throw LEDError("Unknown Element " + elementAttr["target"] + " on map file");
+
+			// Check dupes and add
+			if (elementMap.count(elementAttr["trigger"]) and elementMap[elementAttr["trigger"]].element->getName() == elementAttr["target"])
+				throw LEDError("Duplicated element map for " + elementAttr["target"] + " map " + elementAttr["value"]);
+
+			elementMap.emplace(elementAttr["trigger"], Element::Item {
+				allElements[elementAttr["target"]],
+				&Color::getColor(elementAttr["color"]),
+				Color::str2filter(elementAttr["filter"])
+			});
+		}
+
+		if (elementAttr["type"] == "Group") {
+			if (not layout.count(elementAttr["target"]))
+				throw LEDError("Unknown Group " + elementAttr["target"] + " on map file");
+
+			// Check dupes and add
+			if (groupMap.count(elementAttr["trigger"]) and groupMap[elementAttr["trigger"]].group->getName() == elementAttr["target"])
+				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
+
+			groupMap.emplace(elementAttr["trigger"], Group::Item {
+				&layout[elementAttr["target"]],
+				&Color::getColor(elementAttr["color"]),
+				Color::str2filter(elementAttr["filter"])
+			});
+		}
+	}
+	input->setMaps(elementMap, groupMap);
 }
 
 string DataLoader::createFilename(const string& name) {

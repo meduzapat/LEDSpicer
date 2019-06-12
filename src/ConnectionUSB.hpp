@@ -3,7 +3,21 @@
  * @file      ConnectionUSB.hpp
  * @since     Jun 19, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 // For ints.
@@ -17,6 +31,7 @@
 using std::vector;
 
 #include <chrono>
+using std::chrono::milliseconds;
 #include <thread>
 
 #include "utility/Error.hpp"
@@ -120,12 +135,13 @@ public:
 	 * Returns the interval ms.
 	 * @return
 	 */
-	static uint8_t getInterval();
+	static milliseconds getInterval();
 
 	/**
 	 * Waits for a defined amount of ms.
+	 * @param milliseconds wasted keeps track of the wasted milliseconds.
 	 */
-	static void wait();
+	static void wait(milliseconds wasted);
 
 protected:
 
@@ -152,7 +168,7 @@ protected:
 
 	vector<uint8_t> LEDs;
 
-	static uint8_t waitTime;
+	static milliseconds waitTime;
 
 	virtual void afterConnect() = 0;
 

@@ -23,9 +23,11 @@
  * @mainpage LEDSpicer LEDs controller.
  * <p>LEDSpicer is a LEDs controllers daemon that will handle the output of different programs based on their configurations.<br>
  * Most of that programs will be emulators and games, but can be used with other applications in mind.</p>
-  */
+ */
 
 #include "MainBase.hpp"
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
 
 #ifndef MAIN_HPP_
 #define MAIN_HPP_ 1
@@ -57,6 +59,11 @@ public:
 	 * Stops the main loop.
 	 */
 	static void terminate();
+
+protected:
+
+	static high_resolution_clock::time_point start;
+
 };
 
 /**

@@ -3,7 +3,21 @@
  * @file      MainBase.hpp
  * @since     Nov 18, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 // To handle daemonization.
@@ -69,10 +83,10 @@ protected:
 	static vector<Profile*> profiles;
 
 	/// Keeps a list of always on elements for the current profile.
-	umap<string, Profile::ElementItem> alwaysOnElements;
+	static umap<string, Element::Item> alwaysOnElements;
 
 	/// Keeps a list of always on groups for the current profile.
-	umap<string, Profile::GroupItem> alwaysOnGroups;
+	static umap<string, Group::Item> alwaysOnGroups;
 
 	/**
 	 * Functionality for test programs.

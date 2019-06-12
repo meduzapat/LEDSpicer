@@ -3,7 +3,21 @@
  * @file      Emiter.cpp
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "Emitter.hpp"
@@ -32,9 +46,11 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::LoadProfile) <<
 				" profile1 profile2 ... profileX  Attempts to load the first valid profile from a list of profiles.\n" <<
 				Message::type2str(Message::Types::LoadProfileByEmulator) <<
-				" binary rom emulator  Attempts to load a profile based on the emulator and the ROM.\n" <<
+				" rom platform  Attempts to load a profile based on the platform and the ROM name.\n" <<
 				Message::type2str(Message::Types::FinishLastProfile) <<
 				"                           Terminates the current profile (doens't affect the default).\n" <<
+				Message::type2str(Message::Types::FinishAllProfiles) <<
+				"                           Removes every profile (doens't affect the default).\n" <<
 				Message::type2str(Message::Types::SetElement) <<
 				" elementName color filter         Changes an element's background color until the profile ends.\n" <<
 				Message::type2str(Message::Types::ClearElement) <<
@@ -115,21 +131,20 @@ int main(int argc, char **argv) {
 
 		// Check request.
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
-			if (msg.getData().size() < 3) {
+			if (msg.getData().size() < 2) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}
 			string
-				binary = msg.getData()[0],
-				load   = msg.getData()[1],
-				name   = msg.getData()[2];
+				load   = msg.getData()[0],
+				name   = msg.getData()[1];
 			Message msgTemp;
 
 			msgTemp.setType(Message::Types::LoadProfile);
 			msgTemp.addData(string(name).append("/").append(load));
-			// mame
-			if (name == "mame") {
-				for (string& p : parseMame(binary, load))
+			// arcades (mame and others)
+			if (name == "arcade") {
+				for (string& p : parseMame(load))
 					if (not p.empty())
 						msgTemp.addData(p);
 			}
@@ -150,31 +165,31 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 
-vector<string> parseMame(const string& binary, const string& rom) {
+vector<string> parseMame(const string& rom) {
 
 	vector<string> result(2);
 	string
 		output,
-		cmd = binary + " -lx " + rom + "|grep -E '<control|<input'"; //" 2>&1"
-	LogDebug("Calling MAME: " + cmd);
+		cmd = "grep -F '\"" + rom + "\"' " + CONTROLLERS_FILE;
+	LogDebug("running: " + cmd);
 
-	std::array<char, 128> buffer;
 	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
 	if (not pipe) {
-		LogError("Failed to call MAME");
+		LogError("Failed to read games data file");
 		return result;
 	}
 
+	std::array<char, 128> buffer;
 	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
 		output += buffer.data();
-	output += "</input>";
+
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS) {
-		LogError("Invalid MAME response" + output);
+		LogError("Invalid games data file" + output);
 		return result;
 	}
 
-	LogDebug("MAME response: " + output);
+	LogDebug("Game data: " + output);
 /* Possible types
 <control type="joy" player="2" buttons="1" ways="2|4|8"/>
 <control type="stick" player="1" buttons="4" minimum="0" maximum="255" sensitivity="30" keydelta="30" reverse="yes"/>
@@ -182,10 +197,7 @@ vector<string> parseMame(const string& binary, const string& rom) {
 <control type="paddle" buttons="2" minimum="0" maximum="63" sensitivity="100" keydelta="1"/>
 <control type="pedal" buttons="3" minimum="0" maximum="31" sensitivity="100" keydelta="1"/>
 <control type="dial" buttons="4" minimum="0" maximum="255" sensitivity="25" keydelta="20"/>
-<control type="gambling" buttons="21"/>
-<control type="mahjong" player="1" buttons="26"/>
 <control type="only_buttons" buttons="7"/>
-<control type="keyboard" player="1" buttons="46"/>
 <control type="mouse" player="1" minimum="0" maximum="255" sensitivity="100" keydelta="5"/>
 <control type="lightgun" player="1" buttons="1" minimum="0" maximum="255" sensitivity="70" keydelta="10"/>
 <control type="trackball" player="1" buttons="1" minimum="0" maximum="255" sensitivity="100" keydelta="10" reverse="yes"/>
@@ -197,22 +209,26 @@ vector<string> parseMame(const string& binary, const string& rom) {
 		players = 0,
 		buttons = 0;
 	tinyxml2::XMLElement* element = xml.RootElement();
-	if (!element) {
-		LogError("Missing MAME input node");
+	if (not element) {
+		LogWarning("Missing input node for " + rom);
 		return result;
 	}
 	tempAttr = XMLHelper::processNode(element);
 
-	result[1] = "P" + tempAttr["players"] + "_B";
+	if (not tempAttr.count(PLAYERS)) {
+		LogWarning("Missing players attribute for " + rom);
+		return result;
+	}
+	result[1] = "P" + tempAttr[PLAYERS] + "_B";
 
-	element = element->FirstChildElement("control");
+	element = element->FirstChildElement(CONTROL);
 //	for (; element; element = element->NextSiblingElement("control")) {
 //	}
 	tempAttr = XMLHelper::processNode(element);
-	result[0] = tempAttr["type"] + tempAttr["players"] + "_B";
-	if (tempAttr.count("buttons")) {
-		result[0].append(tempAttr["buttons"]);
-		result[1].append(tempAttr["buttons"]);
+	result[0] = tempAttr[TYPE] + tempAttr[PLAYERS] + "_B";
+	if (tempAttr.count(BUTTONS)) {
+		result[0].append(tempAttr[BUTTONS]);
+		result[1].append(tempAttr[BUTTONS]);
 	}
 	return result;
 }

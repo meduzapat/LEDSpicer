@@ -3,7 +3,21 @@
  * @file      Socks.cpp
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "Socks.hpp"
@@ -23,13 +37,13 @@ Socks::Socks(const string& hostAddress, const string& hostPort, bool bind) {
 		prepare(hostAddress, hostPort, bind);
 }
 
-void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind) {
+void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind, int sockType) {
 
 	if (sockFB)
 		throw Error("Already prepared.");
 
 	if (bind) {
-		LogInfo("Binding " + hostAddress + " port " + hostPort);
+		LogInfo("Listening on " + hostAddress + " port " + hostPort);
 	}
 	else {
 		LogInfo("Connecting to " + hostAddress + " port " + hostPort);
@@ -42,7 +56,7 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 
 	memset((char *)&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;  // AF_UNIX
-	hints.ai_socktype = SOCK_DGRAM;  //SOCK_STREAM | SOCK_NONBLOCK;
+	hints.ai_socktype = sockType; // SOCK_DGRAM, SOCK_STREAM | SOCK_NONBLOCK;
 	if (bind)
 		hints.ai_flags = AI_PASSIVE;  //AI_CANONNAME;
 
@@ -61,19 +75,15 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 			continue;
 		}
 		int errcode = 0;
-		if (bind) {
+		if (bind)
 			errcode = ::bind(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
-			if (not errcode)
-				break;
-			LogDebug(string(gai_strerror(errcode)));
-		}
-		else {
+		else
 			errcode = ::connect(sockFB, serverInfo->ai_addr, serverInfo->ai_addrlen);
-			if (not errcode)
-				break;
-			LogDebug(string(gai_strerror(errcode)));
-		}
+		if (not errcode)
+			break;
+		LogDebug(string(gai_strerror(errcode)));
 		::close(sockFB);
+		sockFB = 0;
 	}
 
 	if (serverInfo == nullptr) {

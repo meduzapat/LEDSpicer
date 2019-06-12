@@ -3,7 +3,21 @@
  * @file      Main.cpp
  * @since     Jun 6, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "Main.hpp"
@@ -14,6 +28,8 @@
 #endif
 
 using namespace LEDSpicer;
+
+high_resolution_clock::time_point Main::start;
 
 void signalHandler(int sig) {
 
@@ -47,6 +63,8 @@ void Main::run() {
 
 	while (running) {
 
+		start = high_resolution_clock::now();
+
 		if (messages.read()) {
 			Message msg = messages.getMessage();
 			LogDebug("Received message: task: " + Message::type2str(msg.getType()) + ", data: " + msg.toString());
@@ -54,7 +72,7 @@ void Main::run() {
 
 			case Message::Types::LoadProfile:
 				if (not tryProfiles(msg.getData()))
-					LogNotice("All requested profiles failed");
+					LogInfo("All requested profiles failed");
 				break;
 
 			case Message::Types::FinishLastProfile:
@@ -63,14 +81,30 @@ void Main::run() {
 					break;
 				}
 				if (currentProfile->isTransiting()) {
-					LogNotice("Profile " + currentProfile->getName() + " is finishing, try later.");
+					LogInfo("Profile " + currentProfile->getName() + " is finishing, try later.");
 					break;
 				}
-				LogNotice("Profile " + currentProfile->getName() + " changed state to finishing.");
+				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
 				// Deactivate overwrites.
 				alwaysOnGroups.clear();
 				alwaysOnElements.clear();
 				currentProfile->terminate();
+				DataLoader::controlledGroups.clear();
+				DataLoader::controlledElements.clear();
+				break;
+
+			case Message::Types::FinishAllProfiles:
+				if (profiles.size() > 1) {
+					// Deactivate overwrites.
+					alwaysOnGroups.clear();
+					alwaysOnElements.clear();
+					currentProfile->terminate();
+					DataLoader::controlledGroups.clear();
+					DataLoader::controlledElements.clear();
+					profiles.clear();
+					currentProfile = DataLoader::defaultProfile;
+					profiles.push_back(currentProfile);
+				}
 				break;
 
 			case Message::Types::SetElement:
@@ -84,13 +118,13 @@ void Main::run() {
 				}
 				try {
 					if (alwaysOnElements.count(msg.getData()[0]))
-						alwaysOnElements[msg.getData()[0]] = Profile::ElementItem{
-						DataLoader::allElements[msg.getData()[0]],
-						&Color::getColor(msg.getData()[1]),
-						Color::str2filter(msg.getData()[2])
-					};
+							alwaysOnElements[msg.getData()[0]] = Element::Item{
+							DataLoader::allElements[msg.getData()[0]],
+							&Color::getColor(msg.getData()[1]),
+							Color::str2filter(msg.getData()[2])
+						};
 					else
-						alwaysOnElements.emplace(msg.getData()[0], Profile::ElementItem{
+						alwaysOnElements.emplace(msg.getData()[0], Element::Item{
 							DataLoader::allElements[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
@@ -125,13 +159,13 @@ void Main::run() {
 				}
 				try {
 					if (alwaysOnGroups.count(msg.getData()[0]))
-						alwaysOnGroups[msg.getData()[0]] = Profile::GroupItem{
+						alwaysOnGroups[msg.getData()[0]] = Group::Item{
 							&DataLoader::layout[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
 						};
 					else
-						alwaysOnGroups.emplace(msg.getData()[0], Profile::GroupItem{
+						alwaysOnGroups.emplace(msg.getData()[0], Group::Item{
 							&DataLoader::layout[msg.getData()[0]],
 							&Color::getColor(msg.getData()[1]),
 							Color::str2filter(msg.getData()[2])
@@ -155,7 +189,7 @@ void Main::run() {
 				alwaysOnGroups.clear();
 				break;
 
-			// Other request that are not handled by ledspicerd.
+			// Other request that are not handled yet by ledspicerd.
 			default:
 				break;
 			}
@@ -283,7 +317,7 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-#ifndef DEVELOP
+#ifdef DEVELOP
 	// force debug mode logging.
 	Log::logToStdErr(DataLoader::getMode() != DataLoader::Modes::Normal);
 	Log::setLogLevel(LOG_DEBUG);
@@ -339,14 +373,23 @@ void Main::runCurrentProfile() {
 
 	currentProfile->runFrame();
 
-	// Set always on groups from config
+	// Set always on groups from config.
 	for (auto& gE : alwaysOnGroups)
 		for (auto eE : gE.second.group->getElements())
 			eE->setColor(*eE->getColor().set(*gE.second.color, gE.second.filter));
 
-	// Set always on elements from config
+	// Set always on elements from config.
 	for (auto& eE : alwaysOnElements)
 		eE.second.element->setColor(*eE.second.element->getColor().set(*eE.second.color, eE.second.filter));
+
+	// Set controlled groups from input plugins.
+	for (auto& gE : DataLoader::controlledGroups)
+		for (auto eE : gE.second->group->getElements())
+			eE->setColor(*eE->getColor().set(*gE.second->color, gE.second->filter));
+
+	// Set controlled elements from input plugins.
+	for (auto& eE : DataLoader::controlledElements)
+		eE.second->element->setColor(*eE.second->element->getColor().set(*eE.second->color, eE.second->filter));
 
 	// Send data.
 	// TODO: need to test speed: single thread or running one thread per device.
@@ -354,8 +397,7 @@ void Main::runCurrentProfile() {
 		device->transfer();
 
 	// Wait...
-	// TODO: if the process takes too long, will be a good idea to subtract the wasted time from the wait time.
-	ConnectionUSB::wait();
+	ConnectionUSB::wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
 
 	if (currentProfile->isRunning()) {
 		Actor::advanceFrame();

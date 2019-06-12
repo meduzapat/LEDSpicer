@@ -25,6 +25,8 @@ libledspicer_la_SOURCES =         \
 	src/utility/Error.cpp         \
 	src/utility/Utility.cpp       \
 	src/utility/XMLHelper.cpp     \
+	src/utility/Speed.cpp         \
+	src/utility/Direction.cpp     \
 	src/utility/Color.cpp         \
 	src/devices/Element.cpp       \
 	src/devices/Group.cpp         \
@@ -32,6 +34,8 @@ libledspicer_la_SOURCES =         \
 	src/devices/Device.cpp        \
 	src/animations/Actor.cpp      \
 	src/animations/TimedActor.cpp \
+	src/inputs/Input.cpp          \
+	src/inputs/Reader.cpp         \
 	src/devices/Profile.cpp       \
 	src/utility/Socks.cpp         \
 	src/Message.cpp               \
@@ -49,6 +53,8 @@ utilityheader_HEADERS =       \
 	src/utility/Utility.hpp   \
 	src/utility/Socks.hpp     \
 	src/utility/XMLHelper.hpp \
+	src/utility/Speed.hpp     \
+	src/utility/Direction.hpp \
 	src/utility/Color.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
@@ -62,6 +68,11 @@ animationsheaderdir=$(pkgincludedir)/animations
 animationsheader_HEADERS =        \
 	src/animations/Actor.hpp      \
 	src/animations/TimedActor.hpp
+
+inputsheaderdir=$(pkgincludedir)/inputs
+inputsheader_HEADERS =    \
+	src/inputs/Input.hpp  \
+	src/inputs/Reader.hpp
 
 ledspicer_pcdir = \
 	$(pkgconfigdir)
@@ -81,6 +92,7 @@ ledspicerd_SOURCES =                \
 	src/Handler.cpp                 \
 	src/animations/ActorHandler.cpp \
 	src/devices/DeviceHandler.cpp   \
+	src/inputs/InputHandler.cpp     \
 	src/DataLoader.cpp              \
 	src/MainBase.cpp                \
 	src/Main.cpp
@@ -90,6 +102,7 @@ ledspicerd_CPPFLAGS =                     \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
 	-DACTORS_DIR=\"$(ACTORS_DIR)/\"       \
 	-DDEVICES_DIR=\"$(DEVICES_DIR)/\"     \
+	-DINPUTS_DIR=\"$(INPUTS_DIR)/\"       \
 	$(TINYXML2_CFLAGS)                    \
 	$(PTHREADSTUBS_CFLAGS)                \
 	$(LINKER_CFLAGS)                      \
@@ -114,10 +127,11 @@ ledspicerd_LDADD = \
 emitter_SOURCES = \
 	src/Emitter.cpp
 
-emitter_CPPFLAGS =                       \
-	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\" \
-	$(TINYXML2_CFLAGS)                   \
-	-I$(top_srcdir)/src                  \
+emitter_CPPFLAGS =                        \
+	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
+	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
+	$(TINYXML2_CFLAGS)                    \
+	-I$(top_srcdir)/src                    \
 	-Wl,--no-as-needed
 
 emitter_LDFLAGS = \
@@ -384,6 +398,77 @@ endif
 devicesdir = \
 	$(DEVICES_DIR)
 
+##########
+# inputs #
+##########
+
+inputsdir = \
+	$(INPUTS_DIR)
+
+inputs_LTLIBRARIES = \
+	Mame.la          \
+	Impulse.la       \
+	Actions.la
+
+########
+# MAME #
+########
+
+Mame_la_SOURCES = \
+	src/inputs/Mame.cpp
+
+Mame_la_LIBADD = \
+	libledspicer.la
+
+Mame_la_LDFLAGS =   \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
+
+###########
+# IMPULSE #
+###########
+
+Impulse_la_SOURCES =      \
+	src/inputs/Impulse.cpp
+
+Impulse_la_LIBADD = \
+	libledspicer.la
+
+Impulse_la_LDFLAGS = \
+	-module          \
+	-shared          \
+	-export-dynamic  \
+	-avoid-version   \
+	-fexceptions
+
+###########
+# Actions #
+###########
+
+Actions_la_SOURCES =      \
+	src/inputs/Actions.cpp
+
+Actions_la_LIBADD = \
+	libledspicer.la
+
+Actions_la_LDFLAGS =   \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version  \
+	-fexceptions
+
+##############
+# games data #
+##############
+
+gamesdatadir=$(pkgdatadir)
+gamesdata_DATA =      \
+	data/gameData.xml
+
 if COPY_SAMPLES
 
 ##########
@@ -442,13 +527,14 @@ DISTCLEANFILES =              \
 	$(systemdsystemunit_DATA) \
 	$(ledspicer_pc_DATA)
 
-EXTRA_DIST +=                         \
-	autogen.sh                        \
-	src/Handler.hpp                   \
-	src/animations/ActorHandler.hpp   \
-	src/devices/DeviceHandler.hpp     \
-	src/DataLoader.hpp                \
-	src/devices/GroovyGameGear/LedWiz.hpp   \
+EXTRA_DIST +=                       \
+	autogen.sh                      \
+	src/Handler.hpp                 \
+	src/animations/ActorHandler.hpp \
+	src/devices/DeviceHandler.hpp   \
+	src/inputs/InputHandler.hpp     \
+	src/DataLoader.hpp              \
+	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \
 	src/devices/Ultimarc/FF00SharedCode.cpp \
@@ -456,18 +542,24 @@ EXTRA_DIST +=                         \
 	src/devices/Ultimarc/Ultimate.hpp \
 	src/devices/Ultimarc/PacDrive.hpp \
 	src/devices/Ultimarc/PacLed64.hpp \
+	src/devices/Ultimarc/NanoLed.hpp  \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \
 	src/animations/Random.hpp     \
 	src/animations/Filler.hpp     \
 	src/animations/PulseAudio.hpp \
+	src/inputs/Mame.hpp           \
+	src/inputs/Reader.hpp         \
+	src/inputs/Impulse.hpp        \
+	src/inputs/Actions.hpp        \
 	src/MainBase.hpp \
 	src/Main.hpp     \
 	src/Emitter.hpp  \
 	data/ledspicer.conf          \
 	data/basicColors.xml         \
 	data/webColors.xml           \
+	data/gameData.xml            \
 	data/animations/example.xml  \
 	data/animations/skeleton.xml \
 	data/profiles/default.xml    \

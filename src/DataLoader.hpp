@@ -3,7 +3,21 @@
  * @file      DataLoader.hpp
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <algorithm>
@@ -14,6 +28,7 @@
 #include "devices/Profile.hpp"
 #include "animations/ActorHandler.hpp"
 #include "devices/DeviceHandler.hpp"
+#include "inputs/InputHandler.hpp"
 
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
@@ -29,6 +44,7 @@
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
+#define REQUIRED_PARAM_MAP            {"type", "target", "trigger", "color", "filter"}
 
 namespace LEDSpicer {
 
@@ -40,6 +56,8 @@ using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
 using Devices::Device;
+using Inputs::Input;
+using Inputs::InputHandler;
 
 /**
  * LEDSpicer::DataLoader
@@ -78,6 +96,7 @@ public:
 	/**
 	 * Reads an profile file.
 	 * @param name
+	 * @param isDefault
 	 */
 	static Profile* processProfile(const string& name);
 
@@ -112,6 +131,18 @@ public:
 
 	/// Maps handlers with actors.
 	static umap<Actor*, ActorHandler*> actorMap;
+
+	/// Keeps references to inputs handlers.
+	static umap<string, InputHandler*> inputHandlers;
+
+	/// Maps handlers with actors.
+	static umap<Input*, InputHandler*> inputMap;
+
+	/// Keeps a list of global elements that can be turn on/off by input plugins.
+	static umap<string, Element::Item*> controlledElements;
+
+	/// Keeps a list of global groups that can be turn on/off by input plugins.
+	static umap<string, Group::Item*> controlledGroups;
 
 	/**
 	 * Returns the current mode.
@@ -179,6 +210,18 @@ protected:
 	 * @return
 	 */
 	static Actor* createAnimation(umap<string, string>& actorData);
+
+	/**
+	 * Loads an input object.
+	 */
+	static Input* createInput(umap<string, string>& inputData);
+
+	/**
+	 * Extracts input map data.
+	 * @param inputNode
+	 * @param input
+	 */
+	static void processInputMap(tinyxml2::XMLElement* inputNode, Input* input);
 
 	/**
 	 * Prepares the filenames.

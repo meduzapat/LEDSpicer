@@ -3,7 +3,21 @@
  * @file      MainBase.cpp
  * @since     Nov 18, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "MainBase.hpp"
@@ -13,6 +27,8 @@ using namespace LEDSpicer;
 bool MainBase::running = false;
 Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
+umap<string, Element::Item> MainBase::alwaysOnElements;
+umap<string, Group::Item> MainBase::alwaysOnGroups;
 
 MainBase::MainBase() :
 	messages(
@@ -28,6 +44,9 @@ MainBase::MainBase() :
 	case DataLoader::Modes::Profile:
 		return;
 	}
+
+	// seed the random
+	std::srand(time(nullptr));
 
 #ifndef DRY_RUN
 	if (DataLoader::getMode() == DataLoader::Modes::Normal) {
@@ -73,6 +92,21 @@ MainBase::~MainBase() {
 		LogDebug("Actor Handler " + ah.first + " instance deleted");
 #endif
 		delete ah.second;
+	}
+
+	// destroy inputs and handlers.
+	for (auto& am : DataLoader::inputMap) {
+#ifdef DEVELOP
+		LogDebug("Input instance deleted");
+#endif
+		am.second->destroyInput(am.first);
+	}
+
+	for (auto i : DataLoader::inputHandlers) {
+	#ifdef DEVELOP
+		LogDebug("Input Handler " + i.first + " instance deleted");
+	#endif
+		delete i.second;
 	}
 
 	for (auto p : DataLoader::profiles) {
@@ -164,7 +198,7 @@ void MainBase::dumpConfiguration() {
 		d->drawHardwarePinMap();
 	cout <<
 		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
-		"Interval: " << (int)ConnectionUSB::getInterval() << "ms" << endl <<
+		"Interval: " << ConnectionUSB::getInterval().count() << "ms" << endl <<
 		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
 		"Layout:";
 	for (auto group : DataLoader::layout) {

@@ -32,6 +32,8 @@ using std::string;
 #ifndef SRC_UTILITY_SOCKS_HPP_
 #define SRC_UTILITY_SOCKS_HPP_ 1
 
+#define LOCALHOST "127.0.0.1"
+
 namespace LEDSpicer {
 
 /**
@@ -64,7 +66,7 @@ public:
 	 * @param hostPort
 	 * @param bind true will bind a port, false (default) will connect to a port.
 	 */
-	void prepare(const string& hostAddress, const string& hostPort, bool bind);
+	void prepare(const string& hostAddress, const string& hostPort, bool bind, int sockType = SOCK_DGRAM);
 
 	/**
 	 * Checks if is connected.

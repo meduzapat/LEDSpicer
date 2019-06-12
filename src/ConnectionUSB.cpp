@@ -3,7 +3,21 @@
  * @file      ConnectionUSB.cpp
  * @since     Jun 19, 2018
  * @author    Patricio A. Rossi (MeduZa)
+ *
  * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ConnectionUSB.hpp"
@@ -13,7 +27,7 @@
 using namespace LEDSpicer;
 
 libusb_context* ConnectionUSB::usbSession = nullptr;
-uint8_t         ConnectionUSB::waitTime   = 0;
+milliseconds ConnectionUSB::waitTime;
 
 ConnectionUSB::ConnectionUSB(
 		uint16_t wValue,
@@ -174,11 +188,11 @@ void ConnectionUSB::transferData(vector<uint8_t>& data) {
 }
 
 void ConnectionUSB::setInterval(uint8_t waitTime) {
-	LogInfo("Set interval to " + to_string(waitTime) + "ms");
-	ConnectionUSB::waitTime = waitTime;
+	ConnectionUSB::waitTime = milliseconds(waitTime);
+	LogInfo("Set interval to " + to_string(ConnectionUSB::waitTime.count()) + "ms");
 }
 
-uint8_t ConnectionUSB::getInterval() {
+milliseconds ConnectionUSB::getInterval() {
 	return waitTime;
 }
 
@@ -186,6 +200,9 @@ string ConnectionUSB::getFullName() {
 	return "device: " + name + " Id: " + to_string(board.boardId);
 }
 
-void ConnectionUSB::wait() {
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+void ConnectionUSB::wait(milliseconds wasted) {
+	if (wasted < waitTime)
+		std::this_thread::sleep_for(waitTime - wasted);
+	else
+		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(waitTime.count()) + "ms)");
 }
