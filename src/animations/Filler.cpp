@@ -133,7 +133,7 @@ void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
 
 void Filler::fillElementsRandom(bool val) {
 
-	// camniar aca: dibujar lo q esta on, el nuevo guardarlo en una property, y dibujarlo faded
+	// TODO: cambiar aca: dibujar lo q esta on, el nuevo guardarlo en una property, y dibujarlo faded
 
 	// Draw.
 	if (isSameFrame()) {
@@ -142,22 +142,22 @@ void Filler::fillElementsRandom(bool val) {
 	}
 
 	// Extract candidates.
-	vector<uint8_t> posibleElements;
+	vector<uint8_t> possibleElements;
 	for (uint8_t e = 0; e < affectedElements.size(); ++e)
 		if (affectedElements[e] != val)
-			posibleElements.push_back(e);
+			possibleElements.push_back(e);
 
 	// Roll dice.
 	uint8_t r = 0;
-	if (posibleElements.size() > 1)
-		r = std::rand() / ((RAND_MAX + 1u) / (posibleElements.size() - 1));
+	if (possibleElements.size() > 1)
+		r = std::rand() / ((RAND_MAX + 1u) / (possibleElements.size() - 1));
 
 	// Set dice and draw.
-	affectedElements[posibleElements[r]] = val;
+	affectedElements[possibleElements[r]] = val;
 	drawRandom();
 
 	// Check direction and force last frame.
-	if (posibleElements.size() == 1) {
+	if (possibleElements.size() == 1) {
 		filling = not filling;
 		currentActorFrame = totalActorFrames;
 	}

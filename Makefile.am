@@ -86,7 +86,8 @@ ledspicer_pc_DATA = \
 
 bin_PROGRAMS = \
 	ledspicerd \
-	emitter
+	emitter    \
+	inputseeker
 
 ledspicerd_SOURCES =                \
 	src/Handler.cpp                 \
@@ -131,7 +132,7 @@ emitter_CPPFLAGS =                        \
 	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
 	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
 	$(TINYXML2_CFLAGS)                    \
-	-I$(top_srcdir)/src                    \
+	-I$(top_srcdir)/src                   \
 	-Wl,--no-as-needed
 
 emitter_LDFLAGS = \
@@ -139,6 +140,19 @@ emitter_LDFLAGS = \
 
 emitter_LDADD = \
 	libledspicer.la
+
+###############
+# inputseeker #
+###############
+
+inputseeker_SOURCES = \
+	src/InputSeeker.cpp
+
+inputseeker_CPPFLAGS =                    \
+	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
+	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
+	-I$(top_srcdir)/src                   \
+	-Wl,--no-as-needed
 
 ##########
 # actors #
@@ -553,9 +567,10 @@ EXTRA_DIST +=                       \
 	src/inputs/Reader.hpp         \
 	src/inputs/Impulse.hpp        \
 	src/inputs/Actions.hpp        \
-	src/MainBase.hpp \
-	src/Main.hpp     \
-	src/Emitter.hpp  \
+	src/MainBase.hpp     \
+	src/Main.hpp         \
+	src/Emitter.hpp      \
+	src/InputSeeker.hpp  \
 	data/ledspicer.conf          \
 	data/basicColors.xml         \
 	data/webColors.xml           \
