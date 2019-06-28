@@ -27,7 +27,7 @@ using LEDSpicer::Socks;
 #ifndef MAME_HPP_
 #define MAME_HPP_ 1
 
-#define MAME_PORT    "8000"
+#define MAME_PORT "8000"
 
 namespace LEDSpicer {
 namespace Inputs {
