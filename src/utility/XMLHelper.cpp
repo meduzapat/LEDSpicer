@@ -28,7 +28,7 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 	LogInfo("Reading " + fileName);
 
 	if (LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS)
-		throw LEDError("Unable to read the file " + fileName);
+		throw LEDError("Unable to read the file " + fileName + " " + string(ErrorStr()));
 
 	root = RootElement();
 	if (not root or std::strcmp(root->Name(), PACKAGE_NAME))

@@ -38,6 +38,7 @@ Reader::Reader(umap<string, string>& parameters) : Input(parameters) {
 }
 
 void Reader::activate() {
+	readController = nullptr;
 	for (auto& l : listenEvents) {
 		// ignore already connected elements.
 		if (l.second >= 0)
@@ -59,12 +60,20 @@ void Reader::deactivate() {
 	}
 }
 
-void Reader::readAll(Input* who) {
+void Reader::drawConfig() {
+	cout << "Listening events: ";
+	for (auto&le : listenEvents)
+		cout << le.first << " ";
+	cout << endl;
+	Input::drawConfig();
+}
+
+void Reader::readAll() {
 
 	if (not readController)
-		readController = who;
+		readController = this;
 
-	if (readController != who)
+	if (readController != this)
 		return;
 
 	events.clear();

@@ -79,9 +79,13 @@ protected:
 
 	struct UserPref {
 		Color
+			/// Color to use when off
 			off,
+			/// Color to use when low
 			c00,
+			/// Color to use when mid
 			c50,
+			/// Color to use when full
 			c75;
 		Modes mode;
 		Channels channel;
@@ -92,13 +96,15 @@ protected:
 	static pa_context* context;
 	static pa_stream* stream;
 
-	static uint8_t instances;
-	static uint8_t totalChannels;
+	static uint8_t
+		instances,
+		totalChannels;
 
 	static string source;
 
 	static uint16_t peak;
 
+	/// To avoid updating when is reading the buffer.
 	static std::mutex mutex;
 
 	uint8_t total = 0;

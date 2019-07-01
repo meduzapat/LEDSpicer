@@ -63,10 +63,10 @@ void DataLoader::readConfiguration() {
 	uint8_t fps = Utility::parseNumber(tempAttr["fps"], "Invalid value for FPS");
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
-	ConnectionUSB::setInterval(1000 / (fps > 30 ? 30 : fps));
+	ConnectionUSB::setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
 	// activate LIBUSB.
 	ConnectionUSB::openSession();
-	Actor::setFPS((fps > 30 ? 30 : fps));
+	Actor::setFPS((fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
 
 	portNumber = tempAttr["port"];
 

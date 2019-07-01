@@ -52,6 +52,8 @@ public:
 
 	virtual void deactivate();
 
+	virtual void drawConfig();
+
 protected:
 
 	uint8_t

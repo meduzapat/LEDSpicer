@@ -84,7 +84,6 @@ void Mame::activate() {
 	if (socks.isConnected()) {
 		return;
 	}
-	cout << Log::level2str(Log::getLogLevel()) << endl;
 	try {
 		// Open connection.
 		socks.prepare(LOCALHOST, MAME_PORT, false, SOCK_STREAM);

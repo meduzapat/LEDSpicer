@@ -25,7 +25,7 @@ using std::string;
 using std::to_string;
 using std::stoi;
 
-// Compilation settings.
+// Compiler settings.
 #include "config.h"
 
 #ifndef ERROR_HPP_

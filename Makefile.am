@@ -1,15 +1,18 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS =          \
-	-I$(srcdir)/src    \
-	-Wl,--no-as-needed \
-	-fexceptions       \
-	$(LIBUSB_CFLAGS)
+AM_CPPFLAGS =                             \
+	-DPACKAGE_CONF_DIR=\"$(sysconfdir)/\" \
+	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
+	-I$(srcdir)/src                       \
+	-Wl,--no-as-needed                    \
+	-fexceptions
 
-AM_LDFLAGS =                     \
-	-version-info $(LIB_VERSION) \
-	$(LIBUSB_LIBS)
+plugins_LDFLAGS =   \
+	-module         \
+	-shared         \
+	-export-dynamic \
+	-avoid-version
 
 EXTRA_DIST =
 
@@ -41,6 +44,14 @@ libledspicer_la_SOURCES =         \
 	src/Message.cpp               \
 	src/Messages.cpp
 
+libledspicer_la_LDFLAGS =        \
+	-version-info $(LIB_VERSION) \
+	$(LIBUSB_LIBS)
+
+libledspicer_la_CPPFLAGS = \
+	$(AM_CPPFLAGS)         \
+	$(LIBUSB_CFLAGS)
+
 pkginclude_HEADERS =      \
 	src/ConnectionUSB.hpp \
 	src/Message.hpp       \
@@ -62,7 +73,7 @@ devicesheader_HEADERS =     \
 	src/devices/Element.hpp \
 	src/devices/Group.hpp   \
 	src/devices/Device.hpp  \
-	src/devices/Profile.hpp 
+	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
 animationsheader_HEADERS =        \
@@ -98,19 +109,15 @@ ledspicerd_SOURCES =                \
 	src/MainBase.cpp                \
 	src/Main.cpp
 
-ledspicerd_CPPFLAGS =                     \
-	-DPACKAGE_CONF_DIR=\"$(sysconfdir)/\" \
-	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
-	-DACTORS_DIR=\"$(ACTORS_DIR)/\"       \
-	-DDEVICES_DIR=\"$(DEVICES_DIR)/\"     \
-	-DINPUTS_DIR=\"$(INPUTS_DIR)/\"       \
-	$(TINYXML2_CFLAGS)                    \
-	$(PTHREADSTUBS_CFLAGS)                \
-	$(LINKER_CFLAGS)                      \
-	$(LIBUSB_CFLAGS)                      \
-	-I$(top_srcdir)/src                   \
-	-Wl,--no-as-needed                    \
-	-fexceptions
+ledspicerd_CPPFLAGS =                 \
+	$(AM_CPPFLAGS)                    \
+	-DACTORS_DIR=\"$(ACTORS_DIR)/\"   \
+	-DDEVICES_DIR=\"$(DEVICES_DIR)/\" \
+	-DINPUTS_DIR=\"$(INPUTS_DIR)/\"   \
+	$(TINYXML2_CFLAGS)                \
+	$(PTHREADSTUBS_CFLAGS)            \
+	$(LINKER_CFLAGS)                  \
+	$(LIBUSB_CFLAGS)
 
 ledspicerd_LDFLAGS =     \
 	$(TINYXML2_LIBS)     \
@@ -128,12 +135,9 @@ ledspicerd_LDADD = \
 emitter_SOURCES = \
 	src/Emitter.cpp
 
-emitter_CPPFLAGS =                        \
-	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
-	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
-	$(TINYXML2_CFLAGS)                    \
-	-I$(top_srcdir)/src                   \
-	-Wl,--no-as-needed
+emitter_CPPFLAGS =    \
+	$(AM_CPPFLAGS)    \
+	$(TINYXML2_CFLAGS)
 
 emitter_LDFLAGS = \
 	$(TINYXML2_LIBS)
@@ -147,12 +151,6 @@ emitter_LDADD = \
 
 inputseeker_SOURCES = \
 	src/InputSeeker.cpp
-
-inputseeker_CPPFLAGS =                    \
-	-DPACKAGE_CONF_DIR=\"$(sysconfdir)\"  \
-	-DPACKAGE_DATA_DIR=\"$(pkgdatadir)/\" \
-	-I$(top_srcdir)/src                   \
-	-Wl,--no-as-needed
 
 ##########
 # actors #
@@ -179,11 +177,7 @@ Gradient_la_LIBADD = \
 	libledspicer.la
 
 Gradient_la_LDFLAGS = \
-	-module           \
-	-shared           \
-	-export-dynamic   \
-	-avoid-version    \
-	-fexceptions
+	$(plugins_LDFLAGS)
 
 #########
 # Pulse #
@@ -195,12 +189,8 @@ Pulse_la_SOURCES = \
 Pulse_la_LIBADD = \
 	libledspicer.la
 
-Pulse_la_LDFLAGS =  \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+Pulse_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
 
 ##############
 # Serpentine #
@@ -213,11 +203,7 @@ Serpentine_la_LIBADD = \
 	libledspicer.la
 
 Serpentine_la_LDFLAGS = \
-	-module             \
-	-shared             \
-	-export-dynamic     \
-	-avoid-version      \
-	-fexceptions
+	$(plugins_LDFLAGS)
 
 ##########
 # Random #
@@ -230,11 +216,7 @@ Random_la_LIBADD = \
 	libledspicer.la
 
 Random_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
 
 ##########
 # Filler #
@@ -247,11 +229,7 @@ Filler_la_LIBADD = \
 	libledspicer.la
 
 Filler_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
 
 ##############
 # PulseAudio #
@@ -268,13 +246,13 @@ PulseAudio_la_LIBADD = \
 	libledspicer.la    \
 	$(LIBPULSE_LIBS)
 
+PulseAudio_la_CPPFLAGS = \
+	$(AM_CPPFLAGS)       \
+	$(LIBPULSE_CFLAGS)
+
 PulseAudio_la_LDFLAGS = \
-	$(LIBPULSE)         \
-	-module             \
-	-shared             \
-	-export-dynamic     \
-	-avoid-version      \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
 else
 EXTRA_DIST += \
 	src/animations/PulseAudio.cpp
@@ -283,6 +261,10 @@ endif
 ###########
 # devices #
 ###########
+
+devices_CPPFLAGS =  \
+	$(AM_CPPFLAGS)  \
+	$(LIBUSB_CFLAGS)
 
 devices_LTLIBRARIES =
 
@@ -302,11 +284,11 @@ UltimarcNanoLed_la_LIBADD = \
 	libledspicer.la
 
 UltimarcNanoLed_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
+UltimarcNanoLed_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
 else
 EXTRA_DIST += \
 	src/devices/Ultimarc/NanoLed.cpp
@@ -326,11 +308,11 @@ UltimarcPacDrive_la_LIBADD = \
 	libledspicer.la
 
 UltimarcPacDrive_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
+UltimarcPacDrive_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
 else
 EXTRA_DIST += \
 	src/devices/Ultimarc/PacDrive.cpp
@@ -351,11 +333,11 @@ UltimarcPacLed64_la_LIBADD = \
 	libledspicer.la
 
 UltimarcPacLed64_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
+UltimarcPacLed64_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
 else
 EXTRA_DIST += \
 	src/devices/Ultimarc/PacLed64.cpp
@@ -375,11 +357,11 @@ UltimarcUltimate_la_LIBADD = \
 	libledspicer.la
 
 UltimarcUltimate_la_LDFLAGS = \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
+UltimarcUltimate_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
 else
 EXTRA_DIST += \
 	src/devices/Ultimarc/Ultimate.cpp
@@ -399,11 +381,11 @@ LedWiz32_la_LIBADD = \
 	libledspicer.la
 
 LedWiz32_la_LDFLAGS = \
-	-module           \
-	-shared           \
-	-export-dynamic   \
-	-avoid-version    \
-	-fexceptions
+	$(plugins_LDFLAGS)
+
+LedWiz32_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
 else
 EXTRA_DIST += \
 	src/devices/GroovyGameGear/LedWiz32.cpp
@@ -434,53 +416,41 @@ Mame_la_SOURCES = \
 Mame_la_LIBADD = \
 	libledspicer.la
 
-Mame_la_LDFLAGS =   \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+Mame_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
 
 ###########
 # IMPULSE #
 ###########
 
-Impulse_la_SOURCES =      \
+Impulse_la_SOURCES = \
 	src/inputs/Impulse.cpp
 
 Impulse_la_LIBADD = \
 	libledspicer.la
 
 Impulse_la_LDFLAGS = \
-	-module          \
-	-shared          \
-	-export-dynamic  \
-	-avoid-version   \
-	-fexceptions
+	$(plugins_LDFLAGS)
 
 ###########
 # Actions #
 ###########
 
-Actions_la_SOURCES =      \
+Actions_la_SOURCES = \
 	src/inputs/Actions.cpp
 
 Actions_la_LIBADD = \
 	libledspicer.la
 
-Actions_la_LDFLAGS =   \
-	-module         \
-	-shared         \
-	-export-dynamic \
-	-avoid-version  \
-	-fexceptions
+Actions_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
 
 ##############
 # games data #
 ##############
 
 gamesdatadir=$(pkgdatadir)
-gamesdata_DATA =      \
+gamesdata_DATA = \
 	data/gameData.xml
 
 if COPY_SAMPLES
@@ -521,7 +491,7 @@ endif
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir='$$(prefix)/$(systemdsystemunitdir)'
 
-systemdsystemunit_DATA =    \
+systemdsystemunit_DATA = \
 	data/ledspicerd.service
 
 #################

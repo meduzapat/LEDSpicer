@@ -36,6 +36,7 @@
 #define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
 #define ACTOR_DIR "animations/"
 #define PROFILE_DIR "profiles/"
+#define MAXIMUM_FPS 30
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}

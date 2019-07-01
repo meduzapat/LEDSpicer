@@ -50,6 +50,8 @@ public:
 
 	virtual void deactivate();
 
+	virtual void drawConfig();
+
 protected:
 
 	/// poll of events.
@@ -65,9 +67,8 @@ protected:
 
 	/**
 	 * Reads all the events.
-	 * @param who
 	 */
-	static void readAll(Input* who);
+	void readAll();
 };
 
 } /* namespace Inputs */

@@ -231,7 +231,8 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 
 	case PA_CONTEXT_FAILED:
 	default:
-		throw Error("Pulseaudio Context failed: " + string(pa_strerror(pa_context_errno(context))));
+		LogError("Pulseaudio Context failed: " + string(pa_strerror(pa_context_errno(context))));
+		throw;
 	}
 }
 
@@ -270,8 +271,10 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 
 	pa_sample_spec ss = {SAMPLE_FORMAT, RATE, info->sample_spec.channels};
 
-	if (not (stream = pa_stream_new(context, STREAM_NAME, &ss, &info->channel_map)))
-		throw Error("Failed to create stream: " + string(pa_strerror(pa_context_errno(context))));
+	if (not (stream = pa_stream_new(context, STREAM_NAME, &ss, &info->channel_map))) {
+		LogError("Failed to create stream: " + string(pa_strerror(pa_context_errno(context))));
+		throw;
+	}
 
 	pa_stream_set_state_callback(stream, onStreamSetState, userPref);
 
@@ -299,25 +302,25 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 	pa_buffer_attr ba;
 	ba.maxlength = (uint32_t) -1;
 	ba.fragsize  = vuData.size() * 10;
-	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0)
-		throw Error("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))));
+	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0) {
+		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))))
+		throw;
+	}
 }
 
 void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 
 	switch (pa_stream_get_state(stream)) {
 
-	case PA_STREAM_CREATING:
 #ifdef DEVELOP
+	case PA_STREAM_CREATING:
 		LogDebug("Creating stream.");
-#endif
 		break;
 
 	case PA_STREAM_TERMINATED:
-#ifdef DEVELOP
 		LogDebug("Stream terminated.");
-#endif
 		break;
+#endif
 
 	case PA_STREAM_READY:
 		LogInfo("Stream successfully created.");
@@ -325,8 +328,8 @@ void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 		break;
 
 	case PA_STREAM_FAILED:
-	default:
-		throw Error("Connection to stream failed: " + string(pa_strerror(pa_context_errno(context))));
+		LogError("Connection to stream failed: " + string(pa_strerror(pa_context_errno(context))));
+		throw;
 	}
 }
 
@@ -337,44 +340,36 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 
 	// Function to reset the data.
 	auto reseter = [userPref] () {
-		switch (userPref->mode) {
-		default:
-			singleData = {0, 0};
-		break;
-		case Modes::Levels:
-			vuData.assign(vuData.size(), Values());
-		}
+		vuData.assign(vuData.size(), Values());
+		singleData = {0, 0};
 	};
 
+	reseter();
 	if (not length) {
-		reseter();
 		return;
 	}
 
 	// Read peaks.
 	const void *data;
-	if (pa_stream_peek(stream, &data, &length) < 0)
-		throw Error("Stream peek failed: " + string(pa_strerror(pa_context_errno(context))));
+	if (pa_stream_peek(stream, &data, &length) < 0) {
+		LogError("Stream peek failed: " + string(pa_strerror(pa_context_errno(context))));
+		return;
+	}
 
 	// Hole detected (no idea what a hole is but is on the docs).
 	if (not data and length > 0) {
-		reseter();
 		pa_stream_drop(stream);
 		return;
 	}
+
 	// Parse data.
 	std::lock_guard<std::mutex> lock(mutex);
 	const int16_t* buffer = static_cast<const int16_t*>(data);
 	vector<int16_t> rawData(buffer, buffer + (length / 2));
-	singleData.l = singleData.r = 0;
-	vuData.assign(vuData.size(), Values());
+	pa_stream_drop(stream);
 	if (rawData.empty())
 		return;
-	switch (userPref->mode) {
-	default:
-		processRawData(rawData, userPref);
-	}
-	pa_stream_drop(stream);
+	processRawData(rawData, userPref);
 }
 
 const vector<bool> PulseAudio::calculateElements() {
@@ -536,6 +531,9 @@ LEDSpicer::Color PulseAudio::detectColor(uint8_t percent) {
 	// Off.
 	if (not percent)
 		return userPref.off;
+
+	if (percent == 100)
+		return userPref.c75;
 
 	#define CALC_PERC(t, b) round((percent - b) * 100.00 / (t - b))
 
