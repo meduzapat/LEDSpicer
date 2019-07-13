@@ -34,8 +34,9 @@
 #define DATALOADER_HPP_ 1
 
 #define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
-#define ACTOR_DIR "animations/"
+#define ACTOR_DIR   "animations/"
 #define PROFILE_DIR "profiles/"
+#define INPUT_DIR   "inputs/"
 #define MAXIMUM_FPS 30
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
@@ -211,6 +212,13 @@ protected:
 	 * @return
 	 */
 	static Actor* createAnimation(umap<string, string>& actorData);
+
+	/**
+	 * Reads an input file.
+	 * @param profile
+	 * @param file
+	 */
+	static void processInput(Profile* profile, const string& file);
 
 	/**
 	 * Loads an input object.

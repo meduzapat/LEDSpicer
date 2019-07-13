@@ -292,6 +292,7 @@ Profile* DataLoader::processProfile(const string& name) {
 			profilePtr->addAlwaysOnElement(allElements[tempAttr["name"]], tempAttr["color"]);
 		}
 	}
+
 	// Check for always on elements.
 	element = profile.getRoot()->FirstChildElement("alwaysOnGroups");
 	if (element) {
@@ -312,10 +313,8 @@ Profile* DataLoader::processProfile(const string& name) {
 		if (element) {
 			for (; element; element = element->NextSiblingElement("input")) {
 				umap<string, string> elementAttr = processNode(element);
-				Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "input node");
-				Input* input =  createInput(elementAttr);
-				processInputMap(element, input);
-				profilePtr->addInput(elementAttr["name"], input);
+				Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "Inputs");
+				processInput(profilePtr, elementAttr["name"]);
 			}
 		}
 	}
@@ -324,9 +323,9 @@ Profile* DataLoader::processProfile(const string& name) {
 	return profilePtr;
 }
 
-vector<Actor*> DataLoader::processAnimation(const string& name) {
+vector<Actor*> DataLoader::processAnimation(const string& file) {
 
-	XMLHelper animation(createFilename(ACTOR_DIR + name), "Animation");
+	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
 
 	umap<string, string> actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement("actor");
@@ -336,7 +335,7 @@ vector<Actor*> DataLoader::processAnimation(const string& name) {
 	vector<Actor*> actors;
 	for (; element; element = element->NextSiblingElement("actor")) {
 		actorData = processNode(element);
-		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + name);
+		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + file);
 		actors.push_back(createAnimation(actorData));
 	}
 
@@ -368,6 +367,15 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 	Actor* a = actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
 	actorMap.emplace(a, actorHandlers[actorName]);
 	return a;
+}
+
+void DataLoader::processInput(Profile* profile, const string& file) {
+	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
+	umap<string, string> elementAttr = processNode(inputFile.getRoot());
+	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, file);
+	Input* input =  createInput(elementAttr);
+	processInputMap(inputFile.getRoot(), input);
+	profile->addInput(elementAttr["name"], input);
 }
 
 Input* DataLoader::createInput(umap<string, string>& inputData) {

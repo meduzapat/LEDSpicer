@@ -89,7 +89,7 @@ void Reader::readAll() {
 				break;
 			if (event.type != EV_KEY) // and event.type != EV_REL))
 				continue;
-			LogDebug("event: " + std::to_string(event.type) + " code: " + std::to_string(event.code) + string(event.value ? " ON" : " OFF"));
+			LogDebug(l.first + " - Type: " + (event.type == 1 ? "Key" : "Other") + " code: " + std::to_string(event.code) + string(event.value ? " ON" : " OFF"));
 			events.push_back(event);
 		}
 	}
