@@ -25,37 +25,39 @@
 using namespace LEDSpicer::Animations;
 
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
-	color(parameters["color"]),
+	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
+	Color(parameters["color"]),
 	tailColor(parameters["tailColor"])
 {
-	totalActorFrames = group->size();
-	uint8_t
-		tailLength    = 0,
-		tailIntensity = 0;
 
-	tailLength = Utility::parseNumber(
-		parameters["tailLength"],
-		"Invalid tailLength, enter a number 0-" + to_string(group->size())
-	);
 	// tail cannot be larger than the array, serpentine will overlap.
+	uint8_t tailLength = Utility::parseNumber(
+		parameters["tailLength"],
+		"Invalid tailLength, enter a number 0 - " + to_string(totalFrames)
+	);
+
 	if (not Utility::verifyValue<uint8_t>(tailLength, 0, group->size()))
-		throw Error("Tail cannot be larger than the group: " + to_string(group->size()));
+		throw Error("Tail cannot be larger than the group: " + to_string(totalFrames));
+
+	if (not tailLength)
+		return;
 
 	tailData.resize(tailLength);
 	tailData.shrink_to_fit();
-	if (tailData.size()) {
-		tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
-		if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
-			throw Error("Invalid tailIntensity, enter a number 0-100");
 
-		float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
-		Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
-		uint8_t firstTail = calculateNextOf(tailDirection, currentActorFrame, tailDirection, totalActorFrames);
-		for (uint8_t c = 0; c < tailData.size(); c++) {
-			tailData[c].percent  = tailweight * (tailData.size() - c);
+	uint8_t tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
+	if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
+		throw Error("Invalid tailIntensity, enter a number 0-100");
+
+	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
+	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
+	uint8_t firstTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
+	for (uint8_t c = 0; c < tailData.size(); c++) {
+		tailData[c].percent  = tailweight * (tailData.size() - c);
+		if (tailDirection == Directions::Forward)
+			tailData[c].position = firstTail + c;
+		else
 			tailData[c].position = firstTail - c;
-		}
 	}
 }
 
@@ -63,35 +65,47 @@ const vector<bool> Serpentine::calculateElements() {
 
 	affectAllElements();
 
+#ifdef DEVELOP
+	cout << "Serpentine frame: " << (currentFrame + 1);
+#endif
+
 	if (not tailData.size()) {
-		changeFrameElement(color, true);
+		changeFrameElement(*this, true);
+#ifdef DEVELOP
+	cout << endl;
+#endif
 		return affectedElements;
 	}
 
-	changeFrameElement(tailColor, color);
+	changeFrameElement(tailColor, *this);
 	calculateTailPosition();
 	for (auto& data : tailData) {
 		switch (filter) {
 		case Color::Filters::Mask:
-			changeElementColor(data.position - 1, tailColor.fade(data.percent), filter);
+			changeElementColor(data.position, tailColor.fade(data.percent), filter);
 			break;
 		default:
 			changeElementColor(
-				data.position - 1,
+				data.position,
 				tailColor,
 				Color::Filters::Combine,
 				data.percent
 			);
 		}
-		affectedElements[data.position -1] = true;
+#ifdef DEVELOP
+	cout << " " << (data.position + 1);
+#endif
+		affectedElements[data.position] = true;
 	}
-
+#ifdef DEVELOP
+	cout << endl;
+#endif
 	return affectedElements;
 }
 
 void Serpentine::calculateTailPosition() {
 	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
-	uint8_t lastTail = calculateNextOf(tailDirection, currentActorFrame, tailDirection, totalActorFrames);
+	uint8_t lastTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
 	// Avoid changing the tail when doing the same frame.
 	if (tailData[0].position == lastTail)
 		return;
@@ -101,13 +115,19 @@ void Serpentine::calculateTailPosition() {
 }
 
 void Serpentine::drawConfig() {
-	cout << "Actor Type: Serpentine " << endl;
-	Actor::drawConfig();
+	cout << "Type: Serpentine " << endl;
+	StepActor::drawConfig();
 	cout << "Color: ";
-	color.drawColor();
-	cout << ", Tail Color: ";
+	drawColor();
+	cout << endl << "Tail: ";
+	if (not tailData.size()) {
+		cout << "No Tail" << endl;
+		return;
+	}
+	cout << " Color: ";
 	tailColor.drawColor();
-	cout << ", Tail Length: " << (int)tailData.size() <<
-			", Tail Intensity: " << (tailData.size() ? tailData.front().percent + tailData.back().percent : 0) <<
-			"%" << endl;
+	cout <<
+		", Length: " << static_cast<int>(tailData.size()) <<
+		", Intensity: " << (tailData.front().percent + tailData.back().percent) <<
+		"%" << endl;
 }

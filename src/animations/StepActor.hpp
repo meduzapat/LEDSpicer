@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      TimedActor.hpp
- * @since     Sep 16, 2018
+ * @file      StepActor.hpp
+ * @since     Jul 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,44 +20,66 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Actor.hpp"
+#ifndef STEPACTOR_HPP_
+#define STEPACTOR_HPP_ 1
 
-#ifndef TIMEDACTOR_HPP_
-#define TIMEDACTOR_HPP_ 1
+#include "DirectionActor.hpp"
 
 namespace LEDSpicer {
 namespace Animations {
 
 /**
- * LEDSpicer::TimedActor
- *
- * Class to add timing functionality to actors.
+ * LEDSpicer::StepActor
  */
-class TimedActor: public Animations::Actor {
+class StepActor: public Animations::DirectionActor {
 
 public:
 
-	TimedActor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters);
+	StepActor(
+		umap<string, string>& parameters,
+		Group* const group,
+		const vector<string>& requiredParameters
+	);
 
-	~TimedActor() = default;
+	virtual ~StepActor() = default;
 
 	/**
-	 * @return return true if the frame is the same than before.
+	 * @see Actor::drawConfig()
 	 */
-	bool isSameFrame() const;
+	virtual void drawConfig();
 
 	/**
-	 * @return return true if this is the last timed frame (the next actor frame will change).
+	 * @return The number of steps for the whole animation.
 	 */
-	bool willChange() const;
+	uint16_t getTotalSteps() const;
+
+	/**
+	 * @return The current relative step.
+	 */
+	uint16_t getCurrentStep() const;
+
+	/**
+	 * @see Actor::restart()
+	 */
+	virtual void restart();
+
+	/**
+	 * @see DirectionActor::isFirstFrame()
+	 */
+	virtual bool isFirstFrame() const;
+
+	/**
+	 * @see DirectionActor::isLastFrame()
+	 */
+	virtual bool isLastFrame() const;
 
 protected:
 
 	uint8_t
-		/// Current change frame factor.
-		changeFrame = 1,
-		/// Total number of frames to actually move to the next actor frame.
-		changeFrameTotal;
+		totalStepFrames  = 0,
+		currentStepFrame = 0;
+
+	virtual void advanceFrame();
 
 	/**
 	 * Changes the current element and fade the next one based on time.
@@ -67,15 +89,14 @@ protected:
 	void changeFrameElement(const Color& color, bool fade = false);
 
 	/**
-	 * Changes the current element with a transition between color and colorNext based on time.
+	 * Changes the current element with a transition between color and colorNext.
 	 * @param color
 	 * @param colorNext
 	 */
 	void changeFrameElement(const Color& color, const Color& colorNext);
 
-	void virtual advanceActorFrame();
 };
 
 }} /* namespace LEDSpicer */
 
-#endif /* TIMEDACTOR_HPP_ */
+#endif /* STEPACTOR_HPP_ */

@@ -39,6 +39,7 @@ vector<PulseAudio::Values> PulseAudio::vuData;
 
 PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	Actor(parameters, group, REQUIRED_PARAM_ACTOR_PULSEAUDIO),
+	Direction(parameters.count("direction") ? parameters["direction"] : "Forward"),
 	userPref({
 		Color(parameters["off"]),
 		Color(parameters["low"]),
@@ -125,11 +126,12 @@ void PulseAudio::disconnect() {
 void PulseAudio::drawConfig() {
 	char cmt[PA_CHANNEL_MAP_SNPRINT_MAX], sst[PA_SAMPLE_SPEC_SNPRINT_MAX];
 	cout <<
-		"Actor Type: Pulseaudio, mode: " << mode2str(userPref.mode) <<
-		", channel: " << channel2str(userPref.channel) <<
-		", low: "     << userPref.c00.getName()        <<
-		", mid: "     << userPref.c50.getName()        <<
-		", high: "    << userPref.c75.getName()        << endl;
+		"Type: Pulseaudio" << endl <<
+		"mode: " << mode2str(userPref.mode) << endl <<
+		"channel: " << channel2str(userPref.channel) << endl <<
+		"Colors: low: "     << userPref.c00.getName() <<
+		", mid: "     << userPref.c50.getName() <<
+		", high: "    << userPref.c75.getName() << endl;
 	Actor::drawConfig();
 	cout << endl;
 }

@@ -37,6 +37,8 @@ using std::vector;
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_ 1
 
+#define PERCENT(x , y) (x * 100 / y)
+
 namespace LEDSpicer {
 
 class Utility {

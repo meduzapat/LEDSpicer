@@ -24,20 +24,49 @@
 
 using namespace LEDSpicer::Animations;
 
+Pulse::Pulse(umap<string, string>& parameters, Group* const layout):
+	DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
+	Color(parameters["color"]),
+	mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
+{
+	affectAllElements(true);
+}
+
 const vector<bool> Pulse::calculateElements() {
-	float c = static_cast<float>(currentActorFrame);
-	c = round((c * c) / totalActorFrames);
+	float c;
+	if (mode == Modes::Linear)
+		c = currentFrame;
+	else
+		c = static_cast<float>(currentFrame * currentFrame) / totalFrames;
 #ifdef DEVELOP
-	cout << "frame: " << to_string(currentActorFrame) << " = " << to_string(c * 100 / totalActorFrames) << endl;
+	cout << "Pulse frame: " << (currentFrame + 1) << " = " << PERCENT(c, totalFrames) << endl;
 #endif
-	changeElementsColor(color.fade(c * 100 / totalActorFrames), filter);
+	changeElementsColor(this->fade(PERCENT(c, totalFrames)), filter);
 	return affectedElements;
 }
 
 void Pulse::drawConfig() {
-	cout << "Actor Type: Pulse " << endl;
-	Actor::drawConfig();
+	cout << "Type: Pulse " << endl;
+	DirectionActor::drawConfig();
 	cout << "Color: ";
-	color.drawColor();
+	this->drawColor();
 	cout << endl;
+}
+
+string Pulse::mode2str(Modes mode) {
+	switch (mode) {
+	case Modes::Linear:
+		return "Linear";
+	case Modes::Exponential:
+		return "exponential";
+	}
+	return "";
+}
+
+Pulse::Modes Pulse::str2mode(const string& mode) {
+	if (mode == "Linear")
+		return Modes::Linear;
+	if (mode == "Exponential")
+		return Modes::Exponential;
+	throw Error("Invalid mode " + mode);
 }

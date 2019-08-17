@@ -40,7 +40,7 @@ public:
 		Reader(parameters),
 		Speed(parameters.count("speed") ? parameters["speed"] : ""),
 		frames(static_cast<uint8_t>(speed) * 3),
-		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : "", Error::INVALID_NUMBER_LABEL)) {}
+		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : "", "Invalid numeric value ")) {}
 
 	virtual ~Blinker() = default;
 

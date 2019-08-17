@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Error.cpp
- * @since     Jun 6, 2018
+ * @file      Colors.cpp
+ * @since     Jul 20, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,10 +20,28 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Error.hpp"
+#include "Colors.hpp"
 
 using namespace LEDSpicer;
 
-string Error::getMessage() {
-	return std::move(error);
+void Colors::extractColors(string colors) {
+
+	if (colors.empty()) {
+		this->colors.reserve(Color::getNames().size());
+		for (auto& c : Color::getNames())
+			this->colors.push_back(&Color::getColor(c));
+	}
+	else {
+		for (auto& c : Utility::explode(colors, ',')) {
+			Utility::trim(c);
+			this->colors.push_back(&Color::getColor(c));
+		}
+		this->colors.shrink_to_fit();
+	}
+
+	if (this->colors.size() < 2)
+		throw Error("You need two or more colors for actor Random to do something.");
+
+	if (this->colors.size() > UINT8_MAX)
+		throw Error("Too many colors (" + to_string(this->colors.size()) + "), the maximum is " + to_string(UINT8_MAX) + " .");
 }

@@ -23,25 +23,28 @@ EXTRA_DIST =
 pkglib_LTLIBRARIES = \
 	libledspicer.la
 
-libledspicer_la_SOURCES =         \
-	src/utility/Log.cpp           \
-	src/utility/Error.cpp         \
-	src/utility/Utility.cpp       \
-	src/utility/XMLHelper.cpp     \
-	src/utility/Speed.cpp         \
-	src/utility/Direction.cpp     \
-	src/utility/Color.cpp         \
-	src/devices/Element.cpp       \
-	src/devices/Group.cpp         \
-	src/ConnectionUSB.cpp         \
-	src/devices/Device.cpp        \
-	src/animations/Actor.cpp      \
-	src/animations/TimedActor.cpp \
-	src/inputs/Input.cpp          \
-	src/inputs/Reader.cpp         \
-	src/devices/Profile.cpp       \
-	src/utility/Socks.cpp         \
-	src/Message.cpp               \
+libledspicer_la_SOURCES =             \
+	src/utility/Log.cpp               \
+	src/utility/Error.cpp             \
+	src/utility/Utility.cpp           \
+	src/utility/XMLHelper.cpp         \
+	src/utility/Speed.cpp             \
+	src/utility/Direction.cpp         \
+	src/utility/Color.cpp             \
+	src/utility/Colors.cpp            \
+	src/devices/Element.cpp           \
+	src/devices/Group.cpp             \
+	src/ConnectionUSB.cpp             \
+	src/devices/Device.cpp            \
+	src/animations/Actor.cpp          \
+	src/animations/FrameActor.cpp     \
+	src/animations/DirectionActor.cpp \
+	src/animations/StepActor.cpp      \
+	src/inputs/Input.cpp              \
+	src/inputs/Reader.cpp             \
+	src/devices/Profile.cpp           \
+	src/utility/Socks.cpp             \
+	src/Message.cpp                   \
 	src/Messages.cpp
 
 libledspicer_la_LDFLAGS =        \
@@ -66,7 +69,8 @@ utilityheader_HEADERS =       \
 	src/utility/XMLHelper.hpp \
 	src/utility/Speed.hpp     \
 	src/utility/Direction.hpp \
-	src/utility/Color.hpp
+	src/utility/Color.hpp     \
+	src/utility/Colors.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
 devicesheader_HEADERS =     \
@@ -76,9 +80,11 @@ devicesheader_HEADERS =     \
 	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
-animationsheader_HEADERS =        \
-	src/animations/Actor.hpp      \
-	src/animations/TimedActor.hpp
+animationsheader_HEADERS =            \
+	src/animations/Actor.hpp          \
+	src/animations/FrameActor.hpp     \
+	src/animations/DirectionActor.hpp \
+	src/animations/StepActor.hpp
 
 inputsheaderdir=$(pkgincludedir)/inputs
 inputsheader_HEADERS =    \

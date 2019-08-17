@@ -52,11 +52,9 @@ int main(int argc, char **argv) {
 	}
 	while ((ent = readdir(dir)) != nullptr) {
 		name = ent->d_name;
-		pos = name.find("event");
-		if (pos ==string::npos)
+		if (name.find("event") ==string::npos)
 			continue;
-		name = name.substr(pos);
-		cout << "Opening device " DEV_INPUT << name << endl;
+		cout << "Opening device " << name << endl;
 		int res = open((DEV_INPUT + name).c_str(), O_RDONLY | O_NONBLOCK);
 		if (res < 0) {
 			cerr << "Unable to open " DEV_INPUT << name << " Ignored" << endl;

@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Actor.hpp"
+#include "DirectionActor.hpp"
 #include <cmath>
 
 #ifndef PULSE_HPP_
@@ -34,25 +34,27 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Pulse
  */
-class Pulse : public Actor {
+class Pulse : public DirectionActor, public Color {
 
 public:
 
-	Pulse(umap<string, string>& parameters, Group* const layout):
-		Actor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
-		color(parameters["color"]) {
-		affectAllElements(true);
-	}
+	enum class Modes : uint8_t {Linear, Exponential};
+
+	Pulse(umap<string, string>& parameters, Group* const layout);
 
 	virtual ~Pulse() = default;
 
 	void drawConfig();
 
+	string mode2str(Modes mode);
+
+	Modes str2mode(const string& mode);
+
 protected:
 
-	Color color;
-
 	const vector<bool> calculateElements();
+
+	Modes mode;
 
 };
 

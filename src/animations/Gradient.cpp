@@ -25,32 +25,60 @@
 using namespace LEDSpicer::Animations;
 
 Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
-	mode(str2mode(parameters["mode"])),
-	colorDirection(cDirection)
+	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
+	mode(str2mode(parameters["mode"]))
 {
-	colors = extractColors(parameters["colors"]);
-	if (colors.size() < 2)
-		throw Error("You need two or more colors for actor Gradient to do something.");
-	float steps;
-	// Cyclic needs timedActor but others don't.
+
+	// Number of tones between two colors.
+	if (parameters.count("tones"))
+		tones = Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number");
+
+	totalStepFrames = totalStepFrames / 5;
+
+	extractColors(parameters["colors"]);
+	float
+		percent = 0,
+		increment;
+
 	switch (mode) {
 
 	case Modes::All:
 	case Modes::Sequential:
-		steps = (static_cast<uint8_t>(speed) + 1) * 4;
-		increment = 100 / steps;
-		totalActorFrames = steps * colors.size();
-		changeFrameTotal = 1;
+		increment = tones ? 100 / tones : 100;
 		break;
 
 	case Modes::Cyclic:
-		steps = getNumberOfElements() / colors.size();
-		increment = 100 / steps;
+		increment = 100 / (group->size() / static_cast<float>(colors.size()));
 		break;
 	}
-	currentColor = cDirection == Directions::Forward ? 1 : colors.size();
+
+	Directions colorDir = Directions::Forward;
+
+	uint8_t
+		lastColor = colors.size() - 1,
+		color     = 0,
+		nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
+	do {
+		precalc.push_back(
+			colors[color]->transition(
+				*colors[nextColor],
+				percent
+			)
+		);
+		percent += increment;
+		if (percent > 99) {
+			percent   = 0;
+			colorDir  = Directions::Forward;
+			color     = nextColor;
+			nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
+		}
+	}
+	while (precalc.size() != group->size());
+	precalc.shrink_to_fit();
+	totalFrames = precalc.size() - 1;
 	affectAllElements(true);
+	if (isDirectionBackward())
+		currentFrame = totalFrames;
 }
 
 const vector<bool> Gradient::calculateElements() {
@@ -67,8 +95,10 @@ const vector<bool> Gradient::calculateElements() {
 }
 
 void Gradient::drawConfig() {
-	cout << "Actor Type: Gradient" << ", Mode: " << mode2str(mode) << endl;
-	Actor::drawConfig();
+	cout <<
+		"Type: Gradient" <<  endl <<
+		"Mode: " << mode2str(mode) << endl;
+	StepActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
 	cout << endl;
@@ -98,46 +128,24 @@ string Gradient::mode2str(Modes mode) {
 }
 
 void Gradient::calculateSingle() {
-
-	Directions currentColorDir = colorDirection;
-	uint8_t nextColor = calculateNextOf(currentColorDir, currentColor, direction, colors.size());
 	changeElementsColor(
-		colors[currentColor - 1]->transition(*colors[nextColor - 1],
-		currentPercent),
+		precalc[currentFrame],
 		filter
 	);
-	currentPercent += increment;
-	if (currentPercent >= 100) {
-		currentPercent = 0;
-		currentColor = calculateNextOf(colorDirection, currentColor, direction, colors.size());
-	}
 }
 
 void Gradient::calculateMultiple() {
 
-	Directions colorDir = colorDirection;
-
-	uint8_t
-		percent   = currentPercent,
-		color     = currentColor,
-		nextColor = calculateNextOf(colorDir, color, direction, colors.size());
-
+	uint8_t frameT = currentFrame;
 	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
-		if (percent >= 100) {
-			color     = nextColor;
-			nextColor = calculateNextOf(colorDir, nextColor, direction, colors.size());
-			percent   = 0;
-		}
-
-		changeElementColor(c, colors[color - 1]->transition(*colors[nextColor - 1], percent), filter);
-		percent += increment;
-	}
-	if (willChange())
-		currentPercent += increment;
-
-	if (currentPercent >= 100) {
-		currentColor = calculateNextOf(colorDirection, currentColor, direction, colors.size());
-		currentPercent = 0;
+		changeElementColor(
+			c,
+			precalc[frameT],
+			filter
+		);
+		frameT++;
+		if (frameT == precalc.size())
+			frameT = 0;
 	}
 }
 

@@ -34,13 +34,13 @@ high_resolution_clock::time_point Main::start;
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		LogNotice(Error::SIGTERM_LABEL);
+		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
 	}
 
 	if (sig == SIGHUP) {
-		LogNotice(Error::SIGHUP_LABEL);
+		LogNotice(PACKAGE_NAME " received re load configuration signal");
 		// TODO: reload the profiles and restart everything?
 		return;
 	}
@@ -56,7 +56,7 @@ void signalHandler(int sig) {
 
 void Main::run() {
 
-	LogInfo(Error::RUNNING_LABEL);
+	LogInfo(PACKAGE_NAME " Running");
 
 	currentProfile = DataLoader::defaultProfile;
 	currentProfile->restart();
@@ -110,11 +110,11 @@ void Main::run() {
 
 			case Message::Types::SetElement:
 				if (msg.getData().size() != 3) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL);
+					LogNotice("Invalid message ");
 					break;
 				}
 				if (not DataLoader::allElements.count(msg.getData()[0])) {
-					LogNotice(Error::INVALID_ELEMENT_LABEL + msg.getData()[0]);
+					LogNotice("Unknown element " + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -138,7 +138,7 @@ void Main::run() {
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL + msg.getData()[0]);
+					LogNotice("Invalid message " + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnElements.count(msg.getData()[0]))
@@ -151,11 +151,11 @@ void Main::run() {
 
 			case Message::Types::SetGroup:
 				if (msg.getData().size() != 3) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL);
+					LogNotice("Invalid message ");
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
+					LogNotice("Unknown group " + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -179,7 +179,7 @@ void Main::run() {
 
 			case Message::Types::ClearGroup:
 				if (msg.getData().size() != 1) {
-					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
+					LogNotice("Unknown group " + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnGroups.count(msg.getData()[0]))
@@ -343,7 +343,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(Error& e) {
-		LogError(Error::TERMINATED_BY_ERROR_LABEL + e.getMessage());
+		LogError("Program terminated by error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
 
@@ -400,6 +400,4 @@ void Main::runCurrentProfile() {
 
 	// Wait...
 	ConnectionUSB::wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
-
-	Actor::advanceFrame();
 }

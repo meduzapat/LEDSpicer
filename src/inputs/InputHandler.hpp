@@ -31,6 +31,7 @@ namespace Inputs {
 
 /**
  * LEDSpicer::Inputs::InputHandler
+ * This is an Input factory to loader and create Input plugins.
  */
 class InputHandler: public Handler {
 
@@ -38,18 +39,38 @@ public:
 
 	InputHandler() = default;
 
+	/**
+	 * @see Handler::Handler()
+	 */
 	InputHandler(const string& inputName);
 
 	virtual ~InputHandler() = default;
 
+	/**
+	 * Wrapper over the create pointer.
+	 * @see createFunction pointer.
+	 */
 	Input* createInput(umap<string, string>& parameters);
 
+	/**
+	 * Wrapper over the destroy pointer.
+	 * @see destroyFunction pointer.
+	 */
 	void destroyInput(Input* input);
 
 protected:
 
+	/**
+	 * Pointer to the plugin's creation function.
+	 * @param plugin parameters.
+	 * @return a new created plugin.
+	 */
 	Input*(*createFunction)(umap<string, string>&) = nullptr;
 
+	/**
+	 * Pointer to the plugin's destruction function.
+	 * @param pointer to the plugin to destroy.
+	 */
 	void(*destroyFunction)(Input*) = nullptr;
 };
 

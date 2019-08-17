@@ -41,8 +41,11 @@ void Profile::drawConfig() {
 
 	if (animations.size()) {
 		cout << endl << "* Animation Actors:" << endl;
-		for(auto actor : animations)
+		uint count = 1;
+		for(auto actor : animations) {
+			cout << "Actor " << count++ << ":" << endl;
 			actor->drawConfig();
+		}
 	}
 
 	if (alwaysOnGroups.size()) {
@@ -77,7 +80,7 @@ void Profile::runFrame() {
 	for (auto i : inputs)
 		i.second->process();
 
-	if (actual and actual->drawFrame()) {
+	if (actual and actual->draw()) {
 		if (actual == end)
 			running = false;
 		actual = nullptr;
@@ -85,7 +88,7 @@ void Profile::runFrame() {
 
 	if (not actual and running)
 		for (auto actor : animations)
-			actor->drawFrame();
+			actor->draw();
 }
 
 void Profile::reset() {

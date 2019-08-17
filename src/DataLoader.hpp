@@ -20,6 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// To handle daemonization and uid/gid.
+#include <unistd.h>
+
 #include <algorithm>
 
 #include "config.h"
@@ -39,7 +42,35 @@
 #define INPUT_DIR   "inputs/"
 #define MAXIMUM_FPS 30
 
-#define REQUIRED_PARAM_ROOT           {"colors", "fps", "port"}
+#define PARAM_FPS             "fps"
+#define PARAM_COLORS          "colors"
+#define PARAM_COLOR           "color"
+#define PARAM_PORT            "port"
+#define PARAM_LOG_LEVEL       "logLevel"
+#define PARAM_NAME            "name"
+#define PARAM_LED             "led"
+#define PARAM_RED             "red"
+#define PARAM_GREEN           "green"
+#define PARAM_BLUE            "blue"
+#define PARAM_DEFAULT_PROFILE "defaultProfile"
+#define PARAM_USER_ID         "userId"
+#define PARAM_GROUP_ID        "groupId"
+
+#define NODE_DEVICES          "devices"
+#define NODE_DEVICE           "device"
+#define NODE_ELEMENT          "element"
+#define NODE_LAYOUT           "layout"
+#define NODE_GROUP            "group"
+#define NODE_COLOR            "color"
+#define NODE_ANIMATIONS       "animations"
+#define NODE_ANIMATION        "animation"
+#define NODE_START_TRANSITION "startTransition"
+#define NODE_END_TRANSITION   "endTransition"
+#define NODE_INPUTS           "inputs"
+#define NODE_INPUT            "input"
+#define NODE_ACTOR            "actor"
+
+#define REQUIRED_PARAM_ROOT           {"colors", "fps", "port", "userId", "groupId"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
 #define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
@@ -238,6 +269,13 @@ protected:
 	 * @return
 	 */
 	static string createFilename(const string& name);
+
+	/**
+	 * Drops root privileges if any and moves the directory to /.
+	 * @param uid new user id
+	 * @param gid new group id
+	 */
+	void static dropRootPrivileges(uid_t uid, gid_t gid);
 };
 
 } /* namespace LEDSpicer */

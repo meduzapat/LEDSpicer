@@ -22,7 +22,6 @@
 
 #include "Handler.hpp"
 #include "Device.hpp"
-#include <functional>
 
 #ifndef DEVICEHANDLER_HPP_
 #define DEVICEHANDLER_HPP_ 1
@@ -32,6 +31,7 @@ namespace Devices {
 
 /**
  * LEDSpicer::Devices::DeviceHandler
+ * This is a Device factory to loader and create Device plugins.
  */
 class DeviceHandler : public Handler {
 
@@ -39,19 +39,41 @@ public:
 
 	DeviceHandler() = default;
 
+	/**
+	 * @see Handler::Handler()
+	 */
 	DeviceHandler(const string& deviceName);
 
 	virtual ~DeviceHandler() = default;
 
+	/**
+	 * Wrapper over the create pointer.
+	 * @see createFunction pointer.
+	 * @param board ID
+	 */
 	Device* createDevice(uint8_t boardId, umap<string, string>& options);
 
+	/**
+	 * Wrapper over the destroy pointer.
+	 * @see destroyFunction pointer.
+	 */
 	void destroyDevice(Device* device);
 
 protected:
 
-	std::function<Device*(uint8_t, umap<string, string>&)> createFunction;
+	/**
+	 * Pointer to the plugin's creation function.
+	 * @param board ID
+	 * @param plugin parameters.
+	 * @return a new created plugin.
+	 */
+	Device*(*createFunction)(uint8_t, umap<string, string>&) = nullptr;
 
-	std::function<void(Device*)> destroyFunction;
+	/**
+	 * Pointer to the plugin's destruction function.
+	 * @param pointer to the plugin to destroy.
+	 */
+	void(*destroyFunction)(Device*) = nullptr;
 };
 
 } /* namespace Devices */

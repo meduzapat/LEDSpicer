@@ -20,12 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Actor.hpp"
+#include "utility/Colors.hpp"
+#include "FrameActor.hpp"
 
 #ifndef RANDOM_HPP_
 #define RANDOM_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_RANDOM {"speed", "direction", "colors"}
+#define REQUIRED_PARAM_ACTOR_RANDOM {"speed", "colors"}
 
 namespace LEDSpicer {
 namespace Animations {
@@ -33,32 +34,31 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Random
  */
-class Random: public Actor {
+class Random: public FrameActor, public Colors {
 
 public:
 
-	Random(umap<string, string>& parameters, Group* const layout);
+	Random(umap<string, string>& parameters, Group* const group);
 
 	virtual ~Random() = default;
+
+	/**
+	 * @see Actor::drawConfig()
+	 */
+	void drawConfig();
 
 protected:
 
 	vector<const Color*>
-		colors,
 		newColors,
 		oldColors;
 
 	const vector<bool> calculateElements();
 
-	void generateNewColors();
-
 	/**
-	 * Random needs to always go forward.
+	 * Picks new colors.
 	 */
-	void advanceActorFrame();
-
-	void drawConfig();
-
+	void generateNewColors();
 };
 
 } /* namespace Animations */

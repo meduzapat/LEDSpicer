@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Reader.hpp
- * @since     May 23, 2019
+ * @file      FrameActor.hpp
+ * @since     Jul 18, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
@@ -20,58 +20,63 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Input.hpp"
-#include <linux/input.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include "Actor.hpp"
+#include "utility/Speed.hpp"
 
-#ifndef READER_HPP_
-#define READER_HPP_ 1
-
-#define DEV_INPUT "/dev/input/by-id/"
+#ifndef FRAMEACTOR_HPP_
+#define FRAMEACTOR_HPP_ 1
 
 namespace LEDSpicer {
-namespace Inputs {
+namespace Animations {
 
 /**
- * LEDSpicer::Inputs::Reader
- *
- * Abstract class with input reader to support user interaction on other plugins.
+ * LEDSpicer::FrameActor
  */
-class Reader: public Input {
+class FrameActor : public Actor, public Speed {
 
 public:
 
-	Reader(umap<string, string>& parameters);
+	FrameActor(
+		umap<string, string>& parameters,
+		Group* const group,
+		const vector<string>& requiredParameters
+	);
 
-	virtual ~Reader() = default;
+	virtual ~FrameActor() = default;
 
-	virtual void activate();
-
-	virtual void deactivate();
-
+	/**
+	 * @see Actor::drawConfig()
+	 */
 	virtual void drawConfig();
+
+	/**
+	 * @return true if the current frame is the first frame.
+	 */
+	virtual bool isFirstFrame() const;
+
+	/**
+	 * @return true if the current frame is the last frame,
+	 */
+	virtual bool isLastFrame() const;
+
+	/**
+	 * @see Actor::draw()
+	 */
+	virtual bool draw();
 
 protected:
 
-	/// poll of events.
-	static vector<input_event> events;
-
-	/// The first plugin will handle the reads.
-	static Input* readController;
+	uint8_t
+		totalFrames  = 0,
+		currentFrame = 0;
 
 	/**
-	 * list of input device and their resource.
+	 * Advances the system frame forward.
 	 */
-	static umap<string, int> listenEvents;
+	virtual void advanceFrame();
 
-	/**
-	 * Reads all the events.
-	 */
-	void readAll();
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+}} /* namespace LEDSpicer */
 
-#endif /* READER_HPP_ */
+#endif /* FRAMEACTOR_HPP_ */

@@ -21,7 +21,9 @@
  */
 
 #include "utility/Color.hpp"
-#include "TimedActor.hpp"
+#include "Actor.hpp"
+#include "StepActor.hpp"
+#include "utility/Speed.hpp"
 
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
@@ -34,7 +36,7 @@ namespace Animations {
 /**
  * LEDSpicer::Serpentine
  */
-class Serpentine: public TimedActor {
+class Serpentine : public StepActor, public Color {
 
 public:
 
@@ -46,14 +48,13 @@ public:
 
 protected:
 
-	Color
-		color,
-		tailColor;
+	Color tailColor;
 
 	struct TailData {
 		uint8_t percent;
 		uint8_t position;
 	};
+
 	vector<TailData> tailData;
 
 	void calculateTailPosition();

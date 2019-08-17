@@ -25,11 +25,12 @@
 using namespace LEDSpicer::Animations;
 
 Filler::Filler(umap<string, string>& parameters, Group* const group) :
-	TimedActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
-	color(parameters["color"])
+	DirectionActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
+	Color(parameters["color"]),
+	mode(str2mode(parameters["mode"]))
 {
-	mode = str2mode(parameters["mode"]);
-	totalActorFrames = group->size();
+
+	totalFrames = group->size();
 	restart();
 	switch (mode) {
 	case Modes::Random:
@@ -38,84 +39,28 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	}
 }
 
-void Filler::advanceActorFrame() {
-
-	if (willChange()) {
-		changeFrame = 1;
-
-		if (mode == Modes::Linear) {
-
-			/*
-			 this will generate an double run when the actor is working as a transition.
-			 */
-			if (isBouncer()) {
-				if (cDirection == Directions::Forward and currentActorFrame == totalActorFrames) {
-					if (filling) {
-						filling = false;
-						currentActorFrame = 1;
-						return;
-					}
-					filling = true;
-				}
-				if (cDirection == Directions::Backward and currentActorFrame == 1) {
-					if (filling) {
-						filling = false;
-						currentActorFrame = totalActorFrames;
-						return;
-					}
-					filling = true;
-				}
-				Actor::advanceActorFrame();
-				return;
-			}
-
-			if (isLastFrame()) {
-				if (filling) {
-					// restart forward.
-					if (cDirection == Directions::Forward) {
-						filling = false;
-						currentActorFrame = 1;
-						return;
-					}
-					// restart backward.
-					if (cDirection == Directions::Backward) {
-						filling = false;
-						currentActorFrame = totalActorFrames;
-						return;
-					}
-				}
-				filling = true;
-			}
-		}
-		Actor::advanceActorFrame();
-		return;
-	}
-	changeFrame++;
-}
-
 const vector<bool> Filler::calculateElements() {
 
 	switch (mode) {
-	default:
-		if (cDirection == Directions::Forward) {
-			fillElementsLinear(
-				filling ? 0                 : currentActorFrame - 1,
-				filling ? currentActorFrame : totalActorFrames
-			);
-			break;
+	default: {
+		uint8_t from, to;
+		if (filling) {
+			from = 1;
+			to   = currentFrame;
 		}
-		fillElementsLinear(
-			filling ? currentActorFrame - 1 : 0,
-			filling ? totalActorFrames  : currentActorFrame
-		);
+		else {
+			from = currentFrame;
+			to   = totalFrames;
+		}
+		fillElementsLinear(from, to);
 		break;
-
+	}
 	// Forward or backward will work in the same way for random modes.
 	case Modes::Random:
 		fillElementsRandom(filling);
 		break;
 	case Modes::RandomSimple:
-		if (isFirstFrame() and not isSameFrame())
+//		if (isFirstFrame() and not isSameFrame())
 			affectAllElements();
 		fillElementsRandom(true);
 		break;
@@ -126,20 +71,19 @@ const vector<bool> Filler::calculateElements() {
 void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
 	affectAllElements();
 	for (uint8_t c = begin; c < end; ++c) {
-		changeElementColor(c, color, filter);
+		changeElementColor(c, *this, filter);
 		affectedElements[c] = true;
 	}
+	//changeFrameElement(*this, true);
 }
 
 void Filler::fillElementsRandom(bool val) {
 
-	// TODO: cambiar aca: dibujar lo q esta on, el nuevo guardarlo en una property, y dibujarlo faded
-
 	// Draw.
-	if (isSameFrame()) {
+/*	if (isSameFrame()) {
 		drawRandom();
 		return;
-	}
+	}*/
 
 	// Extract candidates.
 	vector<uint8_t> possibleElements;
@@ -159,21 +103,23 @@ void Filler::fillElementsRandom(bool val) {
 	// Check direction and force last frame.
 	if (possibleElements.size() == 1) {
 		filling = not filling;
-		currentActorFrame = totalActorFrames;
+		currentFrame = totalFrames;
 	}
 }
 
 void Filler::drawRandom() {
 	for (uint8_t e = 0; e < affectedElements.size(); ++e)
 		if (affectedElements[e])
-			changeElementColor(e, color, filter);
+			changeElementColor(e, *this, filter);
 }
 
 void Filler::drawConfig() {
-	cout << "Actor Type: Filler, Mode: " << mode2str(mode) << endl;
-	Actor::drawConfig();
+	cout <<
+		"Type: Filler" << endl <<
+		"Mode: " << mode2str(mode) << endl;
+	DirectionActor::drawConfig();
 	cout << "Color: ";
-	color.drawColor();
+	this->drawColor();
 }
 
 string Filler::mode2str(Modes mode) {

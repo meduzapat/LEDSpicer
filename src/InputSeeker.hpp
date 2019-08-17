@@ -43,7 +43,7 @@ using std::cerr;
 #ifndef INPUTSEEKER_HPP_
 #define INPUTSEEKER_HPP_ 1
 
-#define DEV_INPUT "/dev/input/"
+#define DEV_INPUT "/dev/input/by-id/"
 
 namespace LEDSpicer {
 

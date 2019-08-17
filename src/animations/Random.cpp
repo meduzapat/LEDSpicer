@@ -24,22 +24,13 @@
 
 using namespace LEDSpicer::Animations;
 
-Random::Random(umap<string, string>& parameters, Group* const layout) :
-	Actor(parameters, layout, REQUIRED_PARAM_ACTOR_RANDOM)
+Random::Random(umap<string, string>& parameters, Group* const group) :
+	FrameActor(parameters, group, REQUIRED_PARAM_ACTOR_RANDOM)
 {
 
-	oldColors.reserve(getNumberOfElements());
+	oldColors.reserve(group->size());
 
-	if (parameters["colors"].empty()) {
-		colors.reserve(Color::getNames().size());
-		for (auto& c : Color::getNames())
-			colors.push_back(&Color::getColor(c));
-	}
-	else {
-		colors = extractColors(parameters["colors"]);
-		if (colors.size() < 2)
-			throw Error("You need two or more colors for actor Random to do something.");
-	}
+	extractColors(parameters["colors"]);
 
 	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
 		oldColors.push_back(&Color::getColor("Black"));
@@ -50,15 +41,24 @@ Random::Random(umap<string, string>& parameters, Group* const layout) :
 
 const vector<bool> Random::calculateElements() {
 
-	uint8_t percent = (currentActorFrame * 100) / totalActorFrames;
-
-	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
+	uint8_t percent = PERCENT(currentFrame, totalFrames);
+#ifdef DEVELOP
+	cout << "Random frame: " << (currentFrame + 1) << " " << percent << "% ";
+#endif
+	for (uint8_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, oldColors[c]->transition(*newColors[c], percent), filter);
+#ifdef DEVELOP
+	cout << " " << to_string(c + 1);
+#endif
+	}
 
 	if (percent == 100) {
 		oldColors = std::move(newColors);
 		generateNewColors();
 	}
+#ifdef DEVELOP
+	cout << endl;
+#endif
 	return affectedElements;
 }
 
@@ -68,14 +68,11 @@ void Random::generateNewColors() {
 		newColors.push_back(colors[std::rand() / ((RAND_MAX + 1u) / colors.size())]);
 }
 
-void Random::advanceActorFrame() {
-	currentActorFrame = calculateNextOf(cDirection, currentActorFrame, Directions::Forward, totalActorFrames);
-}
-
 void Random::drawConfig() {
-	cout << "Actor Type: Random " << endl;
-	Actor::drawConfig();
+	cout << "Type: Random " << endl;
+	FrameActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
 	cout << endl;
 }
+

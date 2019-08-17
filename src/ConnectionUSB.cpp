@@ -197,7 +197,7 @@ milliseconds ConnectionUSB::getInterval() {
 }
 
 string ConnectionUSB::getFullName() {
-	return "device: " + name + " Id: " + to_string(board.boardId);
+	return "Device: " + name + " Id: " + to_string(board.boardId);
 }
 
 void ConnectionUSB::wait(milliseconds wasted) {
