@@ -404,7 +404,8 @@ inputsdir = \
 inputs_LTLIBRARIES = \
 	Mame.la          \
 	Impulse.la       \
-	Actions.la
+	Actions.la       \
+	Blinker.la
 
 ########
 # MAME #
@@ -443,6 +444,19 @@ Actions_la_LIBADD = \
 	libledspicer.la
 
 Actions_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+###########
+# Blinker #
+###########
+
+Blinker_la_SOURCES = \
+	src/inputs/Blinker.cpp
+
+Blinker_la_LIBADD = \
+	libledspicer.la
+
+Blinker_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
 
 ##############
@@ -537,6 +551,7 @@ EXTRA_DIST +=                       \
 	src/inputs/Reader.hpp         \
 	src/inputs/Impulse.hpp        \
 	src/inputs/Actions.hpp        \
+	src/inputs/Blinker.hpp        \
 	src/MainBase.hpp     \
 	src/Main.hpp         \
 	src/Emitter.hpp      \

@@ -28,10 +28,10 @@ void Actions::process() {
 
 	readAll();
 
-	if (not events.size()) {
-		blink();
+	blink();
+
+	if (not events.size())
 		return;
-	}
 
 	for (auto& event : events) {
 
