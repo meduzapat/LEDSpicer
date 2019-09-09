@@ -31,8 +31,6 @@ using std::vector;
 #include "utility/Color.hpp"
 #include "utility/Log.hpp"
 #include "utility/Utility.hpp"
-#include "utility/Speed.hpp"
-#include "utility/Direction.hpp"
 
 #ifndef ACTOR_HPP_
 #define ACTOR_HPP_ 1
@@ -48,7 +46,7 @@ using Devices::Element;
 /**
  * LEDSpicer::Animation
  */
-class Actor : public Speed, public Direction {
+class Actor {
 
 public:
 
@@ -58,17 +56,21 @@ public:
 	 * @param group the group where the actors will act.
 	 * @param requiredParameters A list of mandatory parameters.
 	 */
-	Actor(umap<string, string>& parameters, Group* const group, const vector<string>& requiredParameters);
+	Actor(
+		umap<string, string>& parameters,
+		Group* const group,
+		const vector<string>& requiredParameters
+	);
 
 	Actor() = delete;
 
 	virtual ~Actor() = default;
 
 	/**
-	 * Draws the next frame.
+	 * Draws actor contents.
 	 * @return true if the cycle ended.
 	 */
-	bool drawFrame();
+	virtual bool draw();
 
 	/**
 	 * Draws the actor configuration.
@@ -78,7 +80,12 @@ public:
 	/**
 	 * Reset the animation back to begin.
 	 */
-	virtual void restart();
+	virtual void restart() {}
+
+	/**
+	 * @return Return true if the actor is running.
+	 */
+	virtual bool running() {return true;}
 
 	/**
 	 * Sets the system FPS.
@@ -92,60 +99,13 @@ public:
 	 */
 	static uint8_t getFPS();
 
-	/**
-	 * Advances the system frame forward.
-	 */
-	static void advanceFrame();
-
-	/**
-	 * @return true if the animation is on the bouncing period.
-	 */
-	bool isBouncing() const;
-
-	/**
-	 * @return true if the animation is a bouncer.
-	 */
-	bool isBouncer() const;
-
-	/**
-	 * @return true if the current frame is the first frame.
-	 */
-	bool isFirstFrame() const;
-
-	/**
-	 * @return true if the current frame is the last frame,
-	 */
-	bool isLastFrame() const;
-
-	/**
-	 * @return true if the direction is forward or forward with bouncing.
-	 */
-	bool isDirectionForward();
-
-	/**
-	 * @return true if the direction is backward or backward with bouncing.
-	 */
-	bool isDirectionBackward();
-
 protected:
-
-	uint8_t
-		/// Internally used by actors to keep track of incremental frames.
-		currentActorFrame = 1,
-		/// Total actor frames.
-		totalActorFrames;
-
-	/// Current Direction
-	Directions cDirection;
 
 	/// How the color information will be draw back.
 	Color::Filters filter = Color::Filters::Normal;
 
-	static uint8_t
-		/// Hardware current frame.
-		currentFrame,
-		/// Hardware frames per second.
-		FPS;
+	/// Hardware frames per second.
+	static uint8_t FPS;
 
 	/**
 	 * Array with a list of affected elements.
@@ -176,28 +136,6 @@ protected:
 	 * @param percent the amount of effect to apply, only used by Combine.
 	 */
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
-
-	/**
-	 * Moves the frame to the next one.
-	 */
-	virtual void advanceActorFrame();
-
-	/**
-	 * Will calculate the next element index for a group of element, based on the direction and the current position.
-	 * @param [out] currentDirection will be updated with the new direction.
-	 * @param element the element index from 1.
-	 * @param direction
-	 * @param totalElements
-	 * @return the next element.
-	 */
-	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
-
-	/**
-	 * Creates an array of colors from a string of comma separated color names.
-	 * @param colors
-	 * @return
-	 */
-	static vector<const Color*> extractColors(string colors);
 
 	/**
 	 * Sets the affected elements to the desired stated.

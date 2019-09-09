@@ -31,6 +31,7 @@ namespace Animations {
 
 /**
  * LEDSpicer::Animations::ActorHandler
+ * This is an Actor factory to loader and create Actor plugins.
  */
 class ActorHandler : public Handler {
 
@@ -48,8 +49,18 @@ public:
 
 protected:
 
+	/**
+	 * Pointer to the plugin's creation function.
+	 * @param plugin parameters.
+	 * @param group
+	 * @return a new created plugin.
+	 */
 	Actor*(*createFunction)(umap<string, string>&, Group* const) = nullptr;
 
+	/**
+	 * Pointer to the plugin's destruction function.
+	 * @param pointer to the plugin to destroy.
+	 */
 	void(*destroyFunction)(Actor*) = nullptr;
 };
 

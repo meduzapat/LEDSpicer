@@ -25,12 +25,13 @@
 #include <cmath>
 #include <mutex>
 
+#include "utility/Direction.hpp"
 #include "Actor.hpp"
 
 #ifndef PULSEAUDIO_HPP_
 #define PULSEAUDIO_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSEAUDIO {"direction", "mode", "off", "low", "mid", "high", "channel"}
+#define REQUIRED_PARAM_ACTOR_PULSEAUDIO {"mode", "off", "low", "mid", "high", "channel"}
 #define VU_MIN_ELEMETS 6
 #define STREAM_NAME "Peek Reader"
 #define MIN_MAX_PEAK 10
@@ -47,7 +48,7 @@ namespace Animations {
  * LEDSpicer::Animations::PulseAudio
  * Pulseaudio output plugin.
  */
-class PulseAudio: public Actor {
+class PulseAudio: public Actor, public Direction {
 
 public:
 
@@ -79,9 +80,13 @@ protected:
 
 	struct UserPref {
 		Color
+			/// Color to use when off
 			off,
+			/// Color to use when low
 			c00,
+			/// Color to use when mid
 			c50,
+			/// Color to use when full
 			c75;
 		Modes mode;
 		Channels channel;
@@ -92,13 +97,15 @@ protected:
 	static pa_context* context;
 	static pa_stream* stream;
 
-	static uint8_t instances;
-	static uint8_t totalChannels;
+	static uint8_t
+		instances,
+		totalChannels;
 
 	static string source;
 
 	static uint16_t peak;
 
+	/// To avoid updating when is reading the buffer.
 	static std::mutex mutex;
 
 	uint8_t total = 0;

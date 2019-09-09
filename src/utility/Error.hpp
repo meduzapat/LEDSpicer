@@ -25,7 +25,7 @@ using std::string;
 using std::to_string;
 using std::stoi;
 
-// Compilation settings.
+// Compiler settings.
 #include "config.h"
 
 #ifndef ERROR_HPP_
@@ -41,16 +41,6 @@ namespace LEDSpicer {
 class Error {
 
 public:
-
-	static const char* const SIGTERM_LABEL;
-	static const char* const SIGHUP_LABEL;
-	static const char* const RUNNING_LABEL;
-	static const char* const INVALID_MESSAGE_LABEL;
-	static const char* const INVALID_NUMBER_LABEL;
-	static const char* const INVALID_COLOR_LABEL;
-	static const char* const INVALID_ELEMENT_LABEL;
-	static const char* const INVALID_GROUP_LABEL;
-	static const char* const TERMINATED_BY_ERROR_LABEL;
 
 	Error(const string& errorMessage) : error(errorMessage) {}
 

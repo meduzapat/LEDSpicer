@@ -20,9 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// To handle daemonization.
-#include <unistd.h>
-
 // To handle c signals.
 #include <csignal>
 using std::signal;
@@ -100,6 +97,7 @@ protected:
 	 * @return nullptr if all failed.
 	 */
 	Profile* tryProfiles(const vector<string>& data);
+
 
 };
 

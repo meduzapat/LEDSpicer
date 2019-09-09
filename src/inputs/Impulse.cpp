@@ -26,7 +26,7 @@ using namespace LEDSpicer::Inputs;
 
 void Impulse::process() {
 
-	readAll(this);
+	readAll();
 
 	if (not events.size())
 		return;

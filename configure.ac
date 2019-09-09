@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.3.6],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.3.8],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2019 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -137,7 +137,7 @@ PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.~],
 	AC_MSG_ERROR([libusb-1.0 development library not found.])
 )
 
-PKG_CHECK_MODULES([TINYXML2], [tinyxml2 >= 2.2],
+PKG_CHECK_MODULES([TINYXML2], [tinyxml2 >= 6.0],
 	echo -e "\ttinyxml2 ver `pkg-config --short-errors --modversion tinyxml2` found",
 	AC_MSG_ERROR([tinyxml2 not found.])
 )
@@ -166,7 +166,7 @@ dnl * Needed header *
 dnl *****************
 AC_MSG_CHECKING([Headers])
 
-AC_CHECK_HEADERS([syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ])
+AC_CHECK_HEADERS([termios.h syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ])
 
 dnl ****************
 dnl * Needed Types *
@@ -178,6 +178,7 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_INT8_T
 AC_TYPE_UINT8_T
+AC_TYPE_INT16_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 
@@ -185,7 +186,7 @@ dnl ********************************
 dnl * Checks for library functions *
 dnl ********************************
 AC_FUNC_ERROR_AT_LINE
-AC_CHECK_FUNCS([gethostbyname memset select socket strerror])
+AC_CHECK_FUNCS([atexit gethostbyname memset select socket strerror])
 
 dnl dlopen
 AC_CHECK_LIB([dl], [dlopen],

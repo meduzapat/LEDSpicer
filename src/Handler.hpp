@@ -41,12 +41,20 @@ public:
 
 	Handler() = default;
 
+	/**
+	 * Loads a new plugin using its library name.
+	 * @param the plugin library name without extension or path.
+	 */
 	Handler(const string& filename);
 
+	/**
+	 * releases the linked library.
+	 */
 	virtual ~Handler();
 
 protected:
 
+	/// Pointer to the dynamic linked library.
 	void* handler = nullptr;
 
 };

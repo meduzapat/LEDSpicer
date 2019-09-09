@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Error.cpp
- * @since     Jun 6, 2018
+ * @file      Colors.hpp
+ * @since     Jul 20, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,10 +20,37 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Error.hpp"
+#include "Utility.hpp"
+#include "Color.hpp"
 
-using namespace LEDSpicer;
+#ifndef COLORS_HPP_
+#define COLORS_HPP_ 1
 
-string Error::getMessage() {
-	return std::move(error);
-}
+namespace LEDSpicer {
+
+/**
+ * LEDSpicer::Colors
+ */
+class Colors {
+
+public:
+
+	Colors() = default;
+
+	virtual ~Colors() = default;
+
+protected:
+
+	vector<const Color*> colors;
+
+	/**
+	 * Creates an array of colors from a string of comma separated color names.
+	 * @param colors
+	 */
+	void extractColors(string colors);
+
+};
+
+} /* namespace LEDSpicer */
+
+#endif /* COLORS_HPP_ */

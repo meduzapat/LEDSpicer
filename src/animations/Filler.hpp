@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TimedActor.hpp"
+#include "DirectionActor.hpp"
 
 #ifndef FILLER_HPP_
 #define FILLER_HPP_ 1
@@ -33,7 +33,7 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Fill
  */
-class Filler: public TimedActor {
+class Filler: public DirectionActor, public Color {
 
 public:
 
@@ -42,8 +42,6 @@ public:
 	Filler(umap<string, string>& parameters, Group* const group);
 
 	virtual ~Filler() = default;
-
-	virtual void advanceActorFrame();
 
 	void drawConfig();
 
@@ -56,9 +54,6 @@ protected:
 	virtual const vector<bool> calculateElements();
 
 private:
-
-	/// Stores the color.
-	Color color;
 
 	/// Stores the mode.
 	Modes mode;

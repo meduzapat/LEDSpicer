@@ -56,10 +56,10 @@ class Color {
 public:
 
 	/**
-	 * Normal:     Will overwrite the background.
-	 * Combine:    Will combine with the background.
-	 * Mask:       Will cover the background with a mask.
-	 * Invert:     Will Revert the background color.
+	 * Normal:  Will overwrite the background.
+	 * Combine: Will combine with the background.
+	 * Mask:    Will cover the background with a mask.
+	 * Invert:  Will Revert the background color.
 	 */
 	enum class Filters : uint8_t {Normal, Combine, Mask, Invert};
 
@@ -98,14 +98,14 @@ public:
 	 * @param other
 	 * @return
 	 */
-	bool operator==(const Color& other);
+	bool operator==(const Color& other) const;
 
 	/**
 	 * Compare different Colors.
 	 * @param other
 	 * @return
 	 */
-	bool operator!=(const Color& other);
+	bool operator!=(const Color& other) const;
 
 	void setR(uint8_t color);
 	void setG(uint8_t color);

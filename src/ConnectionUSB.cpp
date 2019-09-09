@@ -197,12 +197,12 @@ milliseconds ConnectionUSB::getInterval() {
 }
 
 string ConnectionUSB::getFullName() {
-	return "device: " + name + " Id: " + to_string(board.boardId);
+	return "Device: " + name + " Id: " + to_string(board.boardId);
 }
 
 void ConnectionUSB::wait(milliseconds wasted) {
 	if (wasted < waitTime)
 		std::this_thread::sleep_for(waitTime - wasted);
 	else
-		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(waitTime.count()) + "ms)");
+		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
 }

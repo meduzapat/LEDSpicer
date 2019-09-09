@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Reader.hpp
- * @since     May 23, 2019
+ * @file      Blinker.hpp
+ * @since     Aug 17, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
@@ -20,31 +20,31 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Input.hpp"
-#include <linux/input.h>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef BLINKER_HPP_
+#define BLINKER_HPP_ 1
 
-#ifndef READER_HPP_
-#define READER_HPP_ 1
-
-#define DEV_INPUT "/dev/input/by-id/"
+#include "Reader.hpp"
+#include "utility/Speed.hpp"
 
 namespace LEDSpicer {
 namespace Inputs {
 
 /**
- * LEDSpicer::Inputs::Reader
- *
- * Abstract class with input reader to support user interaction on other plugins.
+ * LEDSpicer::Blinker
  */
-class Reader: public Input {
+class Blinker: public Inputs::Reader, public Speed {
 
 public:
 
-	Reader(umap<string, string>& parameters);
+	Blinker(umap<string, string>& parameters) :
+		Reader(parameters),
+		Speed(parameters.count("speed") ? parameters["speed"] : ""),
+		frames(static_cast<uint8_t>(speed) * 3),
+		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : "", "Invalid numeric value ")) {}
 
-	virtual ~Reader() = default;
+	virtual ~Blinker() = default;
+
+	virtual void process();
 
 	virtual void activate();
 
@@ -54,24 +54,36 @@ public:
 
 protected:
 
-	/// poll of events.
-	static vector<input_event> events;
+	uint8_t
+		times,
+		frames,
+		cframe = 0;
 
-	/// The first plugin will handle the reads.
-	static Input* readController;
+	bool on = false;
 
-	/**
-	 * list of input device and their resource.
-	 */
-	static umap<string, int> listenEvents;
+	struct timesElement {
+		Element::Item* element;
+		uint8_t times = 0;
+	};
 
-	/**
-	 * Reads all the events.
-	 */
-	void readAll();
+	struct timesGroup {
+		Group::Item* group;
+		uint8_t times = 0;
+	};
+
+	umap<string, timesElement> blinkingElements;
+	umap<string, timesGroup> blinkingGroups;
+
+	vector<string> elementsToClean;
+	vector<string> groupsToClean;
+
+	void blink();
+
 };
 
 } /* namespace Inputs */
 } /* namespace LEDSpicer */
 
-#endif /* READER_HPP_ */
+inputFactory(LEDSpicer::Inputs::Blinker)
+
+#endif /* BLINKER_HPP_ */

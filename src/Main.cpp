@@ -34,13 +34,13 @@ high_resolution_clock::time_point Main::start;
 void signalHandler(int sig) {
 
 	if (sig == SIGTERM) {
-		LogNotice(Error::SIGTERM_LABEL);
+		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
 	}
 
 	if (sig == SIGHUP) {
-		LogNotice(Error::SIGHUP_LABEL);
+		LogNotice(PACKAGE_NAME " received re load configuration signal");
 		// TODO: reload the profiles and restart everything?
 		return;
 	}
@@ -56,7 +56,7 @@ void signalHandler(int sig) {
 
 void Main::run() {
 
-	LogInfo(Error::RUNNING_LABEL);
+	LogInfo(PACKAGE_NAME " Running");
 
 	currentProfile = DataLoader::defaultProfile;
 	currentProfile->restart();
@@ -80,25 +80,26 @@ void Main::run() {
 					LogDebug("Cannot terminate the default profile.");
 					break;
 				}
+				// TODO: this starts to been annoying, I will finish them anyway.
 				if (currentProfile->isTransiting()) {
 					LogInfo("Profile " + currentProfile->getName() + " is finishing, try later.");
 					break;
 				}
 				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
+				currentProfile->terminate();
 				// Deactivate overwrites.
 				alwaysOnGroups.clear();
 				alwaysOnElements.clear();
-				currentProfile->terminate();
 				DataLoader::controlledGroups.clear();
 				DataLoader::controlledElements.clear();
 				break;
 
 			case Message::Types::FinishAllProfiles:
 				if (profiles.size() > 1) {
+					currentProfile->terminate();
 					// Deactivate overwrites.
 					alwaysOnGroups.clear();
 					alwaysOnElements.clear();
-					currentProfile->terminate();
 					DataLoader::controlledGroups.clear();
 					DataLoader::controlledElements.clear();
 					profiles.clear();
@@ -109,11 +110,11 @@ void Main::run() {
 
 			case Message::Types::SetElement:
 				if (msg.getData().size() != 3) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL);
+					LogNotice("Invalid message ");
 					break;
 				}
 				if (not DataLoader::allElements.count(msg.getData()[0])) {
-					LogNotice(Error::INVALID_ELEMENT_LABEL + msg.getData()[0]);
+					LogNotice("Unknown element " + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -137,7 +138,7 @@ void Main::run() {
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL + msg.getData()[0]);
+					LogNotice("Invalid message " + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnElements.count(msg.getData()[0]))
@@ -150,11 +151,11 @@ void Main::run() {
 
 			case Message::Types::SetGroup:
 				if (msg.getData().size() != 3) {
-					LogNotice(Error::INVALID_MESSAGE_LABEL);
+					LogNotice("Invalid message ");
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
+					LogNotice("Unknown group " + msg.getData()[0]);
 					break;
 				}
 				try {
@@ -178,7 +179,7 @@ void Main::run() {
 
 			case Message::Types::ClearGroup:
 				if (msg.getData().size() != 1) {
-					LogNotice(Error::INVALID_GROUP_LABEL + msg.getData()[0]);
+					LogNotice("Unknown group " + msg.getData()[0]);
 					break;
 				}
 				if (alwaysOnGroups.count(msg.getData()[0]))
@@ -311,11 +312,6 @@ int main(int argc, char **argv) {
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
-	}
-	catch(Error& e) {
-		LogError("Error: " + e.getMessage());
-		return EXIT_FAILURE;
-	}
 
 #ifdef DEVELOP
 	// force debug mode logging.
@@ -323,9 +319,7 @@ int main(int argc, char **argv) {
 	Log::setLogLevel(LOG_DEBUG);
 #endif
 
-	// Run mode.
-	try {
-
+		// Run mode.
 		Main ledspicer;
 
 		switch (DataLoader::getMode()) {
@@ -349,7 +343,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(Error& e) {
-		LogError(Error::TERMINATED_BY_ERROR_LABEL + e.getMessage());
+		LogError("Program terminated by error: " + e.getMessage());
 		return EXIT_FAILURE;
 	}
 
@@ -357,6 +351,14 @@ int main(int argc, char **argv) {
 }
 
 void Main::runCurrentProfile() {
+
+	if (not currentProfile->isRunning()) {
+		// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
+		profiles.pop_back();
+		currentProfile = profiles.back();
+		currentProfile->reset();
+		return;
+	}
 
 	// Reset elements.
 	for (auto& eD : DataLoader::allElements)
@@ -398,14 +400,4 @@ void Main::runCurrentProfile() {
 
 	// Wait...
 	ConnectionUSB::wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
-
-	if (currentProfile->isRunning()) {
-		Actor::advanceFrame();
-		return;
-	}
-
-	// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
-	profiles.pop_back();
-	currentProfile = profiles.back();
-	currentProfile->reset();
 }

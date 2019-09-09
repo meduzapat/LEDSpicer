@@ -38,11 +38,12 @@ Reader::Reader(umap<string, string>& parameters) : Input(parameters) {
 }
 
 void Reader::activate() {
+	readController = nullptr;
 	for (auto& l : listenEvents) {
 		// ignore already connected elements.
 		if (l.second >= 0)
 			continue;
-		LogInfo("Opening device " DEV_INPUT + l.first);
+		LogInfo("Opening device " + l.first);
 		l.second = open((DEV_INPUT + l.first).c_str(), O_RDONLY | O_NONBLOCK);
 		if (l.second < 0)
 			LogWarning("Unable to open " DEV_INPUT + l.first);
@@ -59,12 +60,20 @@ void Reader::deactivate() {
 	}
 }
 
-void Reader::readAll(Input* who) {
+void Reader::drawConfig() {
+	cout << "Listening events: ";
+	for (auto&le : listenEvents)
+		cout << le.first << " ";
+	cout << endl;
+	Input::drawConfig();
+}
+
+void Reader::readAll() {
 
 	if (not readController)
-		readController = who;
+		readController = this;
 
-	if (readController != who)
+	if (readController != this)
 		return;
 
 	events.clear();
@@ -80,7 +89,7 @@ void Reader::readAll(Input* who) {
 				break;
 			if (event.type != EV_KEY) // and event.type != EV_REL))
 				continue;
-			LogDebug("event: " + std::to_string(event.type) + " code: " + std::to_string(event.code) + string(event.value ? " ON" : " OFF"));
+			LogDebug(l.first + " - Type: " + (event.type == 1 ? "Key" : "Other") + " code: " + std::to_string(event.code) + string(event.value ? " ON" : " OFF"));
 			events.push_back(event);
 		}
 	}

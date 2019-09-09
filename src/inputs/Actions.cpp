@@ -26,12 +26,12 @@ using namespace LEDSpicer::Inputs;
 
 void Actions::process() {
 
-	readAll(this);
+	readAll();
 
-	if (not events.size()) {
-		blink();
+	blink();
+
+	if (not events.size())
 		return;
-	}
 
 	for (auto& event : events) {
 
@@ -124,6 +124,14 @@ void Actions::deactivate() {
 	blinkingElements.clear();
 	blinkingGroups.clear();
 	Reader::deactivate();
+}
+
+void Actions::drawConfig() {
+	cout << "Linked Elements: ";
+	for (auto&le : linkedElementsRaw)
+		cout << le << " ";
+	cout << endl;
+	Reader::drawConfig();
 }
 
 void Actions::blink() {

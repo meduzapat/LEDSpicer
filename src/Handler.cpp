@@ -24,7 +24,9 @@
 
 using namespace LEDSpicer;
 
-Handler::Handler(const string& filename) :handler(dlopen(filename.c_str(), RTLD_LAZY)) {
+Handler::Handler(const string& filename) :
+	handler(dlopen(filename.c_str(), RTLD_LAZY))
+{
 	LogDebug("Loading library " + filename);
 	if (char *errstr = dlerror())
 		throw Error("Failed to load library " + filename + " " + errstr);

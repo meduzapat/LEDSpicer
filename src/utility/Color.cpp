@@ -35,11 +35,11 @@ Color::Color(const string& color, const string& formatHex) {
 	set(color, formatHex == "hex");
 }
 
-bool Color::operator==(const Color& other) {
+bool Color::operator==(const Color& other) const {
 	return r == other.r and g == other.g and b == other.b;
 }
 
-bool Color::operator!=(const Color& other) {
+bool Color::operator!=(const Color& other) const {
 	return r != other.r or g != other.g or b != other.b;
 }
 
@@ -93,15 +93,11 @@ Color* Color::set(const Color& color, const Filters& filter, uint8_t percent) {
 		break;
 
 	case Color::Filters::Combine:
-		set(
-			this->transition(color, percent)
-		);
+		set(this->transition(color, percent));
 		break;
 
 	case Color::Filters::Mask:
-		set(
-			this->mask(color.getMonochrome())
-		);
+		set(this->mask(color.getMonochrome()));
 		break;
 
 	case Color::Filters::Invert:
@@ -142,7 +138,8 @@ Color Color::fade(float percent) const {
 }
 
 Color Color::transition(const Color& destination, float percent) const {
-	if (percent < 1)
+
+	if (percent < 1 or destination == *this)
 		return *this;
 
 	if (percent > 99)

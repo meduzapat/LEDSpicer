@@ -20,7 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TimedActor.hpp"
+#include "utility/Colors.hpp"
+#include "StepActor.hpp"
 
 #ifndef GRADIENT_HPP_
 #define GRADIENT_HPP_ 1
@@ -33,7 +34,7 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Rainbow
  */
-class Gradient: public TimedActor {
+class Gradient: public StepActor, public Colors {
 
 public:
 
@@ -51,28 +52,17 @@ public:
 
 protected:
 
-	vector<const Color*> colors;
-
-	Directions colorDirection;
-
 	Modes mode;
 
-	float
-		/// the calculated increment
-		increment = 0;
-	uint8_t
-		/// The color for the 1st element.
-		currentColor,
-		/// Keeps the transition percent.
-		currentPercent = 0;
+	uint8_t tones = 6;
+
+	vector<Color> precalc;
 
 	const vector<bool> calculateElements();
 
 private:
 
 	void calculateSingle();
-
-	void calculateSequential();
 
 	void calculateMultiple();
 

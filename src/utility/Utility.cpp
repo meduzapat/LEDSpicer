@@ -85,7 +85,7 @@ vector<string> Utility::explode(const string& text, const char delimiter, const 
 		start = end + 1;
 	}
 
-	return std::move(temp);
+	return temp;
 }
 
 string Utility::hex2str(int number) {
