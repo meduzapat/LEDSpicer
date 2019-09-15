@@ -1,8 +1,8 @@
 # LEDSpicer - LED Manager for linux
 
-[![GitHub](https://img.shields.io/github/release/meduzapat/LEDSpicer?style=plastic&color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
-![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer?style=plastic)
-![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?style=plastic&color=blue)
+[![GitHub](https://img.shields.io/github/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
+![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
+![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 
 LEDSpicer is a linear LED controller daemon that will handle single color or a RGB LEDs connected to different devices.
@@ -25,7 +25,7 @@ all the information you need to get the program running on your Arcade box or PC
 
 ## Comments are welcome.
 
-[![Patricio Rossi](https://img.shields.io/badge/Patricio%20Rossi-meduzapat@users.sourceforge.net-orange.svg?style=plastic&logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
+[![Patricio Rossi](https://img.shields.io/badge/Patricio%20Rossi-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
 
 [![Facebook Page](https://img.shields.io/badge/Visit%20the-Facebook%20page-blue?logo=facebook)](https://www.facebook.com/LEDSpicer-2393969390678210)
 
