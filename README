@@ -1,12 +1,11 @@
 LEDSpicer - LED Manager for linux
 
-LEDSpicer is a linear LED controller daemon that will handle the single color or REG LEDs connected 
-to different devices.
-It allows the execution of animations and profiles and handle input, after setup you 
-be trigger profiles based different events, like programs running, network input, game 
-name, etc.
-Includes some utilities to make an arcade cabinet more attractive and cool!
+LEDSpicer is a linear LED controller daemon that will handle single color or RGB LEDs connected to different devices.
 
+It allows the execution of animations and profiles and can handle input from the user to interact with the LEDs, 
+profiles can be triggered based on different events, user input, network input, game name, etc.
+
+Includes some utilities to make an arcade cabinet more attractive and cool!
 
 A program to give flavor to your Arcade project.
 

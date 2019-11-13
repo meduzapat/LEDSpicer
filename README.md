@@ -5,14 +5,12 @@
 ![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 
-LEDSpicer is a linear LED controller daemon that will handle single color or a RGB LEDs connected to different devices.
+LEDSpicer is a linear LED controller daemon that will handle single color or RGB LEDs connected to different devices.
 
-It allows the execution of animations and profiles and handle can input to interact with the LEDs,
-profiles can be triggered based on different events,
-like programs running, network input, game name, etc.
+It allows the execution of animations and profiles and can handle input from the user to interact with the LEDs, 
+profiles can be triggered based on different events, user input, network input, game name, etc.
 
 Includes some utilities to make an arcade cabinet more attractive and cool!
-
 
 >A program to flavor your Arcade project.
 
