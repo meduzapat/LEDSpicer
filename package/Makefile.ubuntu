@@ -1,0 +1,104 @@
+VERSION := $(shell cat /tmp/project/usr/lib/pkgconfig/ledspicer.pc | grep Version | awk '{print $$2}')
+EXCLUDES := $(shell find /tmp/project/usr/lib/ledspicer/devices \( -name "*.la" -o -name "*.so" \) | xargs -n 1 -I @ sh -c 'echo --exclude **/`basename "@"`')
+
+clean: 
+	@find /tmp/project -name '*.deb' -exec rm {} \;
+
+install_prerequisites:
+	apt-get update
+	apt-get install -y build-essential autoconf libtool autotools-dev libusb-dev libtinyxml-dev libpulse-dev libpthread-stubs0-dev libtinyxml2-dev libusb-1.0-0-dev
+	./autogen.sh
+	./configure CXXFLAGS='-s -O3' --prefix=/usr --sysconfdir=/etc \
+	  --enable-pulseaudio \
+	  --enable-nanoled \
+	  --enable-pacdrive \
+	  --enable-pacled64 \
+	  --enable-ultimateio \
+	  --enable-ledwiz32
+	make
+	make DESTDIR=/tmp/project install
+	apt-get install -y ruby ruby-dev
+	gem install fpm
+
+all: clean package_core package_ledwiz32 package_nanoled package_ultimaio package_pacdrive package_pacled64	
+
+define PACKAGE_DESCRIPTION
+LEDSpicer LED controller and animator
+  LEDSpicer is a program that will handle several LED controller boards to create animations, effects and display profiles, to be used with arcade cabinets, or other projects that require an interaction with their LEDs controllers.
+  This package will install the binaries: ledspicerd (main daemon), emitter (command line application to send commands to ledspicerd), and inputseeker (utility program to detect input devices and codes)
+endef
+
+export PACKAGE_DESCRIPTION
+package_core: SHELL:=/bin/bash
+package_core:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    $(EXCLUDES) \
+	    --depends libtinyxml2-dev \
+	    --depends libusb-1.0-0-dev \
+			--description "$$PACKAGE_DESCRIPTION" \
+	    .
+
+package_ledwiz32: SHELL:=/bin/bash
+package_ledwiz32:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-ledwiz32 \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the Groovy Game Gear LedWiz, a 32 leds controller." \
+	    ./usr/lib/ledspicer/devices/LedWiz32.so
+
+package_nanoled: SHELL:=/bin/bash
+package_nanoled:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-nanoled \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the Ultimarc NanoLed, a 60 leds controller." \
+	    ./usr/lib/ledspicer/devices/UltimarcNanoLed.so
+
+package_ultimaio: SHELL:=/bin/bash
+package_ultimaio:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-ultimaio \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the Ultimarc Ultimate IO, a 96 leds controller." \
+	    ./usr/lib/ledspicer/devices/UltimarcUltimate.so
+
+package_pacdrive: SHELL:=/bin/bash
+package_pacdrive:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-pacdrive \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the Ultimarc PacDrive, a 16 leds controller." \
+	    ./usr/lib/ledspicer/devices/UltimarcPacDrive.so
+
+package_pacled64: SHELL:=/bin/bash
+package_pacled64:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-pacled64 \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the Ultimarc PacLed 64, a 64 leds controller." \
+	    ./usr/lib/ledspicer/devices/UltimarcPacLed64.so
