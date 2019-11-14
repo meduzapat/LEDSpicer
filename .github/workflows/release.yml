@@ -17,11 +17,11 @@ jobs:
       run: sudo make -f package/Makefile.ubuntu install_prerequisites
     - name: build packages
       run: sudo make -f package/Makefile.ubuntu all
-    - name: check packages
-      run: sudo find /tmp/project -name '*.deb'
+    - name: check packages and move locally
+      run: mkdir pkg; sudo find /tmp/project -name '*.deb' -exec mv {} pkg \;
     - name: Upload the artifacts
       uses: skx/github-action-publish-binaries@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: '/tmp/project/ledspicer*'
+        args: 'pkg/*.deb'
