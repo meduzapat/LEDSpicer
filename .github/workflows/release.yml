@@ -6,19 +6,23 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-    
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v1
     - name: install build-essential
-      run: sudo apt-get install -y build-essential
+      run: sudo apt-get update >/dev/null; sudo apt-get install -y build-essential
     - name: install all pre-reqs
       run: sudo make -f package/Makefile.ubuntu install_prerequisites
     - name: build packages
       run: sudo make -f package/Makefile.ubuntu all
     - name: check packages and move locally
       run: mkdir pkg; sudo find /tmp/project -name '*.deb' -exec mv {} pkg \;
+    - name: stuff
+      run: 'apt-get install -y tree >/dev/null 2>&1; pwd; ls -alh; tree'
+    - name: check packages locally
+      run: ls -alh pkg/*.deb
+    - name: double check packages locally
+      run: 'docker run --workdir /github/workspace --rm -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/_work/_temp/_github_home":"/github/home" -v "/_work/_temp/_github_workflow":"/github/workflow" -v "/_work/LEDSpicer/LEDSpicer":"/github/workspace" alpine:latest sh -c "apk add -U tree; tree ."'
     - name: Upload the artifacts
       uses: skx/github-action-publish-binaries@master
       env:
