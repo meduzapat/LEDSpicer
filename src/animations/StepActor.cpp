@@ -32,8 +32,7 @@ StepActor::StepActor(
 	totalStepFrames(totalFrames / 2)
 {
 	totalFrames = group->size() - 1;
-	if (isDirectionBackward())
-		currentFrame = totalFrames;
+	restart();
 }
 
 void StepActor::drawConfig() {
@@ -76,7 +75,6 @@ bool StepActor::isLastFrame() const {
 
 void StepActor::changeFrameElement(const Color& color, bool fade) {
 
-	affectedElements[currentFrame] = true;
 	float percent = PERCENT(currentStepFrame, totalStepFrames);
 
 	if (fade)
@@ -87,12 +85,10 @@ void StepActor::changeFrameElement(const Color& color, bool fade) {
 	Directions dir = cDirection;
 	uint8_t next = calculateNextOf(dir, currentFrame, direction, totalFrames);
 	changeElementColor(next, color.fade(percent), filter);
-	affectedElements[next] = true;
 }
 
 void StepActor::changeFrameElement(const Color& color, const Color& colorNext) {
 
-	affectedElements[currentFrame] = true;
 	float percent = PERCENT(currentStepFrame, totalStepFrames);
 
 	changeElementColor(currentFrame, colorNext.transition(color, percent), filter);
@@ -100,6 +96,4 @@ void StepActor::changeFrameElement(const Color& color, const Color& colorNext) {
 	Directions dir = cDirection;
 	uint8_t next = calculateNextOf(dir, currentFrame, direction, totalFrames);
 	changeElementColor(next, colorNext.fade(percent), filter);
-	affectedElements[next] = true;
 }
-

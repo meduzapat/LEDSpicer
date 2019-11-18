@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 
-		if (DataLoader::getMode() == DataLoader::Modes::Profile)
+		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
 
 #ifdef DEVELOP

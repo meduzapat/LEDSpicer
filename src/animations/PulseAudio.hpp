@@ -73,6 +73,10 @@ public:
 
 protected:
 
+	void calculateElements();
+
+private:
+
 	struct Values {
 		uint16_t
 			l = 0,
@@ -149,10 +153,6 @@ protected:
 	 * @param userdata
 	 */
 	static void onSinkInfo(pa_context* context, const pa_sink_info* info, int eol, void* userdata);
-
-	virtual const vector<bool> calculateElements();
-
-private:
 
 	/**
 	 * Calculates and returns the peaks out of raw data.

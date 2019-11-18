@@ -31,14 +31,16 @@ XMLHelper::XMLHelper(const string& fileName, const string& fileType) {
 		throw LEDError("Unable to read the file " + fileName + " " + string(ErrorStr()));
 
 	root = RootElement();
-	if (not root or std::strcmp(root->Name(), PACKAGE_NAME))
-		throw LEDError("Unknown or invalid data file");
+	if (fileType != XML_FILE_FOREIGN) {
+		if (not root or std::strcmp(root->Name(), PACKAGE_NAME))
+			throw LEDError("Unknown or invalid data file");
 
-	if (not root->Attribute("version") or std::strcmp(root->Attribute("version"), DATA_VERSION))
-		throw LEDError("Invalid data file version, needed " DATA_VERSION);
+		if (not root->Attribute("version") or std::strcmp(root->Attribute("version"), DATA_VERSION))
+			throw LEDError("Invalid data file version, needed " DATA_VERSION);
 
-	if (not root->Attribute("type") or fileType != root->Attribute("type"))
-		throw LEDError("Invalid data file type, needed " + fileType);
+		if (not root->Attribute("type") or fileType != root->Attribute("type"))
+			throw LEDError("Invalid data file type, needed " + fileType);
+	}
 }
 
 umap<string, string> XMLHelper::processNode(tinyxml2::XMLElement* nodeElement) {

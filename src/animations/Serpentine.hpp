@@ -23,7 +23,6 @@
 #include "utility/Color.hpp"
 #include "Actor.hpp"
 #include "StepActor.hpp"
-#include "utility/Speed.hpp"
 
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
@@ -48,6 +47,10 @@ public:
 
 protected:
 
+	void calculateElements();
+
+private:
+
 	Color tailColor;
 
 	struct TailData {
@@ -58,8 +61,6 @@ protected:
 	vector<TailData> tailData;
 
 	void calculateTailPosition();
-
-	const vector<bool> calculateElements();
 };
 
 }} /* namespace LEDSpicer */

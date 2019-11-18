@@ -36,10 +36,9 @@ Random::Random(umap<string, string>& parameters, Group* const group) :
 		oldColors.push_back(&Color::getColor("Black"));
 
 	generateNewColors();
-	affectAllElements(true);
 }
 
-const vector<bool> Random::calculateElements() {
+void Random::calculateElements() {
 
 	uint8_t percent = PERCENT(currentFrame, totalFrames);
 #ifdef DEVELOP
@@ -59,7 +58,6 @@ const vector<bool> Random::calculateElements() {
 #ifdef DEVELOP
 	cout << endl;
 #endif
-	return affectedElements;
 }
 
 void Random::generateNewColors() {

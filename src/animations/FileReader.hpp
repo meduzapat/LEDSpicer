@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Gradient.hpp
- * @since     Jul 3, 2018
+ * @file      FileReader.hpp
+ * @since     Nov 14, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,57 +20,58 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Colors.hpp"
 #include "StepActor.hpp"
 
-#ifndef GRADIENT_HPP_
-#define GRADIENT_HPP_ 1
+#ifndef FILEREADER_HPP_
+#define FILEREADER_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_GRADIENT {"speed", "direction", "colors", "mode"}
+#define REQUIRED_PARAM_ACTOR_FILEREADER {"speed", "direction", "filename", "format"}
 
 namespace LEDSpicer {
 namespace Animations {
 
 /**
- * LEDSpicer::Animations::Rainbow
+ * LEDSpicer::FileReader
  */
-class Gradient: public StepActor, public Colors {
+class FileReader : public StepActor {
 
 public:
 
-	enum class Modes : uint8_t {All, Sequential, Cyclic};
+	enum class Formats : uint8_t {rgba};
 
-	Gradient(umap<string, string>& parameters, Group* const layout);
+	FileReader(umap<string, string>& parameters, Group* const layout);
 
-	virtual ~Gradient() = default;
+	virtual ~FileReader() {}
 
 	void drawConfig();
 
-	static Modes str2mode(const string& mode);
+	string Format2str(Formats format);
 
-	static string mode2str(Modes mode);
+	Formats str2Format(const string& format);
 
 protected:
-
-	Modes mode;
-
-	uint8_t tones = 6;
-
-	vector<Color> precalc;
 
 	void calculateElements();
 
 private:
 
-	void calculateSingle();
+	/// Iterator to the pair
+	umap<string, vector<vector<Color>>>::iterator frames;
 
-	void calculateMultiple();
+	/// All files on memory data by filename.
+	static umap<string, vector<vector<Color>>> fileData;
+
+	/**
+	 * Loads into memory a RGBA file, an animation file that stores data in RGB values divided into frames.
+	 * @param filename
+	 */
+	void processRGBA(const string& filename);
 
 };
 
 } /* namespace Animations */
 } /* namespace LEDSpicer */
 
-actorFactory(LEDSpicer::Animations::Gradient)
+actorFactory(LEDSpicer::Animations::FileReader)
 
-#endif /* GRADIENT_HPP_ */
+#endif /* FILEREADER_HPP_ */

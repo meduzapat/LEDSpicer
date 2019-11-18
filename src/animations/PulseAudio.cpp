@@ -57,9 +57,7 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 		break;
 	case Modes::Wave:
 		waveData.insert(waveData.begin(), group->size(), Color());
-		/* no break */
-	default:
-		affectAllElements(true);
+		break;
 	}
 
 	// No bouncing here.
@@ -361,7 +359,7 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 	pa_stream_drop(stream);
 }
 
-const vector<bool> PulseAudio::calculateElements() {
+void PulseAudio::calculateElements() {
 	std::lock_guard<std::mutex> lock(mutex);
 	switch (userPref.mode) {
 	case Modes::VuMeter:
@@ -376,7 +374,6 @@ const vector<bool> PulseAudio::calculateElements() {
 	case Modes::Wave:
 		waves();
 	}
-	return affectedElements;
 }
 
 PulseAudio::Values PulseAudio::getPeak() {
@@ -430,12 +427,8 @@ void PulseAudio::vuMeters() {
 #else
 			changeElementColor(s, detectColor(round((e + 1) * 100.00 / total), false), filter);
 #endif
-			affectedElements[s] = true;
 		}
 	};
-
-	// Clean.
-	affectAllElements();
 
 	auto singleData = getPeak();
 	if (not singleData.l and not singleData.r)
@@ -636,5 +629,4 @@ LEDSpicer::Color PulseAudio::detectColor(uint8_t percent, bool gradient) {
 		return userPref.off.transition(userPref.c00, CALC_PERC(LOW_POINT, 1));
 
 	return userPref.c00;
-
 }

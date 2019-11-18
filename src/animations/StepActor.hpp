@@ -31,7 +31,7 @@ namespace Animations {
 /**
  * LEDSpicer::StepActor
  */
-class StepActor: public Animations::DirectionActor {
+class StepActor: public DirectionActor {
 
 public:
 
