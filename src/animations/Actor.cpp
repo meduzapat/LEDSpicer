@@ -80,7 +80,7 @@ uint8_t Actor::getNumberOfElements() const {
 void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 	affectedElements[index] = true;
 	Element* e = group->getElement(index);
-	e->setColor(*e->getColor().set(color, filter, percent));
+	e->setColor(color, filter, percent);
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {

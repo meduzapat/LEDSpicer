@@ -56,6 +56,10 @@ void Element::setColor(const Color& color) {
 	}
 }
 
+void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
+	setColor(*getColor().set(color, filter, percent));
+}
+
 LEDSpicer::Color Element::getColor() {
 	Color color;
 	if (pins.size() == 1)
