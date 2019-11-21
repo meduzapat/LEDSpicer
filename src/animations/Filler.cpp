@@ -30,22 +30,19 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	mode(str2mode(parameters["mode"]))
 {
 
-	totalFrames = group->size();
+	totalFrames = group->size() - 1;
+	previousFrameAffectedElements.resize(totalFrames, false);
+	previousFrameAffectedElements.shrink_to_fit();
 	restart();
-	switch (mode) {
-	case Modes::Random:
-	case Modes::RandomSimple:
-		cDirection = direction  = Directions::Forward;
-	}
 }
 
-const vector<bool> Filler::calculateElements() {
+void Filler::calculateElements() {
 
 	switch (mode) {
-	default: {
+	case Modes::LinearSimple: {
 		uint8_t from, to;
-		if (filling) {
-			from = 1;
+		if (cDirection == Directions::Forward) {
+			from = 0;
 			to   = currentFrame;
 		}
 		else {
@@ -55,49 +52,112 @@ const vector<bool> Filler::calculateElements() {
 		fillElementsLinear(from, to);
 		break;
 	}
+	case Modes::Linear: {
+		uint8_t from, to;
+		switch (direction) {
+		case Directions::Forward:
+			if (filling) {
+				from = 0;
+				to   = currentFrame;
+			}
+			else {
+				from = currentFrame;
+				to   = totalFrames;
+			}
+			break;
+		case Directions::Backward:
+			if (filling) {
+				from = currentFrame;
+				to   = totalFrames;
+			}
+			else {
+				from = 0;
+				to   = currentFrame;
+			}
+			break;
+		case Directions::ForwardBouncing:
+			if (filling) {
+				if (cDirection == Directions::Forward) {
+					from = 0;
+					to   = currentFrame;
+				}
+				else {
+					from = totalFrames - currentFrame;
+					to   = totalFrames;
+				}
+			}
+			else {
+				if (cDirection == Directions::Forward) {
+					from = totalFrames - currentFrame;
+					to   = totalFrames;
+				}
+				else {
+					from = 0;
+					to   = currentFrame;
+				}
+			}
+			break;
+		case Directions::BackwardBouncing:
+			if (cDirection == Directions::Forward) {
+				if (filling) {
+					from = 0;
+					to   = totalFrames - currentFrame;
+				}
+				else {
+					from = currentFrame;
+					to   = totalFrames;
+				}
+			}
+			else {
+				if (filling) {
+					from = currentFrame;
+					to   = totalFrames;
+				}
+				else {
+					from = 0;
+					to   = totalFrames - currentFrame;
+				}
+			}
+			break;
+		}
+
+		fillElementsLinear(from, to);
+		break;
+	}
 	// Forward or backward will work in the same way for random modes.
 	case Modes::Random:
 		fillElementsRandom(filling);
 		break;
 	case Modes::RandomSimple:
-//		if (isFirstFrame() and not isSameFrame())
-			affectAllElements();
+		if (isFirstFrame())
+			previousFrameAffectedElements.assign(previousFrameAffectedElements.size(), false);
 		fillElementsRandom(true);
 		break;
 	}
-	return affectedElements;
 }
 
 void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
-	affectAllElements();
-	for (uint8_t c = begin; c < end; ++c) {
+	for (uint8_t c = begin; c <= end; ++c)
 		changeElementColor(c, *this, filter);
-		affectedElements[c] = true;
-	}
-	//changeFrameElement(*this, true);
+	if (isLastFrame())
+		filling = not filling;
 }
 
 void Filler::fillElementsRandom(bool val) {
 
-	// Draw.
-/*	if (isSameFrame()) {
-		drawRandom();
-		return;
-	}*/
-
 	// Extract candidates.
 	vector<uint8_t> possibleElements;
-	for (uint8_t e = 0; e < affectedElements.size(); ++e)
-		if (affectedElements[e] != val)
+	for (uint8_t e = 0; e < totalFrames; ++e)
+		if (previousFrameAffectedElements[e] != val)
 			possibleElements.push_back(e);
 
 	// Roll dice.
 	uint8_t r = 0;
-	if (possibleElements.size() > 1)
+	if (possibleElements.size() > 1) {
 		r = std::rand() / ((RAND_MAX + 1u) / (possibleElements.size() - 1));
-
-	// Set dice and draw.
-	affectedElements[possibleElements[r]] = val;
+		// Set dice and draw.
+		previousFrameAffectedElements[possibleElements[r]] = val;
+	}
 	drawRandom();
 
 	// Check direction and force last frame.
@@ -108,8 +168,8 @@ void Filler::fillElementsRandom(bool val) {
 }
 
 void Filler::drawRandom() {
-	for (uint8_t e = 0; e < affectedElements.size(); ++e)
-		if (affectedElements[e])
+	for (uint8_t e = 0; e < totalFrames; ++e)
+		if (previousFrameAffectedElements[e])
 			changeElementColor(e, *this, filter);
 }
 
@@ -148,4 +208,12 @@ Filler::Modes Filler::str2mode(const string& mode) {
 	throw Error("Invalid mode " + mode);
 }
 
-
+void Filler::restart() {
+	DirectionActor::restart();
+	switch (mode) {
+	case Modes::Random:
+	case Modes::RandomSimple:
+		cDirection = direction  = Directions::Forward;
+		break;
+	}
+}

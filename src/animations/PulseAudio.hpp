@@ -38,8 +38,9 @@
 #define SAMPLE_FORMAT PA_SAMPLE_S16LE
 #define RATE 11025
 
-#define MID_POINT 60
-#define LOW_POINT 30
+#define HIG_POINT 95
+#define MID_POINT 55
+#define LOW_POINT 25
 
 namespace LEDSpicer {
 namespace Animations {
@@ -52,7 +53,7 @@ class PulseAudio: public Actor, public Direction {
 
 public:
 
-	enum class Modes : uint8_t {VuMeter, Levels, Single};
+	enum class Modes : uint8_t {VuMeter, Levels, Single, Wave};
 
 	enum Channels : uint8_t {Left = 1, Right, Both, Mono};
 
@@ -71,6 +72,10 @@ public:
 	static string channel2str(Channels channel);
 
 protected:
+
+	void calculateElements();
+
+private:
 
 	struct Values {
 		uint16_t
@@ -108,13 +113,13 @@ protected:
 	/// To avoid updating when is reading the buffer.
 	static std::mutex mutex;
 
+	/// Total elements per side, stereo or mono.
 	uint8_t total = 0;
 
-	/**
-	 * reusable buffers.
-	 */
-	static Values singleData;
-	static vector<Values> vuData;
+	/// Raw peak data.
+	static vector<int16_t> rawData;
+
+	vector<Color> waveData;
 
 	static void disconnect();
 
@@ -149,11 +154,17 @@ protected:
 	 */
 	static void onSinkInfo(pa_context* context, const pa_sink_info* info, int eol, void* userdata);
 
-	virtual const vector<bool> calculateElements();
+	/**
+	 * Calculates and returns the peaks out of raw data.
+	 * @return
+	 */
+	Values getPeak();
 
-private:
-
-	static void processRawData(vector<int16_t>& rawData, UserPref* userPref);
+	/**
+	 * Calculates and sets the peak.
+	 * @param peaks
+	 */
+	void setPeak(const Values& peaks);
 
 	/**
 	 * Calculates VU meters.
@@ -165,6 +176,8 @@ private:
 	 */
 	void levels();
 
+	void waves();
+
 	/**
 	 * Calculates a single VU for all.
 	 */
@@ -173,9 +186,10 @@ private:
 	/**
 	 * Detects the color based on the percent.
 	 * @param percent
+	 * @param gradient true for smooth gradient, lines with inside gradients.
 	 * @return
 	 */
-	Color detectColor(uint8_t percent);
+	Color detectColor(uint8_t percent, bool gradient = true);
 };
 
 } /* namespace Animations */

@@ -32,9 +32,11 @@ libledspicer_la_SOURCES =             \
 	src/utility/Direction.cpp         \
 	src/utility/Color.cpp             \
 	src/utility/Colors.cpp            \
+	src/utility/Socks.cpp             \
+	src/ConnectionUSB.cpp             \
 	src/devices/Element.cpp           \
 	src/devices/Group.cpp             \
-	src/ConnectionUSB.cpp             \
+	src/devices/Profile.cpp           \
 	src/devices/Device.cpp            \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
@@ -42,8 +44,6 @@ libledspicer_la_SOURCES =             \
 	src/animations/StepActor.cpp      \
 	src/inputs/Input.cpp              \
 	src/inputs/Reader.cpp             \
-	src/devices/Profile.cpp           \
-	src/utility/Socks.cpp             \
 	src/Message.cpp                   \
 	src/Messages.cpp
 
@@ -167,7 +167,8 @@ actors_LTLIBRARIES = \
 	Pulse.la         \
 	Serpentine.la    \
 	Random.la        \
-	Filler.la
+	Filler.la        \
+	FileReader.la
 
 actorsdir = \
 	$(ACTORS_DIR)
@@ -263,6 +264,19 @@ else
 EXTRA_DIST += \
 	src/animations/PulseAudio.cpp
 endif
+
+##############
+# FileReader #
+##############
+
+FileReader_la_SOURCES = \
+	src/animations/FileReader.cpp
+
+FileReader_la_LIBADD = \
+	libledspicer.la
+
+FileReader_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
 
 ###########
 # devices #
@@ -553,6 +567,7 @@ EXTRA_DIST +=                       \
 	src/animations/Random.hpp     \
 	src/animations/Filler.hpp     \
 	src/animations/PulseAudio.hpp \
+	src/animations/FileReader.hpp \
 	src/inputs/Mame.hpp           \
 	src/inputs/Reader.hpp         \
 	src/inputs/Impulse.hpp        \

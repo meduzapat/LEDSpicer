@@ -49,9 +49,11 @@ public:
 
 	Modes str2mode(const string& mode);
 
+	virtual void restart();
+
 protected:
 
-	virtual const vector<bool> calculateElements();
+	void calculateElements();
 
 private:
 
@@ -60,6 +62,9 @@ private:
 
 	/// Keeps track if the process is filling the group or cleaning.
 	bool filling = true;
+
+	/// Keeps track of the previous frame affected elements.
+	vector<bool> previousFrameAffectedElements;
 
 	/**
 	 * Fills the group in a linear way.

@@ -447,8 +447,8 @@ void DataLoader::dropRootPrivileges(uid_t uid, gid_t gid) {
 
 	LogDebug("Dropping privileges to user id " + to_string(uid) + " and group id " + to_string(gid));
 
-	if (getuid() != 0) {
-		LogDebug("No root privileges detected");
+	if (getuid() == uid) {
+		LogDebug("No privileges detected");
 		return;
 	}
 

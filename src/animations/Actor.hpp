@@ -108,15 +108,10 @@ protected:
 	static uint8_t FPS;
 
 	/**
-	 * Array with a list of affected elements.
-	 */
-	vector<bool> affectedElements;
-
-	/**
 	 * Do the elements calculation.
 	 * @return an array with the affected elements.
 	 */
-	virtual const vector<bool> calculateElements() = 0;
+	virtual void calculateElements() = 0;
 
 	uint8_t getNumberOfElements() const;
 
@@ -143,7 +138,18 @@ protected:
 	 */
 	void affectAllElements(bool value = false);
 
+	/**
+	 * Returns if an element got affected (dirty/changed) on this frame.
+	 * @return
+	 */
+	bool isElementAffected(uint8_t index);
+
 private:
+
+	/**
+	 * Array with a list of affected elements.
+	 */
+	vector<bool> affectedElements;
 
 	/// A pointer to the real group of elements.
 	Group* const group;

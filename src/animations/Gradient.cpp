@@ -76,12 +76,10 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	while (precalc.size() != group->size());
 	precalc.shrink_to_fit();
 	totalFrames = precalc.size() - 1;
-	affectAllElements(true);
-	if (isDirectionBackward())
-		currentFrame = totalFrames;
+	restart();
 }
 
-const vector<bool> Gradient::calculateElements() {
+void Gradient::calculateElements() {
 	switch (mode) {
 	case Modes::All:
 		calculateSingle();
@@ -91,7 +89,6 @@ const vector<bool> Gradient::calculateElements() {
 		calculateMultiple();
 		break;
 	}
-	return affectedElements;
 }
 
 void Gradient::drawConfig() {
@@ -128,10 +125,7 @@ string Gradient::mode2str(Modes mode) {
 }
 
 void Gradient::calculateSingle() {
-	changeElementsColor(
-		precalc[currentFrame],
-		filter
-	);
+	changeElementsColor(precalc[currentFrame], filter);
 }
 
 void Gradient::calculateMultiple() {

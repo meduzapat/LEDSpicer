@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 
-		if (DataLoader::getMode() == DataLoader::Modes::Profile)
+		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
 
 #ifdef DEVELOP
@@ -367,31 +367,31 @@ void Main::runCurrentProfile() {
 	// Set always on groups from profile.
 	for (auto& gE : currentProfile->getAlwaysOnGroups())
 		for (auto eE : gE.group->getElements())
-			eE->setColor(*eE->getColor().set(*gE.color, gE.filter));
+			eE->setColor(*gE.color, gE.filter);
 
 	// Set always on elements from profile.
 	for (auto& eE : currentProfile->getAlwaysOnElements())
-		eE.element->setColor(*eE.element->getColor().set(*eE.color, eE.filter));
+		eE.element->setColor(*eE.color, eE.filter);
 
 	currentProfile->runFrame();
 
 	// Set always on groups from config.
 	for (auto& gE : alwaysOnGroups)
 		for (auto eE : gE.second.group->getElements())
-			eE->setColor(*eE->getColor().set(*gE.second.color, gE.second.filter));
+			eE->setColor(*gE.second.color, gE.second.filter);
 
 	// Set always on elements from config.
 	for (auto& eE : alwaysOnElements)
-		eE.second.element->setColor(*eE.second.element->getColor().set(*eE.second.color, eE.second.filter));
+		eE.second.element->setColor(*eE.second.color, eE.second.filter);
 
 	// Set controlled groups from input plugins.
 	for (auto& gE : DataLoader::controlledGroups)
 		for (auto eE : gE.second->group->getElements())
-			eE->setColor(*eE->getColor().set(*gE.second->color, gE.second->filter));
+			eE->setColor(*gE.second->color, gE.second->filter);
 
 	// Set controlled elements from input plugins.
 	for (auto& eE : DataLoader::controlledElements)
-		eE.second->element->setColor(*eE.second->element->getColor().set(*eE.second->color, eE.second->filter));
+		eE.second->element->setColor(*eE.second->color, eE.second->filter);
 
 	// Send data.
 	// TODO: need to test speed: single thread or running one thread per device.

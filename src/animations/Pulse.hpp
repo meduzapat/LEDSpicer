@@ -40,19 +40,25 @@ public:
 
 	enum class Modes : uint8_t {Linear, Exponential};
 
-	Pulse(umap<string, string>& parameters, Group* const layout);
+	Pulse(umap<string, string>& parameters, Group* const layout):
+		DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
+		Color(parameters["color"]),
+		mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
+	{}
 
 	virtual ~Pulse() = default;
 
 	void drawConfig();
 
-	string mode2str(Modes mode);
+	string mode2str(Modes type);
 
-	Modes str2mode(const string& mode);
+	Modes str2mode(const string& type);
 
 protected:
 
-	const vector<bool> calculateElements();
+	void calculateElements();
+
+private:
 
 	Modes mode;
 

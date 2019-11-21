@@ -49,11 +49,14 @@ public:
 
 protected:
 
+	void calculateElements();
+
+private:
+
 	vector<const Color*>
 		newColors,
 		oldColors;
 
-	const vector<bool> calculateElements();
 
 	/**
 	 * Picks new colors.

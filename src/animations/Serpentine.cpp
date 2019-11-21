@@ -61,9 +61,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	}
 }
 
-const vector<bool> Serpentine::calculateElements() {
-
-	affectAllElements();
+void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
 	cout << "Serpentine frame: " << (currentFrame + 1);
@@ -74,7 +72,7 @@ const vector<bool> Serpentine::calculateElements() {
 #ifdef DEVELOP
 	cout << endl;
 #endif
-		return affectedElements;
+		return;
 	}
 
 	changeFrameElement(tailColor, *this);
@@ -95,12 +93,10 @@ const vector<bool> Serpentine::calculateElements() {
 #ifdef DEVELOP
 	cout << " " << (data.position + 1);
 #endif
-		affectedElements[data.position] = true;
 	}
 #ifdef DEVELOP
 	cout << endl;
 #endif
-	return affectedElements;
 }
 
 void Serpentine::calculateTailPosition() {

@@ -34,8 +34,7 @@ string PulseAudio::source;
 uint16_t PulseAudio::peak = MIN_MAX_PEAK;
 std::mutex PulseAudio::mutex;
 
-PulseAudio::Values PulseAudio::singleData;
-vector<PulseAudio::Values> PulseAudio::vuData;
+vector<int16_t> PulseAudio::rawData;
 
 PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	Actor(parameters, group, REQUIRED_PARAM_ACTOR_PULSEAUDIO),
@@ -51,14 +50,14 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	total(userPref.channel != Channels::Both ? group->size() : group->size() / 2)
 {
 
-	vuData.resize(group->size(), Values());
 	switch (userPref.mode) {
 	case Modes::VuMeter:
 		if (group->size() < VU_MIN_ELEMETS)
 			throw Error("To use VU meter a minimum of " + to_string(VU_MIN_ELEMETS) + " elements is needed on the group.");
 		break;
-	default:
-		affectAllElements(true);
+	case Modes::Wave:
+		waveData.insert(waveData.begin(), group->size(), Color());
+		break;
 	}
 
 	// No bouncing here.
@@ -68,6 +67,7 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 		direction = Directions::Backward;
 
 	++instances;
+	peak = MIN_MAX_PEAK;
 
 	LogInfo("Connecting to pulseaudio");
 
@@ -87,7 +87,6 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	pa_context_set_state_callback(context, PulseAudio::onContextSetState, &userPref);
 	pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
 	pa_threaded_mainloop_start(tml);
-	peak = 0;
 	LogDebug("Pulseaudio connected");
 }
 
@@ -127,11 +126,12 @@ void PulseAudio::drawConfig() {
 	char cmt[PA_CHANNEL_MAP_SNPRINT_MAX], sst[PA_SAMPLE_SPEC_SNPRINT_MAX];
 	cout <<
 		"Type: Pulseaudio" << endl <<
-		"mode: " << mode2str(userPref.mode) << endl <<
-		"channel: " << channel2str(userPref.channel) << endl <<
-		"Colors: low: "     << userPref.c00.getName() <<
-		", mid: "     << userPref.c50.getName() <<
-		", high: "    << userPref.c75.getName() << endl;
+		"mode: "        << mode2str(userPref.mode) << endl <<
+		"channel: "     << channel2str(userPref.channel) << endl <<
+		"Colors: Off: " << userPref.off.getName() <<
+		", Low: " << userPref.c00.getName() <<
+		", Mid: "       << userPref.c50.getName() <<
+		", High: "      << userPref.c75.getName() << endl;
 	Actor::drawConfig();
 	cout << endl;
 }
@@ -143,6 +143,8 @@ PulseAudio::Modes PulseAudio::str2mode(const string& mode) {
 		return Modes::VuMeter;
 	if (mode == "Single")
 		return Modes::Single;
+	if (mode == "Wave")
+		return Modes::Wave;
 	LogError("Invalid mode " + mode + " assuming Single");
 	return Modes::Single;
 }
@@ -155,6 +157,8 @@ string PulseAudio::mode2str(Modes mode) {
 		return "VuMeter";
 	case Modes::Single:
 		return "Single";
+	case Modes::Wave:
+		return "Wave";
 	}
 	return "";
 }
@@ -206,21 +210,15 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 				source = info->default_sink_name;
 				pa_operation_unref(pa_context_get_sink_info_list(context, onSinkInfo, userdata));
 			},
-			channels
+			nullptr
 		));
 		pa_context_set_subscribe_callback(
 			context,
 			[] (pa_context* context, pa_subscription_event_type_t type, uint32_t idx, void* userdata) {
-				if (type == PA_SUBSCRIPTION_EVENT_CHANGE)
-					pa_operation_unref(pa_context_get_sink_info_by_index(
-						context,
-						idx,
-						[](pa_context* condex, const pa_sink_info* info, int eol, void* userPref) {
-							LogDebug("context event");
-							peak = MIN_MAX_PEAK;
-						},
-						nullptr
-					));
+				if (type == PA_SUBSCRIPTION_EVENT_CHANGE) {
+					LogDebug("context event changed");
+					peak = MIN_MAX_PEAK;
+				}
 			},
 			nullptr
 		);
@@ -303,7 +301,7 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 
 	pa_buffer_attr ba;
 	ba.maxlength = (uint32_t) -1;
-	ba.fragsize  = vuData.size() * 10;
+	ba.fragsize  = (uint32_t) -1;
 	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0) {
 		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))))
 		throw;
@@ -337,19 +335,9 @@ void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 
 void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) {
 
-	// userdata keeps a pointer to userPref
-	UserPref* userPref = static_cast<UserPref*>(userdata);
-
-	// Function to reset the data.
-	auto reseter = [userPref] () {
-		vuData.assign(vuData.size(), Values());
-		singleData = {0, 0};
-	};
-
-	reseter();
-	if (not length) {
+	rawData.clear();
+	if (not length)
 		return;
-	}
 
 	// Read peaks.
 	const void *data;
@@ -367,14 +355,11 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 	// Parse data.
 	std::lock_guard<std::mutex> lock(mutex);
 	const int16_t* buffer = static_cast<const int16_t*>(data);
-	vector<int16_t> rawData(buffer, buffer + (length / 2));
+	PulseAudio::rawData = std::move(vector<int16_t>(buffer, buffer + (length / 2)));
 	pa_stream_drop(stream);
-	if (rawData.empty())
-		return;
-	processRawData(rawData, userPref);
 }
 
-const vector<bool> PulseAudio::calculateElements() {
+void PulseAudio::calculateElements() {
 	std::lock_guard<std::mutex> lock(mutex);
 	switch (userPref.mode) {
 	case Modes::VuMeter:
@@ -385,57 +370,52 @@ const vector<bool> PulseAudio::calculateElements() {
 		break;
 	case Modes::Levels:
 		levels();
+		break;
+	case Modes::Wave:
+		waves();
 	}
-	return affectedElements;
 }
 
-void PulseAudio::processRawData(vector<int16_t>& rawData, UserPref* userPref) {
-
-	uint16_t
-		m   = 0,
-		v   = 0,
-		rec = 0;
-
+PulseAudio::Values PulseAudio::getPeak() {
+	Values vals;
 	for (size_t c = 0; c < rawData.size(); ++c) {
-
-		v = abs(rawData[c]);
-
+		uint16_t v = abs(rawData[c]);
 		// Even for left, odd for right.
 		if (c % 2) {
-			if (v > singleData.r)
-				singleData.r = v;
-			if (v > vuData[rec].r)
-				vuData[rec].r = v;
+			if (v > vals.r)
+				vals.r = v;
 		}
 		else {
-			if (v > singleData.l)
-				singleData.l = v;
-			if (v > vuData[rec].l)
-				vuData[rec].l = v;
-			++rec;
-			if (rec >= vuData.size() / 2)
-				rec = 0;
+			if (v > vals.l)
+				vals.l = v;
 		}
 	}
+	setPeak(vals);
+	return vals;
+}
 
-	m = (peak + singleData.l + singleData.r) / (totalChannels + 1);
+void PulseAudio::setPeak(const Values& peaks) {
+	if (peaks.r > peak)
+		peak = peaks.r;
+	if (peaks.l > peak)
+		peak = peaks.l;
+/*	uint16_t m = (peak + peaks.l + peaks.r) / (totalChannels + 1);
 	if (m > peak)
-		peak = m;
-	else
-		peak -= MIN_MAX_PEAK;
-
+		peak = m;*/
+	if (peak < MIN_MAX_PEAK)
+		peak = MIN_MAX_PEAK;
 #ifdef DEVELOP
-		cout << "L:" << std::left << std::setfill(' ') << std::setw(5) << to_string(singleData.l) << " R:" << std::setw(5) << to_string(singleData.r) << " Peak:" << std::setw(5) << to_string(peak) << endl;
+	cout
+		<< "L:" << std::left << std::setfill(' ') << std::setw(5) << to_string(peaks.l)
+		<< " R:" << std::setw(5) << to_string(peaks.r)
+		<< " Peak:" << std::setw(5) << to_string(peak) << endl;
 #endif
 }
 
-#define TO_PERC(x) round(x * 100.00 / peak)
+#define TO_PERC(x) round((x) * 100.00 / peak)
 
 void PulseAudio::vuMeters() {
 
-	uint16_t
-		leftVal,
-		rightVal;
 	/*
 	 * Function to draw the elements.
 	 */
@@ -443,84 +423,174 @@ void PulseAudio::vuMeters() {
 		for (uint8_t e = 0; e <= elems; ++e) {
 			uint8_t s = reverse ? start - e : start + e;
 #ifdef DEVELOP
-			cout << std::setw(3) << to_string(s);detectColor(round(e * 100.00 / total));
+			cout << std::setw(3) << to_string(s);
 #else
-			changeElementColor(s, detectColor(round((e + 1) * 100.00 / total)), filter);
+			changeElementColor(s, detectColor(round((e + 1) * 100.00 / total), false), filter);
 #endif
-			affectedElements[s] = true;
 		}
 	};
 
-	// Clean.
-	affectAllElements();
+	auto singleData = getPeak();
+	if (not singleData.l and not singleData.r)
+		return;
 
+	uint16_t val;
 	// Convert to mono and them to elements.
 	if (userPref.channel == Channels::Mono) {
-		leftVal  = total * TO_PERC((singleData.l + singleData.r) / 2) / 100;
-		if (leftVal > total)
-			leftVal = total;
-		if (leftVal) {
-			--leftVal;
-			if (leftVal) {
-				if (direction == Directions::Forward)
-					tintFn(leftVal, 0, false);
-				else
-					tintFn(leftVal, getNumberOfElements() - 1, true);
-			}
-		}
+		val = total * TO_PERC((singleData.l + singleData.r) / 2) / 100;
+		if (not val)
+			return;
+		if (val > total)
+			val = total;
+
+		--val;
+		if (not val)
+			return;
+
+		if (direction == Directions::Forward)
+			tintFn(val, 0, false);
+		else
+			tintFn(val, getNumberOfElements() - 1, true);
 		return;
 	}
 
 	// Convert left channel peak to elements.
 	if (userPref.channel & Channels::Left) {
-		leftVal  = total * TO_PERC(singleData.l) / 100;
-		if (leftVal > total)
-			leftVal = total;
-		if (leftVal) {
-			--leftVal;
-			if (leftVal) {
+		val  = total * TO_PERC(singleData.l) / 100;
+		if (val > total)
+			val = total;
+		if (val) {
+			--val;
+			if (val) {
 				if (direction == Directions::Forward)
-					tintFn(leftVal, 0, false);
+					tintFn(val, 0, false);
 				else
-					tintFn(leftVal, total, true);
+					tintFn(val, total, true);
 			}
 		}
 	}
 
 	// Convert right channel peak to elements.
 	if (userPref.channel & Channels::Right) {
-		rightVal = total * TO_PERC(singleData.r) / 100;
-		if (rightVal > total)
-			rightVal = total;
-		if (rightVal) {
-			--rightVal;
-			if (rightVal) {
+		val = total * TO_PERC(singleData.r) / 100;
+		if (val > total)
+			val = total;
+		if (val) {
+			--val;
+			if (val) {
 				if (direction == Directions::Forward)
-						tintFn(rightVal, getNumberOfElements() - 1, true);
-					else
-						tintFn(rightVal, total, false);
-				}
+					tintFn(val, getNumberOfElements() - 1, true);
+				else
+					tintFn(val, total, false);
+			}
 		}
 	}
 }
 
 void PulseAudio::levels() {
+
+	Values vals;
+	if (rawData.empty()) {
+		setPeak(vals);
+		return;
+	}
 	uint8_t e = userPref.channel == Channels::Both ? total : 0;
-	for (uint8_t c = 0; c < total; ++c) {
+	for (uint8_t c = 0, c2 = 0; c < total; ++c) {
+		uint16_t
+			vR = rawData.size() > c2 ? abs(rawData[c2++]) : 0,
+			vL = rawData.size() > c2 ? abs(rawData[c2++]) : 0;
+		if (vR > peak)
+			peak = vR;
+		if (vL > peak)
+			peak = vL;
+		if (vR > vals.r)
+			vals.r = vR;
+		if (vL > vals.l)
+			vals.l = vL;
 		if (userPref.channel & Channels::Mono)
-			changeElementColor(c, detectColor(TO_PERC(vuData[c].l > vuData[c].r ? vuData[c].l : vuData[c].r)), filter);
+			changeElementColor(c, detectColor(TO_PERC((vL + vR) / 2)), filter);
 		if (userPref.channel & Channels::Left)
-			changeElementColor(c, detectColor(TO_PERC(vuData[c].l)), filter);
+			changeElementColor(c, detectColor(TO_PERC(vL)), filter);
 		if (userPref.channel & Channels::Right)
-			changeElementColor(e + c, detectColor(TO_PERC(vuData[c].r)), filter);
+			changeElementColor(e + c, detectColor(TO_PERC(vR)), filter);
+	}
+
+	setPeak(vals);
+}
+
+void PulseAudio::waves() {
+
+	uint8_t
+		t = waveData.size() - 1,
+		h = waveData.size() / 2 - 1;
+	// single/mono VS stereo
+	if (userPref.channel == Channels::Both) {
+		// outside in
+		if (direction == Directions::Forward) {
+			for (uint8_t c = 0; c < h; c++) {
+				waveData[h - c] = waveData[h - c - 1];
+				waveData[h + c + 1] = waveData[h + c + 2];
+			}
+			if (waveData.size() % 2 != 0)
+				waveData[t - 1] = waveData[t];
+		}
+		// inside out
+		else {
+			for (uint8_t c = 0; c < h; c++) {
+				waveData[c] = waveData[c + 1];
+				waveData[t - c] = waveData[t - c - 1];
+			}
+			if (waveData.size() % 2 != 0)
+				waveData[h + 2] = waveData[h + 1];
+		}
+	}
+	else {
+		for (uint8_t c = 0; c < t; c++)
+			if (direction == Directions::Forward)
+				waveData[t - c] = waveData[t - c - 1];
+			else
+				waveData[c] = waveData[c + 1];
+	}
+	auto singleData = getPeak();
+
+	switch (userPref.channel) {
+	case Channels::Both:
+		if (direction == Directions::Forward) {
+			waveData[0] = detectColor(TO_PERC(singleData.l));
+			waveData[t] = detectColor(TO_PERC(singleData.r));
+		}
+		else {
+			waveData[h] = detectColor(TO_PERC(singleData.l));
+			waveData[h + 1] = detectColor(TO_PERC(singleData.r));
+		}
+		break;
+	case Channels::Mono:
+		waveData[direction == Directions::Forward ? 0 : t] = detectColor(TO_PERC(singleData.r + singleData.l / 2));
+		break;
+	case Channels::Left:
+		waveData[direction == Directions::Forward ? 0 : t] = detectColor(TO_PERC(singleData.l));
+		break;
+	case Channels::Right:
+		waveData[direction == Directions::Forward ? 0 : t] = detectColor(TO_PERC(singleData.r));
+		break;
+	}
+
+	for (uint8_t c = 0; c < waveData.size(); ++c) {
+		changeElementColor(c, waveData[c], filter);
+#ifdef DEVELOP
+	cout << "C:" << to_string(c) << " To: ";
+	waveData[c].drawHex();
+	cout << endl;
+#endif
 	}
 }
 
 void PulseAudio::single() {
+	auto singleData = getPeak();
 	uint8_t e = userPref.channel == Channels::Both ? total : 0;
 	for (uint8_t c = 0; c < total; ++c) {
 		if (userPref.channel & Channels::Mono)
-			changeElementColor(c, detectColor(TO_PERC(singleData.l > singleData.r ? singleData.l : singleData.r)), filter);
+			changeElementColor(c, detectColor(TO_PERC((singleData.l + singleData.r) / 2)), filter);
 		if (userPref.channel & Channels::Left)
 			changeElementColor(c, detectColor(TO_PERC(singleData.l)), filter);
 		if (userPref.channel & Channels::Right)
@@ -528,26 +598,35 @@ void PulseAudio::single() {
 	}
 }
 
-LEDSpicer::Color PulseAudio::detectColor(uint8_t percent) {
+LEDSpicer::Color PulseAudio::detectColor(uint8_t percent, bool gradient) {
+	#define CALC_PERC(t, b) round(abs(percent - (b)) * 100.00 / ((t) - (b)))
+
+#ifdef DEVELOP
+	cout << "Percent: " <<  to_string(percent) << endl;
+#endif
 
 	// Off.
 	if (not percent)
 		return userPref.off;
 
-	if (percent == 100)
+	if (gradient) {
+		if (percent == 100)
+			return userPref.c75;
+	} else if (percent > HIG_POINT) {
 		return userPref.c75;
-
-	#define CALC_PERC(t, b) round((percent - b) * 100.00 / (t - b))
+	}
 
 	// Mid -> High.
 	if (percent > MID_POINT)
-		return userPref.c50.transition(userPref.c75, CALC_PERC(100, MID_POINT));
+		return userPref.c50.transition(userPref.c75, CALC_PERC((gradient ? 99 : HIG_POINT), MID_POINT));
 
 	// Low -> Mid.
 	if (percent > LOW_POINT)
 		return userPref.c00.transition(userPref.c50, CALC_PERC(MID_POINT, LOW_POINT));
 
 	// 0 -> low.
-	return userPref.c00;
+	if (gradient)
+		return userPref.off.transition(userPref.c00, CALC_PERC(LOW_POINT, 1));
 
+	return userPref.c00;
 }

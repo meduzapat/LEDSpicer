@@ -58,7 +58,7 @@ public:
 	Element(Element* other);
 
 	/**
-	 * Structure to elements with properties.
+	 * Structure for elements with properties.
 	 */
 	struct Item {
 		Element* element      = nullptr;
@@ -73,6 +73,13 @@ public:
 	 * @param color
 	 */
 	void setColor(const Color& color);
+
+	/**
+	 * Replaces the pin values with a a new color with a filter.
+	 * @param color
+	 * @param filter
+	 */
+	void setColor(const Color& color, const Color::Filters& filter, uint8_t percent = 50);
 
 	/**
 	 * Covert the pin values into color.

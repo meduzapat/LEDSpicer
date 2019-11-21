@@ -1,4 +1,20 @@
-# ledspicer - RGB LED Manager
+LEDSpicer - LED Manager for linux
+
+LEDSpicer is a linear LED controller daemon that will handle single color or RGB LEDs connected to different devices.
+
+It allows the execution of animations and profiles and can handle input from the user to interact with the LEDs, 
+profiles can be triggered based on different events, user input, network input, game name, etc.
+
+Includes some utilities to make an arcade cabinet more attractive and cool!
+
+A program to give flavor to your Arcade project.
+
+Getting Started
+
+In the [project wiki](https://sourceforge.net/p/ledspicer/wiki/Home/) you will find 
+all the information you need to get the program running on your Arcade box or PC.
+
+License
 
 	Copyright (C) 2018 - 2019 Patricio A. Rossi
 
@@ -19,7 +35,7 @@ Comments are welcome.
 
 	- Patricio A. Rossi <meduzapat@users.sourceforge.net>
 
-Copyright note:
+Copyright note
 
 	Ultimarc, Ultimarc brand and Ultimarc products are property of Ultimarc Limited Company.
 	For more information about Ultimarc visit their website at https://www.ultimarc.com
@@ -28,6 +44,3 @@ Copyright note:
 	For more information about Led-Wiz visit their website at https://groovygamegear.com
 
 	All names used are trademarked by their respective trademark holders.
-
-For more information read the ledspicer wiki at https://sourceforge.net/p/ledspicer/wiki/Home/
-

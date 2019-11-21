@@ -24,15 +24,7 @@
 
 using namespace LEDSpicer::Animations;
 
-Pulse::Pulse(umap<string, string>& parameters, Group* const layout):
-	DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
-	Color(parameters["color"]),
-	mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
-{
-	affectAllElements(true);
-}
-
-const vector<bool> Pulse::calculateElements() {
+void Pulse::calculateElements() {
 	float c;
 	if (mode == Modes::Linear)
 		c = currentFrame;
@@ -42,7 +34,6 @@ const vector<bool> Pulse::calculateElements() {
 	cout << "Pulse frame: " << (currentFrame + 1) << " = " << PERCENT(c, totalFrames) << endl;
 #endif
 	changeElementsColor(this->fade(PERCENT(c, totalFrames)), filter);
-	return affectedElements;
 }
 
 void Pulse::drawConfig() {

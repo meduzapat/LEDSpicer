@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.3.8],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.3.9],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2019 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -61,61 +61,61 @@ dnl ******************
 dnl Disable NANOLED plugin.
 AC_ARG_ENABLE(nanoled,
 	AS_HELP_STRING([--enable-nanoled],
-	[Enables the output plugin nanoled @<:@default=yes@:>@]),
+	[Enables the output plugin nanoled @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) nanoled=yes ;;
 		no)  nanoled=no ;;
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-nanoled]) ;;
 	esac],
-	[nanoled=yes])
+	[nanoled=no])
 AM_CONDITIONAL([NANOLED],[test x$nanoled = xyes])
 
 dnl Disable PACDRIVE plugin.
 AC_ARG_ENABLE(pacdrive,
 	AS_HELP_STRING([--enable-pacdrive],
-	[Enables the output plugin pacdrive @<:@default=yes@:>@]),
+	[Enables the output plugin pacdrive @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) pacdrive=yes ;;
 		no)  pacdrive=no ;;
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-pacdrive]) ;;
 	esac],
-	[pacdrive=yes])
+	[pacdrive=no])
 AM_CONDITIONAL([PACDRIVE],[test x$pacdrive = xyes])
 
 dnl Disable PACLED64 plugin.
 AC_ARG_ENABLE(pacled64,
 	AS_HELP_STRING([--enable-pacled64],
-	[Enables the output plugin pacled64 @<:@default=yes@:>@]),
+	[Enables the output plugin pacled64 @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) pacled64=yes ;;
 		no)  pacled64=no ;;
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-pacled64]) ;;
 	esac],
-	[pacled64=yes])
+	[pacled64=no])
 AM_CONDITIONAL([PACLED64],[test x$pacled64 = xyes])
 
 dnl Disable ULTIMATEIO plugin.
 AC_ARG_ENABLE(ultimateio,
 	AS_HELP_STRING([--enable-ultimateio],
-	[Enables the output plugin ultimateio @<:@default=yes@:>@]),
+	[Enables the output plugin ultimateio @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) ultimateio=yes ;;
 		no)  ultimateio=no ;;
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-ultimateio]) ;;
 	esac],
-	[ultimateio=yes])
+	[ultimateio=no])
 AM_CONDITIONAL([ULTIMATEIO],[test x$ultimateio = xyes])
 
 dnl Disable LEDWIZ32 plugin.
 AC_ARG_ENABLE(ledwiz32,
 	AS_HELP_STRING([--enable-ledwiz32],
-	[Enables the output plugin ledwiz32 @<:@default=yes@:>@]),
+	[Enables the output plugin ledwiz32 @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) ledwiz32=yes ;;
 		no)  ledwiz32=no ;;
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-ledwiz32]) ;;
 	esac],
-	[ledwiz32=yes])
+	[ledwiz32=no])
 AM_CONDITIONAL([LEDWIZ32],[test x$ledwiz32 = xyes])
 
 dnl Enable develop mode

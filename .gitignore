@@ -62,3 +62,5 @@ data/ledspicer.pc
 # Compiled Documentation
 doc/
 
+# Packages
+*.deb
