@@ -4,7 +4,7 @@
  * @since     Nov 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -32,8 +32,8 @@ void LedWiz32::resetLeds() {
 void LedWiz32::afterClaimInterface() {
 	// This will initialize the 4 controllers and set the pulse to 1.
 	vector<uint8_t> data {64, 255, 255, 255, 255, 1, 0, 0};
-	transferData(data);
-	Device::afterClaimInterface();
+	transferToUSB(data);
+	GroovyGameGear::afterClaimInterface();
 }
 
 void LedWiz32::drawHardwarePinMap() {
@@ -62,12 +62,12 @@ void LedWiz32::transfer() {
 	for (auto l : LEDs) {
 		load.push_back(63 * (l / 255.00));
 		if (load.size() == 8) {
-			transferData(load);
+			transferToUSB(load);
 			load.clear();
 		}
 	}
 }
 
 uint16_t LedWiz32::getProduct() {
-	return LEDWIZ32_PRODUCT + board.boardId - 1;
+	return LEDWIZ32_PRODUCT + boardId - 1;
 }

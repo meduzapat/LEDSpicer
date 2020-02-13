@@ -4,7 +4,7 @@
  * @since     Nov 18, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,6 +26,7 @@ using std::signal;
 
 #include "Messages.hpp"
 #include "DataLoader.hpp"
+#include "devices/DeviceUSB.hpp"
 
 #ifndef MAINBASE_HPP_
 #define MAINBASE_HPP_ 1
@@ -63,6 +64,12 @@ public:
 	 * Starts the dump profile.
 	 */
 	void dumpProfile();
+
+	/**
+	 * Waits for a defined amount of ms.
+	 * @param milliseconds wasted keeps track of the wasted milliseconds.
+	 */
+	static void wait(milliseconds wasted);
 
 protected:
 

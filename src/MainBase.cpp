@@ -4,7 +4,7 @@
  * @since     Nov 18, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -116,7 +116,7 @@ MainBase::~MainBase() {
 		delete p.second;
 	}
 
-	ConnectionUSB::terminate();
+	Devices::DeviceUSB::closeUSB();
 }
 
 void MainBase::testLeds() {
@@ -198,7 +198,7 @@ void MainBase::dumpConfiguration() {
 		d->drawHardwarePinMap();
 	cout <<
 		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
-		"Interval: " << ConnectionUSB::getInterval().count() << "ms" << endl <<
+		"Interval: " << DataLoader::waitTime.count() << "ms" << endl <<
 		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
 		"Layout:";
 	for (auto group : DataLoader::layout) {
@@ -261,4 +261,11 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 		}
 	}
 	return profile;
+}
+
+void MainBase::wait(milliseconds wasted) {
+	if (wasted < DataLoader::waitTime)
+		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
+	else
+		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(DataLoader::waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
 }

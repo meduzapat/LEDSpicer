@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Ultimate.hpp
- * @since     Jun 23, 2018
+ * @file      HowlerController.hpp
+ * @since     Feb 5, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,49 +20,43 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For special io format
-#include <iomanip>
+#include "WolfWareTech.hpp"
 
-#include "Ultimarc.hpp"
+#ifndef HOWLER_HPP_
+#define HOWLER_HPP_ 1
 
-#ifndef ULTIMATE_HPP_
-#define ULTIMATE_HPP_ 1
-
-#define IPAC_ULTIMATE_NAME       "Ultimarc Ipac Ultimate IO"
-#define IPAC_ULTIMATE_PRODUCT    0x0410
-#define IPAC_ULTIMATE_WVALUE     0x0203
-#define IPAC_ULTIMATE_INTERFACE  2
-#define IPAC_ULTIMATE_LEDS       96
-#define IPAC_ULTIMAGE_MAX_BOARDS 4
-
-#define ULTIMAGE_MSG(byte1, byte2) {0x03, 0, 0, byte1, byte2}
+#define HOWLER_NAME       "Howler"
+#define HOWLER_PRODUCT    0x6800
+#define HOWLER_WVALUE     0x00CE
+#define HOWLER_INTERFACE  2
+#define HOWLER_LEDS       96
+#define HOWLER_MAX_BOARDS 1
 
 namespace LEDSpicer {
 namespace Devices {
-namespace Ultimarc {
+namespace WolfWareTech {
 
 /**
- * LEDSpicer::Devices::Ultimate
- * Class to keep Ultimate I/O data and functionality.
+ * LEDSpicer::Devices::WolfWareTech::Howler
  */
-class Ultimate : public Ultimarc {
+class Howler: public WolfWareTech {
 
 public:
 
 	/**
 	 * @param boardId
 	 */
-	Ultimate(uint8_t boardId, umap<string, string>& options) :
-	Ultimarc(
-		IPAC_ULTIMATE_WVALUE,
+	Howler(uint8_t boardId, umap<string, string>& options) :
+	WolfWareTech(
+		HOWLER_WVALUE,
 		0, // to be defined.
-		IPAC_ULTIMATE_LEDS,
-		IPAC_ULTIMAGE_MAX_BOARDS,
+		HOWLER_LEDS,
+		HOWLER_MAX_BOARDS,
 		boardId,
-		IPAC_ULTIMATE_NAME
+		HOWLER_NAME
 	) {}
 
-	virtual ~Ultimate() = default;
+	virtual ~Howler() = default;
 
 	virtual void drawHardwarePinMap();
 
@@ -72,14 +66,12 @@ public:
 
 	virtual void resetLeds();
 
-protected:
-
-	virtual void afterConnect();
-
 };
 
-}}} /* namespace LEDSpicer */
+} /* namespace WolfWareTech */
+} /* namespace Devices */
+} /* namespace LEDSpicer */
 
-deviceFactory(LEDSpicer::Devices::Ultimarc::Ultimate)
+deviceFactory(LEDSpicer::Devices::WolfWareTech::Howler)
 
-#endif /* ULTIMATE_HPP_ */
+#endif /* HOWLER_HPP_ */

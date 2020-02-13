@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Handler.hpp
- * @since     Dec 8, 2018
+ * @file      HowlerController.cpp
+ * @since     Feb 5, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,45 +20,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "Howler.hpp"
 
-#include <dlfcn.h>
+using namespace LEDSpicer::Devices::WolfWareTech;
 
-#include "utility/Log.hpp"
-#include "utility/Error.hpp"
+void Howler::resetLeds() {
+//#define CMD_SET_GLOBAL_BRIGHTNESS	0x06
+}
 
-#ifndef HANDLER_HPP_
-#define HANDLER_HPP_ 1
+void Howler::drawHardwarePinMap() {
+	cout
+		<< getFullName() << " Pins " << HOWLER_LEDS << endl
+		<< "Hardware pin map:" << endl;
+	cout << endl;
+}
 
-namespace LEDSpicer {
+void Howler::transfer() {
+//#define CMD_SET_RGB_LED				0x01
+//#define CMD_SET_INDIVIDUAL_LED		0x02
+	vector<uint8_t> data;
+	transferToUSB(data);
+}
 
-/**
- * LEDSpicer::Handler
- */
-class Handler {
+uint16_t Howler::getProduct() {
+	return HOWLER_PRODUCT;
+}
 
-public:
-
-	Handler() = default;
-
-	/**
-	 * Loads a new plugin using its library name.
-	 * @param the plugin library name without extension or path.
-	 */
-	Handler(const string& filename);
-
-	/**
-	 * releases the linked library.
-	 */
-	virtual ~Handler();
-
-protected:
-
-	/// Pointer to the dynamic linked library.
-	void* handler = nullptr;
-
-};
-
-} /* namespace LEDSpicer */
-
-#endif /* HANDLER_HPP_ */

@@ -15,25 +15,25 @@ void FF00SharedCode::resetLeds() {
 
 	// Set Off Ramp Speed.
 	vector<uint8_t> data FF00_MSG(0xC0, 0);
-	transferData(data);
+	transferToUSB(data);
 
 	// Turn off all LEDs and internal buffer.
 	setLeds(0);
 	data[0] = 0x80; //FIXME this may be wrong.
-	transferData(data);
+	transferToUSB(data);
 }
 
 void FF00SharedCode::transfer() {
 
 	// Send FE00 command.
 	vector<uint8_t> data FF00_MSG(0xFE, 0);
-	transferData(data);
+	transferToUSB(data);
 
 	// Send pairs.
 	for (uint8_t c = 0; c < LEDs.size(); c+=2) {
 		data.clear();
 		data.push_back(LEDs[c]);
 		data.push_back(LEDs[c + 1]);
-		transferData(data);
+		transferToUSB(data);
 	}
 }

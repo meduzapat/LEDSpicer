@@ -4,7 +4,7 @@
  * @since     Sep 27, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/Device.hpp"
+#include "devices/DeviceUSB.hpp"
 
 #ifndef ULTIMARC_HPP_
 #define ULTIMARC_HPP_ 1
@@ -35,13 +35,19 @@ namespace Ultimarc {
 /**
  * Ultimarc family data and definitions.
  */
-class Ultimarc : public Device {
+class Ultimarc : public DeviceUSB {
 
-	using Device::Device;
+public:
+
+	using DeviceUSB::DeviceUSB;
 
 	uint16_t getVendor() {
 		return ULTIMARC_VENDOR;
 	}
+
+protected:
+
+	virtual void afterClaimInterface() {}
 
 };
 

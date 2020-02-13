@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,6 +39,7 @@ umap<Input*, InputHandler*> DataLoader::inputMap;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
 umap<string, Element::Item*> DataLoader::controlledElements;
 umap<string, Group::Item*> DataLoader::controlledGroups;
+milliseconds DataLoader::waitTime;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -68,9 +69,8 @@ void DataLoader::readConfiguration() {
 	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], "Invalid value for FPS");
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
-	ConnectionUSB::setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
-	// activate LIBUSB.
-	ConnectionUSB::openSession();
+	setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
+
 	Actor::setFPS((fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
 
 	portNumber = tempAttr[PARAM_PORT];
@@ -469,3 +469,9 @@ void DataLoader::dropRootPrivileges(uid_t uid, gid_t gid) {
 
 	LogDebug("Privileges dropped");
 }
+
+void DataLoader::setInterval(uint8_t waitTime) {
+	DataLoader::waitTime = milliseconds(waitTime);
+	LogInfo("Set interval to " + to_string(DataLoader::waitTime.count()) + "ms");
+}
+

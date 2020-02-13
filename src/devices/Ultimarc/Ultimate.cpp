@@ -4,7 +4,7 @@
  * @since     Jun 23, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,12 +28,12 @@ void Ultimate::resetLeds() {
 
 	// Set Off Ramp Speed.
 	vector<uint8_t> data ULTIMAGE_MSG(0xC0, 0);
-	transferData(data);
+	transferToUSB(data);
 
 	// Turn off all LEDs and internal buffer.
 	setLeds(0);
 	data[3] = 0x80;
-	transferData(data);
+	transferToUSB(data);
 }
 
 void Ultimate::afterConnect() {
@@ -53,11 +53,11 @@ void Ultimate::afterConnect() {
 	// Detect Game Controller mode (will shift the interface by one).
 	if ((descriptor.bcdDevice & 0x40)) {
 		LogInfo("No Game Controller mode detected");
-		board.interface = IPAC_ULTIMATE_INTERFACE;
+		interface = IPAC_ULTIMATE_INTERFACE;
 	}
 	else {
 		LogInfo("Game Controller mode detected");
-		board.interface = IPAC_ULTIMATE_INTERFACE + 1;
+		interface = IPAC_ULTIMATE_INTERFACE + 1;
 	}
 }
 
@@ -90,9 +90,9 @@ void Ultimate::transfer() {
 	vector<uint8_t> load;
 	load.push_back(0x04);
 	load.insert(load.end(), LEDs.begin(), LEDs.end());
-	transferData(load);
+	transferToUSB(load);
 }
 
 uint16_t Ultimate::getProduct() {
-	return IPAC_ULTIMATE_PRODUCT + board.boardId - 1;
+	return IPAC_ULTIMATE_PRODUCT + boardId - 1;
 }

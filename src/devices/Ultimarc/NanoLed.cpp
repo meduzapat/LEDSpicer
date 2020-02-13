@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices::Ultimarc;
 
 uint16_t NanoLed::getProduct() {
-	return NANO_LED_PRODUCT + board.boardId - 1;
+	return NANO_LED_PRODUCT + boardId - 1;
 }
 
 void NanoLed::drawHardwarePinMap() {

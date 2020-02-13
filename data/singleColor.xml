@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Colors"
+	format="hex"
+>
+
+	<color name="White" color="FFFFFF" />
+	<color name="Black" color="000000" />
+
+</LEDSpicer>

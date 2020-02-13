@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,10 @@
 #include <unistd.h>
 
 #include <algorithm>
+
+#include <chrono>
+using std::chrono::milliseconds;
+#include <thread>
 
 #include "config.h"
 #include "utility/XMLHelper.hpp"
@@ -177,6 +181,9 @@ public:
 	/// Keeps a list of global groups that can be turn on/off by input plugins.
 	static umap<string, Group::Item*> controlledGroups;
 
+	/// Keeps the milliseconds to wait.
+	static milliseconds waitTime;
+
 	/**
 	 * Returns the current mode.
 	 * @return
@@ -188,6 +195,12 @@ public:
 	 * @param mode
 	 */
 	static void setMode(Modes mode);
+
+	/**
+	 * Sets the interval ms.
+	 * @param waitTime
+	 */
+	static void setInterval(uint8_t waitTime);
 
 protected:
 

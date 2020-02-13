@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices::Ultimarc;
 
 uint16_t PacLed64::getProduct() {
-	return PAC_LED64_PRODUCT + board.boardId - 1;
+	return PAC_LED64_PRODUCT + boardId - 1;
 }
 
 void PacLed64::drawHardwarePinMap() {
