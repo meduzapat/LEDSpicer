@@ -25,21 +25,50 @@
 using namespace LEDSpicer::Devices::WolfWareTech;
 
 void Howler::resetLeds() {
-//#define CMD_SET_GLOBAL_BRIGHTNESS	0x06
+	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0, 0, 0);
+	transferToUSB(data);
+	setLeds(0);
 }
 
 void Howler::drawHardwarePinMap() {
+	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+		setLed(l, l + 1);
+	const char* const f = "                                          ";
 	cout
 		<< getFullName() << " Pins " << HOWLER_LEDS << endl
-		<< "Hardware pin map:" << endl;
-	cout << endl;
+		<< "Hardware pin map:" << endl
+		<< "G + X X X X  " << (int)*getLed(2) << "  " << (int)*getLed(1) << "  " << (int)*getLed(0) << " + +  "
+		<< (int)*getLed(3) << "  " << (int)*getLed(4) << "  " << (int)*getLed(5) << " X X X X + G" << endl;
+	for (uint8_t c = 0, t = (LEDs.size() / 2) - 9; c < t ; c+=3) {
+		cout
+			<< "+" << f << " +" << endl
+			<< (int)*getLed(c + 12) << f << (int)*getLed(t + c + 12) << endl
+			<< (int)*getLed(c + 13) << f << (int)*getLed(t + c + 13) << endl
+			<< (int)*getLed(c + 14) << f << (int)*getLed(t + c + 14) << endl
+			<< "X" << f << " X" << endl;
+	}
+	cout
+		<< "+" << f << " +" << endl
+		<< (int)*getLed(90) << f << (int)*getLed(93) << endl
+		<< (int)*getLed(91) << f << (int)*getLed(94) << endl
+		<< (int)*getLed(92) << f << (int)*getLed(95) << endl
+		<< "G" << f << " G" << endl
+		<< "G + X X X X  " << (int)*getLed(8) << "  " << (int)*getLed(7) << "  " << (int)*getLed(6) << " + + "
+		<< (int)*getLed(9) << " " << (int)*getLed(10) << " " << (int)*getLed(11) << " X X X X + G" << endl << endl;
 }
 
 void Howler::transfer() {
-//#define CMD_SET_RGB_LED				0x01
-//#define CMD_SET_INDIVIDUAL_LED		0x02
-	vector<uint8_t> data;
-	transferToUSB(data);
+
+	for (uint8_t c = 0, t = LEDs.size() / 3; c < t ; c+=3) {
+		vector<uint8_t> data HOWLER_MSG(
+			HOWLER_CMD_SET_RGB_LED,
+			c,
+			LEDs[c],
+			LEDs[c + 1],
+			LEDs[c + 2]
+		);
+		transferToUSB(data);
+	}
 }
 
 uint16_t Howler::getProduct() {
