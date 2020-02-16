@@ -3,7 +3,7 @@
  * @file      PacLed64.hpp
  * @since     Feb 2, 2019
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  */
 
 #include "FF00SharedCode.hpp"
