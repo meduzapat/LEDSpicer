@@ -435,6 +435,31 @@ EXTRA_DIST += \
 	src/devices/WolfWareTech/Howler.cpp
 endif
 
+###############
+# RASPBERRYPI #
+###############
+if RASPBERRYPI
+devices_LTLIBRARIES += \
+	RaspberryPi.la
+
+RaspberryPi_la_SOURCES = \
+	src/devices/RaspberryPiGPIO/RaspberryPi.cpp
+
+RaspberryPi_la_LIBADD = \
+	libledspicer.la     \
+	$(RASPBERRYPI_LIBS)
+
+RaspberryPi_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+RaspberryPi_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
+else
+EXTRA_DIST += \
+	src/devices/RaspberryPiGPIO/RaspberryPi.cpp
+endif
+
 devicesdir = \
 	$(DEVICES_DIR)
 
@@ -585,8 +610,9 @@ EXTRA_DIST +=                       \
 	src/devices/Ultimarc/PacDrive.hpp \
 	src/devices/Ultimarc/PacLed64.hpp \
 	src/devices/Ultimarc/NanoLed.hpp  \
-	src/devices/WolfWareTech/Howler.hpp       \
-	src/devices/WolfWareTech/WolfWareTech.hpp \
+	src/devices/WolfWareTech/Howler.hpp         \
+	src/devices/WolfWareTech/WolfWareTech.hpp   \
+	src/devices/RaspberryPiGPIO/RaspberryPi.hpp \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \

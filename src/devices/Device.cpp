@@ -31,6 +31,11 @@ void Device::initialize() {
 	resetLeds();
 }
 
+void Device::terminate() {
+	LogDebug("Terminating Device " + name);
+	resetLeds();
+}
+
 Device::Device(
 	uint8_t  elements,
 	const string& name

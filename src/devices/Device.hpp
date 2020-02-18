@@ -56,6 +56,11 @@ public:
 	void initialize();
 
 	/**
+	 * Terminates the device.
+	 */
+	void terminate();
+
+	/**
 	 * Set a LED to an intensity
 	 * @param led
 	 * @param intensity (0-255)

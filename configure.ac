@@ -130,6 +130,18 @@ AC_ARG_ENABLE(howler,
 	[howler=no])
 AM_CONDITIONAL([HOWLER],[test x$howler = xyes])
 
+dnl Enable RASPBERRYPI plugin.
+AC_ARG_ENABLE(raspberrypi,
+	AS_HELP_STRING([--enable-raspberrypi],
+	[Enables the output plugin raspberrypi @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) raspberrypi=yes ;;
+		no)  raspberrypi=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-raspberrypi]) ;;
+	esac],
+	[raspberrypi=no])
+AM_CONDITIONAL([RASPBERRYPI],[test x$raspberrypi = xyes])
+
 dnl Enable develop mode
 AC_ARG_ENABLE(develop,
 	AS_HELP_STRING([--enable-develop],
@@ -170,6 +182,12 @@ if test x$pulseaudio = xyes ; then
 	)
 fi
 
+if test x$raspberrypi = xyes ; then
+	AC_CHECK_HEADER([pigpio.h], [], [AC_MSG_ERROR([pigpio.h header not found.])], [])
+	[RASPBERRYPI_LIBS="-lpigpio"]
+	AC_SUBST(RASPBERRYPI_LIBS)
+fi
+
 dnl expand bindir on configuration files.
 AS_AC_EXPAND(BINDIR, $bindir)
 
@@ -178,7 +196,7 @@ dnl * Needed header *
 dnl *****************
 AC_MSG_CHECKING([Headers])
 
-AC_CHECK_HEADERS([termios.h syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ])
+AC_CHECK_HEADERS([termios.h syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ], [], [AC_MSG_ERROR([missing header file.])], [])
 
 dnl ****************
 dnl * Needed Types *
@@ -263,9 +281,10 @@ Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 Copy samples : $samples
 --------- Output Plugins -----------
-NanoLed     : $nanoled
-PacDrive    : $pacdrive
-PacLed64    : $pacled64
-Ultimate IO : $ultimateio
-LedWiz 32   : $ledwiz32
-Howler      : $howler"
+NanoLed      : $nanoled
+PacDrive     : $pacdrive
+PacLed64     : $pacled64
+Ultimate IO  : $ultimateio
+LedWiz 32    : $ledwiz32
+Howler       : $howler
+Raspberry Pi : $raspberrypi"

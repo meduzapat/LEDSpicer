@@ -33,25 +33,27 @@ high_resolution_clock::time_point Main::start;
 
 void signalHandler(int sig) {
 
-	if (sig == SIGTERM) {
+	switch (sig) {
+	case SIGTERM:
+	case SIGQUIT:
 		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
-	}
-
-	if (sig == SIGHUP) {
+	case SIGHUP:
 		LogNotice(PACKAGE_NAME " received re load configuration signal");
 		// TODO: reload the profiles and restart everything?
 		return;
+	case SIGSEGV:
+	case SIGILL:
+		// display back trace
+	#ifdef DEVELOP
+		void* array[10];
+		size_t size = backtrace(array, 10);
+		backtrace_symbols_fd(array, size, STDERR_FILENO);
+	#endif
+		exit(EXIT_FAILURE);
+		break;
 	}
-
-	// display back trace
-#ifdef DEVELOP
-	void* array[10];
-	size_t size = backtrace(array, 10);
-	backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
-	exit(EXIT_FAILURE);
 }
 
 void Main::run() {
@@ -211,12 +213,6 @@ void Main::terminate() {
 
 int main(int argc, char **argv) {
 
-#ifdef DEVELOP
-	signal(SIGSEGV, signalHandler);
-#endif
-	signal(SIGTERM, signalHandler);
-	signal(SIGHUP, signalHandler);
-
 	// Process command line options.
 	string
 		commandline,
@@ -309,6 +305,15 @@ int main(int argc, char **argv) {
 	try {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
+
+#ifdef DEVELOP
+		signal(SIGSEGV, signalHandler);
+#endif
+		signal(SIGTERM, signalHandler);
+		signal(SIGQUIT, signalHandler);
+		signal(SIGCONT, SIG_IGN);
+		signal(SIGSTOP, SIG_IGN);
+		signal(SIGHUP, signalHandler);
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);

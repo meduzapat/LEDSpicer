@@ -60,11 +60,6 @@ void DataLoader::readConfiguration() {
 	if ((mode != Modes::Dump or mode != Modes::Profile) and tempAttr.count(PARAM_LOG_LEVEL))
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
 
-	dropRootPrivileges(
-		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
-		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
-	);
-
 	// set FPS.
 	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], "Invalid value for FPS");
 	if (fps == 0)
@@ -81,6 +76,14 @@ void DataLoader::readConfiguration() {
 
 	processLayout();
 
+#ifndef DRY_RUN
+	for (auto device : devices)
+		device->initialize();
+#endif
+	dropRootPrivileges(
+		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
+		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
+	);
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -119,7 +122,7 @@ void DataLoader::processDevices() {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, NODE_DEVICE);
 		auto device = createDevice(deviceAttr);
-		LogInfo("Initializing " + device->getFullName());
+		LogInfo("Processing " + device->getFullName());
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}

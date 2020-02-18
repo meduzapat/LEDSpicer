@@ -55,8 +55,6 @@ MainBase::MainBase() :
 			throw Error("Unable to daemonize.");
 		LogDebug("Daemonized");
 	}
-	for (auto device : DataLoader::devices)
-		device->initialize();
 #endif
 
 	running = true;
@@ -69,6 +67,7 @@ MainBase::~MainBase() {
 #ifdef DEVELOP
 		LogDebug(dm.first->getFullName() + " instance deleted");
 #endif
+		dm.first->terminate();
 		dm.second->destroyDevice(dm.first);
 	}
 
