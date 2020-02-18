@@ -3,7 +3,7 @@
  * @file      NanoLed.cpp
  * @since     Mar 11, 2019
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  */
 
 #include "NanoLed.hpp"
@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices::Ultimarc;
 
 uint16_t NanoLed::getProduct() {
-	return NANO_LED_PRODUCT + board.boardId - 1;
+	return NANO_LED_PRODUCT + boardId - 1;
 }
 
 void NanoLed::drawHardwarePinMap() {

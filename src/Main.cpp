@@ -4,7 +4,7 @@
  * @since     Jun 6, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -33,25 +33,27 @@ high_resolution_clock::time_point Main::start;
 
 void signalHandler(int sig) {
 
-	if (sig == SIGTERM) {
+	switch (sig) {
+	case SIGTERM:
+	case SIGQUIT:
 		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
-	}
-
-	if (sig == SIGHUP) {
+	case SIGHUP:
 		LogNotice(PACKAGE_NAME " received re load configuration signal");
 		// TODO: reload the profiles and restart everything?
 		return;
+	case SIGSEGV:
+	case SIGILL:
+		// display back trace
+	#ifdef DEVELOP
+		void* array[10];
+		size_t size = backtrace(array, 10);
+		backtrace_symbols_fd(array, size, STDERR_FILENO);
+	#endif
+		exit(EXIT_FAILURE);
+		break;
 	}
-
-	// display back trace
-#ifdef DEVELOP
-	void* array[10];
-	size_t size = backtrace(array, 10);
-	backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
-	exit(EXIT_FAILURE);
 }
 
 void Main::run() {
@@ -211,12 +213,6 @@ void Main::terminate() {
 
 int main(int argc, char **argv) {
 
-#ifdef DEVELOP
-	signal(SIGSEGV, signalHandler);
-#endif
-	signal(SIGTERM, signalHandler);
-	signal(SIGHUP, signalHandler);
-
 	// Process command line options.
 	string
 		commandline,
@@ -253,7 +249,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2019 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
@@ -309,6 +305,15 @@ int main(int argc, char **argv) {
 	try {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
+
+#ifdef DEVELOP
+		signal(SIGSEGV, signalHandler);
+#endif
+		signal(SIGTERM, signalHandler);
+		signal(SIGQUIT, signalHandler);
+		signal(SIGCONT, SIG_IGN);
+		signal(SIGSTOP, SIG_IGN);
+		signal(SIGHUP, signalHandler);
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
@@ -399,5 +404,5 @@ void Main::runCurrentProfile() {
 		device->transfer();
 
 	// Wait...
-	ConnectionUSB::wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
+	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
 }

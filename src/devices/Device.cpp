@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,9 +25,23 @@
 
 using namespace LEDSpicer::Devices;
 
-void Device::afterClaimInterface() {
-	LogDebug("Initializing board");
+void Device::initialize() {
+	LogDebug("Initializing Device " + name);
+	openDevice();
 	resetLeds();
+}
+
+void Device::terminate() {
+	LogDebug("Terminating Device " + name);
+	resetLeds();
+}
+
+Device::Device(
+	uint8_t  elements,
+	const string& name
+) : name(name) {
+	LEDs.resize(elements);
+	LEDs.shrink_to_fit();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
@@ -70,6 +84,10 @@ void Device::validateLed(uint8_t led) const {
 
 uint8_t Device::getNumberOfElements() const {
 	return elementsByName.size();
+}
+
+uint8_t Device::getNumberOfLeds() {
+	return LEDs.size();
 }
 
 umap<string, Element>* Device::getElements() {

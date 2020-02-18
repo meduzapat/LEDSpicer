@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,8 +21,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ConnectionUSB.hpp"
+// For ints.
+#include <cstdint>
+
 #include "Group.hpp"
+#include "utility/Error.hpp"
+#include "utility/Log.hpp"
+#include "utility/Utility.hpp"
 
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_ 1
@@ -34,13 +39,26 @@ namespace Devices {
  * LEDSpicer::Devices::Device
  * Generic Device settings and functionality.
  */
-class Device : public ConnectionUSB {
+class Device {
 
 public:
 
-	using ConnectionUSB::ConnectionUSB;
+	Device(
+		uint8_t  elements,
+		const string& name
+	);
 
 	virtual ~Device() = default;
+
+	/**
+	 * Prepares the device.
+	 */
+	void initialize();
+
+	/**
+	 * Terminates the device.
+	 */
+	void terminate();
 
 	/**
 	 * Set a LED to an intensity
@@ -102,13 +120,40 @@ public:
 	 */
 	virtual void resetLeds() = 0;
 
+	/**
+	 * @return the device name with all the information that identify it from others.
+	 */
+	virtual string getFullName() = 0;
+
+	/**
+	 * Populates the pins with the correct pin number used by elements and
+	 * displays the pin in a similar way they are found on the hardware.
+	 */
+	virtual void drawHardwarePinMap() = 0;
+
+	/**
+	 * Returns the number of LEDs (pins) this board controls.
+	 * @return
+	 */
+	uint8_t getNumberOfLeds();
+
+	/**
+	 * This method will be called every time a transfer need to be done.
+	 */
+	virtual void transfer() = 0;
+
 protected:
+
+	/// The device name.
+	string name;
+
+	/// Device LEDs (pins)
+	vector<uint8_t> LEDs;
 
 	/// Maps elements by name.
 	umap<string, Element> elementsByName;
 
-	/// Basic
-	virtual void afterClaimInterface();
+	virtual void openDevice() = 0;
 
 };
 

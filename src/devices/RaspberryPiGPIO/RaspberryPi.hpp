@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Pulse.hpp
- * @since     Jun 24, 2018
+ * @file      RaspberryPi.hpp
+ * @since     Feb 15, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
@@ -20,53 +20,51 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DirectionActor.hpp"
-#include <cmath>
+#include "../Device.hpp"
+#include <pigpio.h>
 
-#ifndef PULSE_HPP_
-#define PULSE_HPP_ 1
+#ifndef RASPBERRYPI_HPP_
+#define RASPBERRYPI_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSE {"speed", "direction", "color"}
+#define RPI_NAME "Raspberry Pi"
+#define RPI_LEDS 28
 
 namespace LEDSpicer {
-namespace Animations {
+namespace Devices {
+namespace RaspberryPi {
 
 /**
- * LEDSpicer::Animations::Pulse
+ * LEDSpicer::Devices::RaspberryPi::RaspberryPi
+ *
+ * Raspberry Pi GPIO ports.
  */
-class Pulse : public DirectionActor, public Color {
+class RaspberryPi : public Device {
 
 public:
 
-	enum class Modes : uint8_t {Linear, Exponential};
+	RaspberryPi(uint8_t boardId, umap<string, string>& options) : Device(RPI_LEDS, RPI_NAME) {}
 
-	Pulse(umap<string, string>& parameters, Group* const layout):
-		DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
-		Color(parameters["color"]),
-		mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
-	{}
+	virtual ~RaspberryPi();
 
-	virtual ~Pulse() = default;
+	virtual void resetLeds();
 
-	void drawConfig();
+	virtual string getFullName();
 
-	string mode2str(Modes type);
+	virtual void drawHardwarePinMap();
 
-	Modes str2mode(const string& type);
+	virtual void transfer();
 
 protected:
 
-	void calculateElements();
+	static bool initialized;
 
-private:
-
-	Modes mode;
-
+	virtual void openDevice();
 };
 
-} /* namespace Animations */
+} /* namespace RaspberryPi */
+} /* namespace Devices */
 } /* namespace LEDSpicer */
 
-actorFactory(LEDSpicer::Animations::Pulse)
+deviceFactory(LEDSpicer::Devices::RaspberryPi::RaspberryPi)
 
-#endif /* PULSE_HPP_ */
+#endif /* RASPBERRYPI_HPP_ */

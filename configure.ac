@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.3.9],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.4.0],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
-AC_COPYRIGHT([Copyright © 2018 - 2019 Patricio A. Rossi])
+AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -58,7 +58,7 @@ dnl ******************
 dnl * Output plugins *
 dnl ******************
 
-dnl Disable NANOLED plugin.
+dnl Enable NANOLED plugin.
 AC_ARG_ENABLE(nanoled,
 	AS_HELP_STRING([--enable-nanoled],
 	[Enables the output plugin nanoled @<:@default=no@:>@]),
@@ -70,7 +70,7 @@ AC_ARG_ENABLE(nanoled,
 	[nanoled=no])
 AM_CONDITIONAL([NANOLED],[test x$nanoled = xyes])
 
-dnl Disable PACDRIVE plugin.
+dnl Enable PACDRIVE plugin.
 AC_ARG_ENABLE(pacdrive,
 	AS_HELP_STRING([--enable-pacdrive],
 	[Enables the output plugin pacdrive @<:@default=no@:>@]),
@@ -82,7 +82,7 @@ AC_ARG_ENABLE(pacdrive,
 	[pacdrive=no])
 AM_CONDITIONAL([PACDRIVE],[test x$pacdrive = xyes])
 
-dnl Disable PACLED64 plugin.
+dnl Enable PACLED64 plugin.
 AC_ARG_ENABLE(pacled64,
 	AS_HELP_STRING([--enable-pacled64],
 	[Enables the output plugin pacled64 @<:@default=no@:>@]),
@@ -94,7 +94,7 @@ AC_ARG_ENABLE(pacled64,
 	[pacled64=no])
 AM_CONDITIONAL([PACLED64],[test x$pacled64 = xyes])
 
-dnl Disable ULTIMATEIO plugin.
+dnl Enable ULTIMATEIO plugin.
 AC_ARG_ENABLE(ultimateio,
 	AS_HELP_STRING([--enable-ultimateio],
 	[Enables the output plugin ultimateio @<:@default=no@:>@]),
@@ -106,7 +106,7 @@ AC_ARG_ENABLE(ultimateio,
 	[ultimateio=no])
 AM_CONDITIONAL([ULTIMATEIO],[test x$ultimateio = xyes])
 
-dnl Disable LEDWIZ32 plugin.
+dnl Enable LEDWIZ32 plugin.
 AC_ARG_ENABLE(ledwiz32,
 	AS_HELP_STRING([--enable-ledwiz32],
 	[Enables the output plugin ledwiz32 @<:@default=no@:>@]),
@@ -117,6 +117,30 @@ AC_ARG_ENABLE(ledwiz32,
 	esac],
 	[ledwiz32=no])
 AM_CONDITIONAL([LEDWIZ32],[test x$ledwiz32 = xyes])
+
+dnl Enable HOWLER plugin.
+AC_ARG_ENABLE(howler,
+	AS_HELP_STRING([--enable-pacdrive],
+	[Enables the output plugin howler @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) howler=yes ;;
+		no)  howler=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-howler]) ;;
+	esac],
+	[howler=no])
+AM_CONDITIONAL([HOWLER],[test x$howler = xyes])
+
+dnl Enable RASPBERRYPI plugin.
+AC_ARG_ENABLE(raspberrypi,
+	AS_HELP_STRING([--enable-raspberrypi],
+	[Enables the output plugin raspberrypi @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) raspberrypi=yes ;;
+		no)  raspberrypi=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-raspberrypi]) ;;
+	esac],
+	[raspberrypi=no])
+AM_CONDITIONAL([RASPBERRYPI],[test x$raspberrypi = xyes])
 
 dnl Enable develop mode
 AC_ARG_ENABLE(develop,
@@ -132,7 +156,7 @@ dnl * Needed Libraries *
 dnl ********************
 AC_MSG_CHECKING([dependencies])
 
-PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0.~],
+PKG_CHECK_MODULES([LIBUSB], [libusb-1.0 >= 1.0],
 	echo -e "\tlibusb 1.0 ver `pkg-config --short-errors --modversion libusb-1.0` found",
 	AC_MSG_ERROR([libusb-1.0 development library not found.])
 )
@@ -158,6 +182,12 @@ if test x$pulseaudio = xyes ; then
 	)
 fi
 
+if test x$raspberrypi = xyes ; then
+	AC_CHECK_HEADER([pigpio.h], [], [AC_MSG_ERROR([pigpio.h header not found.])], [])
+	[RASPBERRYPI_LIBS="-lpigpio"]
+	AC_SUBST(RASPBERRYPI_LIBS)
+fi
+
 dnl expand bindir on configuration files.
 AS_AC_EXPAND(BINDIR, $bindir)
 
@@ -166,7 +196,7 @@ dnl * Needed header *
 dnl *****************
 AC_MSG_CHECKING([Headers])
 
-AC_CHECK_HEADERS([termios.h syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ])
+AC_CHECK_HEADERS([termios.h syslog.h unistd.h pthread.h fcntl.h netdb.h sys/ioctl.h sys/socket.h ], [], [AC_MSG_ERROR([missing header file.])], [])
 
 dnl ****************
 dnl * Needed Types *
@@ -251,8 +281,10 @@ Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 Copy samples : $samples
 --------- Output Plugins -----------
-NanoLed     : $nanoled
-PacDrive    : $pacdrive
-PacLed64    : $pacled64
-Ultimate IO : $ultimateio
-LedWiz 32   : $ledwiz32"
+NanoLed      : $nanoled
+PacDrive     : $pacdrive
+PacLed64     : $pacled64
+Ultimate IO  : $ultimateio
+LedWiz 32    : $ledwiz32
+Howler       : $howler
+Raspberry Pi : $raspberrypi"

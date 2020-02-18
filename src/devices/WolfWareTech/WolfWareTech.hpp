@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Handler.hpp
- * @since     Dec 8, 2018
+ * @file      WolfWareTech.hpp
+ * @since     Feb 5, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,45 +20,41 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "devices/DeviceUSB.hpp"
 
-#include <dlfcn.h>
+#ifndef WOLFWARETECH_HPP_
+#define WOLFWARETECH_HPP_ 1
 
-#include "utility/Log.hpp"
-#include "utility/Error.hpp"
-
-#ifndef HANDLER_HPP_
-#define HANDLER_HPP_ 1
+/// WolfWare Tech USB vendor code.
+#define WOLFWARETECH_VENDOR 0x03EB
 
 namespace LEDSpicer {
+namespace Devices {
+namespace WolfWareTech {
 
 /**
- * LEDSpicer::Handler
+ * This is the Base Header for the WolfWare Tech controllers.
+ * LEDSpicer::Devices::WolfWareTech::WolfWareTech
  */
-class Handler {
+class WolfWareTech : public DeviceUSB {
 
 public:
 
-	Handler() = default;
+	using DeviceUSB::DeviceUSB;
 
-	/**
-	 * Loads a new plugin using its library name.
-	 * @param the plugin library name without extension or path.
-	 */
-	Handler(const string& filename);
-
-	/**
-	 * releases the linked library.
-	 */
-	virtual ~Handler();
+	uint16_t getVendor() {
+		return WOLFWARETECH_VENDOR;
+	}
 
 protected:
 
-	/// Pointer to the dynamic linked library.
-	void* handler = nullptr;
+	virtual void afterConnect() {}
 
+	virtual void afterClaimInterface() {}
 };
 
+} /* namespace WolfWareTech */
+} /* namespace Devices */
 } /* namespace LEDSpicer */
 
-#endif /* HANDLER_HPP_ */
+#endif /* WOLFWARETECH_HPP_ */

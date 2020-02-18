@@ -3,7 +3,7 @@
  * @file      PacLed64.cpp
  * @since     Feb 2, 2019
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  */
 
 #include "PacLed64.hpp"
@@ -11,7 +11,7 @@
 using namespace LEDSpicer::Devices::Ultimarc;
 
 uint16_t PacLed64::getProduct() {
-	return PAC_LED64_PRODUCT + board.boardId - 1;
+	return PAC_LED64_PRODUCT + boardId - 1;
 }
 
 void PacLed64::drawHardwarePinMap() {

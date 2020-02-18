@@ -35,7 +35,7 @@ all the information you need to get the program running on your Arcade box or PC
 [![Arcade Demo](http://img.youtube.com/vi/l4lzksatgVA/0.jpg)](https://youtu.be/l4lzksatgVA)
 ## License
 
-Copyright (C) 2018 - 2019 Patricio A. Rossi
+Copyright (C) 2018 - 2020 Patricio A. Rossi
 
 LEDSpicer is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the

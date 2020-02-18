@@ -4,7 +4,7 @@
  * @since     Jun 22, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 		"Input Seeker v" PACKAGE_VERSION << endl <<
 		"Part of LEDSpicer project" << endl <<
 		"This program will open all the system inputs and listen for events to easy the task of setting input plugins" << endl << endl <<
-		PACKAGE_STRING " Copyright © 2018 - 2019 - Patricio A. Rossi (MeduZa)\n\n"
+		PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
 		"For more information visit <" PACKAGE_URL ">\n\n"
 		"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 		PACKAGE_NAME " is free software under the GPL 3 license\n\n"

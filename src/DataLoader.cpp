@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,6 +39,7 @@ umap<Input*, InputHandler*> DataLoader::inputMap;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
 umap<string, Element::Item*> DataLoader::controlledElements;
 umap<string, Group::Item*> DataLoader::controlledGroups;
+milliseconds DataLoader::waitTime;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -59,18 +60,12 @@ void DataLoader::readConfiguration() {
 	if ((mode != Modes::Dump or mode != Modes::Profile) and tempAttr.count(PARAM_LOG_LEVEL))
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
 
-	dropRootPrivileges(
-		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
-		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
-	);
-
 	// set FPS.
 	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], "Invalid value for FPS");
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
-	ConnectionUSB::setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
-	// activate LIBUSB.
-	ConnectionUSB::openSession();
+	setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
+
 	Actor::setFPS((fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
 
 	portNumber = tempAttr[PARAM_PORT];
@@ -81,6 +76,14 @@ void DataLoader::readConfiguration() {
 
 	processLayout();
 
+#ifndef DRY_RUN
+	for (auto device : devices)
+		device->initialize();
+#endif
+	dropRootPrivileges(
+		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
+		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
+	);
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -119,7 +122,7 @@ void DataLoader::processDevices() {
 		umap<string, string> deviceAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, NODE_DEVICE);
 		auto device = createDevice(deviceAttr);
-		LogInfo("Initializing " + device->getFullName());
+		LogInfo("Processing " + device->getFullName());
 		this->devices.push_back(device);
 		processDeviceElements(element, device);
 	}
@@ -469,3 +472,9 @@ void DataLoader::dropRootPrivileges(uid_t uid, gid_t gid) {
 
 	LogDebug("Privileges dropped");
 }
+
+void DataLoader::setInterval(uint8_t waitTime) {
+	DataLoader::waitTime = milliseconds(waitTime);
+	LogInfo("Set interval to " + to_string(DataLoader::waitTime.count()) + "ms");
+}
+

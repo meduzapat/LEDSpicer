@@ -33,11 +33,11 @@ libledspicer_la_SOURCES =             \
 	src/utility/Color.cpp             \
 	src/utility/Colors.cpp            \
 	src/utility/Socks.cpp             \
-	src/ConnectionUSB.cpp             \
 	src/devices/Element.cpp           \
 	src/devices/Group.cpp             \
 	src/devices/Profile.cpp           \
 	src/devices/Device.cpp            \
+	src/devices/DeviceUSB.cpp         \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
@@ -56,7 +56,6 @@ libledspicer_la_CPPFLAGS = \
 	$(LIBUSB_CFLAGS)
 
 pkginclude_HEADERS =      \
-	src/ConnectionUSB.hpp \
 	src/Message.hpp       \
 	src/Messages.hpp
 
@@ -73,10 +72,11 @@ utilityheader_HEADERS =       \
 	src/utility/Colors.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
-devicesheader_HEADERS =     \
-	src/devices/Element.hpp \
-	src/devices/Group.hpp   \
-	src/devices/Device.hpp  \
+devicesheader_HEADERS =       \
+	src/devices/Element.hpp   \
+	src/devices/Group.hpp     \
+	src/devices/Device.hpp    \
+	src/devices/DeviceUSB.hpp \
 	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
@@ -411,6 +411,55 @@ EXTRA_DIST += \
 	src/devices/GroovyGameGear/LedWiz32.cpp
 endif
 
+##########
+# HOWLER #
+##########
+if HOWLER
+devices_LTLIBRARIES += \
+	Howler.la
+
+Howler_la_SOURCES = \
+	src/devices/WolfWareTech/Howler.cpp
+
+Howler_la_LIBADD = \
+	libledspicer.la
+
+Howler_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+Howler_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
+else
+EXTRA_DIST += \
+	src/devices/WolfWareTech/Howler.cpp
+endif
+
+###############
+# RASPBERRYPI #
+###############
+if RASPBERRYPI
+devices_LTLIBRARIES += \
+	RaspberryPi.la
+
+RaspberryPi_la_SOURCES = \
+	src/devices/RaspberryPiGPIO/RaspberryPi.cpp
+
+RaspberryPi_la_LIBADD = \
+	libledspicer.la     \
+	$(RASPBERRYPI_LIBS)
+
+RaspberryPi_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+RaspberryPi_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
+else
+EXTRA_DIST += \
+	src/devices/RaspberryPiGPIO/RaspberryPi.cpp
+endif
+
 devicesdir = \
 	$(DEVICES_DIR)
 
@@ -561,6 +610,9 @@ EXTRA_DIST +=                       \
 	src/devices/Ultimarc/PacDrive.hpp \
 	src/devices/Ultimarc/PacLed64.hpp \
 	src/devices/Ultimarc/NanoLed.hpp  \
+	src/devices/WolfWareTech/Howler.hpp         \
+	src/devices/WolfWareTech/WolfWareTech.hpp   \
+	src/devices/RaspberryPiGPIO/RaspberryPi.hpp \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \
@@ -578,6 +630,7 @@ EXTRA_DIST +=                       \
 	src/Emitter.hpp      \
 	src/InputSeeker.hpp  \
 	data/ledspicer.conf          \
+	data/singleColor.xml         \
 	data/basicColors.xml         \
 	data/webColors.xml           \
 	data/gameData.xml            \

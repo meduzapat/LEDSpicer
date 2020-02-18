@@ -4,7 +4,7 @@
  * @since     Nov 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/Device.hpp"
+#include "devices/DeviceUSB.hpp"
 
 #ifndef GGG_HPP_
 #define GGG_HPP_ 1
@@ -36,15 +36,19 @@ namespace GroovyGameGear {
  * LEDSpicer::Devices::GroovyGameGear
  * GGG family data and definitions.
  */
-class GroovyGameGear: public Device {
+class GroovyGameGear: public DeviceUSB {
 
 public:
 
-	using Device::Device;
+	using DeviceUSB::DeviceUSB;
 
 	uint16_t getVendor() {
 		return GGG_VENDOR;
 	}
+
+protected:
+
+	virtual void afterConnect() {}
 
 };
 

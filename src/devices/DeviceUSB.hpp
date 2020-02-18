@@ -1,10 +1,11 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ConnectionUSB.hpp
- * @since     Jun 19, 2018
+ * @file      DeviceUSB.hpp
+ *
+ * @since     Feb 11, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2019 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,26 +21,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For ints.
-#include <cstdint>
-
-// To handle usb devices.
+// To handle USB devices.
 #include <libusb.h>
 
-// To handle dynamic arrays.
-#include <vector>
-using std::vector;
+#include "Device.hpp"
 
-#include <chrono>
-using std::chrono::milliseconds;
-#include <thread>
-
-#include "utility/Error.hpp"
-#include "utility/Log.hpp"
-#include "utility/Utility.hpp"
-
-#ifndef CONNECTIONUSB_HPP_
-#define CONNECTIONUSB_HPP_ 1
+#ifndef DEVICEUSB_HPP_
+#define DEVICEUSB_HPP_ 1
 
 /// The request type field for the setup packet.
 #define REQUEST_TYPE 0x21
@@ -53,18 +41,17 @@ using std::chrono::milliseconds;
 #define MAX_DUMP_COLUMNS 40
 
 namespace LEDSpicer {
+namespace Devices {
 
 /**
- * LEDSpicer::ConnectionUSB
- * @note All USBLib functions return 0 when success.
- * Every LED is a single element, RGB elements uses three LEDs.
- * LEDs always have 255 levels of intensity even when they are on/off only.
+ * LEDSpicer::Devices::Device
+ * Generic Device settings and functionality.
  */
-class ConnectionUSB {
+class DeviceUSB : public Device {
 
 public:
 
-	ConnectionUSB(
+	DeviceUSB(
 		uint16_t wValue,
 		uint8_t  interface,
 		uint8_t  elements,
@@ -73,18 +60,12 @@ public:
 		const string& name
 	);
 
-	virtual ~ConnectionUSB();
-
-	static void openSession();
-
-	void initialize();
-
-	static void terminate();
+	virtual ~DeviceUSB();
 
 	/**
-	 * This method will be called every time a transfer need to be done.
+	 * This function will be used to close the USB session, need to be called only once when ledspicer exit.
 	 */
-	virtual void transfer() = 0;
+	static void closeUSB();
 
 	/**
 	 * Returns the number of LEDs (pins) this board controls.
@@ -111,71 +92,36 @@ public:
 	/**
 	 * @return the device name with Id.
 	 */
-	string getFullName();
-
-	/**
-	 * Populates the pins with the correct pin number and
-	 * displays the pin in a similar way they are found on the hardware.
-	 */
-	virtual void drawHardwarePinMap() = 0;
-
-	/**
-	 * Transfers miscellaneous data.
-	 * @param data
-	 */
-	virtual void transferData(vector<uint8_t>& data);
-
-	/**
-	 * Sets the interval ms.
-	 * @param waitTime
-	 */
-	static void setInterval(uint8_t waitTime);
-
-	/**
-	 * Returns the interval ms.
-	 * @return
-	 */
-	static milliseconds getInterval();
-
-	/**
-	 * Waits for a defined amount of ms.
-	 * @param milliseconds wasted keeps track of the wasted milliseconds.
-	 */
-	static void wait(milliseconds wasted);
+	virtual string getFullName();
 
 protected:
 
 	/// USB device handle.
 	libusb_device_handle* handle = nullptr;
 
-	/// The device name.
-	string name;
+	/// The value field for the setup packet.
+	uint16_t value = 0;
+
+	uint8_t
+		/// Interface number
+		interface = 0,
+		/// Board ID
+		boardId   = 0;
 
 	/// App wide libusb session.
 	static libusb_context *usbSession;
 
-	/// Internal structure to keep initialization information
-	struct ConnectionData {
-		uint16_t
-			/// The value field for the setup packet.
-			value = 0;
-		uint8_t
-			/// Interface number
-			interface = 0,
-			/// Board ID
-			boardId   = 0;
-	} board;
-
-	vector<uint8_t> LEDs;
-
-	static milliseconds waitTime;
-
-	virtual void afterConnect() = 0;
+	virtual void openDevice();
 
 	/**
 	 * Connect to the USB board.
 	 */
 	virtual void connect();
+
+	/**
+	 * This function will be called after connect.
+	 */
+	virtual void afterConnect() = 0;
 
 	/**
 	 * Detach from kernel and claim the interface.
@@ -186,8 +132,14 @@ protected:
 	 * if anything needs to be initialized after claiming goes here.
 	 */
 	virtual void afterClaimInterface() = 0;
+
+	/**
+	 * Transfers miscellaneous data into the USB device.
+	 * @param data
+	 */
+	virtual void transferToUSB(vector<uint8_t>& data);
 };
 
-} /* namespace LEDSpicer */
+}} /* namespace LEDSpicer */
 
-#endif /* CONNECTIONUSB_HPP_ */
+#endif /* DEVICEUSB_HPP_ */
