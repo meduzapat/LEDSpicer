@@ -25,7 +25,7 @@
 using namespace LEDSpicer::Devices::WolfWareTech;
 
 void Howler::resetLeds() {
-	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0);
+	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0);
 	transferToUSB(data);
 	setLeds(0);
 }
@@ -63,14 +63,27 @@ void Howler::drawHardwarePinMap() {
 
 void Howler::transfer() {
 
-	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0);
+	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0);
 	transferToUSB(data);
 
 	for (uint8_t c = 0, t = LEDs.size(); c < t ; ++c)
 		if (LEDs[c]) {
-			vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_INDIVIDUAL_LED, LEDs[c]);
+			vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_INDIVIDUAL_LED, c, LEDs[c]);
 			transferToUSB(data);
 		}
+
+/*
+	for (uint8_t c = 0, t = LEDs.size() / 3; c < t ; c+=3) {
+		vector<uint8_t> data HOWLER_MSG(
+			HOWLER_CMD_SET_RGB_LED,
+			c,
+			LEDs[c],
+			LEDs[c + 1],
+			LEDs[c + 2]
+		);
+		transferToUSB(data);
+	}
+*/
 }
 
 uint16_t Howler::getProduct() {

@@ -38,7 +38,7 @@
 #define HOWLER_CMD_SET_RGB_LED           0x01
 #define HOWLER_CMD_SET_INDIVIDUAL_LED    0x02
 
-#define HOWLER_MSG(cmd, byte1) {HOWLER_WVALUE, cmd, byte1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define HOWLER_MSG(cmd, byte1, byte2) {HOWLER_WVALUE, cmd, byte1, byte2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 namespace LEDSpicer {
 namespace Devices {
