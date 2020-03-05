@@ -79,7 +79,7 @@ Element* Device::getElement(const string& name) {
 
 void Device::validateLed(uint8_t led) const {
 	if (led >= LEDs.size())
-		throw Error("Invalid led number " + to_string(led));
+		throw Error("Invalid led number " + to_string(led + 1));
 }
 
 uint8_t Device::getNumberOfElements() const {

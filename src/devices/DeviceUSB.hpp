@@ -30,12 +30,12 @@
 #define DEVICEUSB_HPP_ 1
 
 /// The request type field for the setup packet.
-#define REQUEST_TYPE 0x21
+#define REQUEST_TYPE LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE
 /// The request field for the setup packet.
 #define REQUEST      0x09
 
 /// Default USB timeout
-#define TIMEOUT 1500
+#define TIMEOUT 500
 
 /// the number of columns to display when dumping pins.
 #define MAX_DUMP_COLUMNS 40

@@ -142,14 +142,17 @@ void MainBase::testLeds() {
 
 		try {
 			led = std::stoi(inp) - 1;
-			if (led >= device->getNumberOfLeds())
-				throw "";
 			device->setLed(led, 255);
-			device->transfer();
+		}
+		catch (Error& e) {
+			cerr << e.getMessage() << endl;
+			continue;
 		}
 		catch (...) {
-			cerr << "Invalid pin number" << endl;
+			cerr << "Invalid led number " + inp << endl;
+			continue;
 		}
+		device->transfer();
 	}
 }
 
@@ -181,11 +184,12 @@ void MainBase::testElements() {
 		try {
 			Element* element = device->getElement(inp);
 			element->setColor(Color::getColor("White"));
-			device->transfer();
 		}
-		catch (...) {
-			cerr << "Invalid pin number" << endl;
+		catch (Error& e) {
+			cerr << e.getMessage() << endl;
+			continue;
 		}
+		device->transfer();
 	}
 }
 

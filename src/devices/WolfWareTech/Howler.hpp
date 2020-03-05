@@ -28,15 +28,17 @@
 #define HOWLER_NAME       "Howler"
 #define HOWLER_PRODUCT    0x6800
 #define HOWLER_WVALUE     0x00CE
-#define HOWLER_INTERFACE  0x0002
+#define HOWLER_INTERFACE  0
 #define HOWLER_LEDS       96
-#define HOWLER_MAX_BOARDS 1
+#define HOWLER_MAX_BOARDS 4
+#define HOWLER_IN_EP      0x02
+#define HOWLER_OUT_EP     0x81
 
 #define HOWLER_CMD_SET_GLOBAL_BRIGHTNESS 0x06
 #define HOWLER_CMD_SET_RGB_LED           0x01
 #define HOWLER_CMD_SET_INDIVIDUAL_LED    0x02
 
-#define HOWLER_MSG(cmd, byte1, byte2, byte3, byte4) {HOWLER_WVALUE, cmd, byte1, byte2, byte3, byte4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define HOWLER_MSG(cmd, byte1) {HOWLER_WVALUE, cmd, byte1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 namespace LEDSpicer {
 namespace Devices {
@@ -55,7 +57,7 @@ public:
 	Howler(uint8_t boardId, umap<string, string>& options) :
 	WolfWareTech(
 		HOWLER_WVALUE,
-		0, // to be defined.
+		HOWLER_INTERFACE,
 		HOWLER_LEDS,
 		HOWLER_MAX_BOARDS,
 		boardId,
@@ -71,7 +73,9 @@ public:
 	uint16_t getProduct();
 
 	virtual void resetLeds();
+protected:
 
+	virtual void transferToUSB(vector<uint8_t>& data);
 };
 
 } /* namespace WolfWareTech */

@@ -120,7 +120,7 @@ AM_CONDITIONAL([LEDWIZ32],[test x$ledwiz32 = xyes])
 
 dnl Enable HOWLER plugin.
 AC_ARG_ENABLE(howler,
-	AS_HELP_STRING([--enable-pacdrive],
+	AS_HELP_STRING([--enable-howler],
 	[Enables the output plugin howler @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) howler=yes ;;
