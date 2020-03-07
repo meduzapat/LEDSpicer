@@ -72,10 +72,10 @@ void Howler::transfer() {
 			transferToUSB(data);
 		}
 */
-	for (uint8_t c = 0, t = LEDs.size() / 3; c < t ; c+=3) {
+	for (uint8_t c = 0, i = 0, t = LEDs.size() / 3; c < t ; ++i, c+=3) {
 		vector<uint8_t> data HOWLER_MSG(
 			HOWLER_CMD_SET_RGB_LED,
-			c,
+			i,
 			LEDs[c],
 			LEDs[c + 1],
 			LEDs[c + 2]
