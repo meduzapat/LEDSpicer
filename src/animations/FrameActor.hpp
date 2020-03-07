@@ -62,13 +62,26 @@ public:
 	/**
 	 * @see Actor::draw()
 	 */
-	virtual bool draw();
+	virtual void draw();
+
+	virtual bool isRunning();
 
 protected:
 
 	uint8_t
+		/// Total number of frames.
 		totalFrames  = 0,
-		currentFrame = 0;
+		/// The current frame.
+		currentFrame = 0,
+		/// The frame when we start drawing.
+		startFrame   = 0,
+
+		/// Number of cycles to run.
+		cycles     = 0,
+		/// Current cycles.
+		cycle    = 0;
+
+	bool drawing = false;
 
 	/**
 	 * Advances the system frame forward.

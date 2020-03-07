@@ -35,7 +35,9 @@ void signalHandler(int sig) {
 
 	switch (sig) {
 	case SIGTERM:
+	case SIGABRT:
 	case SIGQUIT:
+	case SIGINT:
 		LogNotice(PACKAGE_NAME " terminated by signal");
 		Main::terminate();
 		return;
@@ -203,8 +205,10 @@ void Main::run() {
 	currentProfile->terminate();
 
 	// Wait for termination.
-	while (currentProfile->isRunning())
+	while (currentProfile->isRunning()) {
 		currentProfile->runFrame();
+		sendData();
+	}
 }
 
 void Main::terminate() {
@@ -311,6 +315,8 @@ int main(int argc, char **argv) {
 #endif
 		signal(SIGTERM, signalHandler);
 		signal(SIGQUIT, signalHandler);
+		signal(SIGABRT, signalHandler);
+		signal(SIGINT, signalHandler);
 		signal(SIGCONT, SIG_IGN);
 		signal(SIGSTOP, SIG_IGN);
 		signal(SIGHUP, signalHandler);
@@ -398,6 +404,10 @@ void Main::runCurrentProfile() {
 	for (auto& eE : DataLoader::controlledElements)
 		eE.second->element->setColor(*eE.second->color, eE.second->filter);
 
+	sendData();
+}
+
+void Main::sendData() {
 	// Send data.
 	// TODO: need to test speed: single thread or running one thread per device.
 	for (auto device : DataLoader::devices)

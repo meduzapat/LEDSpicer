@@ -22,7 +22,7 @@
 
 #include "Element.hpp"
 #include "Group.hpp"
-#include "animations/Actor.hpp"
+#include "animations/FrameActor.hpp"
 #include "utility/Color.hpp"
 #include "inputs/Input.hpp"
 
@@ -34,6 +34,7 @@
 namespace LEDSpicer {
 namespace Devices {
 
+using Animations::FrameActor;
 using Animations::Actor;
 using Inputs::Input;
 
@@ -47,8 +48,8 @@ public:
 	Profile(
 		const string& name,
 		const Color& backgroundColor,
-		Actor* start,
-		Actor* end
+		FrameActor* start,
+		FrameActor* end
 	):
 		name(name),
 		backgroundColor(backgroundColor),
@@ -145,7 +146,7 @@ protected:
 	/// Keeps the profile name.
 	string name;
 
-	Actor
+	FrameActor
 		/// The current animation.
 		* actual,
 		/// The starting animation.

@@ -86,6 +86,7 @@ using std::chrono::milliseconds;
 namespace LEDSpicer {
 
 using Animations::Actor;
+using Animations::FrameActor;
 using Animations::ActorHandler;
 using Devices::DeviceHandler;
 using Devices::Device;

@@ -64,6 +64,7 @@ protected:
 
 	static high_resolution_clock::time_point start;
 
+	void sendData();
 };
 
 /**

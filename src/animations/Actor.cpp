@@ -32,18 +32,33 @@ Actor::Actor(
 	const vector<string>& requiredParameters
 ) :
 	filter(Color::str2filter(parameters["filter"])),
+	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
+	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	group(group)
 {
 
 	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
-
-	restart();
 }
 
-bool Actor::draw() {
+void Actor::draw() {
+
 	affectAllElements();
+
+	if (startTime) {
+		if (not startTime->isTime())
+			return;
+		delete startTime;
+		startTime = nullptr;
+		if (secondsToEnd)
+			endTime = new Time(secondsToEnd);
+	}
+
+	if (endTime and endTime->isTime()) {
+		return;
+	}
+
 	calculateElements();
 	if (not affectedElements.empty())
 		switch (filter) {
@@ -55,13 +70,29 @@ bool Actor::draw() {
 				changeElementColor(elIdx, Color::getColor("Black"), Color::Filters::Normal, 100);
 			}
 		}
-	return not running();
 }
 
 void Actor::drawConfig() {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
+}
+
+void Actor::restart() {
+	if (endTime)
+		delete endTime;
+
+	if (secondsToStart) {
+		if (startTime)
+			delete startTime;
+		startTime = new Time(secondsToStart);
+	}
+}
+
+bool Actor::isRunning() {
+	if (endTime and endTime->isTime())
+		return false;
+	return true;
 }
 
 void Actor::setFPS(uint8_t FPS) {

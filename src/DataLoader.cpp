@@ -251,7 +251,7 @@ Profile* DataLoader::processProfile(const string& name) {
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
-	Actor
+	FrameActor
 	 * start = nullptr,
 	 * end   = nullptr;
 
@@ -260,7 +260,8 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		start = createAnimation(tempAttr);
+		tempAttr["cycles"] = "1";
+		start = static_cast<FrameActor*>(createAnimation(tempAttr));
 	}
 
 	element = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
@@ -268,7 +269,8 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		end = createAnimation(tempAttr);
+		tempAttr["cycles"] = "1";
+		end = static_cast<FrameActor*>(createAnimation(tempAttr));
 	}
 
 	Profile* profilePtr = new Profile(

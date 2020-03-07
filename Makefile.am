@@ -33,6 +33,7 @@ libledspicer_la_SOURCES =             \
 	src/utility/Color.cpp             \
 	src/utility/Colors.cpp            \
 	src/utility/Socks.cpp             \
+	src/utility/Time.cpp              \
 	src/devices/Element.cpp           \
 	src/devices/Group.cpp             \
 	src/devices/Profile.cpp           \
@@ -65,6 +66,7 @@ utilityheader_HEADERS =       \
 	src/utility/Error.hpp     \
 	src/utility/Utility.hpp   \
 	src/utility/Socks.hpp     \
+	src/utility/Time.hpp      \
 	src/utility/XMLHelper.hpp \
 	src/utility/Speed.hpp     \
 	src/utility/Direction.hpp \
