@@ -206,6 +206,7 @@ void Main::run() {
 
 	// Wait for termination.
 	while (currentProfile->isRunning()) {
+		start = high_resolution_clock::now();
 		currentProfile->runFrame();
 		sendData();
 	}
