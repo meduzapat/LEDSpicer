@@ -32,7 +32,6 @@ StepActor::StepActor(
 	totalStepFrames(totalFrames / 2)
 {
 	totalFrames = group->size() - 1;
-	restart();
 }
 
 void StepActor::drawConfig() {

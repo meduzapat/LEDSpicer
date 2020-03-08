@@ -97,6 +97,7 @@ bool DirectionActor::isDirectionBackward() const {
 }
 
 void DirectionActor::restart() {
+	FrameActor::restart();
 	if (isDirectionForward()) {
 		currentFrame = 0;
 		cDirection = Directions::Forward;

@@ -138,9 +138,9 @@ public:
 	uint8_t getNumberOfLeds();
 
 	/**
-	 * This method will be called every time a transfer need to be done.
+	 * Pack the data into the device.
 	 */
-	virtual void transfer() = 0;
+	void packData();
 
 protected:
 
@@ -150,10 +150,18 @@ protected:
 	/// Device LEDs (pins)
 	vector<uint8_t> LEDs;
 
+	/// Copy of device LEDs (pins)
+	vector<uint8_t> oldLEDs;
+
 	/// Maps elements by name.
 	umap<string, Element> elementsByName;
 
 	virtual void openDevice() = 0;
+
+	/**
+	 * This method will be called every time a transfer need to be done.
+	 */
+	virtual void transfer() = 0;
 
 };
 

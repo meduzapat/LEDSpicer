@@ -47,10 +47,6 @@ class Element {
 
 public:
 
-	//enum Types : uint8_t {button, joystick, lightBar, trackball, light, marquee}
-
-	Element(const string& name) : name(name) {}
-
 	Element(const string& name, uint8_t* pin);
 
 	Element(const string& name, uint8_t* pinR, uint8_t* pinG, uint8_t* pinB);

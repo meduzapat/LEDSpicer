@@ -45,7 +45,6 @@ FileReader::FileReader(umap<string, string>& parameters, Group* const group) :
 	}
 	totalStepFrames /= 2;
 	totalFrames = frames->second.size() - 1;
-	restart();
 }
 
 void FileReader::drawConfig() {

@@ -80,20 +80,25 @@ void Profile::runFrame() {
 	for (auto i : inputs)
 		i.second->process();
 
-	if (actual and actual->draw()) {
+	if (actual and actual->isRunning()) {
+		actual->draw();
+	}
+	else {
 		if (actual == end)
 			running = false;
 		actual = nullptr;
 	}
 
 	if (not actual and running)
-		for (auto actor : animations)
-			actor->draw();
+		for (auto actor : animations) {
+			if (actor->isRunning())
+				actor->draw();
+		}
 }
 
 void Profile::reset() {
 	running = true;
-	actual = nullptr;
+	actual  = nullptr;
 	restartActors();
 }
 

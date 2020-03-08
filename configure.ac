@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.4.0],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.4.1],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -120,7 +120,7 @@ AM_CONDITIONAL([LEDWIZ32],[test x$ledwiz32 = xyes])
 
 dnl Enable HOWLER plugin.
 AC_ARG_ENABLE(howler,
-	AS_HELP_STRING([--enable-pacdrive],
+	AS_HELP_STRING([--enable-howler],
 	[Enables the output plugin howler @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) howler=yes ;;

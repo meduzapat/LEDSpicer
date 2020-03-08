@@ -64,7 +64,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Serpentine frame: " << (currentFrame + 1);
+	cout << "Serpentine: " << static_cast<int>(currentFrame + 1) << " ";
 #endif
 
 	if (not tailData.size()) {
@@ -91,7 +91,7 @@ void Serpentine::calculateElements() {
 			);
 		}
 #ifdef DEVELOP
-	cout << " " << (data.position + 1);
+		cout << static_cast<int>(data.position + 1) << " ";
 #endif
 	}
 #ifdef DEVELOP

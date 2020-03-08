@@ -33,7 +33,6 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	totalFrames = group->size() - 1;
 	previousFrameAffectedElements.resize(totalFrames, false);
 	previousFrameAffectedElements.shrink_to_fit();
-	restart();
 }
 
 void Filler::calculateElements() {
@@ -137,10 +136,21 @@ void Filler::calculateElements() {
 }
 
 void Filler::fillElementsLinear(uint8_t begin, uint8_t end) {
-	for (uint8_t c = begin; c <= end; ++c)
+#ifdef DEVELOP
+	cout << "Filler Linear ";
+#endif
+	for (uint8_t c = begin; c <= end; ++c) {
 		changeElementColor(c, *this, filter);
+#ifdef DEVELOP
+		cout << static_cast<int>(c) << " ";
+#endif
+
+	}
 	if (isLastFrame())
 		filling = not filling;
+#ifdef DEVELOP
+	cout << endl;
+#endif
 }
 
 void Filler::fillElementsRandom(bool val) {
@@ -168,9 +178,19 @@ void Filler::fillElementsRandom(bool val) {
 }
 
 void Filler::drawRandom() {
+#ifdef DEVELOP
+	cout << "Filler Random ";
+#endif
 	for (uint8_t e = 0; e < totalFrames; ++e)
-		if (previousFrameAffectedElements[e])
+		if (previousFrameAffectedElements[e]) {
 			changeElementColor(e, *this, filter);
+#ifdef DEVELOP
+			cout << static_cast<int>(e) << " ";
+#endif
+		}
+#ifdef DEVELOP
+	cout << endl;
+#endif
 }
 
 void Filler::drawConfig() {

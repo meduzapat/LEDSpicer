@@ -30,7 +30,9 @@ FrameActor::FrameActor(
 	const vector<string>& requiredParameters
 ) :
 	Actor(parameters, group, requiredParameters),
-	Speed(parameters["speed"])
+	Speed(parameters["speed"]),
+	startFrame(parameters.count("startFrame") ? Utility::parseNumber(parameters["startFrame"], "Invalid Value for start frame") : 0),
+	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0)
 {
 	// default frames calculation.
 	switch (speed) {
@@ -50,6 +52,7 @@ FrameActor::FrameActor(
 		totalFrames = FPS * 3;
 		break;
 	}
+	Utility::verifyValue(startFrame, static_cast<uint8_t>(0), totalFrames);
 }
 
 void FrameActor::drawConfig() {
@@ -67,10 +70,45 @@ bool FrameActor::isLastFrame() const {
 	return currentFrame == totalFrames;
 }
 
-bool FrameActor::draw() {
-	Actor::draw();
+void FrameActor::draw() {
+	if (drawing)
+		Actor::draw();
 	advanceFrame();
-	return running();
+}
+
+bool FrameActor::isRunning() {
+
+	if (not Actor::isRunning())
+		return false;
+
+	if (not drawing) {
+		if (startFrame == currentFrame + 1) {
+#ifdef DEVELOP
+			LogDebug("Starting Actor at frame " + to_string(startFrame));
+#endif
+			drawing = true;
+			return true;
+		}
+		advanceFrame();
+		return false;
+	}
+
+	if (cycles) {
+		if (cycle > cycles)
+			return false;
+
+		if (cycle == cycles) {
+#ifdef DEVELOP
+			LogDebug("Ending Actor after " + to_string(cycles) + " cycles.");
+#endif
+			++cycle;
+			return false;
+		}
+		if (isLastFrame())
+			++cycle;
+	}
+
+	return true;
 }
 
 void FrameActor::advanceFrame() {

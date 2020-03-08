@@ -76,7 +76,6 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	while (precalc.size() != group->size());
 	precalc.shrink_to_fit();
 	totalFrames = precalc.size() - 1;
-	restart();
 }
 
 void Gradient::calculateElements() {

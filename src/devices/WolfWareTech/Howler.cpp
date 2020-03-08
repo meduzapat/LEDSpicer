@@ -25,9 +25,8 @@
 using namespace LEDSpicer::Devices::WolfWareTech;
 
 void Howler::resetLeds() {
-	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0, 0, 0);
-	transferToUSB(data);
 	setLeds(0);
+	transfer();
 }
 
 void Howler::drawHardwarePinMap() {
@@ -62,20 +61,47 @@ void Howler::drawHardwarePinMap() {
 }
 
 void Howler::transfer() {
-
-	for (uint8_t c = 0, t = LEDs.size() / 3; c < t ; c+=3) {
-		vector<uint8_t> data HOWLER_MSG(
-			HOWLER_CMD_SET_RGB_LED,
-			c,
-			LEDs[c],
-			LEDs[c + 1],
-			LEDs[c + 2]
-		);
-		transferToUSB(data);
-	}
+	vector<uint8_t> data(24);
+	data = howlerBankA(1, 0);
+	transferToUSB(data);
+	data = howlerBankB(2, 0);
+	transferToUSB(data);
+	data = howlerBankA(3, 1);
+	transferToUSB(data);
+	data = howlerBankB(4, 1);
+	transferToUSB(data);
+	data = howlerBankA(5, 2);
+	transferToUSB(data);
+	data = howlerBankB(6, 2);
+	transferToUSB(data);
 }
 
 uint16_t Howler::getProduct() {
-	return HOWLER_PRODUCT;
+	return HOWLER_PRODUCT + boardId - 1;
 }
 
+void Howler::transferToUSB(vector<uint8_t>& data) {
+#ifdef DRY_RUN
+	WolfWareTech::transferToUSB(data);
+#else
+	int transferred = 0;
+	auto responseCode = libusb_interrupt_transfer(
+		handle,
+		HOWLER_IN_EP,
+		data.data(),
+		data.size(),
+		&transferred,
+		TIMEOUT
+	);
+
+	if (responseCode >= 0)
+		return;
+
+	LogDebug(
+		"wValue: "  + Utility::hex2str(value) +
+		" wIndex: "  + Utility::hex2str(interface) +
+		" wLength: " + to_string(data.size())
+	);
+	throw Error(string(libusb_error_name(responseCode)) + " for " + getFullName());
+#endif
+}

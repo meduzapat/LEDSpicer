@@ -43,6 +43,7 @@ Element::Element(
 Element::Element(Element* other) : name(other->name) {
 	for (auto p : other->pins)
 		pins.push_back(nullptr);
+	pins.shrink_to_fit();
 }
 
 void Element::setColor(const Color& color) {

@@ -251,7 +251,7 @@ Profile* DataLoader::processProfile(const string& name) {
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
-	Actor
+	FrameActor
 	 * start = nullptr,
 	 * end   = nullptr;
 
@@ -260,7 +260,14 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		start = createAnimation(tempAttr);
+		tempAttr["cycles"] = "1";
+		if (tempAttr.count("startTime")) {
+			LogWarning("startTime not used for transitions");
+			tempAttr.erase("startTime");
+		}
+		start = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
+		if (not start)
+			LogWarning("Actor " + tempAttr["type"] + " cannot be used as a start transition");
 	}
 
 	element = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
@@ -268,7 +275,10 @@ Profile* DataLoader::processProfile(const string& name) {
 		umap<string, string> tempAttr = processNode(element);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
-		end = createAnimation(tempAttr);
+		tempAttr["cycles"] = "1";
+		end = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
+		if (not end)
+			LogWarning("Actor " + tempAttr["type"] + " cannot be used as an end transition");
 	}
 
 	Profile* profilePtr = new Profile(

@@ -29,8 +29,8 @@ using std::vector;
 
 #include "devices/Group.hpp"
 #include "utility/Color.hpp"
-#include "utility/Log.hpp"
 #include "utility/Utility.hpp"
+#include "utility/Time.hpp"
 
 #ifndef ACTOR_HPP_
 #define ACTOR_HPP_ 1
@@ -68,9 +68,8 @@ public:
 
 	/**
 	 * Draws actor contents.
-	 * @return true if the cycle ended.
 	 */
-	virtual bool draw();
+	virtual void draw();
 
 	/**
 	 * Draws the actor configuration.
@@ -80,12 +79,12 @@ public:
 	/**
 	 * Reset the animation back to begin.
 	 */
-	virtual void restart() {}
+	virtual void restart();
 
 	/**
 	 * @return Return true if the actor is running.
 	 */
-	virtual bool running() {return true;}
+	virtual bool isRunning();
 
 	/**
 	 * Sets the system FPS.
@@ -106,6 +105,16 @@ protected:
 
 	/// Hardware frames per second.
 	static uint8_t FPS;
+
+	uint16_t
+		secondsToStart = 0,
+		secondsToEnd   = 0;
+
+	/// The actor will start after a number of seconds.
+	Time* startTime = nullptr;
+
+	/// The actor will end after a number of seconds.
+	Time* endTime = nullptr;
 
 	/**
 	 * Do the elements calculation.
