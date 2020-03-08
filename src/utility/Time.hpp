@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <chrono>
 using std::chrono::system_clock;
+#include "utility/Log.hpp"
 
 #ifndef TIME_HPP_
 #define TIME_HPP_ 1

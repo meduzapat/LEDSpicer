@@ -29,7 +29,6 @@ using std::vector;
 
 #include "devices/Group.hpp"
 #include "utility/Color.hpp"
-#include "utility/Log.hpp"
 #include "utility/Utility.hpp"
 #include "utility/Time.hpp"
 

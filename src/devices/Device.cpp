@@ -30,7 +30,9 @@ Device::Device(
 	const string& name
 ) : name(name) {
 	LEDs.resize(elements);
+	oldLEDs.resize(elements, 1);
 	LEDs.shrink_to_fit();
+	oldLEDs.shrink_to_fit();
 }
 
 void Device::initialize() {
@@ -45,7 +47,9 @@ void Device::terminate() {
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
+#ifdef DEVELOP
 	validateLed(led);
+#endif
 	LEDs[led] = intensity;
 	return this;
 }
@@ -57,7 +61,9 @@ Device* Device::setLeds(uint8_t intensity) {
 }
 
 uint8_t* Device::getLed(uint8_t ledPos) {
+#ifdef DEVELOP
 	validateLed(ledPos);
+#endif
 	return &LEDs.at(ledPos);
 }
 
@@ -88,6 +94,17 @@ uint8_t Device::getNumberOfElements() const {
 
 uint8_t Device::getNumberOfLeds() {
 	return LEDs.size();
+}
+
+void Device::packData() {
+	if (LEDs == oldLEDs) {
+#ifdef DEVELOP
+	LogDebug("No changes, data not send for " + getFullName());
+#endif
+		return;
+	}
+	transfer();
+	oldLEDs = LEDs;
 }
 
 umap<string, Element>* Device::getElements() {

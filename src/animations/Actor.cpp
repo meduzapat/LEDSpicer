@@ -45,20 +45,6 @@ Actor::Actor(
 void Actor::draw() {
 
 	affectAllElements();
-
-	if (startTime) {
-		if (not startTime->isTime())
-			return;
-		delete startTime;
-		startTime = nullptr;
-		if (secondsToEnd)
-			endTime = new Time(secondsToEnd);
-	}
-
-	if (endTime and endTime->isTime()) {
-		return;
-	}
-
 	calculateElements();
 	if (not affectedElements.empty())
 		switch (filter) {
@@ -79,19 +65,49 @@ void Actor::drawConfig() {
 }
 
 void Actor::restart() {
-	if (endTime)
+#ifdef DEVELOP
+		LogDebug("Actor restarting");
+#endif
+	if (endTime) {
 		delete endTime;
+		endTime = nullptr;
+	}
 
 	if (secondsToStart) {
 		if (startTime)
 			delete startTime;
 		startTime = new Time(secondsToStart);
 	}
+	else if (secondsToEnd) {
+		endTime = new Time(secondsToEnd);
+	}
 }
 
 bool Actor::isRunning() {
-	if (endTime and endTime->isTime())
+
+	if (startTime) {
+		if (not startTime->isTime())
+			return false;
+		delete startTime;
+		startTime = nullptr;
+#ifdef DEVELOP
+		LogDebug("Staring Actor by time after " + to_string(secondsToStart) + " seconds.");
+#endif
+		if (secondsToEnd)
+			endTime = new Time(secondsToEnd);
+	}
+
+	if (endTime and endTime->isTime()) {
+		delete endTime;
+		endTime = nullptr;
+#ifdef DEVELOP
+		LogDebug("Ended Actor by time after " + to_string(secondsToEnd) + " seconds.");
+#endif
+	}
+
+	if (not startTime and not endTime and secondsToEnd)
 		return false;
+
 	return true;
 }
 
@@ -115,7 +131,6 @@ void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
-	affectAllElements(true);
 	for (uint8_t c = 0; c < group->size(); ++c)
 		changeElementColor(c, color, filter, percent);
 }

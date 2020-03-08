@@ -261,7 +261,13 @@ Profile* DataLoader::processProfile(const string& name) {
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
 		tempAttr["cycles"] = "1";
-		start = static_cast<FrameActor*>(createAnimation(tempAttr));
+		if (tempAttr.count("startTime")) {
+			LogWarning("startTime not used for transitions");
+			tempAttr.erase("startTime");
+		}
+		start = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
+		if (not start)
+			LogWarning("Actor " + tempAttr["type"] + " cannot be used as a start transition");
 	}
 
 	element = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
@@ -270,7 +276,9 @@ Profile* DataLoader::processProfile(const string& name) {
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
 		tempAttr["cycles"] = "1";
-		end = static_cast<FrameActor*>(createAnimation(tempAttr));
+		end = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
+		if (not end)
+			LogWarning("Actor " + tempAttr["type"] + " cannot be used as an end transition");
 	}
 
 	Profile* profilePtr = new Profile(

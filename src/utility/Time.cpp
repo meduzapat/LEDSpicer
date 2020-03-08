@@ -25,9 +25,12 @@
 using namespace LEDSpicer;
 
 Time::Time(uint16_t seconds) {
+#ifdef DEVELOP
+	LogDebug("Setting Clock for " + std::to_string(seconds) + " seconds.");
+#endif
 	clockTime = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
 }
 
 bool Time::isTime() {
-	return (clockTime < std::chrono::system_clock::now());
+	return (std::chrono::system_clock::now() > clockTime);
 }

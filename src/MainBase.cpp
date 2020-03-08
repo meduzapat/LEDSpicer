@@ -133,7 +133,7 @@ void MainBase::testLeds() {
 
 		if (inp == "r") {
 			device->setLeds(0);
-			device->transfer();
+			device->packData();
 			continue;
 		}
 
@@ -142,6 +142,7 @@ void MainBase::testLeds() {
 
 		try {
 			led = std::stoi(inp) - 1;
+			device->validateLed(led);
 			device->setLed(led, 255);
 		}
 		catch (Error& e) {
@@ -152,7 +153,7 @@ void MainBase::testLeds() {
 			cerr << "Invalid led number " + inp << endl;
 			continue;
 		}
-		device->transfer();
+		device->packData();
 	}
 }
 
@@ -174,7 +175,7 @@ void MainBase::testElements() {
 
 		if (inp == "r") {
 			device->setLeds(0);
-			device->transfer();
+			device->packData();
 			continue;
 		}
 
@@ -189,7 +190,10 @@ void MainBase::testElements() {
 			cerr << e.getMessage() << endl;
 			continue;
 		}
-		device->transfer();
+		catch (...) {
+			cerr << "Invalid element " + inp << endl;
+		}
+		device->packData();
 	}
 }
 

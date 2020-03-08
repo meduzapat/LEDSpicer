@@ -77,19 +77,38 @@ void FrameActor::draw() {
 }
 
 bool FrameActor::isRunning() {
-	if (cycles and cycle == cycles)
+
+	if (not Actor::isRunning())
 		return false;
 
-	if (isLastFrame())
-		++cycle;
-
 	if (not drawing) {
-		if (startFrame >= currentFrame)
+		if (startFrame == currentFrame + 1) {
+#ifdef DEVELOP
+			LogDebug("Starting Actor at frame " + to_string(startFrame));
+#endif
 			drawing = true;
-		drawing = Actor::isRunning();
+			return true;
+		}
+		advanceFrame();
+		return false;
 	}
 
-	return drawing;
+	if (cycles) {
+		if (cycle > cycles)
+			return false;
+
+		if (cycle == cycles) {
+#ifdef DEVELOP
+			LogDebug("Ending Actor after " + to_string(cycles) + " cycles.");
+#endif
+			++cycle;
+			return false;
+		}
+		if (isLastFrame())
+			++cycle;
+	}
+
+	return true;
 }
 
 void FrameActor::advanceFrame() {

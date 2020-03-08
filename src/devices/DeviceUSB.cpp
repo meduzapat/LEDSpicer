@@ -59,7 +59,7 @@ DeviceUSB::DeviceUSB(
 		LIBUSB_LOG_LEVEL_INFO
 		LIBUSB_LOG_LEVEL_DEBUG
 	*/
-		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_INFO);
+		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_DEBUG);
 	#else
 		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_ERROR);
 	#endif

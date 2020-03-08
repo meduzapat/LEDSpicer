@@ -412,7 +412,7 @@ void Main::sendData() {
 	// Send data.
 	// TODO: need to test speed: single thread or running one thread per device.
 	for (auto device : DataLoader::devices)
-		device->transfer();
+		device->packData();
 
 	// Wait...
 	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
