@@ -25,9 +25,8 @@
 using namespace LEDSpicer::Devices::WolfWareTech;
 
 void Howler::resetLeds() {
-	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0, 0, 0);
-	transferToUSB(data);
 	setLeds(0);
+	transfer();
 }
 
 void Howler::drawHardwarePinMap() {
@@ -62,29 +61,19 @@ void Howler::drawHardwarePinMap() {
 }
 
 void Howler::transfer() {
-/*
-	vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_GLOBAL_BRIGHTNESS, 0, 0);
+	vector<uint8_t> data(24);
+	data = howlerBankA(1, 0);
 	transferToUSB(data);
-
-	for (uint8_t c = 0, t = LEDs.size(); c < t ; ++c)
-		if (LEDs[c]) {
-			vector<uint8_t> data HOWLER_MSG(HOWLER_CMD_SET_INDIVIDUAL_LED, c, LEDs[c]);
-			transferToUSB(data);
-		}
-*/
-	for (uint8_t c = 0, i = 0, t = LEDs.size() / 3; i < t ; ++i, c+=3) {
-#ifdef DEVELOP
-		LogDebug("Sending Element " + to_string(i));
-#endif
-		vector<uint8_t> data HOWLER_MSG(
-			HOWLER_CMD_SET_RGB_LED,
-			i,
-			LEDs[c],
-			LEDs[c + 1],
-			LEDs[c + 2]
-		);
-		transferToUSB(data);
-	}
+	data = howlerBankB(2, 0);
+	transferToUSB(data);
+	data = howlerBankA(3, 1);
+	transferToUSB(data);
+	data = howlerBankB(4, 1);
+	transferToUSB(data);
+	data = howlerBankA(5, 2);
+	transferToUSB(data);
+	data = howlerBankB(6, 2);
+	transferToUSB(data);
 }
 
 uint16_t Howler::getProduct() {

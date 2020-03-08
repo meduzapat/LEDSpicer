@@ -25,6 +25,14 @@
 
 using namespace LEDSpicer::Devices;
 
+Device::Device(
+	uint8_t  elements,
+	const string& name
+) : name(name) {
+	LEDs.resize(elements);
+	LEDs.shrink_to_fit();
+}
+
 void Device::initialize() {
 	LogDebug("Initializing Device " + name);
 	openDevice();
@@ -34,14 +42,6 @@ void Device::initialize() {
 void Device::terminate() {
 	LogDebug("Terminating Device " + name);
 	resetLeds();
-}
-
-Device::Device(
-	uint8_t  elements,
-	const string& name
-) : name(name) {
-	LEDs.resize(elements);
-	LEDs.shrink_to_fit();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {

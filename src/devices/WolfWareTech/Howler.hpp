@@ -34,11 +34,13 @@
 #define HOWLER_IN_EP      0x02
 #define HOWLER_OUT_EP     0x81
 
-#define HOWLER_CMD_SET_GLOBAL_BRIGHTNESS 0x06
-#define HOWLER_CMD_SET_RGB_LED           0x01
-#define HOWLER_CMD_SET_INDIVIDUAL_LED    0x02
+#define HOWLER_CMD_SET_RGB_LED_BANK 0x09
 
-#define HOWLER_MSG(cmd, byte1, byte2, byte3, byte4) {HOWLER_WVALUE, cmd, byte1, byte2, byte3, byte4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+// use bank with 1 3 5, use row with 0 1 2
+#define howlerBankA(bankNumber, row) {HOWLER_WVALUE, HOWLER_CMD_SET_RGB_LED_BANK, bankNumber, LEDs[row + 0],  LEDs[row + 12], LEDs[row + 15], LEDs[row + 18], LEDs[row + 21], LEDs[row + 24], LEDs[row + 27], LEDs[row + 30], LEDs[row + 69], LEDs[row + 66], LEDs[row + 63], LEDs[row + 60], LEDs[row + 57], LEDs[row + 54], LEDs[row + 51], LEDs[row + 3], 0, 0, 0, 0, 0}
+// use bank with 2 4 6, use row with 0 1 2
+#define howlerBankB(bankNumber, row) {HOWLER_WVALUE, HOWLER_CMD_SET_RGB_LED_BANK, bankNumber, LEDs[row + 33], LEDs[row + 36], LEDs[row + 39], LEDs[row + 42], LEDs[row + 45], LEDs[row + 48], LEDs[row + 6],  LEDs[row + 90], LEDs[row + 93], LEDs[row + 9],  LEDs[row + 87], LEDs[row + 84], LEDs[row + 81], LEDs[row + 78], LEDs[row + 75], LEDs[row + 72], 0, 0, 0, 0, 0}
+
 
 namespace LEDSpicer {
 namespace Devices {
@@ -51,9 +53,6 @@ class Howler: public WolfWareTech {
 
 public:
 
-	/**
-	 * @param boardId
-	 */
 	Howler(uint8_t boardId, umap<string, string>& options) :
 	WolfWareTech(
 		HOWLER_WVALUE,
@@ -73,9 +72,11 @@ public:
 	uint16_t getProduct();
 
 	virtual void resetLeds();
+
 protected:
 
 	virtual void transferToUSB(vector<uint8_t>& data);
+
 };
 
 } /* namespace WolfWareTech */
