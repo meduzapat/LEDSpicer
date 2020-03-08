@@ -80,13 +80,15 @@ void Profile::runFrame() {
 	for (auto i : inputs)
 		i.second->process();
 
-	if (actual and actual->isRunning()) {
-		actual->draw();
-	}
-	else {
-		if (actual == end)
-			running = false;
-		actual = nullptr;
+	if (actual) {
+		if (actual->isRunning()) {
+			actual->draw();
+		}
+		else {
+			if (actual == end)
+				running = false;
+			actual = nullptr;
+		}
 	}
 
 	if (not actual and running)

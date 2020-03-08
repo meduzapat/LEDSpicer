@@ -81,7 +81,7 @@ protected:
 		/// Current cycles.
 		cycle    = 0;
 
-	bool drawing = false;
+	bool drawing;
 
 	/**
 	 * Advances the system frame forward.

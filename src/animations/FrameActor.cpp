@@ -32,7 +32,8 @@ FrameActor::FrameActor(
 	Actor(parameters, group, requiredParameters),
 	Speed(parameters["speed"]),
 	startFrame(parameters.count("startFrame") ? Utility::parseNumber(parameters["startFrame"], "Invalid Value for start frame") : 0),
-	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0)
+	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0),
+	drawing(startFrame ? false : true)
 {
 	// default frames calculation.
 	switch (speed) {
@@ -82,7 +83,7 @@ bool FrameActor::isRunning() {
 		return false;
 
 	if (not drawing) {
-		if (startFrame == currentFrame + 1) {
+		if (startFrame and startFrame -1 == currentFrame) {
 #ifdef DEVELOP
 			LogDebug("Starting Actor at frame " + to_string(startFrame));
 #endif
