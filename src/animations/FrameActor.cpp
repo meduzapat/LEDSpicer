@@ -52,7 +52,6 @@ FrameActor::FrameActor(
 		totalFrames = FPS * 3;
 		break;
 	}
-	Utility::verifyValue(startFrame, static_cast<uint8_t>(0), static_cast<uint8_t>(totalFrames + 1));
 }
 
 void FrameActor::drawConfig() {
@@ -78,6 +77,7 @@ void FrameActor::draw() {
 void FrameActor::restart() {
 	Actor::restart();
 	if (startFrame) {
+		Utility::verifyValue(startFrame, static_cast<uint8_t>(0), static_cast<uint8_t>(totalFrames + 1));
 		currentFrame = startFrame - 1;
 #ifdef DEVELOP
 		LogDebug("Starting Actor from frame " + to_string(currentFrame));
