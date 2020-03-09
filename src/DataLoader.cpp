@@ -261,10 +261,6 @@ Profile* DataLoader::processProfile(const string& name) {
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
 		tempAttr["cycles"] = "1";
-		if (tempAttr.count("startTime")) {
-			LogWarning("startTime not used for transitions");
-			tempAttr.erase("startTime");
-		}
 		start = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
 		if (not start)
 			LogWarning("Actor " + tempAttr["type"] + " cannot be used as a start transition");

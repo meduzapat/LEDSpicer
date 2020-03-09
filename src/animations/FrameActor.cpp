@@ -31,7 +31,7 @@ FrameActor::FrameActor(
 ) :
 	Actor(parameters, group, requiredParameters),
 	Speed(parameters["speed"]),
-	startFrame(parameters.count("startFrame") ? Utility::parseNumber(parameters["startFrame"], "Invalid Value for start frame") : 0),
+	startAt(parameters.count("startAt") ? Utility::parseNumber(parameters["startAt"], "Invalid Value for start at") : 0),
 	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0)
 {
 	// default frames calculation.
@@ -52,6 +52,7 @@ FrameActor::FrameActor(
 		totalFrames = FPS * 3;
 		break;
 	}
+	Utility::verifyValue(startAt, static_cast<uint8_t>(0), static_cast<uint8_t>(100));
 }
 
 void FrameActor::drawConfig() {
@@ -76,14 +77,12 @@ void FrameActor::draw() {
 
 void FrameActor::restart() {
 	Actor::restart();
-	if (startFrame) {
-		Utility::verifyValue(startFrame, static_cast<uint8_t>(0), static_cast<uint8_t>(totalFrames + 1));
-		currentFrame = startFrame - 1;
+	if (startAt) {
+		currentFrame = (totalFrames * (startAt - 1)) / 100;
 #ifdef DEVELOP
 		LogDebug("Starting Actor from frame " + to_string(currentFrame));
 #endif
 	}
-
 }
 
 bool FrameActor::isRunning() {
