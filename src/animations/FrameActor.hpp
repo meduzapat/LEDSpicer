@@ -64,6 +64,8 @@ public:
 	 */
 	virtual void draw();
 
+	virtual void restart();
+
 	virtual bool isRunning();
 
 protected:
@@ -80,8 +82,6 @@ protected:
 		cycles     = 0,
 		/// Current cycles.
 		cycle    = 0;
-
-	bool drawing;
 
 	/**
 	 * Advances the system frame forward.

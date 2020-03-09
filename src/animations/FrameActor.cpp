@@ -32,8 +32,7 @@ FrameActor::FrameActor(
 	Actor(parameters, group, requiredParameters),
 	Speed(parameters["speed"]),
 	startFrame(parameters.count("startFrame") ? Utility::parseNumber(parameters["startFrame"], "Invalid Value for start frame") : 0),
-	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0),
-	drawing(startFrame ? false : true)
+	cycles(parameters.count("cycles") ? Utility::parseNumber(parameters["cycles"], "Invalid Value for cycles") : 0)
 {
 	// default frames calculation.
 	switch (speed) {
@@ -53,7 +52,7 @@ FrameActor::FrameActor(
 		totalFrames = FPS * 3;
 		break;
 	}
-	Utility::verifyValue(startFrame, static_cast<uint8_t>(0), totalFrames);
+	Utility::verifyValue(startFrame, static_cast<uint8_t>(0), static_cast<uint8_t>(totalFrames + 1));
 }
 
 void FrameActor::drawConfig() {
@@ -72,27 +71,25 @@ bool FrameActor::isLastFrame() const {
 }
 
 void FrameActor::draw() {
-	if (drawing)
-		Actor::draw();
+	Actor::draw();
 	advanceFrame();
+}
+
+void FrameActor::restart() {
+	Actor::restart();
+	if (startFrame) {
+		currentFrame = startFrame - 1;
+#ifdef DEVELOP
+		LogDebug("Starting Actor from frame " + to_string(currentFrame));
+#endif
+	}
+
 }
 
 bool FrameActor::isRunning() {
 
 	if (not Actor::isRunning())
 		return false;
-
-	if (not drawing) {
-		if (startFrame and startFrame -1 == currentFrame) {
-#ifdef DEVELOP
-			LogDebug("Starting Actor at frame " + to_string(startFrame));
-#endif
-			drawing = true;
-			return true;
-		}
-		advanceFrame();
-		return false;
-	}
 
 	if (cycles) {
 		if (cycle > cycles)
