@@ -245,6 +245,7 @@ int main(int argc, char **argv) {
 				"Data directory: " PACKAGE_DATA_DIR "\n"
 				"Actors directory: " ACTORS_DIR "\n"
 				"Devices directory: " DEVICES_DIR "\n"
+				"Inputs directory: " INPUTS_DIR "\n"
 				"If -c or --config is not provided " PACKAGE_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;

@@ -59,6 +59,8 @@ protected:
 
 	uint8_t changePoint = 64;
 
+	virtual void connect();
+
 	virtual void afterConnect() {}
 };
 
