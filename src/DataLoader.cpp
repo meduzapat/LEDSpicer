@@ -189,19 +189,17 @@ void DataLoader::processLayout() {
 	string defaultProfileStr = tempAttr[PARAM_DEFAULT_PROFILE];
 
 	tinyxml2::XMLElement* element = layoutNode->FirstChildElement(NODE_GROUP);
-	if (not element)
-		throw LEDError("Empty " NODE_LAYOUT " section");
+	if (element)
+		for (; element; element = element->NextSiblingElement(NODE_GROUP)) {
+			tempAttr = processNode(element);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "group");
 
-	for (; element; element = element->NextSiblingElement(NODE_GROUP)) {
-		tempAttr = processNode(element);
-		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "group");
+			if (this->layout.count(tempAttr[PARAM_NAME]))
+				throw LEDError("Duplicated group " + tempAttr[PARAM_NAME]);
 
-		if (this->layout.count(tempAttr[PARAM_NAME]))
-			throw LEDError("Duplicated group " + tempAttr[PARAM_NAME]);
-
-		layout.emplace(tempAttr[PARAM_NAME], Group(tempAttr[PARAM_NAME]));
-		processGroupElements(element, layout[tempAttr[PARAM_NAME]]);
-	}
+			layout.emplace(tempAttr[PARAM_NAME], Group(tempAttr[PARAM_NAME]));
+			processGroupElements(element, layout[tempAttr[PARAM_NAME]]);
+		}
 
 	// Create a group with all elements on it called All if not defined.
 	if (not this->layout.count("All")) {
