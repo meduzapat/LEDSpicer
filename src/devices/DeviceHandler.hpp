@@ -44,22 +44,19 @@ public:
 	 */
 	DeviceHandler(const string& deviceName);
 
-	virtual ~DeviceHandler() = default;
+	virtual ~DeviceHandler();
 
 	/**
-	 * Wrapper over the create pointer.
+	 * Creates a device calling the create function and keep record of it.
 	 * @see createFunction pointer.
 	 * @param board ID
 	 */
 	Device* createDevice(uint8_t boardId, umap<string, string>& options);
 
-	/**
-	 * Wrapper over the destroy pointer.
-	 * @see destroyFunction pointer.
-	 */
-	void destroyDevice(Device* device);
-
 protected:
+
+	/// List of created devices.
+	vector<Device*> devices;
 
 	/**
 	 * Pointer to the plugin's creation function.

@@ -38,11 +38,7 @@ class Actions: public Reader, public Speed {
 
 public:
 
-	Actions(umap<string, string>& parameters) :
-		Reader(parameters),
-		Speed(parameters.count("speed") ? parameters["speed"] : ""),
-		frames(static_cast<uint8_t>(speed) * 3),
-		linkedElementsRaw(parameters.count("linkedElements") ? parameters["linkedElements"] : "") {}
+	Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
 
 	virtual ~Actions() = default;
 
@@ -60,26 +56,57 @@ protected:
 		frames,
 		cframe = 0;
 
+	/// Keeps the ON/OFF flag.
 	bool on = false;
 
-	// Keeps the list of linked elements.
-	string linkedElementsRaw;
+	struct Record {
 
-	vector<string> preOnElements;
-	vector<string> preOnGroups;
+		Record() = default;
 
-	umap<string, Element::Item*> blinkingElements;
-	umap<string, Group::Item*> blinkingGroups;
+		Record(uint16_t map, bool active, Items* item, Record* next) :
+			map(map),
+			active(active),
+			item(item),
+			next(next) {}
 
-	/// Maps element names to triggers.
-	umap<string, string> linkedElements;
+		Record(const Record& other) :
+			map(other.map),
+			active(other.active),
+			item(other.item),
+			next(other.next) {}
 
-	/// Maps group names to triggers.
-	umap<string, string> linkedGroup;
+		/// Key Map value.
+		uint16_t map = 0;
+
+		/// If true, the item is active.
+		bool active = false;
+		/// Element to turn on when called.
+		Items* item = nullptr;
+
+		/// Next element on the list.
+		Record* next = nullptr;
+	};
+
+	/// Lookup table to avoid search.
+	struct LookupMap {
+		uint
+			groupIdx = 0,
+			mapIdx   = 0;
+	};
+
+	/// Keeps a list of key to handle a record.
+	vector<vector<Record>> groupsMaps;
+
+	/// Small lookup table to avoid a loop every time we need to seek a value.
+	umap<uint16_t, LookupMap> groupMapLookup;
+
+	/// list of 1st elements for groups.
+	vector<uint16_t> firstItems;
+
+	/// Elements or Groups blinking.
+	umap<uint16_t, Items*> blinkingItems;
 
 	void blink();
-
-	string findElementMapByName(string& name);
 
 };
 

@@ -56,9 +56,8 @@ FrameActor::FrameActor(
 }
 
 void FrameActor::drawConfig() {
-	cout <<
-		"Speed: " << speed2str(speed) << endl <<
-		"Total Frames: " << static_cast<uint>(totalFrames) << endl;
+	Speed::drawConfig();
+	cout << "Total Frames: " << static_cast<uint>(totalFrames) << endl;
 	Actor::drawConfig();
 }
 

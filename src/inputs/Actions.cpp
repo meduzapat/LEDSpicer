@@ -24,6 +24,50 @@
 
 using namespace LEDSpicer::Inputs;
 
+Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+	Reader(parameters, inputMaps),
+	Speed(parameters.count("speed") ? parameters["speed"] : ""),
+	frames(static_cast<uint8_t>(speed) * 3)
+{
+	string linkedElements = parameters.count("linkedElements") ? parameters["linkedElements"] : "";
+	// process list
+	if (linkedElements.empty())
+		return;
+
+	uint groupIdx = 0;
+	for (auto& l : Utility::explode(linkedElements, '|')) {
+		auto group = Utility::explode(l, ',');
+		if (group.size() < 2) {
+			LogWarning("ignoring group with less than two items.");
+			continue;
+		}
+		// Extract group info.
+		vector<Record> tempRecord;
+		uint mapIdx = 0;
+		bool firstItem = true;
+		for (auto& e : group) {
+			Utility::trim(e);
+			string mapS  = findItemMapByName(e);
+			uint16_t map = Utility::parseNumber(mapS, "Unable to parse number");
+			tempRecord.emplace_back(std::move(Record(map, firstItem, itemsMap[mapS], nullptr)));
+			if (firstItem) {
+				firstItems.push_back(map);
+				firstItem = false;
+			}
+			// Update lookup table.
+			groupMapLookup.emplace(map, LookupMap{groupIdx, mapIdx++});
+		}
+		// Link last element to 1st element
+		tempRecord.back().next = &tempRecord[0];
+		// Link rest of the table.
+		for (uint c = 0; c < tempRecord.size() - 1; ++c)
+			tempRecord[c].next = &tempRecord[c + 1];
+
+		groupsMaps.emplace_back(std::move(tempRecord));
+		++groupIdx;
+	}
+}
+
 void Actions::process() {
 
 	readAll();
@@ -38,128 +82,83 @@ void Actions::process() {
 		if (not event.value)
 			continue;
 
-		string codeName = std::to_string(event.code);
-		if (elementMap.count(codeName)) {
-			string fullname = codeName + elementMap[codeName].element->getName();
-			if (linkedElements.count(codeName)) {
-				string linkedCode = linkedElements[codeName];
-				string linkedName = linkedCode + elementMap[linkedCode].element->getName();
-				// switch
-				if (blinkingElements.count(linkedName)) {
-					blinkingElements.erase(linkedName);
-					controlledElements->erase(linkedName);
-					blinkingElements.emplace(fullname, &elementMap[codeName]);
-					LogDebug("key: " + codeName + " switches: " + linkedName + " to: " + codeName);
-				}
-				continue;
+		string eventCodeStr = to_string(event.code);
+		if (!itemsMap.count(eventCodeStr))
+			return;
+
+		if (controlledItems->count(eventCodeStr))
+			controlledItems->erase(eventCodeStr);
+
+		// Non Grouped elements.
+		if (!groupMapLookup.count(event.code)) {
+			if (blinkingItems.count(event.code)) {
+				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " stop blinking");
+				blinkingItems.erase(event.code);
 			}
-			if (blinkingElements.count(fullname)) {
-				// deactivate
-				blinkingElements.erase(fullname);
-				controlledElements->erase(fullname);
-				LogDebug("key: " + codeName + " go off: " + fullname);
+			else {
+				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " start blinking");
+				blinkingItems.emplace(event.code, itemsMap[eventCodeStr]);
 			}
-			else if (not linkedElements.count(codeName)) {
-				// activated
-				blinkingElements.emplace(fullname, &elementMap[codeName]);
-				LogDebug("key: " + codeName + " go on: " + fullname);
-			}
+			return;
 		}
 
-		if (groupMap.count(codeName)) {
-			string fullname = codeName + groupMap[codeName].group->getName();
-			if (linkedGroup.count(codeName)) {
-				string linkedCode = linkedGroup[codeName];
-				string linkedName = linkedCode + groupMap[linkedCode].group->getName();
-				// switch
-				if (blinkingGroups.count(linkedName)) {
-					blinkingGroups.erase(linkedName);
-					controlledGroups->erase(linkedName);
-					blinkingGroups.emplace(fullname, &groupMap[codeName]);
-					LogDebug("key: " + codeName + " switches: " + linkedName + " to: " + codeName);
-				}
-				continue;
-			}
-			if (blinkingGroups.count(fullname)) {
-				// deactivate
-				blinkingGroups.erase(fullname);
-				controlledGroups->erase(fullname);
-				LogDebug("key: " + codeName + " go off: " + fullname);
-			}
-			else if (not linkedGroup.count(codeName)) {
-				// activated
-				blinkingGroups.emplace(fullname, &groupMap[codeName]);
-				LogDebug("key: " + codeName + " go on: " + fullname);
-			}
+		// grouped elements.
+		Record& groupMap = groupsMaps[groupMapLookup[event.code].groupIdx][groupMapLookup[event.code].mapIdx];
+		if (groupMap.active) {
+			groupMap.active = false;
+			blinkingItems.erase(event.code);
+			blinkingItems.emplace(groupMap.next->map, groupMap.next->item);
+			groupMap.next->active = true;
+			LogDebug("key: " + eventCodeStr + " for " + groupMap.item->getName() + " switches to: " + groupMap.next->item->getName());
 		}
 	}
 }
 
 void Actions::activate() {
-	// process list
-	if (not linkedElementsRaw.empty()) {
-		for (auto& l : Utility::explode(linkedElementsRaw, '|')) {
-			vector<string> es = Utility::explode(l, ',');
-			if (es.size() != 2)
-				throw Error("you can only link two elements");
-			Utility::trim(es[0]);
-			Utility::trim(es[1]);
-			preOnElements.push_back(findElementMapByName(es[0]));
-			linkedElements.emplace(findElementMapByName(es[0]), findElementMapByName(es[1]));
-			linkedElements.emplace(findElementMapByName(es[1]), findElementMapByName(es[0]));
-		}
-		linkedElementsRaw.clear();
+	for (uint16_t map : firstItems) {
+		Record& groupMap = groupsMaps[groupMapLookup[map].groupIdx][groupMapLookup[map].mapIdx];
+		blinkingItems.emplace(map, groupMap.item);
+		groupMap.active = true;
 	}
-
-	controlledElements->clear();
-	controlledGroups->clear();
-	for (string& e : preOnElements)
-		blinkingElements.emplace(e + elementMap[e].element->getName(), &elementMap[e]);
-	for (string& e : preOnGroups)
-		blinkingGroups.emplace(e + groupMap[e].group->getName(), &groupMap[e]);
 	Reader::activate();
 }
 
 void Actions::deactivate() {
-	blinkingElements.clear();
-	blinkingGroups.clear();
+	for (auto& g : groupsMaps)
+		for (auto& i : g)
+			i.active = false;
+	blinkingItems.clear();
 	Reader::deactivate();
 }
 
 void Actions::drawConfig() {
-	cout << "Linked Elements: ";
-	for (auto&le : linkedElementsRaw)
-		cout << le << " ";
-	cout << endl;
 	Reader::drawConfig();
+	cout << endl;
+	if (groupsMaps.size()) {
+		cout << "Linked Items: " << endl;
+		for (auto& g : groupsMaps) {
+			for (auto& i : g)
+				cout << i.item->getName() << " → ";
+			cout << "«" << endl;
+		}
+	}
+	cout << endl;
+	Speed::drawConfig();
+	cout << endl;
 }
 
 void Actions::blink() {
 	if (frames == cframe) {
 		cframe = 0;
-		for (auto& e : blinkingElements) {
+		for (auto& e : blinkingItems) {
 			if (on)
-				controlledElements->erase(e.first);
+				controlledItems->erase(std::to_string(e.first));
 			else
-				controlledElements->emplace(e.first, e.second);
-		}
-		for (auto& e : blinkingGroups) {
-			if (on)
-				controlledGroups->erase(e.first);
-			else
-				controlledGroups->emplace(e.first, e.second);
+				controlledItems->emplace(std::to_string(e.first), e.second);
 		}
 		on = not on;
 	}
 	else {
 		++cframe;
 	}
-}
-
-string Actions::findElementMapByName(string& name) {
-	for (auto& eMap : elementMap) {
-		if (eMap.second.element->getName() == name)
-			return eMap.first;
-	}
-	throw Error("Unable to find element named " + name);
 }

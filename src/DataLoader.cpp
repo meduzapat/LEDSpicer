@@ -31,14 +31,10 @@ Profile* DataLoader::defaultProfile;
 umap<string, Profile*> DataLoader::profiles;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
-umap<Device*, DeviceHandler*> DataLoader::deviceMap;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
-umap<Actor*, ActorHandler*> DataLoader::actorMap;
 umap<string, InputHandler*> DataLoader::inputHandlers;
-umap<Input*, InputHandler*> DataLoader::inputMap;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
-umap<string, Element::Item*> DataLoader::controlledElements;
-umap<string, Group::Item*> DataLoader::controlledGroups;
+umap<string, Items*> DataLoader::controlledItems;
 milliseconds DataLoader::waitTime;
 
 DataLoader::Modes DataLoader::getMode() {
@@ -51,7 +47,7 @@ void DataLoader::setMode(Modes mode) {
 
 void DataLoader::readConfiguration() {
 
-	Input::setInputControllers(&controlledElements, &controlledGroups);
+	Input::setInputControllers(&controlledItems);
 
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
@@ -305,7 +301,7 @@ Profile* DataLoader::processProfile(const string& name) {
 		}
 	}
 
-	// Check for always on elements.
+	// Check for always on groups.
 	element = profile.getRoot()->FirstChildElement("alwaysOnGroups");
 	if (element) {
 		element = element->FirstChildElement(NODE_GROUP);
@@ -335,6 +331,15 @@ Profile* DataLoader::processProfile(const string& name) {
 	return profilePtr;
 }
 
+Device* DataLoader::createDevice(umap<string, string>& deviceData) {
+
+	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
+	string deviceName = deviceData["name"];
+	if (not deviceHandlers.count(deviceName))
+		deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
+	return deviceHandlers[deviceName]->createDevice(devId, deviceData);
+}
+
 vector<Actor*> DataLoader::processAnimation(const string& file) {
 
 	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
@@ -354,17 +359,6 @@ vector<Actor*> DataLoader::processAnimation(const string& file) {
 	return actors;
 }
 
-Device* DataLoader::createDevice(umap<string, string>& deviceData) {
-
-	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
-	string deviceName = deviceData["name"];
-	if (not deviceHandlers.count(deviceName))
-		deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
-	Device* d = deviceHandlers[deviceName]->createDevice(devId, deviceData);
-	deviceMap.emplace(d, deviceHandlers[deviceName]);
-	return d;
-}
-
 Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 
 	string
@@ -376,33 +370,24 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 
 	if (not actorHandlers.count(actorName))
 		actorHandlers.emplace(actorName, new ActorHandler(actorName));
-	Actor* a = actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
-	actorMap.emplace(a, actorHandlers[actorName]);
-	return a;
+	return actorHandlers[actorName]->createActor(actorData, &layout.at(groupName));
 }
 
 void DataLoader::processInput(Profile* profile, const string& file) {
 	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
 	umap<string, string> elementAttr = processNode(inputFile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, file);
-	Input* input =  createInput(elementAttr);
-	processInputMap(inputFile.getRoot(), input);
-	profile->addInput(elementAttr[PARAM_NAME], input);
+	string inputName = elementAttr[PARAM_NAME];
+	if (not inputHandlers.count(inputName)) {
+		umap<string, Items*> inputMapTmp = processInputMap(inputFile.getRoot());
+		inputHandlers.emplace(inputName, new InputHandler(elementAttr, inputMapTmp));
+	}
+	profile->addInput(inputName, inputHandlers[inputName]->getInstance());
 }
 
-Input* DataLoader::createInput(umap<string, string>& inputData) {
-	string inputName = inputData[PARAM_NAME];
-	if (not inputHandlers.count(inputName))
-		inputHandlers.emplace(inputName, new InputHandler(inputName));
-	Input* i = inputHandlers[inputName]->createInput(inputData);
-	inputMap.emplace(i, inputHandlers[inputName]);
-	return i;
-}
+umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode) {
 
-void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, Input* input) {
-
-	umap<string, Element::Item> elementMap;
-	umap<string, Group::Item> groupMap;
+	umap<string, Items*> itemsMap;
 
 	tinyxml2::XMLElement* maps = inputNode->FirstChildElement("map");
 	for (; maps; maps = maps->NextSiblingElement("map")) {
@@ -414,14 +399,14 @@ void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, Input* input) 
 				throw LEDError("Unknown Element " + elementAttr["target"] + " on map file");
 
 			// Check dupes and add
-			if (elementMap.count(elementAttr["trigger"]) and elementMap[elementAttr["trigger"]].element->getName() == elementAttr["target"])
+			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated element map for " + elementAttr["target"] + " map " + elementAttr["value"]);
 
-			elementMap.emplace(elementAttr["trigger"], Element::Item {
+			itemsMap.emplace(elementAttr["trigger"], new Element::Item(
 				allElements[elementAttr["target"]],
 				&Color::getColor(elementAttr[PARAM_COLOR]),
 				Color::str2filter(elementAttr["filter"])
-			});
+			));
 		}
 
 		if (elementAttr["type"] == "Group") {
@@ -429,17 +414,17 @@ void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, Input* input) 
 				throw LEDError("Unknown Group " + elementAttr["target"] + " on map file");
 
 			// Check dupes and add
-			if (groupMap.count(elementAttr["trigger"]) and groupMap[elementAttr["trigger"]].group->getName() == elementAttr["target"])
+			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
 
-			groupMap.emplace(elementAttr["trigger"], Group::Item {
+			itemsMap.emplace(elementAttr["trigger"], new Group::Item(
 				&layout[elementAttr["target"]],
 				&Color::getColor(elementAttr[PARAM_COLOR]),
 				Color::str2filter(elementAttr["filter"])
-			});
+			));
 		}
 	}
-	input->setMaps(elementMap, groupMap);
+	return itemsMap;
 }
 
 string DataLoader::createFilename(const string& name) {

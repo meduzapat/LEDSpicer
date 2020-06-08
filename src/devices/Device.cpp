@@ -99,7 +99,9 @@ uint8_t Device::getNumberOfLeds() {
 void Device::packData() {
 	if (LEDs == oldLEDs) {
 #ifdef DEVELOP
+	#ifndef NO_OUTPUT
 	LogDebug("No changes, data not sent for " + getFullName());
+	#endif
 #endif
 		return;
 	}

@@ -33,10 +33,19 @@ DeviceHandler::DeviceHandler(const string& deviceName) :
 		throw Error("Failed to load device " + deviceName + " " + errstr);
 }
 
-Device* DeviceHandler::createDevice(uint8_t boardId, umap<string, string>& options) {
-	return createFunction(boardId, options);
+DeviceHandler::~DeviceHandler() {
+
+	// Destroy Devices.
+	for (Device* device : devices) {
+#ifdef DEVELOP
+		LogDebug(device->getFullName() + " instance deleted");
+#endif
+		destroyFunction(device);
+	}
 }
 
-void DeviceHandler::destroyDevice(Device* device) {
-	destroyFunction(device);
+Device* DeviceHandler::createDevice(uint8_t boardId, umap<string, string>& options) {
+	Device* device = createFunction(boardId, options);
+	devices.push_back(device);
+	return device;
 }

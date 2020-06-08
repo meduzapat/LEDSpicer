@@ -38,7 +38,7 @@ DirectionActor::DirectionActor(
 }
 
 void DirectionActor::drawConfig() {
-	cout << "Direction: " << direction2str(direction) << endl;
+	Direction::drawConfig();
 	FrameActor::drawConfig();
 }
 

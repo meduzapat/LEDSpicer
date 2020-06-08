@@ -33,10 +33,19 @@ ActorHandler::ActorHandler(const string& actorName) :
 		throw Error("Failed to load actor " + actorName + " " + errstr);
 }
 
-Actor* ActorHandler::createActor(umap<string, string>& parameters, Group* const group) {
-	return createFunction(parameters, group);
+ActorHandler::~ActorHandler() {
+
+	// Destroy Actors.
+	for (Actor* actor : actors) {
+#ifdef DEVELOP
+		LogDebug("Actor instance deleted");
+#endif
+		destroyFunction(actor);
+	}
 }
 
-void ActorHandler::destroyActor(Actor* actor) {
-	destroyFunction(actor);
+Actor* ActorHandler::createActor(umap<string, string>& parameters, Group* const group) {
+	Actor* actor = createFunction(parameters, group);
+	actors.push_back(actor);
+	return actor;
 }

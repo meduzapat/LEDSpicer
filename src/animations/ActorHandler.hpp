@@ -41,13 +41,14 @@ public:
 
 	ActorHandler(const string& actorName);
 
-	virtual ~ActorHandler() = default;
+	virtual ~ActorHandler();
 
 	Actor* createActor(umap<string, string>& parameters, Group* const group);
 
-	void destroyActor(Actor* actor);
-
 protected:
+
+	/// List of created Actors.
+	vector<Actor*> actors;
 
 	/**
 	 * Pointer to the plugin's creation function.

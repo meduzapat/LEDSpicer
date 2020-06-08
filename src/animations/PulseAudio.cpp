@@ -133,6 +133,7 @@ void PulseAudio::drawConfig() {
 		", Mid: "       << userPref.c50.getName() <<
 		", High: "      << userPref.c75.getName() << endl;
 	Actor::drawConfig();
+	Direction::drawConfig();
 	cout << endl;
 }
 

@@ -35,9 +35,8 @@ StepActor::StepActor(
 }
 
 void StepActor::drawConfig() {
+	Speed::drawConfig();
 	cout <<
-		"Speed: " << speed2str(speed) << endl <<
-		"Direction: " << direction2str(direction) << endl <<
 		"Total Frames: " << static_cast<uint>(getTotalSteps()) <<
 		" (" << static_cast<float>(getTotalSteps()) / FPS << " sec)"<< endl;
 }

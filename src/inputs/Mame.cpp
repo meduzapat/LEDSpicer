@@ -32,50 +32,53 @@ void Mame::process() {
 	if (not socks.isConnected())
 		activate();
 
-	string buffer;
-	if (not socks.recive(buffer))
+	string bufferRaw, buffer;
+	if (not socks.recive(bufferRaw))
 		return;
 
-	// Message ends at line feed, discard the tail.
-	size_t s = buffer.find(13);
-	if (s != string::npos)
-		buffer = buffer.substr(0, s);
+	for (char c : bufferRaw)
+		if (c >= 48 and c <= 122)
+			buffer.push_back(c);
 
 	if (buffer.empty())
 		return;
 
-	if (buffer == "mame_stop = 1") {
+	Log::debug("Message received " + buffer);
+
+	if (buffer.find("mame_stop=1") != string::npos) {
 		active = false;
 		return;
 	}
 
+	if (Log::isLogging(LOG_DEBUG) and buffer.find("mame_start=1") != string::npos)
+		Log::debug("MAME running");
+
+	umap<string, bool> messages;
+
 	auto parts = Utility::explode(buffer, '=');
-	if (parts.size() != 2)
-		return;
 
-	Utility::trim(parts[0]);
-	if (Log::isLogging(LOG_DEBUG) and parts[0] == "mame_start") {
-		Utility::trim(parts[1]);
-		Log::debug("MAME running " + parts[1]);
+	if (itemsMap.count(parts[0]))
+		messages[parts[0]] = parts[1][0] == '1';
+
+	if (parts.size() > 2) {
+		bool last = parts.back()[0] == '1';
+		parts.pop_back();
+		for (uint c = 1; c < parts.size(); c++) {
+			if (itemsMap.count(parts[c].substr(1)))
+				messages[parts[c].substr(1)] = parts[c + 1][0] == '1';
+		}
+		if (itemsMap.count(parts[parts.size() - 1].substr(1)))
+			messages[parts[parts.size() - 1].substr(1)] = last;
 	}
 
-	uint8_t n = std::atoi(parts[1].c_str());
-	if (elementMap.count(parts[0])) {
-		LogDebug("e: " + parts[0] + " " + (n ? "on" : "off"));
-		auto& e = elementMap[parts[0]];
-		if (n)
-			controlledElements->emplace(e.element->getName() + parts[0], &e);
+	for (auto& message : messages) {
+		LogDebug("sending: " + message.first + " " + (message.second ? "on" : "off"));
+		if (message.second) {
+			if (not controlledItems->count(message.first))
+				controlledItems->emplace(message.first, itemsMap[message.first]);
+		}
 		else
-			controlledElements->erase(e.element->getName() + parts[0]);
-	}
-
-	if (groupMap.count(parts[0])) {
-		LogDebug("g: " + parts[0] + " " + (n ? "on" : "off"));
-		auto& g = groupMap[parts[0]];
-		if (n)
-			controlledGroups->emplace(g.group->getName() + parts[0], &g);
-		else
-			controlledGroups->erase(g.group->getName() + parts[0]);
+			controlledItems->erase(message.first);
 	}
 }
 

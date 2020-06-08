@@ -26,6 +26,7 @@
 #include "utility/Utility.hpp"
 
 using LEDSpicer::Devices::Element;
+using LEDSpicer::Devices::Items;
 using LEDSpicer::Devices::Group;
 
 #ifndef INPUT_HPP_
@@ -41,19 +42,19 @@ class Input {
 
 public:
 
-	Input(umap<string, string>& parameters) {}
+	Input(
+		umap<string, string>& parameters,
+		umap<string, Items*>& inputMaps
+	) : itemsMap(inputMaps) {}
 
-	virtual ~Input() {}
+	virtual ~Input();
 
 	/**
 	 * Sets the controlled elements and groups.
 	 * @param controlledElements
 	 * @param controlledGroups
 	 */
-	static void setInputControllers(
-		umap<string, Element::Item*>* controlledElements,
-		umap<string, Group::Item*>* controlledGroups
-	);
+	static void setInputControllers(umap<string, Items*>* controlledItems);
 
 	/**
 	 * Draws the input configuration.
@@ -77,31 +78,25 @@ public:
 	 */
 	virtual void process() = 0;
 
-	/**
-	 * Sets Initial mapping data.
-	 * @param elementMap
-	 * @param groupMap
-	 */
-	void setMaps(umap<string, Element::Item>& elementMap, umap<string, Group::Item>& groupMap);
-
 protected:
 
-	/// Output list of mapped elements by trigger + element name.
-	static umap<string, Element::Item*>* controlledElements;
+	/// Output list of mapped items by trigger.
+	static umap<string, Items*>* controlledItems;
 
-	/// Output list of mapped groups by trigger + group name.
-	static umap<string, Group::Item*>* controlledGroups;
+	/// Input specific map. trigger -> Item.
+	umap<string, Items*>& itemsMap;
 
-	/// Profile specific map. trigger -> Item.
-	umap<string, Element::Item> elementMap;
+	/**
+	 * @param name
+	 * @return string, the map using the element or group name.
+	 */
+	string findItemMapByName(string& name);
 
-	/// Profile specific settings. trigger -> Item.
-	umap<string, Group::Item> groupMap;
 };
 
 // The functions to create and destroy inputs.
 #define inputFactory(plugin) \
-	extern "C" LEDSpicer::Inputs::Input* createInput(umap<string, string>& parameters) {return new plugin(parameters);} \
+	extern "C" LEDSpicer::Inputs::Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
 	extern "C" void destroyInput(LEDSpicer::Inputs::Input* instance) {delete instance;}
 
 } /* namespace Inputs */

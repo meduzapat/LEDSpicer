@@ -28,7 +28,7 @@ vector<input_event> Reader::events;
 umap<string, int> Reader::listenEvents;
 Input* Reader::readController = nullptr;
 
-Reader::Reader(umap<string, string>& parameters) : Input(parameters) {
+Reader::Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps) : Input(parameters, inputMaps) {
 	if (parameters.count("listenEvents"))
 		for (auto& e : Utility::explode(parameters["listenEvents"], ',')) {
 			Utility::trim(e);
@@ -40,7 +40,7 @@ Reader::Reader(umap<string, string>& parameters) : Input(parameters) {
 void Reader::activate() {
 	readController = nullptr;
 	for (auto& l : listenEvents) {
-		// ignore already connected elements.
+		// Ignore already connected elements.
 		if (l.second >= 0)
 			continue;
 		LogInfo("Opening device " + l.first);

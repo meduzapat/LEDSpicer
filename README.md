@@ -1,9 +1,11 @@
 # LEDSpicer - LED Manager for linux
 
-[![GitHub](https://img.shields.io/github/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
+[![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
 ![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
+[![Donations are welcome](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
+
 
 LEDSpicer is a linear LED controller daemon that will handle single color or RGB LEDs connected to different devices.
 

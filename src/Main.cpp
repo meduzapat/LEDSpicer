@@ -94,8 +94,7 @@ void Main::run() {
 				// Deactivate overwrites.
 				alwaysOnGroups.clear();
 				alwaysOnElements.clear();
-				DataLoader::controlledGroups.clear();
-				DataLoader::controlledElements.clear();
+				DataLoader::controlledItems.clear();
 				break;
 
 			case Message::Types::FinishAllProfiles:
@@ -104,41 +103,34 @@ void Main::run() {
 					// Deactivate overwrites.
 					alwaysOnGroups.clear();
 					alwaysOnElements.clear();
-					DataLoader::controlledGroups.clear();
-					DataLoader::controlledElements.clear();
+					DataLoader::controlledItems.clear();
 					profiles.clear();
 					currentProfile = DataLoader::defaultProfile;
 					profiles.push_back(currentProfile);
 				}
 				break;
 
-			case Message::Types::SetElement:
+			case Message::Types::SetElement: {
 				if (msg.getData().size() != 3) {
 					LogNotice("Invalid message ");
 					break;
 				}
-				if (not DataLoader::allElements.count(msg.getData()[0])) {
-					LogNotice("Unknown element " + msg.getData()[0]);
+				string
+					name   = msg.getData()[0],
+					color  = msg.getData()[1],
+					filter = msg.getData()[2];
+				if (not DataLoader::allElements.count(name)) {
+					LogNotice("Unknown element " + name);
 					break;
 				}
 				try {
-					if (alwaysOnElements.count(msg.getData()[0]))
-							alwaysOnElements[msg.getData()[0]] = Element::Item{
-							DataLoader::allElements[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						};
-					else
-						alwaysOnElements.emplace(msg.getData()[0], Element::Item{
-							DataLoader::allElements[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						});
+					alwaysOnElements[name] = Element::Item(DataLoader::allElements[name], &Color::getColor(color), Color::str2filter(filter));
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
 				}
 				break;
+			}
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
@@ -234,18 +226,18 @@ int main(int argc, char **argv) {
 				PACKAGE_NAME " command line usage:\n"
 				PACKAGE " <options>\n"
 				"options:\n"
-				"-c <conf> or --config <conf>\tUse an alternative configuration file\n"
-				"-f or --foreground\t\tRun on foreground\n"
-				"-d or --dump\t\t\tDump configuration files and quit\n"
-				"-p <profile> or --profile <profile>\t\t\tDump a profile by name and quit\n"
-				"-l or --leds\t\t\tTest LEDs.\n"
-				"-e or --elements\t\tTest registered elements.\n"
-				"-v or --version\t\t\tDisplay version information\n"
-				"-h or --help\t\t\tDisplay this help screen.\n"
-				"Data directory: " PACKAGE_DATA_DIR "\n"
-				"Actors directory: " ACTORS_DIR "\n"
+				"-c <conf> or --config <conf>\t\tUse an alternative configuration file\n"
+				"-f or --foreground\t\t\tRun on foreground\n"
+				"-d or --dump\t\t\t\tDump configuration files and quit\n"
+				"-p <profile> or --profile <profile>\tDump a profile by name and quit\n"
+				"-l or --leds\t\t\t\tTest LEDs.\n"
+				"-e or --elements\t\t\tTest registered elements.\n"
+				"-v or --version\t\t\t\tDisplay version information\n"
+				"-h or --help\t\t\t\tDisplay this help screen.\n"
+				"Data directory:    " PACKAGE_DATA_DIR "\n"
+				"Actors directory:  " ACTORS_DIR "\n"
 				"Devices directory: " DEVICES_DIR "\n"
-				"Inputs directory: " INPUTS_DIR "\n"
+				"Inputs directory:  " INPUTS_DIR "\n"
 				"If -c or --config is not provided " PACKAGE_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
@@ -397,14 +389,9 @@ void Main::runCurrentProfile() {
 	for (auto& eE : alwaysOnElements)
 		eE.second.element->setColor(*eE.second.color, eE.second.filter);
 
-	// Set controlled groups from input plugins.
-	for (auto& gE : DataLoader::controlledGroups)
-		for (auto eE : gE.second->group->getElements())
-			eE->setColor(*gE.second->color, gE.second->filter);
-
-	// Set controlled elements from input plugins.
-	for (auto& eE : DataLoader::controlledElements)
-		eE.second->element->setColor(*eE.second->color, eE.second->filter);
+	// Set controlled items from input plugins.
+	for (auto& item : DataLoader::controlledItems)
+		item.second->process();
 
 	sendData();
 }

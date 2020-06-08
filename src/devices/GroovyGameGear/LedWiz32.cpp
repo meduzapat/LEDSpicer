@@ -30,6 +30,7 @@ void LedWiz32::resetLeds() {
 }
 
 void LedWiz32::afterClaimInterface() {
+	LogDebug("Initializing " LEDWIZ32_NAME " controllers ICs");
 	// This will initialize the 4 controllers and set the pulse to 1.
 	vector<uint8_t> data {64, 255, 255, 255, 255, 1, 0, 0};
 	transferToUSB(data);
@@ -59,7 +60,7 @@ void LedWiz32::transfer() {
 	 */
 	vector<uint8_t> load;
 	for (auto l : LEDs) {
-		load.push_back(63 * (l / 255.00));
+		load.push_back(48 * (l / 255.00));
 		if (load.size() == 8) {
 			transferToUSB(load);
 			load.clear();

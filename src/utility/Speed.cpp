@@ -59,3 +59,7 @@ Speed::Speeds Speed::str2speed(const string& speed) {
 	throw Error("Invalid speed " + speed);
 }
 
+void Speed::drawConfig() {
+	cout << "Speed: " << speed2str(speed) << endl;
+}
+
