@@ -36,7 +36,6 @@ Actor::Actor(
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	group(group)
 {
-
 	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
@@ -48,14 +47,16 @@ void Actor::draw() {
 	calculateElements();
 	if (not affectedElements.empty())
 		switch (filter) {
-		case Color::Filters::Mask:
-			// turn off any other element.
+		case Color::Filters::Mask: {
+			const Color& black = Color::getColor("Black");
+			// turn off any non affected element.
 			for (uint8_t elIdx = 0; elIdx < group->size(); ++elIdx) {
 				if (affectedElements[elIdx])
 					continue;
-				changeElementColor(elIdx, Color::getColor("Black"), Color::Filters::Normal, 100);
+				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
 			}
 		}
+	}
 }
 
 void Actor::drawConfig() {
@@ -66,7 +67,7 @@ void Actor::drawConfig() {
 
 void Actor::restart() {
 #ifdef DEVELOP
-		LogDebug("Actor restarting");
+	LogDebug("Actor restarting");
 #endif
 	if (endTime) {
 		delete endTime;

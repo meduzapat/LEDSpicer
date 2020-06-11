@@ -45,7 +45,7 @@ public:
 	 */
 	struct Item : public Items {
 
-		Group* group    = nullptr;
+		Group* group = nullptr;
 
 		Item() = default;
 
@@ -61,15 +61,16 @@ public:
 			group     = item.group;
 			color     = item.color;
 			filter    = item.filter;
-			typeGroup = item.typeGroup;
 			return *this;
 		}
 
 		virtual ~Item() = default;
 
-		bool typeGroup  = true;
-		virtual string getName() {return group->getName();}
-		void process() {
+		virtual string getName() const {
+			return group->getName();
+		}
+
+		void process() const {
 			for (auto& e : group->getElements())
 				e->setColor(*color, filter);
 		}

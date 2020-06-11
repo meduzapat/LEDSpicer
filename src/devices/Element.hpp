@@ -42,15 +42,20 @@ namespace Devices {
  * Helper base class to unify elements and groups.
  */
 struct Items {
+
 	const Color* color = nullptr;
+
 	Color::Filters filter = Color::Filters::Normal;
+
 	Items() = default;
 	Items(const Color* color, Color::Filters filter) : color(color), filter(filter) {}
 	Items(const Items& item)  : color(item.color), filter(item.filter) {}
 	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)) {}
-	virtual ~Items()         = default;
-	virtual string getName() = 0;
-	virtual void process()   = 0;
+
+	virtual ~Items() = default;
+
+	virtual string getName() const = 0;
+	virtual void process() const   = 0;
 };
 
 /**
@@ -93,11 +98,11 @@ public:
 
 		virtual ~Item() = default;
 
-		string getName() {
+		string getName() const {
 			return element->getName();
 		}
 
-		void process() {
+		void process() const  {
 			element->setColor(*color, filter);
 		}
 	};

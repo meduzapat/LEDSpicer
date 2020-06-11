@@ -118,10 +118,12 @@ protected:
 
 	/**
 	 * Do the elements calculation.
-	 * @return an array with the affected elements.
 	 */
 	virtual void calculateElements() = 0;
 
+	/**
+	 * @return the number of elements on this group.
+	 */
 	uint8_t getNumberOfElements() const;
 
 	/**
@@ -142,7 +144,7 @@ protected:
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	/**
-	 * Sets the affected elements to the desired stated.
+	 * Mark all elements to the desired state.
 	 * @param value
 	 */
 	void affectAllElements(bool value = false);

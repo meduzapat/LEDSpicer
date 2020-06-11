@@ -371,23 +371,21 @@ void Main::runCurrentProfile() {
 
 	// Set always on groups from profile.
 	for (auto& gE : currentProfile->getAlwaysOnGroups())
-		for (auto eE : gE.group->getElements())
-			eE->setColor(*gE.color, gE.filter);
+		gE.process();
 
 	// Set always on elements from profile.
 	for (auto& eE : currentProfile->getAlwaysOnElements())
-		eE.element->setColor(*eE.color, eE.filter);
+		eE.process();
 
 	currentProfile->runFrame();
 
 	// Set always on groups from config.
 	for (auto& gE : alwaysOnGroups)
-		for (auto eE : gE.second.group->getElements())
-			eE->setColor(*gE.second.color, gE.second.filter);
+		gE.second.process();
 
 	// Set always on elements from config.
 	for (auto& eE : alwaysOnElements)
-		eE.second.element->setColor(*eE.second.color, eE.second.filter);
+		eE.second.process();
 
 	// Set controlled items from input plugins.
 	for (auto& item : DataLoader::controlledItems)
