@@ -40,7 +40,6 @@ public:
 	virtual ~Impulse() = default;
 
 	virtual void process();
-
 };
 
 } /* namespace Inputs */

@@ -28,13 +28,10 @@ void Blinker::process() {
 
 	readAll();
 
-	for (auto& e : elementsToClean)
-		blinkingElements.erase(e);
-	for (auto& g : groupsToClean)
-		blinkingGroups.erase(g);
+	for (auto& e :itemsToClean)
+		blinkingItems.erase(e);
 
-	elementsToClean.clear();
-	groupsToClean.clear();
+	itemsToClean.clear();
 
 	blink();
 
@@ -47,80 +44,52 @@ void Blinker::process() {
 			continue;
 
 		string codeName = std::to_string(event.code);
-		if (elementMap.count(codeName)) {
-			string fullname = codeName + elementMap[codeName].element->getName();
-			LogDebug("key: " + codeName + " adds: " + to_string(times) + " times to element: " + fullname);
+		if (itemsMap.count(codeName)) {
+			LogDebug("key: " + codeName + " adds: " + to_string(times) + " times to element: " + itemsMap[codeName]->getName());
 			// switch
-			if (blinkingElements.count(fullname)) {
-				blinkingElements[fullname].times = 0;
+			if (blinkingItems.count(event.code)) {
+				blinkingItems[event.code].times = 0;
 			}
 			else {
-				blinkingElements.emplace(fullname, timesElement{&elementMap[codeName], 0});
-			}
-		}
-
-		if (groupMap.count(codeName)) {
-			string fullname = codeName + groupMap[codeName].group->getName();
-			LogDebug("key: " + codeName + " adds: " + to_string(times) + " times to group: " + fullname);
-			// switch
-			if (blinkingGroups.count(fullname)) {
-				blinkingGroups[fullname].times = 0;
-			}
-			else {
-				blinkingGroups.emplace(fullname, timesGroup{&groupMap[codeName], 0});
+				blinkingItems.emplace(event.code, Times{itemsMap[codeName], 0});
 			}
 		}
 	}
 }
 
 void Blinker::activate() {
-	controlledElements->clear();
-	controlledGroups->clear();
+	controlledItems->clear();
 	Reader::activate();
 }
 
 void Blinker::deactivate() {
-	blinkingElements.clear();
-	blinkingGroups.clear();
+	blinkingItems.clear();
 	Reader::deactivate();
 }
 
 void Blinker::drawConfig() {
-	cout << "Stop After " << times << " times" << endl;
 	Reader::drawConfig();
+	cout << endl << "Stop After " << times << " times" << endl;
+	Speed::drawConfig();
 }
 
 void Blinker::blink() {
 	if (frames == cframe) {
 		cframe = 0;
-		for (auto& e : blinkingElements) {
+		for (auto& i : blinkingItems) {
+			string name = std::to_string(i.first);
 			// deactivate after time passed.
-			if (e.second.times == times) {
-				controlledElements->erase(e.first);
-				elementsToClean.push_back(e.first);
+			if (i.second.times == times) {
+				controlledItems->erase(name);
+				itemsToClean.push_back(i.first);
 				continue;
 			}
 			if (on) {
-				controlledElements->erase(e.first);
+				controlledItems->erase(name);
 			}
 			else {
-				controlledElements->emplace(e.first, e.second.element);
-				++e.second.times;
-			}
-		}
-		for (auto& e : blinkingGroups) {
-			// deactivate after time passed.
-			if (e.second.times == times) {
-				controlledGroups->erase(e.first);
-				groupsToClean.push_back(e.first);
-				continue;
-			}
-			if (on) {
-				controlledGroups->erase(e.first);
-			}
-			else {
-				controlledGroups->emplace(e.first, e.second.group);
-				++e.second.times;
+				controlledItems->emplace(name, i.second.item);
+				++i.second.times;
 			}
 		}
 		on = not on;

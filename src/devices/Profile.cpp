@@ -80,13 +80,15 @@ void Profile::runFrame() {
 	for (auto i : inputs)
 		i.second->process();
 
-	if (actual and actual->isRunning()) {
-		actual->draw();
-	}
-	else {
-		if (actual == end)
-			running = false;
-		actual = nullptr;
+	if (actual) {
+		if (actual->isRunning()) {
+			actual->draw();
+		}
+		else {
+			if (actual == end)
+				running = false;
+			actual = nullptr;
+		}
 	}
 
 	if (not actual and running)
@@ -163,7 +165,7 @@ const vector<Element::Item>& Profile::getAlwaysOnElements() const {
 }
 
 void Profile::addAlwaysOnElement(Element* element ,const string& color) {
-	alwaysOnElements.push_back(Element::Item{element, &Color::getColor(color), Color::Filters::Normal});
+	alwaysOnElements.emplace_back(element, &Color::getColor(color), Color::Filters::Normal);
 }
 
 const vector<Group::Item> & Profile::getAlwaysOnGroups() const {
@@ -171,7 +173,7 @@ const vector<Group::Item> & Profile::getAlwaysOnGroups() const {
 }
 
 void Profile::addAlwaysOnGroup(Group* group, const string& color) {
-	alwaysOnGroups.push_back(Group::Item{group, &Color::getColor(color), Color::Filters::Normal});
+	alwaysOnGroups.emplace_back(group, &Color::getColor(color), Color::Filters::Normal);
 }
 
 void Profile::addInput(string name, Input* input) {

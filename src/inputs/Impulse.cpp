@@ -33,27 +33,15 @@ void Impulse::process() {
 
 	for (auto& event : events) {
 		string codeName = std::to_string(event.code);
-		if (elementMap.count(codeName)) {
-			string fullname = codeName + elementMap[codeName].element->getName();
-			if (controlledElements->count(fullname)) {
+		if (itemsMap.count(codeName)) {
+			if (controlledItems->count(codeName)) {
 				// released
 				if (not event.value)
-					controlledElements->erase(fullname);
+					controlledItems->erase(codeName);
 			}
 			else
 				// activated
-				controlledElements->emplace(fullname, &elementMap[codeName]);
-		}
-		if (groupMap.count(codeName)) {
-			string fullname = codeName + groupMap[codeName].group->getName();
-			if (controlledGroups->count(fullname)) {
-				// released
-				if (not event.value)
-					controlledGroups->erase(fullname);
-			}
-			else
-				// activated
-				controlledGroups->emplace(fullname, &groupMap[codeName]);
+				controlledItems->emplace(codeName, itemsMap[codeName]);
 		}
 	}
 }

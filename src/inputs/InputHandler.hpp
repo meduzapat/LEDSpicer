@@ -29,6 +29,8 @@
 namespace LEDSpicer {
 namespace Inputs {
 
+using LEDSpicer::Devices::Items;
+
 /**
  * LEDSpicer::Inputs::InputHandler
  * This is an Input factory to loader and create Input plugins.
@@ -41,37 +43,21 @@ public:
 
 	/**
 	 * @see Handler::Handler()
+	 * @param parameters list of parameters to for the plugin.
 	 */
-	InputHandler(const string& inputName);
+	InputHandler(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
 
-	virtual ~InputHandler() = default;
+	virtual ~InputHandler();
 
-	/**
-	 * Wrapper over the create pointer.
-	 * @see createFunction pointer.
-	 */
-	Input* createInput(umap<string, string>& parameters);
-
-	/**
-	 * Wrapper over the destroy pointer.
-	 * @see destroyFunction pointer.
-	 */
-	void destroyInput(Input* input);
+	Input* getInstance();
 
 protected:
 
-	/**
-	 * Pointer to the plugin's creation function.
-	 * @param plugin parameters.
-	 * @return a new created plugin.
-	 */
-	Input*(*createFunction)(umap<string, string>&) = nullptr;
+	/// Keep copy of input plugin instance.
+	Input* instance = nullptr;
 
-	/**
-	 * Pointer to the plugin's destruction function.
-	 * @param pointer to the plugin to destroy.
-	 */
-	void(*destroyFunction)(Input*) = nullptr;
+	/// Profile specific map. trigger -> Item.
+	umap<string, Items*> inputMaps;
 };
 
 } /* namespace Inputs */

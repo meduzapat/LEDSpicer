@@ -36,8 +36,8 @@ class Blinker: public Inputs::Reader, public Speed {
 
 public:
 
-	Blinker(umap<string, string>& parameters) :
-		Reader(parameters),
+	Blinker(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+		Reader(parameters, inputMaps),
 		Speed(parameters.count("speed") ? parameters["speed"] : ""),
 		frames(static_cast<uint8_t>(speed) * 3),
 		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : "", "Invalid numeric value ")) {}
@@ -61,21 +61,14 @@ protected:
 
 	bool on = false;
 
-	struct timesElement {
-		Element::Item* element;
+	struct Times {
+		Items* item;
 		uint8_t times = 0;
 	};
 
-	struct timesGroup {
-		Group::Item* group;
-		uint8_t times = 0;
-	};
+	umap<uint16_t, Times> blinkingItems;
 
-	umap<string, timesElement> blinkingElements;
-	umap<string, timesGroup> blinkingGroups;
-
-	vector<string> elementsToClean;
-	vector<string> groupsToClean;
+	vector<uint16_t> itemsToClean;
 
 	void blink();
 

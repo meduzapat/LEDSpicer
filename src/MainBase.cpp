@@ -62,50 +62,25 @@ MainBase::MainBase() :
 
 MainBase::~MainBase() {
 
-	// destroy devices and handlers.
-	for (auto& dm : DataLoader::deviceMap) {
-#ifdef DEVELOP
-		LogDebug(dm.first->getFullName() + " instance deleted");
-#endif
-		dm.first->terminate();
-		dm.second->destroyDevice(dm.first);
-	}
-
 	for (auto& dh : DataLoader::deviceHandlers) {
-#ifdef DEVELOP
-		LogDebug("Device Handler " + dh.first + " instance deleted");
-#endif
 		delete dh.second;
-	}
-
-	// destroy actors and handlers.
-	for (auto& am : DataLoader::actorMap) {
 #ifdef DEVELOP
-		LogDebug("Actor instance deleted");
+		LogDebug("Device Handler of type " + dh.first + " instance deleted");
 #endif
-		am.second->destroyActor(am.first);
 	}
 
 	for (auto& ah : DataLoader::actorHandlers) {
-#ifdef DEVELOP
-		LogDebug("Actor Handler " + ah.first + " instance deleted");
-#endif
 		delete ah.second;
-	}
-
-	// destroy inputs and handlers.
-	for (auto& am : DataLoader::inputMap) {
 #ifdef DEVELOP
-		LogDebug("Input instance deleted");
+		LogDebug("Actor Handler of type " + ah.first + " instance deleted");
 #endif
-		am.second->destroyInput(am.first);
 	}
 
 	for (auto i : DataLoader::inputHandlers) {
-	#ifdef DEVELOP
-		LogDebug("Input Handler " + i.first + " instance deleted");
-	#endif
 		delete i.second;
+#ifdef DEVELOP
+		LogDebug("Input Handler " + i.first + " instance deleted");
+#endif
 	}
 
 	for (auto p : DataLoader::profiles) {

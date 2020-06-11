@@ -42,7 +42,7 @@ class Reader: public Input {
 
 public:
 
-	Reader(umap<string, string>& parameters);
+	Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
 
 	virtual ~Reader() = default;
 

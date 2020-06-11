@@ -209,7 +209,7 @@ void Color::drawColors() {
 
 void Color::drawColors(vector<const Color*>& colors) {
 	uint8_t count = 0;
-	for (auto c : colors) {
+	for (auto& c : colors) {
 		c->drawColor();
 		if (++count < colors.size())
 			cout << ", ";

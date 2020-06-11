@@ -22,13 +22,18 @@
 
 #include <cstdint>
 #include <string>
-using std::string;
+#include <iostream>
+
 #include "Error.hpp"
 
 #ifndef DIRECTION_HPP_
 #define DIRECTION_HPP_ 1
 
 namespace LEDSpicer {
+
+using std::string;
+using std::cout;
+using std::endl;
 
 /**
  * LEDSpicer::Direction
@@ -49,6 +54,8 @@ public:
 	static string direction2str(Directions direction);
 
 	static Directions str2direction(const string& direction);
+
+	void drawConfig();
 
 protected:
 

@@ -24,41 +24,37 @@
 
 using namespace LEDSpicer::Inputs;
 
-umap<string, LEDSpicer::Devices::Element::Item*>* Input::controlledElements = nullptr;
-umap<string, LEDSpicer::Devices::Group::Item*>* Input::controlledGroups     = nullptr;
+umap<string, LEDSpicer::Devices::Items*>* Input::controlledItems = nullptr;
 
-void Input::setInputControllers(
-	umap<string, Element::Item*>* controlledElements,
-	umap<string, Group::Item*>* controlledGroups
-) {
-	Input::controlledElements = controlledElements;
-	Input::controlledGroups   = controlledGroups;
+Input::~Input() {
+	LogDebug("Releasing input maps...");
+	for (auto&p : itemsMap)
+		delete p.second;
+}
+
+void Input::setInputControllers(umap<string, Items*>* controlledElements) {
+	Input::controlledItems = controlledElements;
 }
 
 void Input::drawConfig() {
 
-	if (elementMap.size()) {
-		cout << "Element mappings:" << endl;
-		for (auto& e : elementMap)
-			cout <<
-				"Target element: " << e.second.element->getName() << endl <<
-				"Trigger: " << e.first << endl <<
-				"Color: " << e.second.color->getName() << endl <<
-				"Filter: " << Color::filter2str(e.second.filter) << endl << endl;
-	}
+	if (!itemsMap.size())
+		return;
 
-	if (groupMap.size()) {
-		cout << "Group mappings:" << endl;
-		for (auto& g : groupMap)
-			cout <<
-				"Target group: " << g.second.group->getName() << endl <<
-				"Trigger: " << g.first << endl <<
-				"Color: " << g.second.color->getName() << endl <<
-				"Filter: " << Color::filter2str(g.second.filter) << endl << endl;
-	}
+	cout << "Element and Groups mappings:" << endl;
+	for (auto& e : itemsMap)
+		cout <<
+			"Target: "  << e.second->getName() << endl <<
+			"Trigger: " << e.first << endl <<
+			"Color: "   << e.second->color->getName() << endl <<
+			"Filter: "  << Color::filter2str(e.second->filter) << endl << endl;
 }
 
-void Input::setMaps(umap<string, Element::Item>& elementMap, umap<string, Group::Item>& groupMap) {
-	this->elementMap = std::move(elementMap);
-	this->groupMap   = std::move(groupMap);
+string Input::findItemMapByName(string& name) {
+	for (auto& eMap : itemsMap) {
+		if (eMap.second->getName() == name)
+			return eMap.first;
+	}
+	throw Error("Unable to find item named " + name);
 }
+

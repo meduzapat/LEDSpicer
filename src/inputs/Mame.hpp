@@ -42,7 +42,7 @@ public:
 
 	using Input::Input;
 
-	virtual ~Mame() {}
+	virtual ~Mame() = default;
 
 	virtual void process();
 

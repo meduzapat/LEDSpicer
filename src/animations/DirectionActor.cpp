@@ -38,7 +38,7 @@ DirectionActor::DirectionActor(
 }
 
 void DirectionActor::drawConfig() {
-	cout << "Direction: " << direction2str(direction) << endl;
+	Direction::drawConfig();
 	FrameActor::drawConfig();
 }
 
@@ -97,7 +97,6 @@ bool DirectionActor::isDirectionBackward() const {
 }
 
 void DirectionActor::restart() {
-	FrameActor::restart();
 	if (isDirectionForward()) {
 		currentFrame = 0;
 		cDirection = Directions::Forward;
@@ -106,6 +105,7 @@ void DirectionActor::restart() {
 		currentFrame = totalFrames;
 		cDirection = Directions::Backward;
 	}
+	FrameActor::restart();
 }
 
 uint8_t DirectionActor::calculateNextOf(

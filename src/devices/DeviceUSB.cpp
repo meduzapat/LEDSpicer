@@ -59,9 +59,17 @@ DeviceUSB::DeviceUSB(
 		LIBUSB_LOG_LEVEL_INFO
 		LIBUSB_LOG_LEVEL_DEBUG
 	*/
+		#if LIBUSB_API_VERSION >= 0x01000106
+		libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+		#else
 		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_DEBUG);
+		#endif
 	#else
+		#if LIBUSB_API_VERSION >= 0x01000106
+		libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
+		#else
 		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_ERROR);
+		#endif
 	#endif
 #else
 	LogDebug("No USB - DRY RUN");

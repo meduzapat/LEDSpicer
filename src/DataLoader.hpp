@@ -140,9 +140,6 @@ public:
 
 /* Storage */
 
-	/// Stores devices.
-	static vector<Device*> devices;
-
 	/// list with all elements by name.
 	static umap<string, Element*> allElements;
 
@@ -158,29 +155,20 @@ public:
 	/// Port number to use for listening.
 	static string portNumber;
 
-	/// Keeps references to device handlers.
+	/// Stores devices.
+	static vector<Device*> devices;
+
+	/// Keeps references to device handlers by device type.
 	static umap<string, DeviceHandler*> deviceHandlers;
 
-	/// Maps handlers with devices.
-	static umap<Device*, DeviceHandler*> deviceMap;
-
-	/// Keeps references to actor handlers.
+	/// Keeps references to actor handlers by actor name.
 	static umap<string, ActorHandler*> actorHandlers;
 
-	/// Maps handlers with actors.
-	static umap<Actor*, ActorHandler*> actorMap;
-
-	/// Keeps references to inputs handlers.
+	/// Keeps references to inputs handlers by input name.
 	static umap<string, InputHandler*> inputHandlers;
 
-	/// Maps handlers with actors.
-	static umap<Input*, InputHandler*> inputMap;
-
-	/// Keeps a list of global elements that can be turn on/off by input plugins.
-	static umap<string, Element::Item*> controlledElements;
-
-	/// Keeps a list of global groups that can be turn on/off by input plugins.
-	static umap<string, Group::Item*> controlledGroups;
+	/// Keeps a list of global elements and groups that can be turn on/off by input plugins.
+	static umap<string, Items*> controlledItems;
 
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
@@ -266,16 +254,11 @@ protected:
 	static void processInput(Profile* profile, const string& file);
 
 	/**
-	 * Loads an input object.
-	 */
-	static Input* createInput(umap<string, string>& inputData);
-
-	/**
 	 * Extracts input map data.
 	 * @param inputNode
 	 * @param input
 	 */
-	static void processInputMap(tinyxml2::XMLElement* inputNode, Input* input);
+	static umap<string, Items*> processInputMap(tinyxml2::XMLElement* inputNode);
 
 	/**
 	 * Prepares the filenames.

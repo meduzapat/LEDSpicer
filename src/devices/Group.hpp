@@ -29,7 +29,7 @@ namespace LEDSpicer {
 namespace Devices {
 
 /**
- * LEDSpicer::Devices::Layout
+ * LEDSpicer::Devices::Group
  * A group of elements.
  */
 class Group {
@@ -43,10 +43,37 @@ public:
 	/**
 	 * Structure to handle groups with properties.
 	 */
-	struct Item {
-		const Group* group = nullptr;
-		const Color* color = nullptr;
-		Color::Filters filter;
+	struct Item : public Items {
+
+		Group* group = nullptr;
+
+		Item() = default;
+
+		Item(Group* group, const Color* color, Color::Filters filter) :
+			Items(color, filter),
+			group(group) {}
+
+		Item(const Item& item) : Items(item), group(item.group) {}
+
+		Item(Item&& item) : Items(item), group(std::move(item.group)) {}
+
+		Item& operator=(const Item& item) {
+			group     = item.group;
+			color     = item.color;
+			filter    = item.filter;
+			return *this;
+		}
+
+		virtual ~Item() = default;
+
+		virtual string getName() const {
+			return group->getName();
+		}
+
+		void process() const {
+			for (auto& e : group->getElements())
+				e->setColor(*color, filter);
+		}
 	};
 
 	virtual ~Group() = default;

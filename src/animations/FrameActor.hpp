@@ -64,6 +64,8 @@ public:
 	 */
 	virtual void draw();
 
+	virtual void restart();
+
 	virtual bool isRunning();
 
 protected:
@@ -73,15 +75,12 @@ protected:
 		totalFrames  = 0,
 		/// The current frame.
 		currentFrame = 0,
-		/// The frame when we start drawing.
-		startFrame   = 0,
-
+		/// The percent of the animation to start.
+		startAt      = 0,
 		/// Number of cycles to run.
-		cycles     = 0,
+		cycles       = 0,
 		/// Current cycles.
-		cycle    = 0;
-
-	bool drawing = false;
+		cycle        = 0;
 
 	/**
 	 * Advances the system frame forward.

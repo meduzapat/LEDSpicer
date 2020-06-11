@@ -38,6 +38,25 @@ using std::vector;
 namespace LEDSpicer {
 namespace Devices {
 
+/**
+ * Helper base class to unify elements and groups.
+ */
+struct Items {
+
+	const Color* color = nullptr;
+
+	Color::Filters filter = Color::Filters::Normal;
+
+	Items() = default;
+	Items(const Color* color, Color::Filters filter) : color(color), filter(filter) {}
+	Items(const Items& item)  : color(item.color), filter(item.filter) {}
+	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)) {}
+
+	virtual ~Items() = default;
+
+	virtual string getName() const = 0;
+	virtual void process() const   = 0;
+};
 
 /**
  * LEDSpicer::Devices::Element
@@ -56,10 +75,36 @@ public:
 	/**
 	 * Structure for elements with properties.
 	 */
-	struct Item {
-		Element* element      = nullptr;
-		const Color* color    = nullptr;
-		Color::Filters filter = Color::Filters::Normal;
+	struct Item : public Items {
+
+		Element* element = nullptr;
+
+		Item() = default;
+
+		Item(Element* element, const Color* color, Color::Filters filter) :
+			Items(color, filter),
+			element(element) {}
+
+		Item(const Item& item) : Items(item), element(item.element) {}
+
+		Item& operator=(const Item& item) {
+			element   = item.element;
+			color     = item.color;
+			filter    = item.filter;
+			return *this;
+		}
+
+		Item(Item&& item) : Items(item), element(std::move(item.element)) {}
+
+		virtual ~Item() = default;
+
+		string getName() const {
+			return element->getName();
+		}
+
+		void process() const  {
+			element->setColor(*color, filter);
+		}
 	};
 
 	virtual ~Element() = default;

@@ -59,3 +59,7 @@ string Direction::direction2str(Directions direction) {
 	}
 	return "";
 }
+
+void Direction::drawConfig() {
+	cout << "Direction: " << direction2str(direction) << endl;
+}

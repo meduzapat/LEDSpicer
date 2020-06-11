@@ -22,13 +22,18 @@
 
 #include <cstdint>
 #include <string>
-using std::string;
+#include <iostream>
+
 #include "Error.hpp"
 
 #ifndef SPEED_HPP_
 #define SPEED_HPP_ 1
 
 namespace LEDSpicer {
+
+using std::string;
+using std::cout;
+using std::endl;
 
 /**
  * LEDSpicer::Speed
@@ -49,6 +54,8 @@ public:
 	static string speed2str(Speeds speed);
 
 	static Speeds str2speed(const string& speed);
+
+	void drawConfig();
 
 protected:
 
