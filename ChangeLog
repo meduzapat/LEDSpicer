@@ -1,191 +1,85 @@
-2018-11-11T17:37:23-05:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.4.5) focal; urgency=medium
 
-* Improved gradient a little bit
-* Added new mode NO OUTPUT
+  * Changes packaging settings
+  * Build process.
+  * Removed confused configuration steps.
+  * Simplified examples and docs.
 
+ -- Patricio Rossi <meduzapat@netscape.net>  Fri, 14 Jun 2020 20:38:36 -0400
 
-2018-11-07T23:42:31-05:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.4.4) focal; urgency=medium
 
-* Code clean up and organization.
-* Docs updates.
-* Initial work on Led-Wis hardware
+  * This release improves overall code and speed, fixes some bugs specially on
+    the input mame plugin.
 
+ -- Patricio Rossi <meduzapat@netscape.net>  Wed, 10 Jun 2020 20:38:36 -0400
 
-2018-11-06T00:38:38-05:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.4.3) unstable; urgency=medium
 
-* Finished Filler.
-* Fixed a bug that avoid the program to end.
-* Added some functions.
-* improved code.
+  * Fixes an issue with ledwiz controller
+  * Allows empty layouts
 
+ -- Patricio Rossi <meduzapat@netscape.net>  14 Apr 2020 20:38:36 -0400
 
-2018-11-04T23:47:39-05:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.4.2) unstable; urgency=medium 
 
-* Improved code.
-* Finished the profiles changer (need more test).
-* Added more functions to reduce code.
-* Improved output mesages.
-* Added and fixed documentation.
-* Removed startup values from memory.
+  * This release is to fix some issues on 0.4.1 it also adds support for
+    multiple pacdrives
 
+ -- Patricio Rossi <meduzapat@netscape.net>  5 Apr 2020 20:38:36 -0400
+ 
+ledspicer (0.4.1) unstable; urgency=medium 
 
-2018-11-03T17:16:29-04:00 Patricio Rossi <meduzapat@netscape.net>
+    * Actors can be start or finished using time or cycles (frames)
+    * Howler controller fully functional and tested.
+    * Fixed transitions.
+    * Improved transitions, now only frame actors can be used for transitions.
+    * Improved code so when the device have no changes on the internal data,
+      nothing is transmitted to save CPU.
+    * Added more debug to actors when running DEVELOP
 
+ -- Patricio Rossi <meduzapat@netscape.net>  8 Mar 2020 20:38:36 -0400
 
+ledspicer (0.4.0) unstable; urgency=medium 
 
+   * New release is out includes two new hardware devices and several fixes.
 
-2018-11-03T17:05:59-04:00 Patricio Rossi <meduzapat@netscape.net>
+ -- Patricio Rossi <meduzapat@netscape.net>  18 Feb 2020 20:38:36 -0400
+ 
+ledspicer (0.3.9) unstable; urgency=medium 
 
-* Added new function for actors.
-* Added new function for timedActors.
-* Added iqual and not equial operators for colors.
-* Added new Actor: Filler.
-* cleanned up docs
+   * This is the release 0.3.9
+   * Improves Pulseaudio plugin render.
+   * new PulseAudio mode Wave.
+   * Adds new actor plugin FileReader.
+   * Lot of bug fixes.
+   * Code improvement.
+   *Packages.
 
+ -- Patricio Rossi <meduzapat@netscape.net>  21 Nov 2019 20:38:36 -0400
 
-2018-10-15T19:46:17-04:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.3.8) unstable; urgency=medium 
 
-* added more debuging messages.
-* fixed docs.
-* improved output values by implementing hex2str
-* fixed a wrong value for pac drive device.
+  * This is the release 0.3.8
 
+ -- Patricio Rossi <meduzapat@netscape.net>  8 Sep 2019 20:38:36 -0400
 
-2018-10-14T22:18:08-04:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.3.7) unstable; urgency=medium 
 
-Improved log functionality
+  * This is the release 0.3.7
 
+ -- Patricio Rossi <meduzapat@netscape.net>  8 Sep 2019 20:38:36 -0400
 
-2018-10-14T12:10:28-04:00 Patricio Rossi <meduzapat@netscape.net>
+ledspicer (0.3.6) unstable; urgency=medium
 
-* added draw color by name
-* replaced old draw to drawHex that makes more sense.
-* Added extra debugin.
-* Changed some messages to display as info instead of debug.
-* Fixed the bugs on file type and version detection.
-* Fixed some profile changing issues.
-* Fixed wrong values sent for devices.
+  * Includes all the new Input plugins functionality
 
+ -- Patricio Rossi <meduzapat@netscape.net>  30 Jun 2019 20:38:36 -0400
 
+ledspicer (0.3.5) unstable; urgency=medium 
 
-2018-09-28T00:46:26-04:00 Patricio Rossi <meduzapat@netscape.net>
+  * Adds profile dump
+  * Allows to enable or disable output device plugins when building.
 
-Several changes:
-* Moved includes outside the file defines and other code cleanups /
-arragements.
-* Added class for Ultimarc family devices.
-* Added a new Device, the PAC Drive, on/off board, untested but looks
-working.
-* Arranged code in a better way to handle different Devices in a more
-neutral way.
-* Added TimedActor abstract class, for Actors that need a timing
-interval.
-* Added trim, ltrim and rtrim generic functions.
-* Fixed a memory leak due to a commented out code when testing without
-reverting the comment, 0 leaks.
-* Fixed some bugs here and there.
-* Added function to populate colors out of a comma separated list of
-colors.
-* Improved dump output.
-* Groups uses a little bit less memory now.
-* Advanced work on some animations like gradiant.
-* Logs are a bit more verbose, but still needs better error messages
-when loading.
-
-
-2018-09-09T01:15:44-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-* Added network listening.
-* Added configuration for network.
-* New classes for network communication, message, messages, socks.
-* Initial work on emiter, a program to send messages to the daemon.
-* Initial work on Fill actor
-* Improved the actors frames handling.
-* Added a list of color names to color class.
-* Added a special group called All that have all elements on it.
-
-
-
-2018-07-05T23:12:43-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-Added two new animations: gradient and random.
-Animations all working.
-Improved code here and there.
-Added two hardware test (LEDs and Elements).
-Added more utility functions.
-Removed trash files
-
-
-2018-07-02T01:25:14-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-* Replaced some configuration numbers with words.
-* Animations engine almost done, testing..
-* Lots of unfinished stuff.
-* Added new debuging mode DRY_RUN to work disconected and print out pins
-intead of send them to the hardware.
-* Improved some test functions into their "final" versions
-* Removed actor second buffers, not needed, they now write directly to
-the main buffer.
-* Improved some Color functions.
-
-
-
-2018-06-26T18:08:52-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-Added a new animation (work in progress)
-Added read of profiles
-Added profiles dump
-finished other elements.
-
-
-2018-06-25T02:06:03-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-* Configuration parsing finished for
-	configuration
-	devices
-	elements
-	layouts
-	colors
-	animations
-* Initial work on Animations
-* Added dump functionality.
-
-
-
-2018-06-24T19:02:31-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-still planning
-
-
-2018-06-20T21:44:32-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-
-
-
-2018-06-20T21:32:26-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-* Added readme info
-* added some libraries to configure.ac
-* Initial work on XML
-
-
-
-2018-06-08T08:43:31-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-
-
-
-2018-06-07T01:42:36-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-added some text files and build settings
-
-
-2018-06-06T23:54:57-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-added more files
-
-
-2018-06-06T22:51:47-04:00 Patricio Rossi <meduzapat@netscape.net>
-
-Repo creation with some files.
+ -- Patricio Rossi <meduzapat@netscape.net>  13 Apr 2019 20:38:36 -0400
 
