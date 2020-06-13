@@ -61,9 +61,9 @@ void Reader::deactivate() {
 }
 
 void Reader::drawConfig() {
-	cout << "Listening events: ";
+	cout << "Listening events: " << endl;
 	for (auto&le : listenEvents)
-		cout << le.first << " ";
+		cout << "  " << le.first << endl;
 	cout << endl;
 	Input::drawConfig();
 }

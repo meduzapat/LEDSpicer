@@ -39,6 +39,8 @@ using std::vector;
 
 #define PERCENT(x , y) (x * 100 / y)
 
+#define SEPARATOR "------------------------------"
+
 namespace LEDSpicer {
 
 class Utility {

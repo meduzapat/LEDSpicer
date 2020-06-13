@@ -24,6 +24,11 @@
 
 using namespace LEDSpicer::Inputs;
 
+void Mame::drawConfig() {
+	cout << SEPARATOR << endl << "Type: Mame" << endl;
+	Input::drawConfig();
+}
+
 void Mame::process() {
 
 	if (not active)

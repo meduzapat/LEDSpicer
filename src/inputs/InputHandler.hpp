@@ -45,19 +45,36 @@ public:
 	 * @see Handler::Handler()
 	 * @param parameters list of parameters to for the plugin.
 	 */
-	InputHandler(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+	InputHandler(const string& inputName);
 
 	virtual ~InputHandler();
 
-	Input* getInstance();
+	/**
+	 * Creates a new input.
+	 * @param parameters
+	 * @param maps
+	 * @return the newly created input plugin.
+	 */
+	Input* createInput(const string& name, umap<string, string>& parameters, umap<string, Items*>& maps);
 
 protected:
 
 	/// Keep copy of input plugin instance.
-	Input* instance = nullptr;
+	umap<string, Input*> instances;
 
-	/// Profile specific map. trigger -> Item.
-	umap<string, Items*> inputMaps;
+	/**
+	 * Pointer to the plugin's creation function.
+	 * @param plugin parameters.
+	 * @return a new created plugin.
+	 */
+	Input*(*createFunction)(umap<string, string>&, umap<string, Items*>&) = nullptr;
+
+	/**
+	 * Pointer to the plugin's destruction function.
+	 * @param pointer to the plugin to destroy.
+	 */
+	void(*destroyFunction)(Input*) = nullptr;
+
 };
 
 } /* namespace Inputs */

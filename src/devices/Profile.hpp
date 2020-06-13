@@ -130,10 +130,9 @@ public:
 
 	/**
 	 * Adds an input plugin to this profile.
-	 * @param name
 	 * @param input
 	 */
-	void addInput(string name, Input* input);
+	void addInput(Input* input);
 
 protected:
 
@@ -164,7 +163,7 @@ protected:
 	vector<Group::Item> alwaysOnGroups;
 
 	/// Input plugins
-	umap<string, Input*> inputs;
+	vector<Input*> inputs;
 
 private:
 

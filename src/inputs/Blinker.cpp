@@ -47,12 +47,10 @@ void Blinker::process() {
 		if (itemsMap.count(codeName)) {
 			LogDebug("key: " + codeName + " adds: " + to_string(times) + " times to element: " + itemsMap[codeName]->getName());
 			// switch
-			if (blinkingItems.count(event.code)) {
+			if (blinkingItems.count(event.code))
 				blinkingItems[event.code].times = 0;
-			}
-			else {
+			else
 				blinkingItems.emplace(event.code, Times{itemsMap[codeName], 0});
-			}
 		}
 	}
 }
@@ -68,8 +66,9 @@ void Blinker::deactivate() {
 }
 
 void Blinker::drawConfig() {
+	cout << SEPARATOR << endl << "Type: Blinker" << endl;
 	Reader::drawConfig();
-	cout << endl << "Stop After " << times << " times" << endl;
+	cout << "Stop After " << to_string(times) << " times" << endl;
 	Speed::drawConfig();
 }
 

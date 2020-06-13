@@ -378,11 +378,10 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 	umap<string, string> elementAttr = processNode(inputFile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, file);
 	string inputName = elementAttr[PARAM_NAME];
-	if (not inputHandlers.count(inputName)) {
-		umap<string, Items*> inputMapTmp = processInputMap(inputFile.getRoot());
-		inputHandlers.emplace(inputName, new InputHandler(elementAttr, inputMapTmp));
-	}
-	profile->addInput(inputName, inputHandlers[inputName]->getInstance());
+	if (not inputHandlers.count(inputName))
+		inputHandlers.emplace(inputName, new InputHandler(inputName));
+	umap<string, Items*> inputMapTmp = processInputMap(inputFile.getRoot());
+	profile->addInput(inputHandlers[inputName]->createInput(file, elementAttr, inputMapTmp));
 }
 
 umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode) {

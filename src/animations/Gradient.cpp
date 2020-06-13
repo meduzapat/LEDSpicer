@@ -97,7 +97,7 @@ void Gradient::drawConfig() {
 	StepActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << endl;
+	cout << SEPARATOR << endl;
 }
 
 Gradient::Modes Gradient::str2mode(const string& mode) {
