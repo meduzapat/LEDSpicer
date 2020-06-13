@@ -1,13 +1,17 @@
-ledspicer (0.4.5) focal; urgency=medium
+ledspicer (0.4.5) unstable; urgency=medium
 
   * Changes packaging settings
   * Build process.
   * Removed confused configuration steps.
   * Simplified examples and docs.
+  * Improved dump output.
+  * Changed the way the input plugin works.
+  * Input plugins now accept the same plugin multiple times.
+  * Updated readme
 
- -- Patricio Rossi <meduzapat@netscape.net>  Fri, 14 Jun 2020 20:38:36 -0400
+ -- Patricio Rossi <meduzapat@netscape.net>  Sat, 13 Jun 2020 02:38:36 -0500
 
-ledspicer (0.4.4) focal; urgency=medium
+ledspicer (0.4.4) unstable; urgency=medium
 
   * This release improves overall code and speed, fixes some bugs specially on
     the input mame plugin.
