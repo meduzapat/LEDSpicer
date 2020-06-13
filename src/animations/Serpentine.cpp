@@ -125,5 +125,6 @@ void Serpentine::drawConfig() {
 	cout <<
 		", Length: " << static_cast<int>(tailData.size()) <<
 		", Intensity: " << (tailData.front().percent + tailData.back().percent) <<
-		"%" << endl;
+		"%" << endl
+		<< SEPARATOR << endl;
 }

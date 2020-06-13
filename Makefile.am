@@ -21,9 +21,9 @@ EXTRA_DIST =
 ##################
 
 pkglib_LTLIBRARIES = \
-	libledspicer.la
+	libledspicer1.la
 
-libledspicer_la_SOURCES =             \
+libledspicer1_la_SOURCES =            \
 	src/utility/Log.cpp               \
 	src/utility/Error.cpp             \
 	src/utility/Utility.cpp           \
@@ -48,16 +48,16 @@ libledspicer_la_SOURCES =             \
 	src/Message.cpp                   \
 	src/Messages.cpp
 
-libledspicer_la_LDFLAGS =        \
+libledspicer1_la_LDFLAGS =       \
 	-version-info $(LIB_VERSION) \
 	$(LIBUSB_LIBS)
 
-libledspicer_la_CPPFLAGS = \
-	$(AM_CPPFLAGS)         \
+libledspicer1_la_CPPFLAGS = \
+	$(AM_CPPFLAGS)          \
 	$(LIBUSB_CFLAGS)
 
-pkginclude_HEADERS =      \
-	src/Message.hpp       \
+pkginclude_HEADERS = \
+	src/Message.hpp  \
 	src/Messages.hpp
 
 utilityheaderdir=$(pkgincludedir)/utility
@@ -134,7 +134,7 @@ ledspicerd_LDFLAGS =     \
 	$(LIBUSB_LIBS)
 
 ledspicerd_LDADD = \
-	libledspicer.la
+	libledspicer1.la
 
 ###########
 # emitter #
@@ -151,7 +151,7 @@ emitter_LDFLAGS = \
 	$(TINYXML2_LIBS)
 
 emitter_LDADD = \
-	libledspicer.la
+	libledspicer1.la
 
 ###############
 # inputseeker #
@@ -183,7 +183,7 @@ Gradient_la_SOURCES = \
 	src/animations/Gradient.cpp
 
 Gradient_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Gradient_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -196,7 +196,7 @@ Pulse_la_SOURCES = \
 	src/animations/Pulse.cpp
 
 Pulse_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Pulse_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -209,7 +209,7 @@ Serpentine_la_SOURCES = \
 	src/animations/Serpentine.cpp
 
 Serpentine_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Serpentine_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -222,7 +222,7 @@ Random_la_SOURCES = \
 	src/animations/Random.cpp
 
 Random_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Random_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -235,7 +235,7 @@ Filler_la_SOURCES = \
 	src/animations/Filler.cpp
 
 Filler_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Filler_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -252,7 +252,7 @@ PulseAudio_la_SOURCES = \
 	src/animations/PulseAudio.cpp
 
 PulseAudio_la_LIBADD = \
-	libledspicer.la    \
+	libledspicer1.la   \
 	$(LIBPULSE_LIBS)
 
 PulseAudio_la_CPPFLAGS = \
@@ -275,7 +275,7 @@ FileReader_la_SOURCES = \
 	src/animations/FileReader.cpp
 
 FileReader_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 FileReader_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -303,7 +303,7 @@ UltimarcNanoLed_la_SOURCES =                \
 	src/devices/Ultimarc/NanoLed.cpp
 
 UltimarcNanoLed_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 UltimarcNanoLed_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -327,7 +327,7 @@ UltimarcPacDrive_la_SOURCES = \
 	src/devices/Ultimarc/PacDrive.cpp
 
 UltimarcPacDrive_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 UltimarcPacDrive_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -352,7 +352,7 @@ UltimarcPacLed64_la_SOURCES =               \
 	src/devices/Ultimarc/PacLed64.cpp
 
 UltimarcPacLed64_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 UltimarcPacLed64_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -376,7 +376,7 @@ UltimarcUltimate_la_SOURCES = \
 	src/devices/Ultimarc/Ultimate.cpp
 
 UltimarcUltimate_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 UltimarcUltimate_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -400,7 +400,7 @@ LedWiz32_la_SOURCES = \
 	src/devices/GroovyGameGear/LedWiz32.cpp
 
 LedWiz32_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 LedWiz32_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -424,7 +424,7 @@ Howler_la_SOURCES = \
 	src/devices/WolfWareTech/Howler.cpp
 
 Howler_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Howler_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -448,7 +448,7 @@ RaspberryPi_la_SOURCES = \
 	src/devices/RaspberryPiGPIO/RaspberryPi.cpp
 
 RaspberryPi_la_LIBADD = \
-	libledspicer.la     \
+	libledspicer1.la    \
 	$(RASPBERRYPI_LIBS)
 
 RaspberryPi_la_LDFLAGS = \
@@ -486,7 +486,7 @@ Mame_la_SOURCES = \
 	src/inputs/Mame.cpp
 
 Mame_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Mame_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -499,7 +499,7 @@ Impulse_la_SOURCES = \
 	src/inputs/Impulse.cpp
 
 Impulse_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Impulse_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -512,7 +512,7 @@ Actions_la_SOURCES = \
 	src/inputs/Actions.cpp
 
 Actions_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Actions_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -525,7 +525,7 @@ Blinker_la_SOURCES = \
 	src/inputs/Blinker.cpp
 
 Blinker_la_LIBADD = \
-	libledspicer.la
+	libledspicer1.la
 
 Blinker_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
@@ -535,65 +535,50 @@ Blinker_la_LDFLAGS = \
 ##############
 
 gamesdatadir=$(pkgdatadir)
-gamesdata_DATA = \
-	data/gameData.xml
+gamesdata_DATA =         \
+	data/gameData.xml    \
+	data/basicColors.xml
 
-if COPY_SAMPLES
+################################
+# Devices, Profiles and Inputs #
+################################
 
-##########
-# config #
-##########
+animations_datadir=$(pkgdatadir)/animations
+animations_data_DATA = \
+	data/animations/readme.txt
 
-ledspicerdconfdir=$(sysconfdir)
-ledspicerdconf_DATA = \
-	data/ledspicer.conf
+profiles_datadir=$(pkgdatadir)/profiles
+profiles_data_DATA = \
+	data/profiles/readme.txt
+	
+inputs_datadir=$(pkgdatadir)/inputs
+inputs_data_DATA = \
+	data/inputs/readme.txt
 
-###########
-# samples #
-###########
+#############################
+# documentation and samples #
+#############################
 
-sampledir=$(pkgdatadir)
-sample_DATA =            \
-	data/basicColors.xml \
-	data/webColors.xml
+dist_doc_DATA = \
+	README      \
+	COPYING
 
-sample_animationsdir=$(pkgdatadir)/animations
-sample_animations_DATA =        \
-	data/animations/example.xml \
-	data/animations/skeleton.xml
-
-sample_profilesdir=$(pkgdatadir)/profiles
-sample_profiles_DATA =        \
-	data/profiles/default.xml \
-	data/profiles/skeleton.xml
-
-endif
-
-###########
-# systemd #
-###########
-
-AM_DISTCHECK_CONFIGURE_FLAGS = \
-	--with-systemdsystemunitdir='$$(prefix)/$(systemdsystemunitdir)'
-
-systemdsystemunit_DATA = \
-	data/ledspicerd.service
-
-#################
-# documentation #
-#################
-
-dist_doc_DATA =             \
-	README                  \
-	COPYING                 \
-	data/21-ledspicer.rules
+examplesdir=$(docdir)/examples
+examples_DATA =             \
+	data/21-ledspicer.rules \
+	data/ledspicerd.service \
+	data/ledspicer.conf     \
+	data/webColors.xml      \
+	data/singleColor.xml    \
+	data/animations/animation-skeleton.xml \
+	data/profiles/profile-skeleton.xml     \
+	data/inputs/input-skeleton.xml
 
 ######################
 # extra distribution #
 ######################
 
-DISTCLEANFILES =              \
-	$(systemdsystemunit_DATA) \
+DISTCLEANFILES = \
 	$(ledspicer_pc_DATA)
 
 EXTRA_DIST +=                       \
@@ -631,15 +616,20 @@ EXTRA_DIST +=                       \
 	src/Main.hpp         \
 	src/Emitter.hpp      \
 	src/InputSeeker.hpp  \
-	data/ledspicer.conf          \
-	data/singleColor.xml         \
-	data/basicColors.xml         \
-	data/webColors.xml           \
-	data/gameData.xml            \
-	data/animations/example.xml  \
-	data/animations/skeleton.xml \
-	data/profiles/default.xml    \
-	data/profiles/skeleton.xml   \
+	data/ledspicer.conf        \
+	data/singleColor.xml       \
+	data/basicColors.xml       \
+	data/webColors.xml         \
+	data/gameData.xml          \
+	data/animations/readme.txt \
+	data/profiles/readme.txt   \
+	data/inputs/readme.txt     \
+	data/21-ledspicer.rules    \
+	data/ledspicerd.service    \
+	data/animations/animation-skeleton.xml \
+	data/profiles/profile-skeleton.xml     \
+	data/inputs/input-skeleton.xml         \
 	AUTHORS                      \
 	ChangeLog                    \
 	NEWS
+

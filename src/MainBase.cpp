@@ -187,10 +187,11 @@ void MainBase::dumpConfiguration() {
 		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
 	}
+	cout << endl;
 }
 
 void MainBase::dumpProfile() {
-	cout << endl << "Default Profile:" << endl;
+	cout << endl << "Default Profile:" << DataLoader::defaultProfile->getName() << endl;
 	DataLoader::defaultProfile->drawConfig();
 	cout << endl;
 }

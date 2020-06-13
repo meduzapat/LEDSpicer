@@ -200,6 +200,7 @@ void Filler::drawConfig() {
 	DirectionActor::drawConfig();
 	cout << "Color: ";
 	this->drawColor();
+	cout << SEPARATOR << endl;
 }
 
 string Filler::mode2str(Modes mode) {

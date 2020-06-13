@@ -44,6 +44,8 @@ public:
 
 	virtual ~Mame() = default;
 
+	virtual void drawConfig();
+
 	virtual void process();
 
 	virtual void activate();

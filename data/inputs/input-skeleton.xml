@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Input"
+	name=""
+	speed=""
+>
+	<map
+		type="Element"
+		target=""
+		trigger=""
+		color=""
+		filter="Normal"
+	/>
+	<map
+		type="Group"
+		target=""
+		trigger=""
+		color=""
+		filter="Normal"
+	/>
+    <map
+        type="Element"
+        target=""
+        trigger=""
+        color=""
+        filter="Normal"
+    />
+</LEDSpicer>

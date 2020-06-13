@@ -18,8 +18,10 @@ Includes some utilities to make an arcade cabinet more attractive and cool!
 
 ## Getting Started
 
-In the [project wiki](https://sourceforge.net/p/ledspicer/wiki/Home/) you will find 
-all the information you need to get the program running on your Arcade box or PC.
+You can get the program installed using the [PPA](https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer) (I'm working on getting LEDSpicer into the repositories).
+
+Or In the [project wiki](https://sourceforge.net/p/ledspicer/wiki/Home/) you will find 
+all the information you need to compile and install the program yourself.
 
 [![Download LEDSpicer](https://sourceforge.net/sflogo.php?type=11&group_id=2963748)](https://sourceforge.net/p/ledspicer/)
 
@@ -35,6 +37,9 @@ all the information you need to get the program running on your Arcade box or PC
 
 [![Arcade Demo](http://img.youtube.com/vi/DbuePBl1W0Y/0.jpg)](https://youtu.be/DbuePBl1W0Y)
 [![Arcade Demo](http://img.youtube.com/vi/l4lzksatgVA/0.jpg)](https://youtu.be/l4lzksatgVA)
+
+for more videos visit the YT channel.
+
 ## License
 
 Copyright (C) 2018 - 2020 Patricio A. Rossi

@@ -134,7 +134,7 @@ void PulseAudio::drawConfig() {
 		", High: "      << userPref.c75.getName() << endl;
 	Actor::drawConfig();
 	Direction::drawConfig();
-	cout << endl;
+	cout << SEPARATOR << endl;
 }
 
 PulseAudio::Modes PulseAudio::str2mode(const string& mode) {

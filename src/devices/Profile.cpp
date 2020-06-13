@@ -35,7 +35,7 @@ void Profile::drawConfig() {
 		start->drawConfig();
 	}
 	if (end) {
-		cout << endl << endl << "* Ending transition:" << endl;
+		cout << endl << "* Ending transition:" << endl;
 		end->drawConfig();
 	}
 
@@ -67,18 +67,17 @@ void Profile::drawConfig() {
 	}
 
 	if (inputs.size()) {
-		cout << endl << endl << "* Input plugins:" << endl;
-		for (auto i : inputs) {
-			cout << "Plugin " << i.first << endl;
-			i.second->drawConfig();
-		}
+		cout << endl << "* Input plugins:" << endl;
+		for (Input* i : inputs)
+			i->drawConfig();
 	}
+	cout << SEPARATOR << endl;
 }
 
 void Profile::runFrame() {
 
-	for (auto i : inputs)
-		i.second->process();
+	for (Input* i : inputs)
+		i->process();
 
 	if (actual) {
 		if (actual->isRunning()) {
@@ -115,8 +114,8 @@ void Profile::restart() {
 }
 
 void Profile::terminate() {
-	for (auto i : inputs)
-		i.second->deactivate();
+	for (Input* i : inputs)
+		i->deactivate();
 
 	if (end) {
 		actual = end;
@@ -126,8 +125,8 @@ void Profile::terminate() {
 }
 
 void Profile::restartActors() {
-	for (auto i : inputs)
-		i.second->activate();
+	for (Input* i : inputs)
+		i->activate();
 	for (auto actor : animations)
 		actor->restart();
 }
@@ -176,8 +175,6 @@ void Profile::addAlwaysOnGroup(Group* group, const string& color) {
 	alwaysOnGroups.emplace_back(group, &Color::getColor(color), Color::Filters::Normal);
 }
 
-void Profile::addInput(string name, Input* input) {
-	if (inputs.count(name))
-		throw Error(name + " already exist, only one input plugin of this type can be assigned");
-	inputs.emplace(name, input);
+void Profile::addInput(Input* input) {
+	inputs.push_back(input);
 }

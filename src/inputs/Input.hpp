@@ -45,7 +45,7 @@ public:
 	Input(
 		umap<string, string>& parameters,
 		umap<string, Items*>& inputMaps
-	) : itemsMap(inputMaps) {}
+	) : itemsMap(std::move(inputMaps)) {}
 
 	virtual ~Input();
 
@@ -84,7 +84,7 @@ protected:
 	static umap<string, Items*>* controlledItems;
 
 	/// Input specific map. trigger -> Item.
-	umap<string, Items*>& itemsMap;
+	umap<string, Items*> itemsMap;
 
 	/**
 	 * @param name

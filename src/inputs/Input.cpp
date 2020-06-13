@@ -41,7 +41,7 @@ void Input::drawConfig() {
 	if (!itemsMap.size())
 		return;
 
-	cout << "Element and Groups mappings:" << endl;
+	cout << "Elements and Groups mapping:" << endl;
 	for (auto& e : itemsMap)
 		cout <<
 			"Target: "  << e.second->getName() << endl <<

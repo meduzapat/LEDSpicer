@@ -39,6 +39,8 @@ public:
 
 	virtual ~Impulse() = default;
 
+	virtual void drawConfig();
+
 	virtual void process();
 };
 

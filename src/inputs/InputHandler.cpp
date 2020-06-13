@@ -24,31 +24,30 @@
 
 using namespace LEDSpicer::Inputs;
 
-InputHandler::InputHandler(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
-	Handler(INPUTS_DIR + parameters["name"] + ".so")
+InputHandler::InputHandler(const string& inputName) :
+	Handler(INPUTS_DIR + inputName + ".so"),
+	createFunction(reinterpret_cast<Input*(*)(umap<string, string>&, umap<string, Items*>&)>(dlsym(handler, "createInput"))),
+	destroyFunction(reinterpret_cast<void(*)(Input*)>(dlsym(handler, "destroyInput")))
 {
-
-	if (instance)
-		return;
-
-	this->inputMaps.insert(inputMaps.begin(), inputMaps.end());
-
-	Input*(*createFunction)(umap<string, string>&, umap<string, Items*>&) = (reinterpret_cast<Input*(*)(umap<string, string>&, umap<string, Items*>&)>(dlsym(handler, "createInput")));
-
 	if (char *errstr = dlerror())
-		throw Error("Failed to load input " + parameters["name"] + " " + errstr);
-
-	instance = createFunction(parameters, this->inputMaps);
+		throw Error("Failed to load input " + inputName + " " + errstr);
 }
 
 InputHandler::~InputHandler() {
-	void(*destroyFunction)(Input*) = reinterpret_cast<void(*)(Input*)>(dlsym(handler, "destroyInput"));
-	destroyFunction(instance);
+	for (auto& i : instances) {
 #ifdef DEVELOP
-	LogDebug("Input instance deleted");
+		LogDebug("Input instance " + i.first + " deleted");
 #endif
+		destroyFunction(i.second);
+	}
 }
 
-Input* InputHandler::getInstance() {
+Input* InputHandler::createInput(const string& name, umap<string, string>& parameters, umap<string, Items*>& maps) {
+
+	if (instances.count(name))
+		return instances[name];
+
+	Input* instance = createFunction(parameters, maps);
+	instances.emplace(name, instance);
 	return instance;
 }

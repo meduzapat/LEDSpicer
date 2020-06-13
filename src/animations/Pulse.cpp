@@ -41,7 +41,7 @@ void Pulse::drawConfig() {
 	DirectionActor::drawConfig();
 	cout << "Color: ";
 	this->drawColor();
-	cout << endl;
+	cout << endl << SEPARATOR << endl;
 }
 
 string Pulse::mode2str(Modes mode) {
