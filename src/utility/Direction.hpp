@@ -55,6 +55,8 @@ public:
 
 	static Directions str2direction(const string& direction);
 
+	static Directions getOppositeDirection(const Directions direction);
+
 	void drawConfig();
 
 protected:

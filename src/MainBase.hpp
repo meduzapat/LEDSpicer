@@ -105,7 +105,6 @@ protected:
 	 */
 	Profile* tryProfiles(const vector<string>& data);
 
-
 };
 
 } /* namespace LEDSpicer */

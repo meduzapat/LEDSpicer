@@ -84,6 +84,11 @@ public:
 	virtual bool isDirectionBackward() const;
 
 	/**
+	 * @return Returns the opposite direction for current direction.
+	 */
+	virtual Directions getOppositeDirection() const;
+
+	/**
 	 * @see Actor::restart()
 	 */
 	virtual void restart();

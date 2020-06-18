@@ -71,6 +71,6 @@ void Random::drawConfig() {
 	FrameActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << SEPARATOR << endl;
+	cout << endl << SEPARATOR << endl;
 }
 

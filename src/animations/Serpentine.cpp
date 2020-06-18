@@ -50,7 +50,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 		throw Error("Invalid tailIntensity, enter a number 0-100");
 
 	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
-	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
+	Directions tailDirection = getOppositeDirection();
 	uint8_t firstTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
 	for (uint8_t c = 0; c < tailData.size(); c++) {
 		tailData[c].percent  = tailweight * (tailData.size() - c);
@@ -68,14 +68,14 @@ void Serpentine::calculateElements() {
 #endif
 
 	if (not tailData.size()) {
-		changeFrameElement(*this, true);
+		changeFrameElement(*this, true, direction);
 #ifdef DEVELOP
 	cout << endl;
 #endif
 		return;
 	}
 
-	changeFrameElement(tailColor, *this);
+	changeFrameElement(tailColor, *this, direction);
 	calculateTailPosition();
 	for (auto& data : tailData) {
 		switch (filter) {
@@ -100,7 +100,7 @@ void Serpentine::calculateElements() {
 }
 
 void Serpentine::calculateTailPosition() {
-	Directions tailDirection = cDirection == Directions::Forward ? Directions::Backward : Directions::Forward;
+	Directions tailDirection = getOppositeDirection();
 	uint8_t lastTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
 	// Avoid changing the tail when doing the same frame.
 	if (tailData[0].position == lastTail)
@@ -117,7 +117,7 @@ void Serpentine::drawConfig() {
 	drawColor();
 	cout << endl << "Tail: ";
 	if (not tailData.size()) {
-		cout << "No Tail" << endl;
+		cout << "No Tail" << endl << SEPARATOR << endl;
 		return;
 	}
 	cout << " Color: ";

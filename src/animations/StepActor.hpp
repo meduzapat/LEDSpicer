@@ -82,18 +82,35 @@ protected:
 	virtual void advanceFrame();
 
 	/**
+	 * Fades the element at index.
+	 * @param index
+	 * @param color
+	 * @param direction
+	 */
+	void changeFrameElement(uint8_t index, const Color& color, Directions direction);
+
+	/**
+	 * Fades the current element.
+	 * @param color
+	 * @param direction
+	 */
+	void changeFrameElement(const Color& color, Directions direction);
+
+	/**
 	 * Changes the current element and fade the next one based on time.
 	 * @param color
 	 * @param fade
+	 * @param direction
 	 */
-	void changeFrameElement(const Color& color, bool fade = false);
+	void changeFrameElement(const Color& color, bool fade, Directions direction);
 
 	/**
 	 * Changes the current element with a transition between color and colorNext.
 	 * @param color
 	 * @param colorNext
+	 * @param direction
 	 */
-	void changeFrameElement(const Color& color, const Color& colorNext);
+	void changeFrameElement(const Color& color, const Color& colorNext, Directions direction);
 
 };
 

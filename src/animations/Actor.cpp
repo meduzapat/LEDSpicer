@@ -63,6 +63,10 @@ void Actor::drawConfig() {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
+	if (secondsToStart)
+		cout << "Start After: " << secondsToStart << " sec" << endl;
+	if (secondsToEnd)
+		cout << "Stop After: " << secondsToEnd << " sec" << endl;
 }
 
 void Actor::restart() {

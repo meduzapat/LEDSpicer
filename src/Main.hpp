@@ -60,6 +60,11 @@ public:
 	 */
 	static void terminate();
 
+	/**
+	 * terminates the current profile and reset everything.
+	 */
+	void terminateCurrentProfile();
+
 protected:
 
 	static high_resolution_clock::time_point start;

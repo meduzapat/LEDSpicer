@@ -96,6 +96,10 @@ bool DirectionActor::isDirectionBackward() const {
 	return direction == Directions::Backward or direction == Directions::BackwardBouncing;
 }
 
+DirectionActor::Directions DirectionActor::getOppositeDirection() const {
+	return Direction::getOppositeDirection(cDirection);
+}
+
 void DirectionActor::restart() {
 	if (isDirectionForward()) {
 		currentFrame = 0;
