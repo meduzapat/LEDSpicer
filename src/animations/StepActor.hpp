@@ -73,6 +73,12 @@ public:
 	 */
 	virtual bool isLastFrame() const;
 
+	/**
+	 * Sets the total step frames.
+	 * @param totalStepFrames
+	 */
+	void setTotalStepFrames(uint8_t totalStepFrames);
+
 protected:
 
 	uint8_t

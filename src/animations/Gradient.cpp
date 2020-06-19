@@ -35,8 +35,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	if (not tones)
 		tones = DEFAULT_TONES;
 
-	totalStepFrames = totalStepFrames / 2;
-	stepPercent = PERCENT(1.0, totalStepFrames);
+	setTotalStepFrames(totalStepFrames / 2);
 
 	extractColors(parameters["colors"]);
 	float
@@ -55,12 +54,10 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		break;
 	}
 
-	Directions colorDir = Directions::Forward;
-
 	uint8_t
 		lastColor = colors.size() - 1,
 		color     = 0,
-		nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
+		nextColor = nextOf(Directions::Forward, color, Directions::Forward, lastColor);
 	for (size_t c = 0; c <= lastColor;) {
 		precalc.push_back(
 			colors[color]->transition(
@@ -71,9 +68,8 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		percent += increment;
 		if (percent > 99) {
 			percent   = 0;
-			colorDir  = Directions::Forward;
 			color     = nextColor;
-			nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
+			nextColor = nextOf(Directions::Forward, color, Directions::Forward, lastColor);
 			++c;
 		}
 	}
@@ -133,8 +129,7 @@ string Gradient::mode2str(Modes mode) {
 
 void Gradient::calculateSingle() {
 	if (speed != Speeds::VeryFast) {
-		Directions dir = getOppositeDirection();
-		uint8_t t      = calculateNextOf(dir, currentFrame, cDirection, totalFrames);
+		uint8_t t = nextOf(getOppositeDirection(), currentFrame, cDirection, totalFrames);
 		changeElementsColor(precalc[currentFrame].transition(precalc[t], stepPercent * currentStepFrame), filter);
 	}
 	else {
@@ -145,13 +140,12 @@ void Gradient::calculateSingle() {
 void Gradient::calculateMultiple() {
 
 	uint8_t
-		frameT     = currentFrame,
-		preframeT  = 0;
+		frameT    = currentFrame,
+		preframeT = 0;
 
 	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
 		if (speed != Speeds::VeryFast) {
-			Directions dir = getOppositeDirection();
-			preframeT      = calculateNextOf(dir, frameT, cDirection, precalc.size() - 1);
+			preframeT = nextOf(getOppositeDirection(), frameT, cDirection, precalc.size() - 1);
 			changeElementColor(c, precalc[frameT].transition(precalc[preframeT], stepPercent * currentStepFrame), filter);
 		}
 		else {

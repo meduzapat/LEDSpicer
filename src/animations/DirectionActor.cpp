@@ -114,47 +114,51 @@ void DirectionActor::restart() {
 
 uint8_t DirectionActor::calculateNextOf(
 	Directions& currentDirection,
-	uint8_t frame,
+	uint8_t index,
 	Directions direction,
-	uint8_t totalElements)
+	uint8_t amount)
 {
 
 	switch (direction) {
 	case Directions::Forward:
-		if (frame == totalElements)
-			frame = 0;
+		if (index == amount)
+			index = 0;
 		else
-			++frame;
+			++index;
 		break;
 	case Directions::ForwardBouncing:
 	case Directions::BackwardBouncing:
 		if (currentDirection == Directions::Forward) {
 			// change of direction.
-			if (frame == totalElements) {
+			if (index == amount) {
 				currentDirection = Directions::Backward;
-				--frame;
+				--index;
 				break;
 			}
-			++frame;
+			++index;
 			break;
 		}
 		// change of direction.
-		if (frame == 0) {
+		if (index == 0) {
 			currentDirection = Directions::Forward;
-			++frame;
+			++index;
 			break;
 		}
-		--frame;
+		--index;
 		break;
 	case Directions::Backward:
-		if (frame == 0)
-			frame = totalElements;
+		if (index == 0)
+			index = amount;
 		else
-			--frame;
+			--index;
 		break;
 	}
 
-	return frame;
+	return index;
+}
+
+uint8_t DirectionActor::nextOf(Directions currentDirection, uint8_t index, Directions direction, uint8_t amount) {
+	return calculateNextOf(currentDirection, index, direction, amount);
 }
 
 void DirectionActor::advanceFrame() {

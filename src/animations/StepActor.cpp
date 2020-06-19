@@ -31,26 +31,24 @@ StepActor::StepActor(
 	DirectionActor(parameters, group, requiredParameters)
 {
 	totalFrames = group->size() - 1;
-	// default frames calculation.
+	// Default frames calculation.
 	switch (speed) {
 	case Speeds::VeryFast:
-		totalStepFrames = 0;
+		setTotalStepFrames(0);
 		break;
 	case Speeds::Fast:
-		totalStepFrames = FPS * 0.2;
+		setTotalStepFrames(FPS * 0.2);
 		break;
 	case Speeds::Normal:
-		totalStepFrames = FPS * 0.4;
+		setTotalStepFrames(FPS * 0.4);
 		break;
 	case Speeds::Slow:
-		totalStepFrames = FPS * 0.6;
+		setTotalStepFrames(FPS * 0.6);
 		break;
 	case Speeds::VerySlow:
-		totalStepFrames = FPS * 0.8;
+		setTotalStepFrames(FPS * 0.8);
 		break;
 	}
-
-	stepPercent = PERCENT(1.0, totalStepFrames);
 }
 
 void StepActor::drawConfig() {
@@ -111,9 +109,8 @@ void StepActor::changeFrameElement(const Color& color, Directions direction) {
 
 void StepActor::changeFrameElement(const Color& color, bool fade, Directions direction) {
 
-	float percent  = stepPercent * currentStepFrame;
-	Directions dir = cDirection;
-	uint8_t next   = calculateNextOf(dir, currentFrame, direction, totalFrames);
+	float percent = stepPercent * currentStepFrame;
+	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
 
 #ifdef DEVELOP
 	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
@@ -129,9 +126,8 @@ void StepActor::changeFrameElement(const Color& color, bool fade, Directions dir
 
 void StepActor::changeFrameElement(const Color& color, const Color& colorNext, Directions direction) {
 
-	float percent  = stepPercent * currentStepFrame;
-	Directions dir = cDirection;
-	uint8_t next   = calculateNextOf(dir, currentFrame, direction, totalFrames);
+	float percent = stepPercent * currentStepFrame;
+	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
 
 #ifdef DEVELOP
 	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
@@ -139,4 +135,9 @@ void StepActor::changeFrameElement(const Color& color, const Color& colorNext, D
 
 	changeElementColor(currentFrame, colorNext.transition(color, percent), filter);
 	changeElementColor(next, colorNext.fade(percent), filter);
+}
+
+void StepActor::setTotalStepFrames(uint8_t totalStepFrames) {
+	this->totalStepFrames = totalStepFrames;
+	stepPercent = totalStepFrames ? PERCENT(1.0, totalStepFrames) : 0;
 }

@@ -94,14 +94,23 @@ public:
 	virtual void restart();
 
 	/**
-	 * Will calculate the next element index for a group of element, based on the direction and the current position.
+	 * Will calculate the next index for a group of items, based on the direction and the current position.
 	 * @param [out] currentDirection will be updated with the new direction.
-	 * @param element the element index from 1.
+	 * @param index the element index from 1.
 	 * @param direction
-	 * @param totalElements
+	 * @param amount
 	 * @return the next element.
 	 */
-	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t element, Directions direction, uint8_t totalElements);
+	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t index, Directions direction, uint8_t amount);
+
+	/**
+	 * @param currentDirection
+	 * @param element
+	 * @param direction
+	 * @param totalElements
+	 * @return the next element based on direction and item's position.
+	 */
+	static uint8_t nextOf(Directions currentDirection, uint8_t index, Directions direction, uint8_t amount);
 
 protected:
 
