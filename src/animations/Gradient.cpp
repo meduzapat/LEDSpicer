@@ -36,6 +36,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		tones = DEFAULT_TONES;
 
 	totalStepFrames = totalStepFrames / 2;
+	stepPercent = PERCENT(1.0, totalStepFrames);
 
 	extractColors(parameters["colors"]);
 	float

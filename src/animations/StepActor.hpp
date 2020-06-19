@@ -79,6 +79,7 @@ protected:
 		totalStepFrames  = 0,
 		currentStepFrame = 0;
 
+	/// Keeps the pre-calculated 1%.
 	float stepPercent = 0;
 
 	virtual void advanceFrame();
