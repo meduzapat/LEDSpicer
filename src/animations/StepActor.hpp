@@ -79,6 +79,8 @@ protected:
 		totalStepFrames  = 0,
 		currentStepFrame = 0;
 
+	float stepPercent = 0;
+
 	virtual void advanceFrame();
 
 	/**

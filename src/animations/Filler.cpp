@@ -112,7 +112,8 @@ void Filler::fillElementsLinear(const Data& values) {
 			cout << static_cast<int>(c) << " ";
 #endif
 		}
-	changeFrameElement(*this, values.dir);
+	if (speed != Speeds::VeryFast)
+		changeFrameElement(*this, values.dir);
 }
 
 void Filler::fillElementsRandom() {
@@ -124,7 +125,10 @@ void Filler::fillElementsRandom() {
 			cout << static_cast<int>(e) << " ";
 #endif
 		}
-	changeFrameElement(currentRandom, *this, filling ? Directions::Forward : Directions::Backward);
+	if (speed == Speeds::VeryFast)
+		changeElementColor(currentRandom, *this, filter);
+	else
+		changeFrameElement(currentRandom, *this, filling ? Directions::Forward : Directions::Backward);
 
 	if (currentStepFrame == totalStepFrames) {
 		previousFrameAffectedElements[currentRandom] = filling;

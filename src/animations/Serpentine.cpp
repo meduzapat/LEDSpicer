@@ -64,18 +64,24 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Serpentine current frame: " << static_cast<int>(currentFrame + 1) << " ";
+	cout << "Serpentine: " << (cDirection == Directions::Forward ? "→ " : "← Pos: ") << static_cast<int>(currentFrame + 1) << " ";
 #endif
 
 	if (not tailData.size()) {
-		changeFrameElement(*this, true, direction);
+		if (speed == Speeds::VeryFast)
+			changeElementColor(currentFrame, *this, filter);
+		else
+			changeFrameElement(*this, true, direction);
 #ifdef DEVELOP
 	cout << endl;
 #endif
 		return;
 	}
 
-	changeFrameElement(tailColor, *this, direction);
+	if (speed == Speeds::VeryFast)
+		changeElementColor(currentFrame, *this, filter);
+	else
+		changeFrameElement(tailColor, *this, direction);
 	calculateTailPosition();
 	for (auto& data : tailData) {
 		switch (filter) {

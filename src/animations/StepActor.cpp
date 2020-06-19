@@ -28,10 +28,29 @@ StepActor::StepActor(
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	DirectionActor(parameters, group, requiredParameters),
-	totalStepFrames((static_cast<uint8_t>(speed) + 1) * 3)
+	DirectionActor(parameters, group, requiredParameters)
 {
 	totalFrames = group->size() - 1;
+	// default frames calculation.
+	switch (speed) {
+	case Speeds::VeryFast:
+		totalStepFrames = 0;
+		break;
+	case Speeds::Fast:
+		totalStepFrames = FPS * 0.2;
+		break;
+	case Speeds::Normal:
+		totalStepFrames = FPS * 0.4;
+		break;
+	case Speeds::Slow:
+		totalStepFrames = FPS * 0.6;
+		break;
+	case Speeds::VerySlow:
+		totalStepFrames = FPS * 0.8;
+		break;
+	}
+
+	stepPercent = PERCENT(1.0, totalStepFrames);
 }
 
 void StepActor::drawConfig() {
@@ -74,7 +93,7 @@ bool StepActor::isLastFrame() const {
 
 void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions direction) {
 
-	float percent = PERCENT(static_cast<float>(currentStepFrame * currentStepFrame) / totalStepFrames, totalStepFrames);
+	float percent = stepPercent * currentStepFrame;
 
 	if (direction == Directions::Backward)
 		percent = 100 - percent;
@@ -92,7 +111,7 @@ void StepActor::changeFrameElement(const Color& color, Directions direction) {
 
 void StepActor::changeFrameElement(const Color& color, bool fade, Directions direction) {
 
-	float percent  = PERCENT(static_cast<float>(currentStepFrame * currentStepFrame) / totalStepFrames, totalStepFrames);
+	float percent  = stepPercent * currentStepFrame;
 	Directions dir = cDirection;
 	uint8_t next   = calculateNextOf(dir, currentFrame, direction, totalFrames);
 
@@ -110,7 +129,7 @@ void StepActor::changeFrameElement(const Color& color, bool fade, Directions dir
 
 void StepActor::changeFrameElement(const Color& color, const Color& colorNext, Directions direction) {
 
-	float percent  = PERCENT(static_cast<float>(currentStepFrame * currentStepFrame) / totalStepFrames, totalStepFrames);
+	float percent  = stepPercent * currentStepFrame;
 	Directions dir = cDirection;
 	uint8_t next   = calculateNextOf(dir, currentFrame, direction, totalFrames);
 

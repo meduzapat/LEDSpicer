@@ -32,8 +32,10 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	// Number of tones between two colors.
 	if (parameters.count("tones"))
 		tones = Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number");
+	if (not tones)
+		tones = DEFAULT_TONES;
 
-	totalStepFrames = totalStepFrames / 5;
+	totalStepFrames = totalStepFrames / 2;
 
 	extractColors(parameters["colors"]);
 	float
@@ -44,11 +46,11 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 
 	case Modes::All:
 	case Modes::Sequential:
-		increment = tones ? 100 / tones : 100;
+		increment = 100.0 / tones;
 		break;
 
 	case Modes::Cyclic:
-		increment = 100 / (group->size() / static_cast<float>(colors.size()));
+		increment = 100.0 / (group->size() / static_cast<float>(colors.size()));
 		break;
 	}
 
@@ -58,7 +60,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 		lastColor = colors.size() - 1,
 		color     = 0,
 		nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
-	do {
+	for (size_t c = 0; c <= lastColor;) {
 		precalc.push_back(
 			colors[color]->transition(
 				*colors[nextColor],
@@ -71,14 +73,19 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 			colorDir  = Directions::Forward;
 			color     = nextColor;
 			nextColor = calculateNextOf(colorDir, color, Directions::Forward, lastColor);
+			++c;
 		}
 	}
-	while (precalc.size() != group->size());
 	precalc.shrink_to_fit();
 	totalFrames = precalc.size() - 1;
 }
 
 void Gradient::calculateElements() {
+
+#ifdef DEVELOP
+	cout << "Gradient: " << (cDirection == Directions::Forward ? "→ " : "← F: ") << getCurrentStep() << endl;
+#endif
+
 	switch (mode) {
 	case Modes::All:
 		calculateSingle();
@@ -97,7 +104,7 @@ void Gradient::drawConfig() {
 	StepActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << SEPARATOR << endl;
+	cout << endl << SEPARATOR << endl;
 }
 
 Gradient::Modes Gradient::str2mode(const string& mode) {
@@ -124,21 +131,33 @@ string Gradient::mode2str(Modes mode) {
 }
 
 void Gradient::calculateSingle() {
-	changeElementsColor(precalc[currentFrame], filter);
+	if (speed != Speeds::VeryFast) {
+		Directions dir = getOppositeDirection();
+		uint8_t t      = calculateNextOf(dir, currentFrame, cDirection, totalFrames);
+		changeElementsColor(precalc[currentFrame].transition(precalc[t], stepPercent * currentStepFrame), filter);
+	}
+	else {
+		changeElementsColor(precalc[currentFrame], filter);
+	}
 }
 
 void Gradient::calculateMultiple() {
 
-	uint8_t frameT = currentFrame;
+	uint8_t
+		frameT     = currentFrame,
+		preframeT  = 0;
+
 	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
-		changeElementColor(
-			c,
-			precalc[frameT],
-			filter
-		);
+		if (speed != Speeds::VeryFast) {
+			Directions dir = getOppositeDirection();
+			preframeT      = calculateNextOf(dir, frameT, cDirection, precalc.size() - 1);
+			changeElementColor(c, precalc[frameT].transition(precalc[preframeT], stepPercent * currentStepFrame), filter);
+		}
+		else {
+			changeElementColor(c, precalc[frameT], filter);
+		}
 		frameT++;
 		if (frameT == precalc.size())
 			frameT = 0;
 	}
 }
-
