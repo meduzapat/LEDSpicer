@@ -44,7 +44,7 @@ using std::chrono::milliseconds;
 #define ACTOR_DIR   "animations/"
 #define PROFILE_DIR "profiles/"
 #define INPUT_DIR   "inputs/"
-#define MAXIMUM_FPS 30
+#define MAXIMUM_FPS 60
 
 #define PARAM_FPS             "fps"
 #define PARAM_COLORS          "colors"

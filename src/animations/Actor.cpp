@@ -110,6 +110,7 @@ bool Actor::isRunning() {
 #endif
 	}
 
+	// Time Over: there is an end time that ran out, and not start time, so is not running.
 	if (not startTime and not endTime and secondsToEnd)
 		return false;
 

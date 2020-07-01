@@ -136,8 +136,8 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 			}
 			string
-				load   = msg.getData()[0],
-				name   = msg.getData()[1];
+				load = msg.getData()[0],
+				name = msg.getData()[1];
 			Message msgTemp;
 
 			msgTemp.setType(Message::Types::LoadProfile);

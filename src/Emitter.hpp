@@ -40,7 +40,7 @@ using std::endl;
 #define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
 #define CONTROL "C"
 #define PLAYERS "ps"
-#define TYPE "t"
+#define TYPE    "t"
 #define BUTTONS "b"
 
 /**

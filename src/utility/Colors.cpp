@@ -36,11 +36,8 @@ void Colors::extractColors(string colors) {
 			Utility::trim(c);
 			this->colors.push_back(&Color::getColor(c));
 		}
-		this->colors.shrink_to_fit();
 	}
-
-	if (this->colors.size() < 2)
-		throw Error("You need two or more colors for actor Random to do something.");
+	this->colors.shrink_to_fit();
 
 	if (this->colors.size() > UINT8_MAX)
 		throw Error("Too many colors (" + to_string(this->colors.size()) + "), the maximum is " + to_string(UINT8_MAX) + " .");

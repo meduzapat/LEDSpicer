@@ -84,7 +84,7 @@ void Actions::process() {
 
 		string eventCodeStr = to_string(event.code);
 		if (!itemsMap.count(eventCodeStr))
-			return;
+			continue;
 
 		if (controlledItems->count(eventCodeStr))
 			controlledItems->erase(eventCodeStr);
@@ -99,7 +99,7 @@ void Actions::process() {
 				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " start blinking");
 				blinkingItems.emplace(event.code, itemsMap[eventCodeStr]);
 			}
-			return;
+			continue;
 		}
 
 		// grouped elements.
