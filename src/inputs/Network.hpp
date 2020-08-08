@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      WolfWareTech.hpp
- * @since     Feb 5, 2020
+ * @file      Network.hpp
+ * @since     Jul 24, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,43 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
-#include "Brands.hpp"
+#include "Input.hpp"
+#include "utility/Socks.hpp"
 
-#ifndef WOLFWARETECH_HPP_
-#define WOLFWARETECH_HPP_ 1
+#ifndef INPUTSNETWORK_HPP_
+#define INPUTSNETWORK_HPP_ 1
+
+#define DEFAULT_PORT "16162"
 
 namespace LEDSpicer {
-namespace Devices {
-namespace WolfWareTech {
+namespace Inputs {
 
 /**
- * This is the Base Header for the WolfWare Tech controllers.
- * LEDSpicer::Devices::WolfWareTech::WolfWareTech
+ * LEDSpicer::Inputs::Network
  */
-class WolfWareTech : public DeviceUSB {
+class Network: public Input {
 
 public:
 
-	using DeviceUSB::DeviceUSB;
+	Network(umap<string, string>& parameters, umap<string, Items*>& inputMaps):
+		Input(parameters, inputMaps) {}
 
-	uint16_t getVendor() {
-		return WOLFWARETECH_VENDOR;
-	}
+	virtual ~Network() = default;
+
+	virtual void activate();
+
+	virtual void deactivate();
+
+	virtual void process();
 
 protected:
 
-	virtual void afterConnect() {}
-
-	virtual void afterClaimInterface() {}
+	static Socks sock;
 };
 
-} /* namespace WolfWareTech */
-} /* namespace Devices */
+} /* namespace Inputs */
 } /* namespace LEDSpicer */
 
-#endif /* WOLFWARETECH_HPP_ */
+inputFactory(LEDSpicer::Inputs::Network)
+
+#endif /* INPUTSNETWORK_HPP_ */

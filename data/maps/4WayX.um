@@ -1,0 +1,12 @@
+MapFileFormatVersion=1.0
+
+MapSize=9
+MapRow1=NW,NW,NW,NW,*,NE,NE,NE,NE
+MapRow2=NW,NW,NW,NW,*,NE,NE,NE,NE
+MapRow3=NW,NW,NW,NW,C,NE,NE,NE,NE
+MapRow4=NW,NW,NW,C,C,C,NE,NE,NE
+MapRow5=*,*,C,C,C,C,C,*,*
+MapRow6=SW,SW,SW,C,C,C,SE,SE,SE
+MapRow7=SW,SW,SW,SW,C,SE,SE,SE,SE
+MapRow8=SW,SW,SW,SW,*,SE,SE,SE,SE
+MapRow9=SW,SW,SW,SW,*,SE,SE,SE,SE

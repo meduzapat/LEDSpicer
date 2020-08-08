@@ -29,9 +29,11 @@ int main(int argc, char **argv) {
 	string
 		commandline,
 		configFile = "",
-		rawMessage;
+		port;
 
 	Message msg;
+
+	bool craftProfile = false;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -62,7 +64,7 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::ClearGroup) <<
 				" groupName                        Removes a group's background color.\n" <<
 				Message::type2str(Message::Types::ClearAllGroups) <<
-				"                              Removes all group's background color.\n\n"
+				"                              Removes all group's background color.\n" <<
 				"options:\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
 				"-v or --version              Display version information\n"
@@ -123,37 +125,57 @@ int main(int argc, char **argv) {
 		XMLHelper config(configFile, "Configuration");
 		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
 
-		Utility::checkAttributes({"port"}, configValues, "root");
-
 		// Set log level.
 		if (configValues.count("logLevel"))
 			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
 
+		// Set craft profile mode.
+		if (configValues.count("craftProfile"))
+			craftProfile = configValues["craftProfile"] == "true";
+
+		// Port.
+		if (configValues.count("port"))
+			port = configValues["port"];
+		else
+			throw Error("Missing port attribute");
+
 		// Check request.
+		vector<string> data = msg.getData();
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
-			if (msg.getData().size() < 2) {
+			if (data.size() < 2) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}
-			string
-				load = msg.getData()[0],
-				name = msg.getData()[1];
-			Message msgTemp;
 
-			msgTemp.setType(Message::Types::LoadProfile);
-			msgTemp.addData(string(name).append("/").append(load));
+			msg.reset();
 			// arcades (mame and others)
-			if (name == "arcade") {
-				for (string& p : parseMame(load))
-					if (not p.empty())
-						msgTemp.addData(p);
+			if (data[1] == "arcade") {
+				GameRecord gd;
+				try {
+					gd = parseMame(data[0]);
+				}
+				catch (Error& e) {
+					LogError("Error: " + e.getMessage());
+					return EXIT_FAILURE;
+				}
+				if (craftProfile) {
+					msg.setType(Message::Types::CraftProfile);
+					msg.addData(gd.toString());
+				}
+				else {
+					msg.setType(Message::Types::LoadProfile);
+					msg.addData(string(data[1]).append("/").append(data[0]));
+					msg.addData("P" + gd.players + "_B" + gd.playersData[0].buttons);
+					msg.addData(gd.playersData[0].type + gd.players + "_B" + gd.playersData[0].buttons);
+					msg.addData(data[1]);
+				}
+				// Rotate restrictors.
+				gd.rotate();
 			}
-			msgTemp.addData(name);
-			msg = msgTemp;
 		}
 
 		// Open connection and send message.
-		Socks sock(LOCALHOST, configValues["port"]);
+		Socks sock(LOCALHOST, port);
 		bool r = sock.send(msg.toString());
 		LogDebug("Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
 	}
@@ -165,72 +187,94 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 
-vector<string> parseMame(const string& rom) {
+GameRecord parseMame(const string& rom) {
 
-	vector<string> result(2);
 	string
 		output,
-		cmd = "grep -F '\"" + rom + "\"' " + CONTROLLERS_FILE;
+		cmd = "grep -w '" + rom + "' " + CONTROLLERS_FILE;
 	LogDebug("running: " + cmd);
 
 	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
-	if (not pipe) {
-		LogError("Failed to read games data file");
-		return result;
-	}
+	if (not pipe)
+		throw Error("Failed to read games data file");
 
 	std::array<char, 128> buffer;
 	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
 		output += buffer.data();
 
+	if (not output.size())
+		throw Error("Game " + rom + " not found.");
+
+
 	tinyxml2::XMLDocument xml;
-	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS) {
-		LogError("Invalid games data file" + output);
-		return result;
-	}
+	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
+		throw Error("Invalid games data file" + output);
 
 	LogDebug("Game data: " + output);
-/* Possible types
-<control type="joy" player="2" buttons="1" ways="2|4|8"/>
-<control type="stick" player="1" buttons="4" minimum="0" maximum="255" sensitivity="30" keydelta="30" reverse="yes"/>
-<control type="keypad" player="1" buttons="24"/>
-<control type="paddle" buttons="2" minimum="0" maximum="63" sensitivity="100" keydelta="1"/>
-<control type="pedal" buttons="3" minimum="0" maximum="31" sensitivity="100" keydelta="1"/>
-<control type="dial" buttons="4" minimum="0" maximum="255" sensitivity="25" keydelta="20"/>
-<control type="only_buttons" buttons="7"/>
-<control type="mouse" player="1" minimum="0" maximum="255" sensitivity="100" keydelta="5"/>
-<control type="lightgun" player="1" buttons="1" minimum="0" maximum="255" sensitivity="70" keydelta="10"/>
-<control type="trackball" player="1" buttons="1" minimum="0" maximum="255" sensitivity="100" keydelta="10" reverse="yes"/>
-<control type="doublejoy" buttons="1" ways="8" ways2="8"/>
 
-*/
-	umap<string, string> tempAttr;
-	uint8_t
-		players = 0,
-		buttons = 0;
+	GameRecord tempData;
+
 	tinyxml2::XMLElement* element = xml.RootElement();
-	if (not element) {
-		LogWarning("Missing input node for " + rom);
-		return result;
-	}
-	tempAttr = XMLHelper::processNode(element);
+	if (not element)
+		throw Error("Missing input node for " + rom);
 
-	if (not tempAttr.count(PLAYERS)) {
-		LogWarning("Missing players attribute for " + rom);
-		return result;
-	}
-	result[1] = "P" + tempAttr[PLAYERS] + "_B";
+	umap<string, string> tempAttr = XMLHelper::processNode(element);
+
+	if (not tempAttr.count(PLAYERS))
+		throw Error("Missing players attribute for " + rom);
+
+	tempData.players = tempAttr[PLAYERS];
+
+	if (tempAttr.count(COINS))
+		tempData.coins = tempAttr[COINS];
 
 	element = element->FirstChildElement(CONTROL);
-//	for (; element; element = element->NextSiblingElement("control")) {
-//	}
-	tempAttr = XMLHelper::processNode(element);
-	result[0] = tempAttr[TYPE] + tempAttr[PLAYERS] + "_B";
-	if (tempAttr.count(BUTTONS)) {
-		result[0].append(tempAttr[BUTTONS]);
-		result[1].append(tempAttr[BUTTONS]);
+	if (not element)
+		throw Error("Missing control section " + rom);
+
+	for (; element; element = element->NextSiblingElement()) {
+		tempAttr = XMLHelper::processNode(element);
+		if (not tempAttr.count(TYPE))
+			continue;
+
+		PlayerData pd = processControllerNode(tempAttr);
+
+		if ((tempAttr[TYPE] == "doublejoy" or tempAttr[TYPE] == "triplejoy") and tempAttr.count(WAYS "2"))
+			pd.ways.push_back(tempAttr[WAYS "2"]);
+		if (tempAttr[TYPE] == "triplejoy" and tempAttr.count(WAYS "3"))
+			pd.ways.push_back(tempAttr[WAYS "3"]);
+		tempData.playersData.push_back(pd);
 	}
-	return result;
+	return tempData;
+}
+
+PlayerData processControllerNode(umap<string, string>& tempAttr, string variant) {
+
+	PlayerData p;
+
+	if (tempAttr[TYPE] == "doublejoy" or tempAttr[TYPE] == "triplejoy") {
+		p.type = "joy";
+	}
+	else if (tempAttr[TYPE] == "stick") {
+		p.type = "joy";
+		p.ways.push_back("analog");
+	}
+	else {
+		p.type = tempAttr[TYPE];
+	}
+
+	if (tempAttr.count(WAYS + variant))
+		p.ways.push_back(tempAttr[WAYS + variant]);
+
+	if (tempAttr.count(PLAYER))
+		p.player = tempAttr[PLAYER];
+	else
+		p.player = "1";
+
+	if (tempAttr.count(BUTTONS))
+		p.buttons = tempAttr[BUTTONS];
+
+	return p;
 }
 
 

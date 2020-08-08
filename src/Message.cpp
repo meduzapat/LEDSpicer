@@ -55,6 +55,8 @@ string Message::type2str(Types type) {
 		return "ClearGroup";
 	case Types::ClearAllGroups:
 		return "ClearAllGroups";
+	case Types::CraftProfile:
+		return "CraftProfile";
 	}
 	throw Error("Invalid type");
 }
@@ -80,6 +82,8 @@ Message::Types Message::str2type(const string& type) {
 		return Types::ClearGroup;
 	if (type == "ClearAllGroups")
 		return Types::ClearAllGroups;
+	if (type == "CraftProfile")
+		return Types::CraftProfile;
 	throw Error("Invalid type " + type);
 }
 
@@ -101,4 +105,9 @@ Message::Types Message::getType() const {
 
 void Message::setType(Types type) {
 	this->type = type;
+}
+
+void Message::reset() {
+	type = Types::Invalid;
+	data.clear();
 }

@@ -60,11 +60,17 @@ void StepActor::drawConfig() {
 }
 
 uint16_t StepActor::getTotalSteps() const {
-	return totalStepFrames * totalFrames;
+	if (totalStepFrames)
+		return totalStepFrames * totalFrames;
+	return totalFrames;
 }
 
 uint16_t StepActor::getCurrentStep() const {
-	return (currentFrame * totalStepFrames) - currentStepFrame;
+	if (not totalStepFrames)
+		return currentFrame;
+	if (currentFrame)
+		return (currentFrame * totalStepFrames) - currentStepFrame;
+	return 0;
 }
 
 void StepActor::advanceFrame() {
@@ -82,11 +88,15 @@ void StepActor::restart() {
 }
 
 bool StepActor::isFirstFrame() const {
-	return (not currentStepFrame and DirectionActor::isFirstFrame());
+	if (totalStepFrames)
+		return (not currentStepFrame and DirectionActor::isFirstFrame());
+	return DirectionActor::isFirstFrame();
 }
 
 bool StepActor::isLastFrame() const {
-	return (currentStepFrame == totalStepFrames and DirectionActor::isLastFrame());
+	if (totalStepFrames)
+		return (currentStepFrame == totalStepFrames and DirectionActor::isLastFrame());
+	return DirectionActor::isLastFrame();
 }
 
 void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions direction) {

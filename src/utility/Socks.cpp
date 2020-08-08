@@ -23,9 +23,11 @@
 #include "Socks.hpp"
 
 #define BUFFER_SIZE 1024
-#include <unistd.h>     //for close
+// for close
+#include <unistd.h>
 
-#include <sys/socket.h> // For socket(), connect(), send(), and recv()
+// For socket(), connect(), send(), and recv()
+#include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <cstring>
@@ -55,10 +57,10 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 		* result;
 
 	memset((char *)&hints, 0, sizeof(hints));
-	hints.ai_family   = AF_UNSPEC;  // AF_UNIX
+	hints.ai_family   = AF_UNSPEC; // AF_UNIX
 	hints.ai_socktype = sockType; // SOCK_DGRAM, SOCK_STREAM | SOCK_NONBLOCK;
 	if (bind)
-		hints.ai_flags = AI_PASSIVE;  //AI_CANONNAME;
+		hints.ai_flags = AI_PASSIVE; //AI_CANONNAME;
 
 	if (int errcode = getaddrinfo(hostAddress.c_str(), hostPort.c_str(), &hints, &result))
 		throw Error("Unable to find the server " + hostAddress + ", port " + hostPort + " " + gai_strerror(errcode));

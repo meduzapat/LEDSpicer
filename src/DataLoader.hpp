@@ -49,6 +49,7 @@ using std::chrono::milliseconds;
 #define PARAM_FPS             "fps"
 #define PARAM_COLORS          "colors"
 #define PARAM_COLOR           "color"
+#define PARAM_RANDOM_COLORS   "randomColors"
 #define PARAM_PORT            "port"
 #define PARAM_LOG_LEVEL       "logLevel"
 #define PARAM_NAME            "name"

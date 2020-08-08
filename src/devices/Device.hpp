@@ -25,9 +25,7 @@
 #include <cstdint>
 
 #include "Group.hpp"
-#include "utility/Error.hpp"
 #include "utility/Log.hpp"
-#include "utility/Utility.hpp"
 
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_ 1
@@ -156,7 +154,15 @@ protected:
 	/// Maps elements by name.
 	umap<string, Element> elementsByName;
 
+	/**
+	 * This method will be called to initialize a device.
+	 */
 	virtual void openDevice() = 0;
+
+	/**
+	 * This method will be called to terminate a device.
+	 */
+	virtual void closeDevice() = 0;
 
 	/**
 	 * This method will be called every time a transfer need to be done.

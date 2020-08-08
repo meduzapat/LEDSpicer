@@ -37,13 +37,11 @@ void Mame::process() {
 	if (not socks.isConnected())
 		activate();
 
-	string bufferRaw, buffer;
-	if (not socks.recive(bufferRaw))
+	string buffer;
+	if (not socks.recive(buffer))
 		return;
 
-	for (char c : bufferRaw)
-		if (c >= 48 and c <= 122)
-			buffer.push_back(c);
+	buffer = Utility::extractChars(buffer, '*', 'z');
 
 	if (buffer.empty())
 		return;
@@ -79,7 +77,7 @@ void Mame::process() {
 	}
 
 	for (auto& message : messages) {
-		LogDebug("sending: " + message.first + " " + (message.second ? "on" : "off"));
+		LogDebug("Sending: " + message.first + " " + (message.second ? "on" : "off"));
 		if (message.second) {
 			if (not controlledItems->count(message.first))
 				controlledItems->emplace(message.first, itemsMap[message.first]);

@@ -23,29 +23,31 @@ EXTRA_DIST =
 pkglib_LTLIBRARIES = \
 	libledspicer1.la
 
-libledspicer1_la_SOURCES =            \
-	src/utility/Log.cpp               \
-	src/utility/Error.cpp             \
-	src/utility/Utility.cpp           \
-	src/utility/XMLHelper.cpp         \
-	src/utility/Speed.cpp             \
-	src/utility/Direction.cpp         \
-	src/utility/Color.cpp             \
-	src/utility/Colors.cpp            \
-	src/utility/Socks.cpp             \
-	src/utility/Time.cpp              \
-	src/devices/Element.cpp           \
-	src/devices/Group.cpp             \
-	src/devices/Profile.cpp           \
-	src/devices/Device.cpp            \
-	src/devices/DeviceUSB.cpp         \
+libledspicer1_la_SOURCES =    \
+	src/utility/Log.cpp       \
+	src/utility/Error.cpp     \
+	src/utility/Utility.cpp   \
+	src/utility/USB.cpp       \
+	src/utility/XMLHelper.cpp \
+	src/utility/Speed.cpp     \
+	src/utility/Direction.cpp \
+	src/utility/Color.cpp     \
+	src/utility/Colors.cpp    \
+	src/utility/Socks.cpp     \
+	src/utility/Time.cpp      \
+	src/restrictors/Restrictor.cpp \
+	src/devices/Element.cpp   \
+	src/devices/Group.cpp     \
+	src/devices/Profile.cpp   \
+	src/devices/Device.cpp    \
+	src/devices/DeviceUSB.cpp \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
 	src/animations/StepActor.cpp      \
-	src/inputs/Input.cpp              \
-	src/inputs/Reader.cpp             \
-	src/Message.cpp                   \
+	src/inputs/Input.cpp  \
+	src/inputs/Reader.cpp \
+	src/Message.cpp \
 	src/Messages.cpp
 
 libledspicer1_la_LDFLAGS =       \
@@ -64,6 +66,7 @@ utilityheaderdir=$(pkgincludedir)/utility
 utilityheader_HEADERS =       \
 	src/utility/Log.hpp       \
 	src/utility/Error.hpp     \
+	src/utility/USB.hpp       \
 	src/utility/Utility.hpp   \
 	src/utility/Socks.hpp     \
 	src/utility/Time.hpp      \
@@ -72,6 +75,10 @@ utilityheader_HEADERS =       \
 	src/utility/Direction.hpp \
 	src/utility/Color.hpp     \
 	src/utility/Colors.hpp
+
+restrictorssheaderdir=$(pkgincludedir)/restrictors
+restrictorssheader_HEADERS =    \
+	src/restrictors/Restrictor.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
 devicesheader_HEADERS =       \
@@ -106,7 +113,8 @@ ledspicer_pc_DATA = \
 bin_PROGRAMS = \
 	ledspicerd \
 	emitter    \
-	inputseeker
+	inputseeker\
+	rotator
 
 ledspicerd_SOURCES =                \
 	src/Handler.cpp                 \
@@ -140,17 +148,38 @@ ledspicerd_LDADD = \
 # emitter #
 ###########
 
-emitter_SOURCES = \
+emitter_SOURCES =   \
 	src/Emitter.cpp
 
-emitter_CPPFLAGS =    \
-	$(AM_CPPFLAGS)    \
+emitter_CPPFLAGS =     \
+	$(AM_CPPFLAGS)     \
 	$(TINYXML2_CFLAGS)
 
-emitter_LDFLAGS = \
+emitter_LDFLAGS =    \
 	$(TINYXML2_LIBS)
 
 emitter_LDADD = \
+	libledspicer1.la
+
+###########
+# rotator #
+###########
+
+rotator_SOURCES =                    \
+	src/restrictors/ServoStik.cpp    \
+	src/restrictors/UltraStik360.cpp \
+	src/Rotator.cpp
+
+rotator_CPPFLAGS =     \
+	$(AM_CPPFLAGS)     \
+	$(TINYXML2_CFLAGS) \
+	$(LIBUSB_CFLAGS)
+
+rotator_LDFLAGS =    \
+	$(TINYXML2_LIBS) \
+	$(LIBUSB_LIBS)
+
+rotator_LDADD = \
 	libledspicer1.la
 
 ###############
@@ -476,7 +505,8 @@ inputs_LTLIBRARIES = \
 	Mame.la          \
 	Impulse.la       \
 	Actions.la       \
-	Blinker.la
+	Blinker.la       \
+	Network.la
 
 ########
 # MAME #
@@ -530,6 +560,19 @@ Blinker_la_LIBADD = \
 Blinker_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
 
+###########
+# Network #
+###########
+
+Network_la_SOURCES = \
+	src/inputs/Network.cpp
+
+Network_la_LIBADD = \
+	libledspicer1.la
+
+Network_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
 ##############
 # games data #
 ##############
@@ -538,6 +581,20 @@ gamesdatadir=$(pkgdatadir)
 gamesdata_DATA =         \
 	data/gameData.xml    \
 	data/basicColors.xml
+
+######################
+# Ultrastik 360 maps #
+######################
+
+mapsdatadir=$(pkgdatadir)/umaps
+mapsdata_DATA =         \
+	data/maps/2Way.um   \
+	data/maps/2WayV.um  \
+	data/maps/4Way.um   \
+	data/maps/4WayX.um  \
+	data/maps/8Way.um   \
+	data/maps/Analog.um \
+	data/maps/Mouse.um
 
 ################################
 # Devices, Profiles and Inputs #
@@ -583,11 +640,14 @@ DISTCLEANFILES = \
 
 EXTRA_DIST +=                       \
 	autogen.sh                      \
+	src/Brands.hpp                  \
 	src/Handler.hpp                 \
 	src/animations/ActorHandler.hpp \
 	src/devices/DeviceHandler.hpp   \
 	src/inputs/InputHandler.hpp     \
 	src/DataLoader.hpp              \
+	src/restrictors/ServoStik.hpp    \
+	src/restrictors/UltraStik360.hpp \
 	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \
@@ -612,9 +672,11 @@ EXTRA_DIST +=                       \
 	src/inputs/Impulse.hpp        \
 	src/inputs/Actions.hpp        \
 	src/inputs/Blinker.hpp        \
+	src/inputs/Network.hpp        \
 	src/MainBase.hpp     \
 	src/Main.hpp         \
 	src/Emitter.hpp      \
+	src/Rotator.hpp      \
 	src/InputSeeker.hpp  \
 	data/ledspicer.conf        \
 	data/singleColor.xml       \
@@ -629,7 +691,14 @@ EXTRA_DIST +=                       \
 	data/animations/animation-skeleton.xml \
 	data/profiles/profile-skeleton.xml     \
 	data/inputs/input-skeleton.xml         \
-	AUTHORS                      \
-	ChangeLog                    \
+	data/maps/2Way.um   \
+	data/maps/2WayV.um  \
+	data/maps/4Way.um   \
+	data/maps/4WayX.um  \
+	data/maps/8Way.um   \
+	data/maps/Analog.um \
+	data/maps/Mouse.um  \
+	AUTHORS             \
+	ChangeLog           \
 	NEWS
 

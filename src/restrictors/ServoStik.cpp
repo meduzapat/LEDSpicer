@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DeviceUSB.cpp
- * @since     Feb 11, 2020
+ * @file      ServoStick.cpp
+ * @since     Jul 9, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,33 +20,35 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DeviceUSB.hpp"
+#include "../restrictors/ServoStik.hpp"
 
-using namespace LEDSpicer::Devices;
+using namespace LEDSpicer::Restrictors;
 
-void DeviceUSB::openDevice() {
-	connect();
-	afterConnect();
-	claimInterface();
-	afterClaimInterface();
+void ServoStik::rotate(Ways way) {
+	vector<uint8_t> data {0, 0xdd, 0, 0};
+	switch (way) {
+	case Ways::w2:
+	case Ways::w2v:
+	case Ways::w4:
+	case Ways::w4x:
+		LogDebug("Rotating " + getName() + " to 4 ways.");
+		data[3] = 0;
+		break;
+	default:
+		LogDebug("Rotating " + getName() + " to 8 ways.");
+		data[3] = 1;
+	}
+	transferToUSB(data);
 }
 
-void DeviceUSB::closeDevice() {
-	LogDebug("Disconnecting " + getFullName());
-	disconnect();
+uint16_t ServoStik::getVendor() {
+	return ULTIMARC_VENDOR;
 }
 
-void DeviceUSB::connect() {
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
-	USB::connect();
-	if (not handle)
-		throw Error(
-			"Unable to connect to " +
-			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
-			" " + getFullName()
-		);
+uint16_t ServoStik::getProduct() {
+	return (SERVOSTIK_PRODUCT + getId() - 1);
 }
 
-string DeviceUSB::getFullName() {
-	return "Device: " + name + " Id: " + to_string(boardId);
+string ServoStik::getName() {
+	return string(SERVOSTIK_NAME) + " " + to_string(getId());
 }

@@ -35,7 +35,8 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	if (not tones)
 		tones = DEFAULT_TONES;
 
-	setTotalStepFrames(totalStepFrames / 2);
+	if (totalStepFrames > 2)
+		setTotalStepFrames(totalStepFrames / 2);
 
 	extractColors(parameters["colors"]);
 	float
@@ -80,7 +81,7 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 void Gradient::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Gradient: " << (cDirection == Directions::Forward ? "→ " : "← F: ") << getCurrentStep() << endl;
+	cout << "Gradient: " << DrawDirection(cDirection) << " F: " << static_cast<int>(getCurrentStep()) << endl;
 #endif
 
 	switch (mode) {

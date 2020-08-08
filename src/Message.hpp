@@ -48,7 +48,8 @@ struct Message {
 		ClearAllElements,
 		SetGroup,
 		ClearGroup,
-		ClearAllGroups
+		ClearAllGroups,
+		CraftProfile
 	};
 
 	string toString();
@@ -66,6 +67,8 @@ struct Message {
 	Types getType() const;
 
 	void setType(Types type);
+
+	void reset();
 
 protected:
 

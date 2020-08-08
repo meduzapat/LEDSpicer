@@ -26,6 +26,7 @@ using namespace LEDSpicer;
 
 umap<string, Color> Color::colors;
 vector<string> Color::names;
+vector<Color*> Color::randomColors;
 
 Color::Color(const string& color) {
 	set(color);
@@ -270,5 +271,21 @@ string Color::getName() const {
 const Color& Color::getColor(const string& color) {
 	if (colors.count(color))
 		return colors[color];
+	if (color == "Random")
+		return *randomColors[std::rand() / ((RAND_MAX + 1u) / randomColors.size())];
 	throw Error("Unknown color " + color);
+}
+
+void Color::setRandomColors(vector<string> colors) {
+
+	if (randomColors.size())
+		return;
+
+	if (colors.empty())
+		for (auto& c : Color::colors)
+			randomColors.push_back(&c.second);
+	else
+		for (string& c : colors)
+			randomColors.push_back(&Color::colors.at(c));
+	randomColors.shrink_to_fit();
 }

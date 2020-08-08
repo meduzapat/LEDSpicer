@@ -29,6 +29,8 @@
 #ifndef DIRECTION_HPP_
 #define DIRECTION_HPP_ 1
 
+#define DrawDirection(d) (d == Directions::Forward ? "→" : "←")
+
 namespace LEDSpicer {
 
 using std::string;

@@ -21,12 +21,10 @@
  */
 
 #include "devices/DeviceUSB.hpp"
+#include "Brands.hpp"
 
 #ifndef GGG_HPP_
 #define GGG_HPP_ 1
-
-/// GGG USB vendor code.
-#define GGG_VENDOR 0xFAFA
 
 namespace LEDSpicer {
 namespace Devices {

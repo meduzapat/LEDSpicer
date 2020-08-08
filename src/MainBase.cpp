@@ -90,7 +90,7 @@ MainBase::~MainBase() {
 		delete p.second;
 	}
 
-	Devices::DeviceUSB::closeUSB();
+	USB::closeSession();
 }
 
 void MainBase::testLeds() {

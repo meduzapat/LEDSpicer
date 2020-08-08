@@ -146,6 +146,15 @@ public:
 	 * @return
 	 */
 	static string removeChar(const string& str, char c);
+
+	/**
+	 * Extracts characters from a string.
+	 * @param str
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	static string extractChars(const string& str, char from, char to);
 };
 
 } // namespace

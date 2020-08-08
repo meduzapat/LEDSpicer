@@ -43,7 +43,7 @@ void RaspberryPi::openDevice() {
 	initialized = true;
 }
 
-RaspberryPi::~RaspberryPi() {
+void RaspberryPi::closeDevice() {
 	if (initialized)
 		gpioTerminate();
 }

@@ -20,13 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Brands.hpp"
 #include "devices/DeviceUSB.hpp"
 
 #ifndef ULTIMARC_HPP_
 #define ULTIMARC_HPP_ 1
-
-/// Ultimarc USB vendor code.
-#define ULTIMARC_VENDOR 0xD209
 
 namespace LEDSpicer {
 namespace Devices {

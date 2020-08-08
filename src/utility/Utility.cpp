@@ -73,6 +73,9 @@ vector<string> Utility::explode(const string& text, const char delimiter, const 
 
 	vector<string> temp;
 
+	if (text.empty())
+		return temp;
+
 	size_t start = 0, end = 0;
 
 	for (size_t c = 0; limit ? c < limit : true; c++) {
@@ -101,3 +104,13 @@ string Utility::removeChar(const string& str, char c) {
 			result += currentChar;
 	return result;
 }
+
+string Utility::extractChars(const string& str, char from, char to) {
+	string result;
+	if (not str.empty())
+		for (char c : str)
+			if (c >= from and c <= to)
+				result.push_back(c);
+	return result;
+}
+

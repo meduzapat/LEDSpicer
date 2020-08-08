@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      WolfWareTech.hpp
- * @since     Feb 5, 2020
+ * @file      Rotator.hpp
+ * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,33 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
-#include "Brands.hpp"
+#include <iostream>
+using std::cout;
+using std::endl;
 
-#ifndef WOLFWARETECH_HPP_
-#define WOLFWARETECH_HPP_ 1
+#include "restrictors/Restrictor.hpp"
+#include "restrictors/UltraStik360.hpp"
+#include "restrictors/ServoStik.hpp"
+#include "utility/XMLHelper.hpp"
+
+#ifndef ROTATOR_HPP_
+#define ROTATOR_HPP_ 1
+
+#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
+#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
+#define RESTRICTORS "restrictors"
+#define RESTRICTOR "restrictor"
 
 namespace LEDSpicer {
-namespace Devices {
-namespace WolfWareTech {
 
-/**
- * This is the Base Header for the WolfWare Tech controllers.
- * LEDSpicer::Devices::WolfWareTech::WolfWareTech
- */
-class WolfWareTech : public DeviceUSB {
+using Restrictors::Restrictor;
+using Restrictors::UltraStik360;
+using Restrictors::ServoStik;
 
-public:
+umap<string, Restrictor*> restrictors;
 
-	using DeviceUSB::DeviceUSB;
+int main(int argc, char **argv);
 
-	uint16_t getVendor() {
-		return WOLFWARETECH_VENDOR;
-	}
+#endif /* ROTATOR_HPP_ */
 
-protected:
-
-	virtual void afterConnect() {}
-
-	virtual void afterClaimInterface() {}
-};
-
-} /* namespace WolfWareTech */
-} /* namespace Devices */
 } /* namespace LEDSpicer */
-
-#endif /* WOLFWARETECH_HPP_ */

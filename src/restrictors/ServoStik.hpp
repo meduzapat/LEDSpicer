@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      WolfWareTech.hpp
- * @since     Feb 5, 2020
+ * @file      ServoStik.hpp
+ * @since     Jul 9, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,50 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
+#include "Restrictor.hpp"
 #include "Brands.hpp"
 
-#ifndef WOLFWARETECH_HPP_
-#define WOLFWARETECH_HPP_ 1
+#ifndef RESTRICTORS_SERVOSTIK_HPP_
+#define RESTRICTORS_SERVOSTIK_HPP_ 1
+
+#define SERVOSTIK_NAME       "ServoStick"
+#define SERVOSTIK_PRODUCT    0x1700
+#define SERVOSTIK_INTERFACE  0
+#define SERVOSTIK_WVALUE     0x0200
+#define SERVOSTIK_MAX_BOARDS 4
 
 namespace LEDSpicer {
-namespace Devices {
-namespace WolfWareTech {
+namespace Restrictors {
 
 /**
- * This is the Base Header for the WolfWare Tech controllers.
- * LEDSpicer::Devices::WolfWareTech::WolfWareTech
+ * LEDSpicer::Restrictor::ServoStick
  */
-class WolfWareTech : public DeviceUSB {
+class ServoStik : public Restrictor {
 
 public:
 
-	using DeviceUSB::DeviceUSB;
+	ServoStik(umap<string, string>& options) :
+		Restrictor(
+			options,
+			SERVOSTIK_WVALUE,
+			SERVOSTIK_INTERFACE,
+			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
+			SERVOSTIK_MAX_BOARDS
+		) {}
 
-	uint16_t getVendor() {
-		return WOLFWARETECH_VENDOR;
-	}
 
-protected:
+	virtual ~ServoStik() = default;
 
-	virtual void afterConnect() {}
+	virtual void rotate(Ways way);
 
-	virtual void afterClaimInterface() {}
+	virtual uint16_t getVendor();
+
+	virtual uint16_t getProduct();
+
+	virtual string getName();
 };
 
-} /* namespace WolfWareTech */
-} /* namespace Devices */
+} /* namespace Rotators */
 } /* namespace LEDSpicer */
 
-#endif /* WOLFWARETECH_HPP_ */
+#endif /* RESTRICTORS_SERVOSTIK_HPP_ */

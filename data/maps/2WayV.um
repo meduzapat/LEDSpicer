@@ -1,0 +1,13 @@
+MapFileFormatVersion=1.0
+
+MapSize=9
+MapBorderLocations=30,58,86,114,142,170,198,226
+MapRow1=N,N,N,N,N,N,N,N,N
+MapRow2=N,N,N,N,N,N,N,N,N
+MapRow3=N,N,N,N,N,N,N,N,N
+MapRow4=C,C,C,C,C,C,C,C,C
+MapRow5=C,C,C,C,C,C,C,C,C
+MapRow6=C,C,C,C,C,C,C,C,C
+MapRow7=S,S,S,S,S,S,S,S,S
+MapRow8=S,S,S,S,S,S,S,S,S
+MapRow9=S,S,S,S,S,S,S,S,S

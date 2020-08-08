@@ -57,7 +57,7 @@ void Filler::generateNextRandom() {
 
 void Filler::calculateElements() {
 #ifdef DEVELOP
-	cout << "Filler " << (cDirection == Directions::Forward ? "→ " : "← ") << (filling ? " Fill " : "Emp ");
+	cout << "Filler: " << DrawDirection(cDirection) << (filling ? " Filling " : " Emptying ");
 #endif
 	switch (mode) {
 	// Normal

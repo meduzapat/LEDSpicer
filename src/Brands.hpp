@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      DeviceUSB.cpp
- * @since     Feb 11, 2020
+ * @file      Brands.hpp
+ * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
@@ -20,33 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DeviceUSB.hpp"
+/// This header file defines the USB Vendor code for several brands used by the devices supported by LEDSpicer.
 
-using namespace LEDSpicer::Devices;
+/// Ultimarc USB vendor code.
+#define ULTIMARC_VENDOR 0xD209
 
-void DeviceUSB::openDevice() {
-	connect();
-	afterConnect();
-	claimInterface();
-	afterClaimInterface();
-}
+/// GGG USB vendor code.
+#define GGG_VENDOR 0xFAFA
 
-void DeviceUSB::closeDevice() {
-	LogDebug("Disconnecting " + getFullName());
-	disconnect();
-}
-
-void DeviceUSB::connect() {
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
-	USB::connect();
-	if (not handle)
-		throw Error(
-			"Unable to connect to " +
-			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
-			" " + getFullName()
-		);
-}
-
-string DeviceUSB::getFullName() {
-	return "Device: " + name + " Id: " + to_string(boardId);
-}
+/// WolfWare Tech USB vendor code.
+#define WOLFWARETECH_VENDOR 0x03EB

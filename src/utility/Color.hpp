@@ -248,10 +248,20 @@ public:
 	 */
 	string getName() const;
 
+	/**
+	 * Specifies the random colors to use.
+	 * NOTE: This function may be allocates a new vector that is never deleted (but not a memory leak).
+	 * @param colors
+	 */
+	static void setRandomColors(vector<string> colors);
+
 protected:
 
 	/// Loaded colors.
 	static umap<string, Color> colors;
+
+	/// Possible values for random.
+	static vector<Color*> randomColors;
 
 	/// List of color names.
 	static vector<string> names;
