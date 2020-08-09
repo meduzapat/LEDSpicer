@@ -42,7 +42,7 @@ void Random::calculateElements() {
 
 	uint8_t percent = PERCENT(currentFrame, totalFrames);
 #ifdef DEVELOP
-	cout << "Random frame: " << (currentFrame + 1) << " " << percent << "% ";
+	cout << "Random: F: " << static_cast<int>(currentFrame + 1) << " " << percent << "% ";
 #endif
 	for (uint8_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, oldColors[c]->transition(*newColors[c], percent), filter);
@@ -71,6 +71,6 @@ void Random::drawConfig() {
 	FrameActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << SEPARATOR << endl;
+	cout << endl << SEPARATOR << endl;
 }
 

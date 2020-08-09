@@ -57,7 +57,11 @@ FrameActor::FrameActor(
 
 void FrameActor::drawConfig() {
 	Speed::drawConfig();
-	cout << "Total Frames: " << static_cast<uint>(totalFrames) << endl;
+	cout << "Frames: " << static_cast<uint>(totalFrames) << " (" << static_cast<float>(totalFrames) / FPS << " sec)" << endl;
+	if (cycles)
+		cout << "Cycles: " << to_string(cycles) << endl;
+	if (startAt)
+		cout << "Start at Frame: " << to_string(startAt) << endl;
 	Actor::drawConfig();
 }
 
@@ -82,6 +86,7 @@ void FrameActor::restart() {
 		LogDebug("Starting Actor from frame " + to_string(currentFrame));
 #endif
 	}
+	cycle = 0;
 }
 
 bool FrameActor::isRunning() {

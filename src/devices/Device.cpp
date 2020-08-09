@@ -42,8 +42,9 @@ void Device::initialize() {
 }
 
 void Device::terminate() {
-	LogDebug("Terminating Device " + name);
+	LogDebug("Disconnect Device " + name);
 	resetLeds();
+	closeDevice();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {

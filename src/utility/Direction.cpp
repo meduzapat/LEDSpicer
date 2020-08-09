@@ -60,6 +60,10 @@ string Direction::direction2str(Directions direction) {
 	return "";
 }
 
+Direction::Directions Direction::getOppositeDirection(const Directions direction) {
+	return (direction == Directions::Forward ? Directions::Backward : Directions::Forward);
+}
+
 void Direction::drawConfig() {
 	cout << "Direction: " << direction2str(direction) << endl;
 }

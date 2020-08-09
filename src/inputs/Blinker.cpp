@@ -55,11 +55,6 @@ void Blinker::process() {
 	}
 }
 
-void Blinker::activate() {
-	controlledItems->clear();
-	Reader::activate();
-}
-
 void Blinker::deactivate() {
 	blinkingItems.clear();
 	Reader::deactivate();

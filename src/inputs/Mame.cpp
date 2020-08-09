@@ -37,13 +37,11 @@ void Mame::process() {
 	if (not socks.isConnected())
 		activate();
 
-	string bufferRaw, buffer;
-	if (not socks.recive(bufferRaw))
+	string buffer;
+	if (not socks.recive(buffer))
 		return;
 
-	for (char c : bufferRaw)
-		if (c >= 48 and c <= 122)
-			buffer.push_back(c);
+	buffer = Utility::extractChars(buffer, '*', 'z');
 
 	if (buffer.empty())
 		return;
@@ -62,22 +60,24 @@ void Mame::process() {
 
 	auto parts = Utility::explode(buffer, '=');
 
+	// Several outputs use digits, to make things simple zero ( 0 ) will be OFF, everything else will be ON
+
 	if (itemsMap.count(parts[0]))
-		messages[parts[0]] = parts[1][0] == '1';
+		messages[parts[0]] = parts[1][0] != '0';
 
 	if (parts.size() > 2) {
-		bool last = parts.back()[0] == '1';
+		bool last = parts.back()[0] != '0';
 		parts.pop_back();
 		for (uint c = 1; c < parts.size(); c++) {
 			if (itemsMap.count(parts[c].substr(1)))
-				messages[parts[c].substr(1)] = parts[c + 1][0] == '1';
+				messages[parts[c].substr(1)] = parts[c + 1][0] != '0';
 		}
 		if (itemsMap.count(parts[parts.size() - 1].substr(1)))
 			messages[parts[parts.size() - 1].substr(1)] = last;
 	}
 
 	for (auto& message : messages) {
-		LogDebug("sending: " + message.first + " " + (message.second ? "on" : "off"));
+		LogDebug("Sending: " + message.first + " " + (message.second ? "on" : "off"));
 		if (message.second) {
 			if (not controlledItems->count(message.first))
 				controlledItems->emplace(message.first, itemsMap[message.first]);

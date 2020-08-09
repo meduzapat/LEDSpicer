@@ -63,6 +63,10 @@ void Actor::drawConfig() {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
+	if (secondsToStart)
+		cout << "Start After: " << secondsToStart << " sec" << endl;
+	if (secondsToEnd)
+		cout << "Stop After: " << secondsToEnd << " sec" << endl;
 }
 
 void Actor::restart() {
@@ -106,6 +110,7 @@ bool Actor::isRunning() {
 #endif
 	}
 
+	// Time Over: there is an end time that ran out, and not start time, so is not running.
 	if (not startTime and not endTime and secondsToEnd)
 		return false;
 

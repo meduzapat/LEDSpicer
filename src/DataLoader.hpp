@@ -44,11 +44,12 @@ using std::chrono::milliseconds;
 #define ACTOR_DIR   "animations/"
 #define PROFILE_DIR "profiles/"
 #define INPUT_DIR   "inputs/"
-#define MAXIMUM_FPS 30
+#define MAXIMUM_FPS 60
 
 #define PARAM_FPS             "fps"
 #define PARAM_COLORS          "colors"
 #define PARAM_COLOR           "color"
+#define PARAM_RANDOM_COLORS   "randomColors"
 #define PARAM_PORT            "port"
 #define PARAM_LOG_LEVEL       "logLevel"
 #define PARAM_NAME            "name"

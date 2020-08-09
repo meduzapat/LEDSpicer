@@ -80,12 +80,10 @@ uint16_t Howler::getProduct() {
 	return HOWLER_PRODUCT + boardId - 1;
 }
 
-void Howler::transferToUSB(vector<uint8_t>& data) {
-#ifdef DRY_RUN
-	WolfWareTech::transferToUSB(data);
-#else
+int Howler::send(vector<uint8_t>& data) {
+
 	int transferred = 0;
-	auto responseCode = libusb_interrupt_transfer(
+	return libusb_interrupt_transfer(
 		handle,
 		HOWLER_IN_EP,
 		data.data(),
@@ -93,15 +91,4 @@ void Howler::transferToUSB(vector<uint8_t>& data) {
 		&transferred,
 		TIMEOUT
 	);
-
-	if (responseCode >= 0)
-		return;
-
-	LogDebug(
-		"wValue: "  + Utility::hex2str(value) +
-		" wIndex: "  + Utility::hex2str(interface) +
-		" wLength: " + to_string(data.size())
-	);
-	throw Error(string(libusb_error_name(responseCode)) + " for " + getFullName());
-#endif
 }

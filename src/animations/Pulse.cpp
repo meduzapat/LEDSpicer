@@ -31,7 +31,7 @@ void Pulse::calculateElements() {
 	else
 		c = static_cast<float>(currentFrame * currentFrame) / totalFrames;
 #ifdef DEVELOP
-	cout << "Pulse frame: " << (currentFrame + 1) << " = " << PERCENT(c, totalFrames) << endl;
+	cout << "Pulse: " << DrawDirection(cDirection) << " F: " <<  static_cast<int>(currentFrame + 1) << " = " << PERCENT(c, totalFrames) << endl;
 #endif
 	changeElementsColor(this->fade(PERCENT(c, totalFrames)), filter);
 }

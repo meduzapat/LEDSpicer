@@ -37,7 +37,7 @@ using std::vector;
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_ 1
 
-#define PERCENT(x , y) (x * 100 / y)
+#define PERCENT(x , y) ((x) * 100 / (y))
 
 #define SEPARATOR "------------------------------"
 
@@ -146,6 +146,15 @@ public:
 	 * @return
 	 */
 	static string removeChar(const string& str, char c);
+
+	/**
+	 * Extracts characters from a string.
+	 * @param str
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	static string extractChars(const string& str, char from, char to);
 };
 
 } // namespace

@@ -26,6 +26,7 @@ using namespace LEDSpicer;
 
 umap<string, Color> Color::colors;
 vector<string> Color::names;
+vector<Color*> Color::randomColors;
 
 Color::Color(const string& color) {
 	set(color);
@@ -194,6 +195,8 @@ uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
 
 void Color::loadColors(const umap<string, string>& colorsData, const string& format) {
 	for (auto& colorData : colorsData) {
+		if (colorData.first == Color_Random)
+			continue;
 		colors[colorData.first] = std::move(Color(colorData.second, format));
 		names.push_back(colorData.first);
 	}
@@ -270,5 +273,31 @@ string Color::getName() const {
 const Color& Color::getColor(const string& color) {
 	if (colors.count(color))
 		return colors[color];
+	if (color == Color_Random)
+		return *randomColors[std::rand() / ((RAND_MAX + 1u) / randomColors.size())];
 	throw Error("Unknown color " + color);
+}
+
+void Color::setRandomColors(vector<string> colors) {
+
+	if (randomColors.size())
+		return;
+
+	if (colors.empty())
+		for (auto& c : Color::colors)
+			randomColors.push_back(&c.second);
+	else
+		for (string& c : colors) {
+			if (c == Color_Random)
+				throw Error(Color_Random " cannot be part of the list of colors because is getting build");
+			if (Color::colors.count(c))
+				randomColors.push_back(&Color::colors[c]);
+#ifdef DEVELOP
+			else
+				throw Error("Unknown color " + c);
+#endif
+		}
+	if (randomColors.empty())
+		throw Error("All colors failed for random colors");
+	randomColors.shrink_to_fit();
 }

@@ -75,7 +75,7 @@ public:
 
 protected:
 
-	virtual void transferToUSB(vector<uint8_t>& data);
+	virtual int send(vector<uint8_t>& data);
 
 };
 

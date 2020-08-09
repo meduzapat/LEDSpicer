@@ -53,7 +53,7 @@ void Reader::activate() {
 void Reader::deactivate() {
 	for (auto& l : listenEvents) {
 		if (l.second < 0)
-			return;
+			continue;
 		LogInfo("Closing device " DEV_INPUT + l.first);
 		close(l.second);
 		l.second = -1;

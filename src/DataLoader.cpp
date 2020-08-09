@@ -68,14 +68,18 @@ void DataLoader::readConfiguration() {
 
 	processColorFile(createFilename(tempAttr[PARAM_COLORS]));
 
+	auto cs = Utility::explode(tempAttr.count(PARAM_RANDOM_COLORS) ? tempAttr[PARAM_RANDOM_COLORS] : "", ',');
+	for (auto& c : cs)
+		Utility::trim(c);
+	Color::setRandomColors(cs);
+
 	processDevices();
 
 	processLayout();
 
-#ifndef DRY_RUN
 	for (auto device : devices)
 		device->initialize();
-#endif
+
 	dropRootPrivileges(
 		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
 		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
@@ -96,6 +100,8 @@ void DataLoader::processColorFile(const string& file) {
 	for (; element; element = element->NextSiblingElement()) {
 		colorAttr = processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_COLOR, colorAttr, NODE_COLOR);
+		if (colorAttr[PARAM_NAME] == "random")
+			continue;
 		if (colorsData.count(colorAttr[PARAM_NAME]))
 			LogWarning("Duplicated color " + colorAttr[PARAM_NAME]);
 		colorsData[colorAttr[PARAM_NAME]] = colorAttr[PARAM_COLOR];

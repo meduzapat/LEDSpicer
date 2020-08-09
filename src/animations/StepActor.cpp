@@ -28,25 +28,49 @@ StepActor::StepActor(
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	DirectionActor(parameters, group, requiredParameters),
-	totalStepFrames(totalFrames / 2)
+	DirectionActor(parameters, group, requiredParameters)
 {
 	totalFrames = group->size() - 1;
+	// Default frames calculation.
+	switch (speed) {
+	case Speeds::VeryFast:
+		setTotalStepFrames(0);
+		break;
+	case Speeds::Fast:
+		setTotalStepFrames(FPS * 0.2);
+		break;
+	case Speeds::Normal:
+		setTotalStepFrames(FPS * 0.4);
+		break;
+	case Speeds::Slow:
+		setTotalStepFrames(FPS * 0.6);
+		break;
+	case Speeds::VerySlow:
+		setTotalStepFrames(FPS * 0.8);
+		break;
+	}
 }
 
 void StepActor::drawConfig() {
-	Speed::drawConfig();
+	DirectionActor::drawConfig();
 	cout <<
-		"Total Frames: " << static_cast<uint>(getTotalSteps()) <<
-		" (" << static_cast<float>(getTotalSteps()) / FPS << " sec)"<< endl;
+		"Steps: " << static_cast<uint>(totalStepFrames) << endl <<
+		"Full Frames: " << static_cast<uint>(getTotalSteps()) <<
+		" (" << static_cast<float>(getTotalSteps()) / FPS << " sec)" << endl;
 }
 
 uint16_t StepActor::getTotalSteps() const {
-	return totalStepFrames * totalFrames;
+	if (totalStepFrames)
+		return totalStepFrames * totalFrames;
+	return totalFrames;
 }
 
 uint16_t StepActor::getCurrentStep() const {
-	return (currentFrame * totalStepFrames) - currentStepFrame;
+	if (not totalStepFrames)
+		return currentFrame;
+	if (currentFrame)
+		return (currentFrame * totalStepFrames) - currentStepFrame;
+	return 0;
 }
 
 void StepActor::advanceFrame() {
@@ -64,34 +88,66 @@ void StepActor::restart() {
 }
 
 bool StepActor::isFirstFrame() const {
-	return (not currentStepFrame and DirectionActor::isFirstFrame());
+	if (totalStepFrames)
+		return (not currentStepFrame and DirectionActor::isFirstFrame());
+	return DirectionActor::isFirstFrame();
 }
 
 bool StepActor::isLastFrame() const {
-	return (currentStepFrame == totalStepFrames and DirectionActor::isLastFrame());
+	if (totalStepFrames)
+		return (currentStepFrame == totalStepFrames and DirectionActor::isLastFrame());
+	return DirectionActor::isLastFrame();
 }
 
-void StepActor::changeFrameElement(const Color& color, bool fade) {
+void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions direction) {
 
-	float percent = PERCENT(currentStepFrame, totalStepFrames);
+	float percent = stepPercent * currentStepFrame;
+
+	if (direction == Directions::Backward)
+		percent = 100 - percent;
+
+#ifdef DEVELOP
+	cout << "Element " << static_cast<uint>(index) << " faded " << percent << "%" << endl;
+#endif
+
+	changeElementColor(index, color.fade(percent), filter);
+}
+
+void StepActor::changeFrameElement(const Color& color, Directions direction) {
+	changeFrameElement(currentFrame, color, direction);
+}
+
+void StepActor::changeFrameElement(const Color& color, bool fade, Directions direction) {
+
+	float percent = stepPercent * currentStepFrame;
+	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
+
+#ifdef DEVELOP
+	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
+#endif
 
 	if (fade)
 		changeElementColor(currentFrame, color.fade(100 - percent), filter);
 	else
 		changeElementColor(currentFrame, color, filter);
 
-	Directions dir = cDirection;
-	uint8_t next = calculateNextOf(dir, currentFrame, direction, totalFrames);
 	changeElementColor(next, color.fade(percent), filter);
 }
 
-void StepActor::changeFrameElement(const Color& color, const Color& colorNext) {
+void StepActor::changeFrameElement(const Color& color, const Color& colorNext, Directions direction) {
 
-	float percent = PERCENT(currentStepFrame, totalStepFrames);
+	float percent = stepPercent * currentStepFrame;
+	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
+
+#ifdef DEVELOP
+	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
+#endif
 
 	changeElementColor(currentFrame, colorNext.transition(color, percent), filter);
-
-	Directions dir = cDirection;
-	uint8_t next = calculateNextOf(dir, currentFrame, direction, totalFrames);
 	changeElementColor(next, colorNext.fade(percent), filter);
+}
+
+void StepActor::setTotalStepFrames(uint8_t totalStepFrames) {
+	this->totalStepFrames = totalStepFrames;
+	stepPercent = totalStepFrames ? PERCENT(1.0, totalStepFrames) : 0;
 }

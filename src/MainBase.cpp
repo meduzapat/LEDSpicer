@@ -90,7 +90,7 @@ MainBase::~MainBase() {
 		delete p.second;
 	}
 
-	Devices::DeviceUSB::closeUSB();
+	USB::closeSession();
 }
 
 void MainBase::testLeds() {
@@ -230,12 +230,13 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 		LogInfo("changing profile to " + profileName);
 		try {
 			profile = DataLoader::processProfile(profileName);
-			profiles.push_back(profile);
-			currentProfile = profile;
-			profile->restart();
 			// Deactivate any overwrite.
 			alwaysOnElements.clear();
 			alwaysOnGroups.clear();
+			DataLoader::controlledItems.clear();
+			profiles.push_back(profile);
+			currentProfile = profile;
+			profile->restart();
 			break;
 		}
 		catch(Error& e) {

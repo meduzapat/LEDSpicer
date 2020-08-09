@@ -70,8 +70,8 @@ void Profile::drawConfig() {
 		cout << endl << "* Input plugins:" << endl;
 		for (Input* i : inputs)
 			i->drawConfig();
+		cout << SEPARATOR << endl;
 	}
-	cout << SEPARATOR << endl;
 }
 
 void Profile::runFrame() {

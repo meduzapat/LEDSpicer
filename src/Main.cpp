@@ -90,20 +90,12 @@ void Main::run() {
 					break;
 				}
 				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
-				currentProfile->terminate();
-				// Deactivate overwrites.
-				alwaysOnGroups.clear();
-				alwaysOnElements.clear();
-				DataLoader::controlledItems.clear();
+				terminateCurrentProfile();
 				break;
 
 			case Message::Types::FinishAllProfiles:
 				if (profiles.size() > 1) {
-					currentProfile->terminate();
-					// Deactivate overwrites.
-					alwaysOnGroups.clear();
-					alwaysOnElements.clear();
-					DataLoader::controlledItems.clear();
+					terminateCurrentProfile();
 					profiles.clear();
 					currentProfile = DataLoader::defaultProfile;
 					profiles.push_back(currentProfile);
@@ -194,6 +186,18 @@ void Main::run() {
 		runCurrentProfile();
 	}
 	currentProfile = profiles[0];
+	terminateCurrentProfile();
+}
+
+void Main::terminate() {
+	running = false;
+}
+
+void Main::terminateCurrentProfile() {
+	// Deactivate overwrites.
+	alwaysOnGroups.clear();
+	alwaysOnElements.clear();
+	DataLoader::controlledItems.clear();
 	currentProfile->terminate();
 
 	// Wait for termination.
@@ -202,10 +206,6 @@ void Main::run() {
 		currentProfile->runFrame();
 		sendData();
 	}
-}
-
-void Main::terminate() {
-	running = false;
 }
 
 int main(int argc, char **argv) {
@@ -361,6 +361,7 @@ void Main::runCurrentProfile() {
 		// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
 		profiles.pop_back();
 		currentProfile = profiles.back();
+		// do not run transition.
 		currentProfile->reset();
 		return;
 	}

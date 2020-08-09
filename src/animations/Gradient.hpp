@@ -26,6 +26,8 @@
 #ifndef GRADIENT_HPP_
 #define GRADIENT_HPP_ 1
 
+#define DEFAULT_TONES 5
+
 #define REQUIRED_PARAM_ACTOR_GRADIENT {"speed", "direction", "colors", "mode"}
 
 namespace LEDSpicer {
@@ -54,7 +56,7 @@ protected:
 
 	Modes mode;
 
-	uint8_t tones = 6;
+	uint8_t tones = DEFAULT_TONES;
 
 	vector<Color> precalc;
 

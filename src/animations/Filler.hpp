@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DirectionActor.hpp"
+#include "StepActor.hpp"
 
 #ifndef FILLER_HPP_
 #define FILLER_HPP_ 1
@@ -33,11 +33,11 @@ namespace Animations {
 /**
  * LEDSpicer::Animations::Fill
  */
-class Filler: public DirectionActor, public Color {
+class Filler: public StepActor, public Color {
 
 public:
 
-	enum class Modes : uint8_t {Linear, Random, LinearSimple, RandomSimple};
+	enum class Modes : uint8_t {Normal, Random};
 
 	Filler(umap<string, string>& parameters, Group* const group);
 
@@ -53,6 +53,13 @@ public:
 
 protected:
 
+	struct Data {
+		uint8_t
+			begin,
+			end;
+		Directions dir;
+	};
+
 	void calculateElements();
 
 private:
@@ -60,29 +67,30 @@ private:
 	/// Stores the mode.
 	Modes mode;
 
-	/// Keeps track if the process is filling the group or cleaning.
+	/// Keeps the currently processed random.
+	uint8_t currentRandom;
+
+	/// Keeps track if the process is filling / emptying.
 	bool filling = true;
 
 	/// Keeps track of the previous frame affected elements.
 	vector<bool> previousFrameAffectedElements;
 
 	/**
-	 * Fills the group in a linear way.
-	 * @return The elements that changed.
+	 * Generates the next random element.
 	 */
-	void fillElementsLinear(uint8_t begin, uint8_t end);
+	void generateNextRandom();
+
+	/**
+	 * Fills the group in a linear way.
+	 * @param values
+	 */
+	void fillElementsLinear(const Data& values);
 
 	/**
 	 * Fills the group in a random way.
-	 * @param val
-	 * @return The elements that changed.
 	 */
-	void fillElementsRandom(bool val);
-
-	/**
-	 * Draw the random values.
-	 */
-	void drawRandom();
+	void fillElementsRandom();
 
 };
 

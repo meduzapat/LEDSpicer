@@ -46,8 +46,6 @@ public:
 
 	virtual void process();
 
-	virtual void activate();
-
 	virtual void deactivate();
 
 	virtual void drawConfig();

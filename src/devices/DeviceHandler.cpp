@@ -37,6 +37,7 @@ DeviceHandler::~DeviceHandler() {
 
 	// Destroy Devices.
 	for (Device* device : devices) {
+		device->terminate();
 #ifdef DEVELOP
 		LogDebug(device->getFullName() + " instance deleted");
 #endif

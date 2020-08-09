@@ -40,6 +40,7 @@ po/
 ledspicerd
 emitter
 inputseeker
+rotator
 .dirstamp
 .libs/
 *.slo

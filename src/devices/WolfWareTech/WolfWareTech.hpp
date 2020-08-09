@@ -21,12 +21,10 @@
  */
 
 #include "devices/DeviceUSB.hpp"
+#include "Brands.hpp"
 
 #ifndef WOLFWARETECH_HPP_
 #define WOLFWARETECH_HPP_ 1
-
-/// WolfWare Tech USB vendor code.
-#define WOLFWARETECH_VENDOR 0x03EB
 
 namespace LEDSpicer {
 namespace Devices {

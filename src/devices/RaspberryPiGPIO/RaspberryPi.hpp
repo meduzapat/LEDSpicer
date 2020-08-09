@@ -44,7 +44,7 @@ public:
 
 	RaspberryPi(uint8_t boardId, umap<string, string>& options) : Device(RPI_LEDS, RPI_NAME) {}
 
-	virtual ~RaspberryPi();
+	virtual ~RaspberryPi() = default;
 
 	virtual void resetLeds();
 
@@ -59,6 +59,8 @@ protected:
 	static bool initialized;
 
 	virtual void openDevice();
+
+	virtual void closeDevice();
 };
 
 } /* namespace RaspberryPi */

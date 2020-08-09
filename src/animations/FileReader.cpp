@@ -124,7 +124,7 @@ void FileReader::processRGBA(const string& filename) {
 
 void FileReader::calculateElements() {
 #ifdef DEVELOP
-	cout << "Frame: " <<  to_string(currentFrame) << endl;
+	cout << "FileReader: " << DrawDirection(cDirection) << " F: " << (currentFrame + 1) << endl;
 #endif
 	for (uint8_t c = 0; c < frames->second[currentFrame].size(); ++c) {
 #ifdef DEVELOP
