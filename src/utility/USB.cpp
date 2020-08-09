@@ -35,7 +35,7 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 		throw Error("Board id should be a number between 1 and " + to_string(maxBoards));
 
 #ifdef DRY_RUN
-	LogDebug("No USB - DRY RUN");
+	LogDebug("No USB Init - DRY RUN");
 	return;
 #endif
 
@@ -67,6 +67,8 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 }
 
 void USB::connect() {
+
+	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()));
 
 #ifdef DRY_RUN
 	LogDebug("No USB handle - DRY RUN");
@@ -108,7 +110,12 @@ void USB::disconnect() {
 
 void USB::claimInterface() {
 
-	LogInfo("Claiming interface " + to_string(interface));
+#ifdef DRY_RUN
+	LogDebug("No USB interface - DRY RUN");
+	return;
+#endif
+
+	LogDebug("Claiming interface " + to_string(interface));
 	if (libusb_claim_interface(handle, interface))
 		throw Error(
 			"Unable to claim interface to " +
@@ -117,14 +124,18 @@ void USB::claimInterface() {
 }
 
 void USB::closeSession() {
-#ifndef DRY_RUN
+
+#ifdef DRY_RUN
+	LogDebug("No Close USB - DRY RUN");
+	return;
+#endif
+
 	if (not usbSession)
 		return;
 
 	LogInfo("Closing USB session");
 	libusb_exit(usbSession);
 	usbSession = nullptr;
-#endif
 }
 
 uint8_t USB::getId() {

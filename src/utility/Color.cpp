@@ -271,7 +271,7 @@ string Color::getName() const {
 const Color& Color::getColor(const string& color) {
 	if (colors.count(color))
 		return colors[color];
-	if (color == "Random")
+	if (color == Color_Random)
 		return *randomColors[std::rand() / ((RAND_MAX + 1u) / randomColors.size())];
 	throw Error("Unknown color " + color);
 }
@@ -285,7 +285,17 @@ void Color::setRandomColors(vector<string> colors) {
 		for (auto& c : Color::colors)
 			randomColors.push_back(&c.second);
 	else
-		for (string& c : colors)
-			randomColors.push_back(&Color::colors.at(c));
+		for (string& c : colors) {
+			if (c == Color_Random)
+				throw Error(Color_Random " cannot be part of the list of colors because is getting build");
+			if (Color::colors.count(c))
+				randomColors.push_back(&Color::colors[c]);
+#ifdef DEVELOP
+			else
+				throw Error("Unknown color " + c);
+#endif
+		}
+	if (randomColors.empty())
+		throw Error("All colors failed for random colors");
 	randomColors.shrink_to_fit();
 }

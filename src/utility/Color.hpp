@@ -46,6 +46,8 @@ using std::vector;
 #ifndef COLOR_HPP_
 #define COLOR_HPP_ 1
 
+#define Color_Random "Random"
+
 namespace LEDSpicer {
 
 /**

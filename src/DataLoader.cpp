@@ -68,7 +68,10 @@ void DataLoader::readConfiguration() {
 
 	processColorFile(createFilename(tempAttr[PARAM_COLORS]));
 
-	Color::setRandomColors(Utility::explode(tempAttr.count(PARAM_RANDOM_COLORS) ? tempAttr[PARAM_RANDOM_COLORS] : "", ','));
+	auto cs = Utility::explode(tempAttr.count(PARAM_RANDOM_COLORS) ? tempAttr[PARAM_RANDOM_COLORS] : "", ',');
+	for (auto& c : cs)
+		Utility::trim(c);
+	Color::setRandomColors(cs);
 
 	processDevices();
 

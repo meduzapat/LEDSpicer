@@ -26,25 +26,18 @@ using namespace LEDSpicer::Devices;
 
 void DeviceUSB::openDevice() {
 	connect();
+#ifndef DRY_RUN
 	afterConnect();
+#endif
 	claimInterface();
+#ifndef DRY_RUN
 	afterClaimInterface();
+#endif
 }
 
 void DeviceUSB::closeDevice() {
 	LogDebug("Disconnecting " + getFullName());
 	disconnect();
-}
-
-void DeviceUSB::connect() {
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
-	USB::connect();
-	if (not handle)
-		throw Error(
-			"Unable to connect to " +
-			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
-			" " + getFullName()
-		);
 }
 
 string DeviceUSB::getFullName() {

@@ -57,8 +57,6 @@ public:
 
 protected:
 
-	virtual void connect();
-
 	virtual void openDevice();
 
 	virtual void closeDevice();
