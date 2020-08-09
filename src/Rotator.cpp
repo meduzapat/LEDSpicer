@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
 		commandline,
 		configFile = "";
 
+	string resetWays;
+
 	umap<string, Restrictor::Ways> playersData;
 
 	for (int i = 1; i < argc; i++) {
@@ -54,6 +56,7 @@ int main(int argc, char **argv) {
 				"Rotate player 1 joystick 1 into 2 ways and player 1 joystick 2 into 2 ways vertical:\n"
 				"rotator 1 1 2 1 2 vertical2\n"
 				"Options:\n"
+				"-r <ways> or --reset <ways>  Reset all the restrictors to way\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
 				"-v or --version              Display version information\n"
 				"-h or --help                 Display this help screen.\n"
@@ -76,6 +79,12 @@ int main(int argc, char **argv) {
 			return EXIT_SUCCESS;
 		}
 
+		// Reset Only.
+		if (commandline == "-r" or commandline == "--reset") {
+			resetWays = argv[++i];
+			continue;
+		}
+
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
 			configFile = argv[++i];
@@ -90,7 +99,7 @@ int main(int argc, char **argv) {
 		i+=2;
 	}
 
-	if (playersData.empty()) {
+	if (playersData.empty() and resetWays.empty()) {
 		LogError("Nothing to do");
 		return EXIT_SUCCESS;
 	}
@@ -135,12 +144,22 @@ int main(int argc, char **argv) {
 		}
 
 		// Run Rotations.
-		for (auto& playerData : playersData) {
-			if (not restrictors.count(playerData.first))
-				continue;
-			LogDebug("Rotating player " + playerData.first + " into " + Restrictor::ways2str(playerData.second));
-			restrictors[playerData.first]->initialize();
-			restrictors[playerData.first]->rotate(playerData.second);
+		if (resetWays.empty()) {
+			// Process players
+			for (auto& playerData : playersData) {
+				if (not restrictors.count(playerData.first))
+					continue;
+				LogDebug("Rotating player " + playerData.first + " into " + Restrictor::ways2str(playerData.second));
+				restrictors[playerData.first]->initialize();
+				restrictors[playerData.first]->rotate(playerData.second);
+			}
+		}
+		else {
+			// Reset all
+			for (auto& r : restrictors) {
+				r.second->initialize();
+				r.second->rotate(Restrictor::str2ways(resetWays));
+			}
 		}
 
 		// Clean up
