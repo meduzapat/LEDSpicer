@@ -195,6 +195,8 @@ uint8_t Color::transition(uint8_t colorA, uint8_t colorB, float percent) {
 
 void Color::loadColors(const umap<string, string>& colorsData, const string& format) {
 	for (auto& colorData : colorsData) {
+		if (colorData.first == Color_Random)
+			continue;
 		colors[colorData.first] = std::move(Color(colorData.second, format));
 		names.push_back(colorData.first);
 	}
