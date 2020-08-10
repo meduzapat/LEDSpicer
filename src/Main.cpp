@@ -126,7 +126,7 @@ void Main::run() {
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
-					LogNotice("Invalid message " + msg.getData()[0]);
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
 					break;
 				}
 				if (alwaysOnElements.count(msg.getData()[0]))
@@ -139,7 +139,7 @@ void Main::run() {
 
 			case Message::Types::SetGroup:
 				if (msg.getData().size() != 3) {
-					LogNotice("Invalid message ");
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
@@ -167,7 +167,7 @@ void Main::run() {
 
 			case Message::Types::ClearGroup:
 				if (msg.getData().size() != 1) {
-					LogNotice("Unknown group " + msg.getData()[0]);
+					LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
 					break;
 				}
 				if (alwaysOnGroups.count(msg.getData()[0]))

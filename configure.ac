@@ -248,6 +248,7 @@ Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
 Prefix       : $prefix
 Devices dir  : $DEVICES_DIR
 Actors dir   : $ACTORS_DIR
+Inputs dir   : $INPUTS_DIR
 Data dir     : $datadir
 Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
