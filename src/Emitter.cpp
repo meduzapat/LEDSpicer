@@ -141,14 +141,17 @@ int main(int argc, char **argv) {
 		// Check request.
 		vector<string> data = msg.getData();
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
+			// param 1 is rom, param 2 is system.
 			if (data.size() < 2) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}
 
+			msg.reset();
+			msg.setType(Message::Types::LoadProfile);
+			msg.addData(string(data[1]).append("/").append(data[0]));
 			// arcades (mame and others)
 			if (data[1] == "arcade") {
-				msg.reset();
 				GameRecord gd;
 				try {
 					gd = parseMame(data[0]);
@@ -162,18 +165,14 @@ int main(int argc, char **argv) {
 					msg.addData(gd.toString());
 				}
 				else {
-					msg.setType(Message::Types::LoadProfile);
-					msg.addData(string(data[1]).append("/").append(data[0]));
 					msg.addData("P" + gd.players + "_B" + gd.playersData[0].buttons);
 					msg.addData(gd.playersData[0].type + gd.players + "_B" + gd.playersData[0].buttons);
-					msg.addData(data[1]);
 				}
+
 				// Rotate restrictors.
 				gd.rotate();
 			}
-			else {
-				msg.setType(Message::Types::LoadProfile);
-			}
+			msg.addData(data[1]);
 		}
 
 		// Open connection and send message.

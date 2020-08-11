@@ -68,7 +68,7 @@ struct PlayerData {
 	string rotate() {
 		string command;
 		for (uint8_t c = 0; c < ways.size(); ++c)
-			command += player + " " + to_string(c + 1) + " " + ways[c] + " ";
+			command += player + " " + to_string(c + 1) + " '" + ways[c] + "' ";
 		return command;
 	}
 };
