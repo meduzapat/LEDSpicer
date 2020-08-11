@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
 		configFile = CONFIG_FILE;
 
 	try {
-
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");
 		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
@@ -147,9 +146,9 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 			}
 
-			msg.reset();
 			// arcades (mame and others)
 			if (data[1] == "arcade") {
+				msg.reset();
 				GameRecord gd;
 				try {
 					gd = parseMame(data[0]);
@@ -171,6 +170,9 @@ int main(int argc, char **argv) {
 				}
 				// Rotate restrictors.
 				gd.rotate();
+			}
+			else {
+				msg.setType(Message::Types::LoadProfile);
 			}
 		}
 
