@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 			msg.reset();
 			msg.setType(Message::Types::LoadProfile);
 			msg.addData(string(data[1]).append("/").append(data[0]));
-			// arcades (mame and others)
+			// Arcades (mame and others).
 			if (data[1] == "arcade") {
 				GameRecord gd;
 				try {
@@ -162,7 +162,8 @@ int main(int argc, char **argv) {
 				}
 				if (craftProfile) {
 					msg.setType(Message::Types::CraftProfile);
-					msg.addData(gd.toString());
+					for (string& s : gd.toString())
+						msg.addData(s);
 				}
 				else {
 					msg.addData("P" + gd.players + "_B" + gd.playersData[0].buttons);
@@ -253,16 +254,10 @@ PlayerData processControllerNode(umap<string, string>& tempAttr, string variant)
 
 	PlayerData p;
 
-	if (tempAttr[TYPE] == "doublejoy" or tempAttr[TYPE] == "triplejoy") {
-		p.type = "joy";
-	}
-	else if (tempAttr[TYPE] == "stick") {
-		p.type = "joy";
+	if (tempAttr[TYPE] == "stick")
 		p.ways.push_back("analog");
-	}
-	else {
-		p.type = tempAttr[TYPE];
-	}
+
+	p.type = mameController2ledspicer(tempAttr[TYPE]);
 
 	if (tempAttr.count(WAYS + variant))
 		p.ways.push_back(tempAttr[WAYS + variant]);
@@ -278,4 +273,65 @@ PlayerData processControllerNode(umap<string, string>& tempAttr, string variant)
 	return p;
 }
 
+string mameController2ledspicer(const string& controller) {
+	if (controller == "mouse")
+		return "MOUSE";
+	if (controller == "lightgun")
+		return "LIGHTGUN";
+	if (controller == "trackball")
+		return "TRACKBALL";
+	if (controller == "dial")
+		return "DIAL";
+	if (controller == "paddle")
+		return "PADDLE";
+	if (controller == "pedal")
+		return "PEDAL";
+	if (controller == "only_buttons")
+		return "";
+	if (controller == "positional")
+		return "POSITIONAL";
+	return "JOYSTICK";
+}
 
+vector<string> GameRecord::toString() {
+
+	vector<string> result;
+	string pd;
+	for (PlayerData& playerData : playersData)
+		pd += playerData.toString();
+	result.push_back(pd.substr(0, pd.size()-1));
+	pd.clear();
+
+	for (uint8_t c = 1; c <= playersData.size(); ++c)
+		pd += "PLAYER" + to_string(c) + ",";
+
+	result.push_back(pd + (coins.empty() ? "" : coins + "_COINS,") + players + "_PLAYERS");
+	return result;
+}
+
+void GameRecord::rotate() {
+	string command = "./rotator ";
+	for (auto& pd : playersData)
+		command += pd.rotate();
+	LEDSpicer::Log::debug("Running: " + command);
+	if (system(command.c_str()) != EXIT_SUCCESS)
+		LogWarning("Failed to execute " + command);
+}
+
+string PlayerData::toString() {
+	string p;
+	for (uint8_t c = 1; c <= ways.size(); ++c)
+		p += "P" + player + "_" + type + to_string(c) + ",";
+
+	for (uint8_t c = 1; c <= Utility::parseNumber(buttons, ""); ++c)
+		p += "P" + player + "_BUTTON" + to_string(c) + ",";
+
+	return p;
+}
+
+string PlayerData::rotate() {
+	string command;
+	for (uint8_t c = 0; c < ways.size(); ++c)
+		command += player + " " + to_string(c + 1) + " '" + ways[c] + "' ";
+	return command;
+}

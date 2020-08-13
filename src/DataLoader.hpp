@@ -139,6 +139,37 @@ public:
 	 */
 	static Profile* processProfile(const string& name);
 
+	/**
+	 * Reads an animation file.
+	 * @param file
+	 */
+	static vector<Actor*> processAnimation(const string& file);
+
+	/**
+	 * Reads an input file.
+	 * @param profile
+	 * @param file
+	 */
+	static void processInput(Profile* profile, const string& file);
+
+	/**
+	 * Returns the current mode.
+	 * @return
+	 */
+	static Modes getMode();
+
+	/**
+	 * Sets the mode.
+	 * @param mode
+	 */
+	static void setMode(Modes mode);
+
+	/**
+	 * Sets the interval ms.
+	 * @param waitTime
+	 */
+	static void setInterval(uint8_t waitTime);
+
 /* Storage */
 
 	/// list with all elements by name.
@@ -173,24 +204,6 @@ public:
 
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
-
-	/**
-	 * Returns the current mode.
-	 * @return
-	 */
-	static Modes getMode();
-
-	/**
-	 * Sets the mode.
-	 * @param mode
-	 */
-	static void setMode(Modes mode);
-
-	/**
-	 * Sets the interval ms.
-	 * @param waitTime
-	 */
-	static void setInterval(uint8_t waitTime);
 
 protected:
 
@@ -227,12 +240,6 @@ protected:
 	void processGroupElements(tinyxml2::XMLElement* groupNode, Group& group);
 
 	/**
-	 * Reads an animation file.
-	 * @param file
-	 */
-	static vector<Actor*> processAnimation(const string& file);
-
-	/**
 	 * Creates a device object.
 	 * @param name
 	 * @param boardId
@@ -246,13 +253,6 @@ protected:
 	 * @return
 	 */
 	static Actor* createAnimation(umap<string, string>& actorData);
-
-	/**
-	 * Reads an input file.
-	 * @param profile
-	 * @param file
-	 */
-	static void processInput(Profile* profile, const string& file);
 
 	/**
 	 * Extracts input map data.

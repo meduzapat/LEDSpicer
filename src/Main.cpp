@@ -178,6 +178,74 @@ void Main::run() {
 				alwaysOnGroups.clear();
 				break;
 
+			case Message::Types::CraftProfile: {
+				/*
+				 * 0 target name
+				 * 1 elements
+				 * 2 groups
+				 * 3 system
+				 */
+				if (msg.getData().size() != 4) {
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
+					break;
+				}
+				// Try game profile.
+				if (tryProfiles({msg.getData()[0]}))
+					break;
+
+				// Create profile.
+				LogDebug("Creating profile with EmptyProfile_" + msg.getData()[3]);
+				Profile* profile = DataLoader::processProfile("EmptyProfile_" + msg.getData()[3]);
+				// Deactivate any overwrite.
+				alwaysOnElements.clear();
+				alwaysOnGroups.clear();
+				DataLoader::controlledItems.clear();
+				profiles.push_back(profile);
+				currentProfile = profile;
+
+				// Add elements.
+				for (string& n : Utility::explode(msg.getData()[1], ',')) {
+					LogDebug("Using element " + n);
+					if (DataLoader::allElements.count(n))
+						profile->addAlwaysOnElement(DataLoader::allElements[n], "White");
+					else
+						LogDebug(n + " not found");
+				}
+
+				// Add Groups.
+				for (string& n : Utility::explode(msg.getData()[2], ',')) {
+					LogDebug("Using group " + n);
+					if (DataLoader::layout.count(n))
+						profile->addAlwaysOnGroup(&DataLoader::layout[n], "White");
+					else
+						LogDebug(n + " not found");
+				}
+
+				// Add Animations.
+				for (string& n : Utility::explode(msg.getData()[2], ',')) {
+					try {
+						profile->addAnimation(DataLoader::processAnimation(n));
+					}
+					catch (...) {
+						LogDebug(n + " not found");
+						continue;
+					}
+				}
+
+				// Add Inputs.
+				for (string& n : Utility::explode(msg.getData()[2], ',')) {
+					try {
+						DataLoader::processInput(profile, n);
+					}
+					catch (...) {
+						LogDebug(n + " not found");
+						continue;
+					}
+				}
+
+				profile->restart();
+				break;
+			}
 			// Other request that are not handled yet by ledspicerd.
 			default:
 				break;

@@ -58,19 +58,12 @@ struct PlayerData {
 	/**
 	 * @return The dataset as a string.
 	 */
-	string toString() {
-		return "P" + player + "_" + type + (ways.size() ? to_string(ways.size()) : "") + "," + (buttons.empty() ? "" : "P" + player + "_buttons" + buttons + ",");
-	}
+	string toString();
 
 	/**
 	 * Rotates the restrictors if any.
 	 */
-	string rotate() {
-		string command;
-		for (uint8_t c = 0; c < ways.size(); ++c)
-			command += player + " " + to_string(c + 1) + " '" + ways[c] + "' ";
-		return command;
-	}
+	string rotate();
 };
 
 struct GameRecord {
@@ -78,29 +71,18 @@ struct GameRecord {
 	string
 		players = "0",
 		coins   = "0";
+
 	vector<PlayerData> playersData;
 
 	/**
 	 * @return The dataset as a string.
 	 */
-	string toString() {
-		string result = coins.empty() ? "" : coins + "_Coins,";
-		for (PlayerData& playerData : playersData)
-			result += playerData.toString();
-		result += players + "_Players";
-		return result;
-	}
+	vector<string> toString();
 
 	/**
 	 * Call Rotate on every player.
 	 */
-	void rotate() {
-		string command = "./rotator ";
-		for (auto& pd : playersData)
-			command += pd.rotate();
-		LEDSpicer::Log::debug("Running: " + command);
-		system(command.c_str());
-	}
+	void rotate();
 };
 
 /**
@@ -148,7 +130,8 @@ GameRecord parseMame(const string& rom);
 		dial
 		trackball
 		mouse
-		keypad    << all ignored
+		all next are ignored:
+		keypad
 		keyboard
 		mahjong
 		hanafuda
@@ -158,5 +141,7 @@ GameRecord parseMame(const string& rom);
  * @return
  */
 PlayerData processControllerNode(umap<string, string>& tempAttr, string variant = "");
+
+string mameController2ledspicer(const string& controller);
 
 #endif /* EMITTER_HPP_ */

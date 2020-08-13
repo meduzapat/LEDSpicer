@@ -28,8 +28,10 @@ int Utility::parseNumber(const string& number, const string& errorMessage) {
 	try {
 		return std::stoi(number);
 	} catch (...) {
-		throw Error(errorMessage);
+		if (errorMessage.size())
+			throw Error(errorMessage);
 	}
+	return 0;
 }
 
 void Utility::ltrim(string& text) {

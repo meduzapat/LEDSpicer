@@ -84,15 +84,15 @@ private:
 	};
 
 	struct UserPref {
-		Color
+		const Color
 			/// Color to use when off
-			off,
+			& off,
 			/// Color to use when low
-			c00,
+			& c00,
 			/// Color to use when mid
-			c50,
+			& c50,
 			/// Color to use when full
-			c75;
+			& c75;
 		Modes mode;
 		Channels channel;
 	} userPref;

@@ -213,6 +213,7 @@ void DataLoader::processLayout() {
 	}
 
 	defaultProfile = processProfile(defaultProfileStr);
+	profiles[defaultProfileStr] = defaultProfile;
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
@@ -333,7 +334,6 @@ Profile* DataLoader::processProfile(const string& name) {
 		}
 	}
 
-	profiles[name] = profilePtr;
 	return profilePtr;
 }
 

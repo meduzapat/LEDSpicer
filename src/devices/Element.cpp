@@ -48,9 +48,9 @@ Element::Element(Element* other) : name(other->name) {
 
 void Element::setColor(const Color& color) {
 	if (pins.size() == 3) {
-		*pins[Color::Channels::Red] = color.getR();
+		*pins[Color::Channels::Red]   = color.getR();
 		*pins[Color::Channels::Green] = color.getG();
-		*pins[Color::Channels::Blue] = color.getB();
+		*pins[Color::Channels::Blue]  = color.getB();
 	}
 	else {
 		*pins[SINGLE_PIN] = color.getMonochrome();

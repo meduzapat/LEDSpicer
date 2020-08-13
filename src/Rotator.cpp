@@ -158,14 +158,14 @@ int main(int argc, char **argv) {
 			}
 		}
 		else {
-			// Reset all
+			// Reset all.
 			for (auto& r : restrictors) {
 				r.second->initialize();
 				r.second->rotate(Restrictor::str2ways(resetWays));
 			}
 		}
 
-		// Clean up
+		// Clean up.
 		for (auto& r : restrictors) {
 			r.second->terminate();
 			delete r.second;
