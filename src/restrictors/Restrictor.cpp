@@ -46,16 +46,16 @@ Restrictor::Ways Restrictor::str2ways(const string& ways) {
 		return Ways::w4x;
 	if (ways == "49")
 		return Ways::w49;
-    if (ways == "16")
+	if (ways == "16")
 		return Ways::w16;
-    if (ways == "analog")
+	if (ways == "analog")
 		return Ways::analog;
 	if (ways == "mouse")
 		return Ways::mouse;
-     if (ways == "rotary8")
+	if (ways == "rotary8")
 		return Ways::rotary8;
 	if (ways == "rotary12")
-		return Ways::rotary12;   
+		return Ways::rotary12;
 	return Ways::w8;
 }
 
@@ -71,18 +71,18 @@ string Restrictor::ways2str(Ways ways) {
 		return "diagonal 4 ways";
 	case Ways::w8:
 		return "8 ways";
-    case Ways::w16:
-        return "16 ways"; 
-    case Ways::w49:
-        return "49 ways"; 
+	case Ways::w16:
+		return "16 ways";
+	case Ways::w49:
+		return "49 ways";
 	case Ways::analog:
 		return "analog";
 	case Ways::mouse:
 		return "mouse";
-    case Ways::rotary8:
-        return "rotary 8"; 
-    case Ways::rotary12:
-        return "rotary 12"; 
+	case Ways::rotary8:
+		return "rotary 8";
+	case Ways::rotary12:
+		return "rotary 12";
 	}
 	return "";
 }

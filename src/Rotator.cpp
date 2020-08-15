@@ -130,16 +130,16 @@ int main(int argc, char **argv) {
 					umap<string, string> restrictorAttr = XMLHelper::processNode(element);
 					Utility::checkAttributes(REQUIRED_PARAM_RESTRICTOR, restrictorAttr, RESTRICTOR);
 					Restrictor* restrictor = nullptr;
-					if (restrictorAttr["name"] == "UltraStik360") {
+					if (restrictorAttr["name"] == ULTRASTIK_NAME) {
 						restrictor = new UltraStik360(restrictorAttr);
 					}
-					else if (restrictorAttr["name"] == "ServoStik") {
+					else if (restrictorAttr["name"] == SERVOSTIK_NAME) {
 						restrictor = new ServoStik(restrictorAttr);
 					}
-                    else if (restrictorAttr["name"] == "GPWiz49") {
+					else if (restrictorAttr["name"] == GPWIZ49_NAME) {
 						restrictor = new GPWiz49(restrictorAttr);
 					}
-                    else if (restrictorAttr["name"] == "GPWiz40RotoX") {
+					else if (restrictorAttr["name"] == GPWIZ40ROTOX_NAME) {
 						restrictor = new GPWiz40RotoX(restrictorAttr);
 					}
 					else {

@@ -51,7 +51,6 @@ public:
 			GPWIZ49_MAX_BOARDS
 		) {}
 
-
 	virtual ~GPWiz49() = default;
 
 	virtual void rotate(Ways way);
@@ -63,7 +62,7 @@ public:
 	virtual string getName();
 };
 
-} /* namespace Rotators */
+} /* namespace Restrictors */
 } /* namespace LEDSpicer */
 
 #endif /* RESTRICTORS_GPWIZ49_HPP_ */

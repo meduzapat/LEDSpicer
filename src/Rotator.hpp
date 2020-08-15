@@ -46,7 +46,7 @@ using Restrictors::UltraStik360;
 using Restrictors::ServoStik;
 using Restrictors::GPWiz49;
 using Restrictors::GPWiz40RotoX;
-    
+
 umap<string, Restrictor*> restrictors;
 
 int main(int argc, char **argv);

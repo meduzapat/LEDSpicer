@@ -63,7 +63,7 @@ public:
 	virtual string getName();
 };
 
-} /* namespace Rotators */
+} /* namespace Restrictors */
 } /* namespace LEDSpicer */
 
 #endif /* RESTRICTORS_SERVOSTIK_HPP_ */

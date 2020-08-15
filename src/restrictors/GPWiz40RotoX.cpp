@@ -25,34 +25,34 @@
 using namespace LEDSpicer::Restrictors;
 
 void GPWiz40RotoX::rotate(Ways way) {
-    
-    /*
-    bit0 (1) = 12-way rotary enable on Rotary Stick 1
-    bit1 (2) = 12-way rotary enable on Rotary Stick 2 
-    bit4 (16) = 8-way rotary enable on Rotary Stick 1
-    bit5 (32) = 8-way rotary enable on Rotary Stick 2 
-    */ 
-    /* 30,30 is default speedon / speedoff value, it would be nice to have some control over these 2 values  */ 
+
+	/*
+	bit0 (1) = 12-way rotary enable on Rotary Stick 1
+	bit1 (2) = 12-way rotary enable on Rotary Stick 2
+	bit4 (16) = 8-way rotary enable on Rotary Stick 1
+	bit5 (32) = 8-way rotary enable on Rotary Stick 2
+	 */
+	/* 30,30 is default speedon / speedoff value, it would be nice to have some control over these 2 values  */
 	// vector<uint8_t> data {207,30,30,0x000001};
-    vector<uint8_t> data {207,30,30,1,0,0,0};
-    
+	vector<uint8_t> data {207,30,30,1,0,0,0};
+
 	switch (way) {
 	case Ways::rotary8:
-            data[3]= 1; 
-            data[4]= 2; 
-            data[5]= 16; 
-            data[6]= 32; 
-            LogDebug("Rotating " + getName() + " to 8 way rotary.");
-            break;
+		data[3]= 1;
+		data[4]= 2;
+		data[5]= 16;
+		data[6]= 32;
+		LogDebug("Rotating " + getName() + " to 8 way rotary.");
+		break;
 	case Ways::rotary12:
-            data[3] = 1; 
-            data[4] = 2; 
-            LogDebug("Rotating " + getName() + " to 12 way rotary.");
-            break;
+		data[3] = 1;
+		data[4] = 2;
+		LogDebug("Rotating " + getName() + " to 12 way rotary.");
+		break;
 	default:
-            data[3] = 1; 
-            data[4] = 2; 
-            LogDebug("Rotating " + getName() + " to 12 way rotary.");
+		data[3] = 1;
+		data[4] = 2;
+		LogDebug("Rotating " + getName() + " to 12 way rotary.");
 	}
 	transferToUSB(data);
 }
