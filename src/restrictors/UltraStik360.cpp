@@ -189,6 +189,8 @@ string UltraStik360::ways2file(Ways ways) {
 	case Ways::w8:
 		return "8Way";
 	case Ways::analog:
+    case Ways::w49:
+    case Ways::w16:
 		return "Analog";
 	case Ways::mouse:
 		if (handleMouse)
