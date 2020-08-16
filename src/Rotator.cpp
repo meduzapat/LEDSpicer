@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 				"You can repeat 'player joystick ways' as many times as needed:\n"
 				" value for player: 1, 2, etc.\n"
 				" value for joystick: 1, 2, etc.\n"
-				" value for ways: 1, 2, strange2, vertical2, '3 (half4)', 4, 4x, 8, '5 (half8)', analog, mouse.\n"
+				" value for ways: 1, 2, strange2, vertical2, '3 (half4)', 4, 4x, 8, '5 (half8)', 16, 49, analog, mouse, rotary8, rotary12.\n"
 				"Note: if your hardware does not support a specific ways the closes available one will be used.\n\n"
 				"Examples:\n"
 				"Rotate player 1 joystick 1 into 4 ways:\n"
@@ -135,6 +135,12 @@ int main(int argc, char **argv) {
 					}
 					else if (restrictorAttr["name"] == "ServoStik") {
 						restrictor = new ServoStik(restrictorAttr);
+					}
+                    else if (restrictorAttr["name"] == "GPWiz49") {
+						restrictor = new GPWiz49(restrictorAttr);
+					}
+                    else if (restrictorAttr["name"] == "GPWiz40RotoX") {
+						restrictor = new GPWiz40RotoX(restrictorAttr);
 					}
 					else {
 						LogError("Unknown restrictor type");
