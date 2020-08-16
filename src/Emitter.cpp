@@ -310,7 +310,7 @@ vector<string> GameRecord::toString() {
 }
 
 void GameRecord::rotate() {
-	string command = "./rotator ";
+	string command = "rotator ";
 	for (auto& pd : playersData)
 		command += pd.rotate();
 	LEDSpicer::Log::debug("Running: " + command);

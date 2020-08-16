@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../restrictors/GPWiz40RotoX.hpp"
+#include "GPWiz40RotoX.hpp"
 
 using namespace LEDSpicer::Restrictors;
 

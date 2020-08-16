@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../restrictors/GPWiz49.hpp"
+#include "GPWiz49.hpp"
 
 using namespace LEDSpicer::Restrictors;
 

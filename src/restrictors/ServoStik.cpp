@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../restrictors/ServoStik.hpp"
+#include "ServoStik.hpp"
 
 using namespace LEDSpicer::Restrictors;
 
