@@ -21,7 +21,7 @@
  */
 
 #include "USB.hpp"
-#ifdef DRY_RUN
+#ifdef SHOW_OUTPUT
 #include <iomanip>
 #endif
 using namespace LEDSpicer;
@@ -157,10 +157,7 @@ int USB::send(vector<uint8_t>& data) {
 
 void USB::transferToUSB(vector<uint8_t>& data) {
 
-#ifdef DRY_RUN
-	#ifdef NO_OUTPUT
-	return;
-	#endif
+#ifdef SHOW_OUTPUT
 	cout << "Data sent:" << endl;
 	uint8_t count = MAX_DUMP_COLUMNS;
 	for (auto b : data) {
@@ -171,8 +168,9 @@ void USB::transferToUSB(vector<uint8_t>& data) {
 		}
 	}
 	cout << endl;
-#else
+#endif
 
+#ifndef DRY_RUN
 	int responseCode;
 	if ((responseCode = send(data)) >= 0)
 		return;

@@ -36,9 +36,12 @@ class Group {
 
 public:
 
-	Group() = default;
+	Group(const Color& defaultColor) : defaultColor(defaultColor) {}
 
-	Group(const string& name) : name(name) {}
+	Group(
+		const string& name,
+		const Color& defaultColor
+	) : name(name), defaultColor(defaultColor) {}
 
 	/**
 	 * Structure to handle groups with properties.
@@ -112,12 +115,20 @@ public:
 	 */
 	const string& getName() const;
 
+	/**
+	 * Returns the default color for this element.
+	 * @return
+	 */
+	const Color& getDefaultColor();
+
 protected:
 
 	/// Elements on this group.
 	vector<Element*> elements;
 
 	string name = "";
+
+	const Color& defaultColor;
 
 };
 

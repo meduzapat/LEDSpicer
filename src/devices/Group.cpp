@@ -59,3 +59,7 @@ Element* Group::getElement(uint8_t index) {
 const string& Group::getName() const {
 	return name;
 }
+
+const LEDSpicer::Color& Group::getDefaultColor() {
+	return defaultColor;
+}

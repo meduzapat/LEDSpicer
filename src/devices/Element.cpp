@@ -24,7 +24,9 @@
 
 using namespace LEDSpicer::Devices;
 
-Element::Element(const string& name, uint8_t* pin) : name(name), pins{pin} {
+Element::Element(const string& name, uint8_t* pin, const Color& defaultColor) :
+	name(name), pins{pin}, defaultColor(defaultColor)
+{
 	pins.shrink_to_fit();
 }
 
@@ -32,15 +34,17 @@ Element::Element(
 		const string& name,
 		uint8_t* pinR,
 		uint8_t* pinG,
-		uint8_t* pinB
+		uint8_t* pinB,
+		const Color& defaultColor
 	) :
 		name(name),
-		pins{pinR, pinG, pinB
-	} {
+		pins{pinR, pinG, pinB},
+		defaultColor(defaultColor)
+{
 	pins.shrink_to_fit();
 }
 
-Element::Element(Element* other) : name(other->name) {
+Element::Element(Element* other) : name(other->name), defaultColor(other->defaultColor) {
 	for (auto p : other->pins)
 		pins.push_back(nullptr);
 	pins.shrink_to_fit();
@@ -102,4 +106,8 @@ uint8_t Element::size() const {
 
 string Element::getName() {
 	return name;
+}
+
+const LEDSpicer::Color& Element::getDefaultColor() {
+	return defaultColor;
 }

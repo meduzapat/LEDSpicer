@@ -66,10 +66,28 @@ class Element {
 
 public:
 
-	Element(const string& name, uint8_t* pin);
+	/**
+	 * Creates a new monochrome Element.
+	 * @param name
+	 * @param pin
+	 * @param defaultColor
+	 */
+	Element(const string& name, uint8_t* pin, const Color& defaultColor);
 
-	Element(const string& name, uint8_t* pinR, uint8_t* pinG, uint8_t* pinB);
+	/**
+	 * Creates a new RGB Element.
+	 * @param name
+	 * @param pinR
+	 * @param pinG
+	 * @param pinB
+	 * @param defaultColor
+	 */
+	Element(const string& name, uint8_t* pinR, uint8_t* pinG, uint8_t* pinB, const Color& defaultColor);
 
+	/**
+	 * Copy from other Element.
+	 * @param other
+	 */
 	Element(Element* other);
 
 	/**
@@ -174,16 +192,22 @@ public:
 	 */
 	string getName();
 
-protected:
-
 	/**
-	 * Array of pointers to the original pins
+	 * Returns the default color for this element.
+	 * @return
 	 */
-	vector<uint8_t*> pins;
+	const Color& getDefaultColor();
+
+protected:
 
 	/// keeps the element name.
 	string name;
 
+	/// Array of pointers to the original pins.
+	vector<uint8_t*> pins;
+
+	/// Color used for the craft profile elements.
+	const Color& defaultColor;
 };
 
 }} /* namespace LEDSpicer */

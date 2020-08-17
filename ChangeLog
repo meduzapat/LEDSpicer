@@ -1,4 +1,34 @@
-ledspicer (0.4.5) unstable; urgency=medium
+ledspicer (0.4.9) focal; urgency=medium
+
+  * fixes some issues on emmiter.
+  * New feature: default color for elements and groups.
+  * Code clean up.
+  * Removed NO_OUTPUT in order to use SHOW_OUTPUT that now works independently from DRY_RUN.
+  * Code documentation.
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Sun, 16 Aug 2020 13:46:29 -0500
+
+ledspicer (0.4.8) focal; urgency=medium
+
+  * fixes
+  * generated profiles
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Thu, 13 Aug 2020 18:23:29 -0400
+
+ledspicer (0.4.7) focal; urgency=medium
+
+  * fixes
+  * plugin network
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Tue, 11 Aug 2020 18:54:05 -0400
+
+ledspicer (0.4.6) focal; urgency=medium
+
+  * Added support for rotators
+  
+ -- Patricio Rossi <meduzapat@netscape.net>  Sun, 9 Aug 2020 00:22:19 -0400
+
+ledspicer (0.4.5) focal; urgency=medium
 
   * Changes packaging settings
   * Build process.
@@ -11,28 +41,28 @@ ledspicer (0.4.5) unstable; urgency=medium
 
  -- Patricio Rossi <meduzapat@netscape.net>  Sat, 13 Jun 2020 02:38:36 -0500
 
-ledspicer (0.4.4) unstable; urgency=medium
+ledspicer (0.4.4) focal; urgency=medium
 
   * This release improves overall code and speed, fixes some bugs specially on
     the input mame plugin.
 
  -- Patricio Rossi <meduzapat@netscape.net>  Wed, 10 Jun 2020 20:38:36 -0400
 
-ledspicer (0.4.3) unstable; urgency=medium
+ledspicer (0.4.3) focal; urgency=medium
 
   * Fixes an issue with ledwiz controller
   * Allows empty layouts
 
  -- Patricio Rossi <meduzapat@netscape.net>  14 Apr 2020 20:38:36 -0400
 
-ledspicer (0.4.2) unstable; urgency=medium 
+ledspicer (0.4.2) focal; urgency=medium 
 
   * This release is to fix some issues on 0.4.1 it also adds support for
     multiple pacdrives
 
  -- Patricio Rossi <meduzapat@netscape.net>  5 Apr 2020 20:38:36 -0400
  
-ledspicer (0.4.1) unstable; urgency=medium 
+ledspicer (0.4.1) focal; urgency=medium 
 
     * Actors can be start or finished using time or cycles (frames)
     * Howler controller fully functional and tested.
@@ -44,13 +74,13 @@ ledspicer (0.4.1) unstable; urgency=medium
 
  -- Patricio Rossi <meduzapat@netscape.net>  8 Mar 2020 20:38:36 -0400
 
-ledspicer (0.4.0) unstable; urgency=medium 
+ledspicer (0.4.0) focal; urgency=medium 
 
    * New release is out includes two new hardware devices and several fixes.
 
  -- Patricio Rossi <meduzapat@netscape.net>  18 Feb 2020 20:38:36 -0400
  
-ledspicer (0.3.9) unstable; urgency=medium 
+ledspicer (0.3.9) focal; urgency=medium 
 
    * This is the release 0.3.9
    * Improves Pulseaudio plugin render.
@@ -62,25 +92,25 @@ ledspicer (0.3.9) unstable; urgency=medium
 
  -- Patricio Rossi <meduzapat@netscape.net>  21 Nov 2019 20:38:36 -0400
 
-ledspicer (0.3.8) unstable; urgency=medium 
+ledspicer (0.3.8) focal; urgency=medium 
 
   * This is the release 0.3.8
 
  -- Patricio Rossi <meduzapat@netscape.net>  8 Sep 2019 20:38:36 -0400
 
-ledspicer (0.3.7) unstable; urgency=medium 
+ledspicer (0.3.7) focal; urgency=medium 
 
   * This is the release 0.3.7
 
  -- Patricio Rossi <meduzapat@netscape.net>  8 Sep 2019 20:38:36 -0400
 
-ledspicer (0.3.6) unstable; urgency=medium
+ledspicer (0.3.6) focal; urgency=medium
 
   * Includes all the new Input plugins functionality
 
  -- Patricio Rossi <meduzapat@netscape.net>  30 Jun 2019 20:38:36 -0400
 
-ledspicer (0.3.5) unstable; urgency=medium 
+ledspicer (0.3.5) focal; urgency=medium 
 
   * Adds profile dump
   * Allows to enable or disable output device plugins when building.

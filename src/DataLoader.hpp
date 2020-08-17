@@ -53,6 +53,7 @@ using std::chrono::milliseconds;
 #define PARAM_PORT            "port"
 #define PARAM_LOG_LEVEL       "logLevel"
 #define PARAM_NAME            "name"
+#define PARAM_DEFAULT_COLOR   "defaultColor"
 #define PARAM_LED             "led"
 #define PARAM_RED             "red"
 #define PARAM_GREEN           "green"
@@ -83,6 +84,9 @@ using std::chrono::milliseconds;
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
 #define REQUIRED_PARAM_MAP            {"type", "target", "trigger", "color", "filter"}
+
+#define EMPTY_PROFILE "profile_"
+#define DEFAULT_COLOR "White"
 
 namespace LEDSpicer {
 

@@ -105,6 +105,13 @@ protected:
 	 */
 	Profile* tryProfiles(const vector<string>& data);
 
+	/**
+	 * Attempts create a profile with the values provided.
+	 * @param name
+	 * @return null if failed.
+	 */
+	Profile* craftProfile(const string& name, const string& elements, const string& groups);
+
 };
 
 } /* namespace LEDSpicer */

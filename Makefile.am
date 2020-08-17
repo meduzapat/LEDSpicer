@@ -605,7 +605,7 @@ animations_data_DATA = \
 	data/animations/readme.txt
 
 profiles_datadir=$(pkgdatadir)/profiles
-profiles_data_DATA = \
+profiles_data_DATA =         \
 	data/profiles/readme.txt
 	
 inputs_datadir=$(pkgdatadir)/inputs
@@ -629,6 +629,7 @@ examples_DATA =             \
 	data/singleColor.xml    \
 	data/animations/animation-skeleton.xml \
 	data/profiles/profile-skeleton.xml     \
+	data/profiles/profile_empty.xml        \
 	data/inputs/input-skeleton.xml
 
 ######################
@@ -688,6 +689,7 @@ EXTRA_DIST +=                       \
 	data/inputs/readme.txt     \
 	data/21-ledspicer.rules    \
 	data/ledspicerd.service    \
+	data/profiles/profile_empty.xml        \
 	data/animations/animation-skeleton.xml \
 	data/profiles/profile-skeleton.xml     \
 	data/inputs/input-skeleton.xml         \
