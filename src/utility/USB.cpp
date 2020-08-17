@@ -119,7 +119,7 @@ void USB::claimInterface() {
 	if (libusb_claim_interface(handle, interface))
 		throw Error(
 			"Unable to claim interface to " +
-			to_string(getVendor()) + ":" + to_string(getProduct())
+			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct())
 		);
 }
 
