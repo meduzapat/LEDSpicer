@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.4.7],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.4.9],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -248,6 +248,7 @@ Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
 Prefix       : $prefix
 Devices dir  : $DEVICES_DIR
 Actors dir   : $ACTORS_DIR
+Inputs dir   : $INPUTS_DIR
 Data dir     : $datadir
 Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE

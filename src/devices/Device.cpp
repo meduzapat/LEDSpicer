@@ -68,16 +68,22 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 	return &LEDs.at(ledPos);
 }
 
-void Device::registerElement(const string& name, uint8_t led) {
+void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor) {
 	validateLed(led);
-	elementsByName.emplace(name, Element(name, &LEDs[led]));
+	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor));
 }
 
-void Device::registerElement(const string& name, uint8_t led1, uint8_t led2, uint8_t led3) {
+void Device::registerElement(
+	const string& name,
+	uint8_t led1,
+	uint8_t led2,
+	uint8_t led3,
+	const Color& defaultColor
+) {
 	validateLed(led1);
 	validateLed(led2);
 	validateLed(led3);
-	elementsByName.emplace(name, Element(name, &LEDs[led1], &LEDs[led2], &LEDs[led3]));
+	elementsByName.emplace(name, Element(name, &LEDs[led1], &LEDs[led2], &LEDs[led3], defaultColor));
 }
 
 Element* Device::getElement(const string& name) {
@@ -100,7 +106,7 @@ uint8_t Device::getNumberOfLeds() {
 void Device::packData() {
 	if (LEDs == oldLEDs) {
 #ifdef DEVELOP
-	#ifndef NO_OUTPUT
+	#ifdef SHOW_OUTPUT
 	LogDebug("No changes, data not sent for " + getFullName());
 	#endif
 #endif

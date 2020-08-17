@@ -116,7 +116,7 @@ void Main::run() {
 					break;
 				}
 				try {
-					alwaysOnElements[name] = Element::Item(DataLoader::allElements[name], &Color::getColor(color), Color::str2filter(filter));
+					alwaysOnElements[name] = Element::Item{DataLoader::allElements.at(name), &Color::getColor(color), Color::str2filter(filter)};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -126,7 +126,7 @@ void Main::run() {
 
 			case Message::Types::ClearElement:
 				if (msg.getData().size() != 1) {
-					LogNotice("Invalid message " + msg.getData()[0]);
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
 					break;
 				}
 				if (alwaysOnElements.count(msg.getData()[0]))
@@ -139,7 +139,7 @@ void Main::run() {
 
 			case Message::Types::SetGroup:
 				if (msg.getData().size() != 3) {
-					LogNotice("Invalid message ");
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
@@ -147,18 +147,11 @@ void Main::run() {
 					break;
 				}
 				try {
-					if (alwaysOnGroups.count(msg.getData()[0]))
-						alwaysOnGroups[msg.getData()[0]] = Group::Item{
-							&DataLoader::layout[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						};
-					else
-						alwaysOnGroups.emplace(msg.getData()[0], Group::Item{
-							&DataLoader::layout[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						});
+					alwaysOnGroups[msg.getData()[0]] = Group::Item{
+						&DataLoader::layout.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -167,7 +160,7 @@ void Main::run() {
 
 			case Message::Types::ClearGroup:
 				if (msg.getData().size() != 1) {
-					LogNotice("Unknown group " + msg.getData()[0]);
+					LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
 					break;
 				}
 				if (alwaysOnGroups.count(msg.getData()[0]))
@@ -177,6 +170,44 @@ void Main::run() {
 			case Message::Types::ClearAllGroups:
 				alwaysOnGroups.clear();
 				break;
+
+			case Message::Types::CraftProfile: {
+				/*
+				 * 0 target name
+				 * 1 elements
+				 * 2 groups
+				 * 3 system
+				 */
+				if (msg.getData().size() != 4) {
+					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
+					break;
+				}
+				// Try game profile.
+				if (tryProfiles({msg.getData()[0]}))
+					break;
+
+				// Craft profile.
+				Profile* profile = craftProfile(msg.getData()[3], msg.getData()[1], msg.getData()[2]);
+				if (profile) {
+					// Deactivate any overwrite.
+					alwaysOnGroups.clear();
+					alwaysOnElements.clear();
+					DataLoader::controlledItems.clear();
+					profiles.push_back(profile);
+					currentProfile = profile;
+					profile->restart();
+					break;
+				}
+#ifdef DEVELOP
+				else {
+					LogDebug("Failed to craft profile with " + msg.getData()[3]);
+				}
+#endif
+				// Load system.
+				if (not tryProfiles({msg.getData()[3]}))
+					LogInfo("All requested profiles failed");
+				break;
+			}
 
 			// Other request that are not handled yet by ledspicerd.
 			default:

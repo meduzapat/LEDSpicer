@@ -51,7 +51,7 @@ protected:
 
 private:
 
-	Color tailColor;
+	const Color& tailColor;
 
 	struct TailData {
 		uint8_t percent;

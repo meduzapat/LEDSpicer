@@ -32,6 +32,8 @@ int main(int argc, char **argv) {
 
 	string resetWays;
 
+	Log::initialize(true);
+
 	umap<string, Restrictor::Ways> playersData;
 
 	for (int i = 1; i < argc; i++) {
@@ -147,22 +149,23 @@ int main(int argc, char **argv) {
 		if (resetWays.empty()) {
 			// Process players
 			for (auto& playerData : playersData) {
+				LogDebug("Checking player " + playerData.first + " for " + Restrictor::ways2str(playerData.second));
 				if (not restrictors.count(playerData.first))
 					continue;
-				LogDebug("Rotating player " + playerData.first + " into " + Restrictor::ways2str(playerData.second));
+				LogInfo("Rotating player " + playerData.first + " into " + Restrictor::ways2str(playerData.second));
 				restrictors[playerData.first]->initialize();
 				restrictors[playerData.first]->rotate(playerData.second);
 			}
 		}
 		else {
-			// Reset all
+			// Reset all.
 			for (auto& r : restrictors) {
 				r.second->initialize();
 				r.second->rotate(Restrictor::str2ways(resetWays));
 			}
 		}
 
-		// Clean up
+		// Clean up.
 		for (auto& r : restrictors) {
 			r.second->terminate();
 			delete r.second;

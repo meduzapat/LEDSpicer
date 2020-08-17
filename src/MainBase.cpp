@@ -187,6 +187,14 @@ void MainBase::dumpConfiguration() {
 		cout << endl << "Group: '" << group.first << "' with ";
 		group.second.drawElements();
 	}
+	cout << endl << "Groups:" << endl;
+	for (auto group : DataLoader::layout)
+		cout << std::setfill(' ') << std::setw(20) << std::left << group.first << "default Color: " << group.second.getDefaultColor().getName() << endl;
+
+	cout << endl << "Elements:" << endl;
+	for (auto element : DataLoader::allElements)
+		cout << std::setfill(' ') << std::setw(20) << std::left << element.first << "default Color: " << element.second->getDefaultColor().getName() << endl;
+
 	cout << endl;
 }
 
@@ -224,6 +232,13 @@ Device* MainBase::selectDevice() {
 	}
 }
 
+void MainBase::wait(milliseconds wasted) {
+	if (wasted < DataLoader::waitTime)
+		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
+	else
+		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(DataLoader::waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
+}
+
 Profile* MainBase::tryProfiles(const vector<string>& data) {
 	Profile* profile = nullptr;
 	for (auto& profileName : data) {
@@ -247,9 +262,54 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 	return profile;
 }
 
-void MainBase::wait(milliseconds wasted) {
-	if (wasted < DataLoader::waitTime)
-		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
-	else
-		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(DataLoader::waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
+Profile* MainBase::craftProfile(const string& name, const string& elements, const string& groups) {
+
+	// Create profile.
+	LogDebug("Creating profile with " EMPTY_PROFILE + name);
+	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name);
+
+	// Add elements.
+	for (string& n : Utility::explode(elements, ',')) {
+		LogDebug("Using element " + n);
+		if (DataLoader::allElements.count(n))
+			profile->addAlwaysOnElement(DataLoader::allElements.at(n), DataLoader::allElements.at(n)->getDefaultColor());
+		else
+			LogDebug(n + " not found");
+	}
+
+	// Add Groups.
+	for (string& n : Utility::explode(groups, ',')) {
+		LogDebug("Using group " + n);
+		if (DataLoader::layout.count(n))
+			profile->addAlwaysOnGroup(
+					&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor());
+		else
+			LogDebug(n + " not found");
+	}
+
+	// Add Animations.
+	for (string& n : Utility::explode(groups, ',')) {
+		LogDebug("Loading animation " + n);
+		try {
+			profile->addAnimation(DataLoader::processAnimation(n));
+		}
+		catch (...) {
+			LogDebug(n + " not found");
+			continue;
+		}
+	}
+
+	// Add Inputs.
+	for (string& n : Utility::explode(groups, ',')) {
+		LogDebug("Loading input " + n);
+		try {
+			DataLoader::processInput(profile, n);
+		}
+		catch (...) {
+			LogDebug(n + " not found");
+			continue;
+		}
+	}
+
+	return profile;
 }

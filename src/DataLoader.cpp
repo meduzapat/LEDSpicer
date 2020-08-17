@@ -47,27 +47,29 @@ void DataLoader::setMode(Modes mode) {
 
 void DataLoader::readConfiguration() {
 
+	// Input need to be linked with the main program items.
 	Input::setInputControllers(&controlledItems);
 
+	// Process Root.
 	umap<string, string> tempAttr = processNode(root);
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
-	// set log level.
+	// Set log level.
 	if ((mode != Modes::Dump or mode != Modes::Profile) and tempAttr.count(PARAM_LOG_LEVEL))
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
 
-	// set FPS.
+	// Set FPS.
 	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], "Invalid value for FPS");
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
 	setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
-
 	Actor::setFPS((fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
 
+	// Set Port number.
 	portNumber = tempAttr[PARAM_PORT];
 
+	// Read Colors.
 	processColorFile(createFilename(tempAttr[PARAM_COLORS]));
-
 	auto cs = Utility::explode(tempAttr.count(PARAM_RANDOM_COLORS) ? tempAttr[PARAM_RANDOM_COLORS] : "", ',');
 	for (auto& c : cs)
 		Utility::trim(c);
@@ -77,9 +79,11 @@ void DataLoader::readConfiguration() {
 
 	processLayout();
 
+	// Initialize Devices.
 	for (auto device : devices)
 		device->initialize();
 
+	// Drop root.
 	dropRootPrivileges(
 		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
 		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
@@ -87,18 +91,18 @@ void DataLoader::readConfiguration() {
 }
 
 void DataLoader::processColorFile(const string& file) {
-	// Process colors file.
+
 	XMLHelper colors(file, "Colors");
 	umap<string, string> colorAttr = processNode(colors.getRoot());
 
-	tinyxml2::XMLElement* element = colors.getRoot()->FirstChildElement(NODE_COLOR);
-	if (not element)
+	tinyxml2::XMLElement* xmlElement = colors.getRoot()->FirstChildElement(NODE_COLOR);
+	if (not xmlElement)
 		throw LEDError("No colors found");
 
 	string format = colorAttr["format"];
 	umap<string, string> colorsData;
-	for (; element; element = element->NextSiblingElement()) {
-		colorAttr = processNode(element);
+	for (; xmlElement; xmlElement = xmlElement->NextSiblingElement()) {
+		colorAttr = processNode(xmlElement);
 		Utility::checkAttributes(REQUIRED_PARAM_COLOR, colorAttr, NODE_COLOR);
 		if (colorAttr[PARAM_NAME] == "random")
 			continue;
@@ -112,21 +116,21 @@ void DataLoader::processColorFile(const string& file) {
 
 void DataLoader::processDevices() {
 
-	tinyxml2::XMLElement* element = root->FirstChildElement(NODE_DEVICES);
-	if (not element)
+	tinyxml2::XMLElement* xmlElement = root->FirstChildElement(NODE_DEVICES);
+	if (not xmlElement)
 		throw LEDError("Missing " NODE_DEVICES " section");
 
-	element = element->FirstChildElement(NODE_DEVICE);
-	if (not element)
+	xmlElement = xmlElement->FirstChildElement(NODE_DEVICE);
+	if (not xmlElement)
 		throw LEDError("Empty " NODE_DEVICES " section");
 
-	for (; element; element = element->NextSiblingElement(NODE_DEVICE)) {
-		umap<string, string> deviceAttr = processNode(element);
+	for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_DEVICE)) {
+		umap<string, string> deviceAttr = processNode(xmlElement);
 		Utility::checkAttributes(REQUIRED_PARAM_DEVICE, deviceAttr, NODE_DEVICE);
 		auto device = createDevice(deviceAttr);
 		LogInfo("Processing " + device->getFullName());
 		this->devices.push_back(device);
-		processDeviceElements(element, device);
+		processDeviceElements(xmlElement, device);
 	}
 }
 
@@ -134,12 +138,12 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 	vector<bool> pinCheck(device->getNumberOfLeds(), false);
 
-	tinyxml2::XMLElement* element = deviceNode->FirstChildElement(NODE_ELEMENT);
-	if (not element)
+	tinyxml2::XMLElement* xmlElement = deviceNode->FirstChildElement(NODE_ELEMENT);
+	if (not xmlElement)
 		throw LEDError("Empty elements section in " + device->getFullName());
 
-	for (; element; element = element->NextSiblingElement(NODE_ELEMENT)) {
-		umap<string, string> tempAttr = processNode(element);
+	for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ELEMENT)) {
+		umap<string, string> tempAttr = processNode(xmlElement);
 
 		if (allElements.count(tempAttr[PARAM_NAME]))
 			throw LEDError("Duplicated element " + tempAttr[PARAM_NAME]);
@@ -147,9 +151,13 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
 		// Single color.
-		if (tempAttr.count("led")) {
+		if (tempAttr.count(PARAM_LED)) {
 			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], "Invalid Value for pin in " + device->getFullName()) - 1;
-			device->registerElement(tempAttr[PARAM_NAME], pin);
+			device->registerElement(
+				tempAttr[PARAM_NAME],
+				pin,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR)
+			);
 			pinCheck[pin] = true;
 		}
 		// RGB.
@@ -159,7 +167,11 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 				r = Utility::parseNumber(tempAttr[PARAM_RED], "Invalid Value for red pin in " + device->getFullName()) - 1,
 				g = Utility::parseNumber(tempAttr[PARAM_GREEN], "Invalid Value for green pin in " + device->getFullName()) - 1,
 				b = Utility::parseNumber(tempAttr[PARAM_BLUE], "Invalid Value for blue pin in " + device->getFullName()) - 1;
-			device->registerElement(tempAttr[PARAM_NAME], r, g , b);
+			device->registerElement(
+				tempAttr[PARAM_NAME],
+				r, g , b,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR)
+			);
 			pinCheck[r] = true;
 			pinCheck[g] = true;
 			pinCheck[b] = true;
@@ -167,12 +179,12 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		allElements.emplace(tempAttr[PARAM_NAME], device->getElement(tempAttr[PARAM_NAME]));
 	}
 
-	// Checks orphan Pins.
 	LogInfo(
 		device->getFullName() + " with " +
 		to_string(pinCheck.size()) + " LEDs divided into " +
 		to_string(device->getNumberOfElements()) + " elements"
 	);
+	// Checks orphan Pins.
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
 		if (not pinCheck[pin])
 			LogInfo("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
@@ -190,22 +202,28 @@ void DataLoader::processLayout() {
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, NODE_LAYOUT);
 	string defaultProfileStr = tempAttr[PARAM_DEFAULT_PROFILE];
 
-	tinyxml2::XMLElement* element = layoutNode->FirstChildElement(NODE_GROUP);
-	if (element)
-		for (; element; element = element->NextSiblingElement(NODE_GROUP)) {
-			tempAttr = processNode(element);
-			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "group");
+	tinyxml2::XMLElement* xmlElement = layoutNode->FirstChildElement(NODE_GROUP);
+	if (xmlElement)
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_GROUP)) {
+			tempAttr = processNode(xmlElement);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, NODE_GROUP);
 
 			if (this->layout.count(tempAttr[PARAM_NAME]))
 				throw LEDError("Duplicated group " + tempAttr[PARAM_NAME]);
 
-			layout.emplace(tempAttr[PARAM_NAME], Group(tempAttr[PARAM_NAME]));
-			processGroupElements(element, layout[tempAttr[PARAM_NAME]]);
+			layout.emplace(
+				tempAttr[PARAM_NAME],
+				Group{
+					tempAttr[PARAM_NAME],
+					Color::getColor(tempAttr.count(PARAM_DEFAULT_COLOR) ? tempAttr[PARAM_DEFAULT_COLOR] : DEFAULT_COLOR)
+				}
+			);
+			processGroupElements(xmlElement, layout.at(tempAttr[PARAM_NAME]));
 		}
 
 	// Create a group with all elements on it called All if not defined.
 	if (not this->layout.count("All")) {
-		Group group("All");
+		Group group("All", Color::getColor(DEFAULT_COLOR));
 		for (auto& gp : allElements)
 			group.linkElement(gp.second);
 		group.shrinkToFit();
@@ -213,18 +231,19 @@ void DataLoader::processLayout() {
 	}
 
 	defaultProfile = processProfile(defaultProfileStr);
+	profiles[defaultProfileStr] = defaultProfile;
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
 
-	tinyxml2::XMLElement* element = groupNode->FirstChildElement(NODE_ELEMENT);
+	tinyxml2::XMLElement* xmlElement = groupNode->FirstChildElement(NODE_ELEMENT);
 
-	if (not element)
+	if (not xmlElement)
 		throw LEDError("Empty group section");
 
 	umap<string, bool> groupElements;
-	for (; element; element = element->NextSiblingElement(NODE_ELEMENT)) {
-		umap<string, string> elementAttr = processNode(element);
+	for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ELEMENT)) {
+		umap<string, string> elementAttr = processNode(xmlElement);
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "group element");
 
 		// Check dupes and add
@@ -255,9 +274,9 @@ Profile* DataLoader::processProfile(const string& name) {
 	 * start = nullptr,
 	 * end   = nullptr;
 
-	tinyxml2::XMLElement* element = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
-	if (element) {
-		umap<string, string> tempAttr = processNode(element);
+	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
+	if (xmlElement) {
+		umap<string, string> tempAttr = processNode(xmlElement);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
 		tempAttr["cycles"] = "1";
@@ -266,9 +285,9 @@ Profile* DataLoader::processProfile(const string& name) {
 			LogWarning("Actor " + tempAttr["type"] + " cannot be used as a start transition");
 	}
 
-	element = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
-	if (element) {
-		umap<string, string> tempAttr = processNode(element);
+	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
+	if (xmlElement) {
+		umap<string, string> tempAttr = processNode(xmlElement);
 		tempAttr["group"]  = "All";
 		tempAttr["filter"] = "Normal";
 		tempAttr["cycles"] = "1";
@@ -285,55 +304,60 @@ Profile* DataLoader::processProfile(const string& name) {
 	);
 
 	// Check for animations.
-	element = profile.getRoot()->FirstChildElement(NODE_ANIMATIONS);
-	if (element) {
-		element = element->FirstChildElement(NODE_ANIMATION);
-		for (; element; element = element->NextSiblingElement(NODE_ANIMATION)) {
-			tempAttr = processNode(element);
+	xmlElement = profile.getRoot()->FirstChildElement(NODE_ANIMATIONS);
+	if (xmlElement) {
+		xmlElement = xmlElement->FirstChildElement(NODE_ANIMATION);
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
+			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for profile " + name);
 			profilePtr->addAnimation(processAnimation(tempAttr[PARAM_NAME]));
 		}
 	}
 	// Check for always on elements.
-	element = profile.getRoot()->FirstChildElement("alwaysOnElements");
-	if (element) {
-		element = element->FirstChildElement(NODE_ELEMENT);
-		for (; element; element = element->NextSiblingElement(NODE_ELEMENT)) {
-			tempAttr = processNode(element);
-			Utility::checkAttributes(REQUIRED_PARAM_COLOR, tempAttr, "alwaysOnElements for profile " + name);
+	xmlElement = profile.getRoot()->FirstChildElement("alwaysOnElements");
+	if (xmlElement) {
+		xmlElement = xmlElement->FirstChildElement(NODE_ELEMENT);
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ELEMENT)) {
+			tempAttr = processNode(xmlElement);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "alwaysOnElements for profile " + name);
 			if (not allElements.count(tempAttr[PARAM_NAME]))
 				throw LEDError("Unknown element [" + tempAttr[PARAM_NAME] + "] for always on element on profile " + name);
-			profilePtr->addAlwaysOnElement(allElements[tempAttr[PARAM_NAME]], tempAttr[PARAM_COLOR]);
+			profilePtr->addAlwaysOnElement(
+				allElements.at(tempAttr[PARAM_NAME]),
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : allElements.at(tempAttr[PARAM_NAME])->getDefaultColor()
+			);
 		}
 	}
 
 	// Check for always on groups.
-	element = profile.getRoot()->FirstChildElement("alwaysOnGroups");
-	if (element) {
-		element = element->FirstChildElement(NODE_GROUP);
-		for (; element; element = element->NextSiblingElement(NODE_GROUP)) {
-			tempAttr = processNode(element);
-			Utility::checkAttributes(REQUIRED_PARAM_COLOR, tempAttr, "alwaysOnGroups for profile " + name);
+	xmlElement = profile.getRoot()->FirstChildElement("alwaysOnGroups");
+	if (xmlElement) {
+		xmlElement = xmlElement->FirstChildElement(NODE_GROUP);
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_GROUP)) {
+			tempAttr = processNode(xmlElement);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "alwaysOnGroups for profile " + name);
 			if (not layout.count(tempAttr[PARAM_NAME]))
 				throw LEDError("Unknown group [" + tempAttr[PARAM_NAME] + "] for always on group on profile " + name);
-			profilePtr->addAlwaysOnGroup(&layout[tempAttr[PARAM_NAME]], tempAttr[PARAM_COLOR]);
+			profilePtr->addAlwaysOnGroup(
+				&layout.at(tempAttr[PARAM_NAME]),
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : layout.at(tempAttr[PARAM_NAME]).getDefaultColor()
+			 );
 		}
 	}
 
 	// Check for input plugins.
-	element = profile.getRoot()->FirstChildElement(NODE_INPUTS);
-	if (element) {
-		element = element->FirstChildElement(NODE_INPUT);
-		if (element) {
-			for (; element; element = element->NextSiblingElement(NODE_INPUT)) {
-				umap<string, string> elementAttr = processNode(element);
+	xmlElement = profile.getRoot()->FirstChildElement(NODE_INPUTS);
+	if (xmlElement) {
+		xmlElement = xmlElement->FirstChildElement(NODE_INPUT);
+		if (xmlElement) {
+			for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_INPUT)) {
+				umap<string, string> elementAttr = processNode(xmlElement);
 				Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, "Inputs");
 				processInput(profilePtr, elementAttr[PARAM_NAME]);
 			}
 		}
 	}
 
-	profiles[name] = profilePtr;
 	return profilePtr;
 }
 
@@ -423,7 +447,7 @@ umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode
 				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
 
 			itemsMap.emplace(elementAttr["trigger"], new Group::Item(
-				&layout[elementAttr["target"]],
+				&layout.at(elementAttr["target"]),
 				&Color::getColor(elementAttr[PARAM_COLOR]),
 				Color::str2filter(elementAttr["filter"])
 			));

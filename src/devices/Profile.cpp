@@ -163,16 +163,16 @@ const vector<Element::Item>& Profile::getAlwaysOnElements() const {
 	return alwaysOnElements;
 }
 
-void Profile::addAlwaysOnElement(Element* element ,const string& color) {
-	alwaysOnElements.emplace_back(element, &Color::getColor(color), Color::Filters::Normal);
+void Profile::addAlwaysOnElement(Element* element, const Color& color) {
+	alwaysOnElements.emplace_back(element, &color, Color::Filters::Normal);
 }
 
 const vector<Group::Item> & Profile::getAlwaysOnGroups() const {
 	return alwaysOnGroups;
 }
 
-void Profile::addAlwaysOnGroup(Group* group, const string& color) {
-	alwaysOnGroups.emplace_back(group, &Color::getColor(color), Color::Filters::Normal);
+void Profile::addAlwaysOnGroup(Group* group, const Color& color) {
+	alwaysOnGroups.emplace_back(group, &color, Color::Filters::Normal);
 }
 
 void Profile::addInput(Input* input) {

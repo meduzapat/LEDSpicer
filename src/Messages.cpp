@@ -39,6 +39,8 @@ bool Messages::read() {
 
 		try {
 			msg.setType(static_cast<Message::Types>(std::stoi(chunks.back())));
+			if (msg.getType() == Message::Types::Invalid)
+				throw true;
 		}
 		catch (...) {
 			LogNotice("Invalid message type received");

@@ -125,8 +125,8 @@ public:
 	const vector<Element::Item>& getAlwaysOnElements() const;
 	const vector<Group::Item>& getAlwaysOnGroups() const;
 
-	void addAlwaysOnElement(Element* element, const string& color);
-	void addAlwaysOnGroup(Group* group, const string& color);
+	void addAlwaysOnElement(Element* element, const Color& color);
+	void addAlwaysOnGroup(Group* group, const Color& color);
 
 	/**
 	 * Adds an input plugin to this profile.

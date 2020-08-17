@@ -27,7 +27,7 @@ using namespace LEDSpicer::Animations;
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	Color(parameters["color"]),
-	tailColor(parameters["tailColor"])
+	tailColor(Color::getColor(parameters["tailColor"]))
 {
 
 	// tail cannot be larger than the array, serpentine will overlap.

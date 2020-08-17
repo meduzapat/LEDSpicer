@@ -40,10 +40,10 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	Actor(parameters, group, REQUIRED_PARAM_ACTOR_PULSEAUDIO),
 	Direction(parameters.count("direction") ? parameters["direction"] : "Forward"),
 	userPref({
-		Color(parameters["off"]),
-		Color(parameters["low"]),
-		Color(parameters["mid"]),
-		Color(parameters["high"]),
+		Color::getColor(parameters["off"]),
+		Color::getColor(parameters["low"]),
+		Color::getColor(parameters["mid"]),
+		Color::getColor(parameters["high"]),
 		str2mode(parameters["mode"]),
 		str2channel(parameters["channel"])
 	}),
