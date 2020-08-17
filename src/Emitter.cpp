@@ -312,7 +312,7 @@ vector<string> GameRecord::toString() {
 	result.push_back(pd.substr(0, pd.size()-1));
 	pd.clear();
 
-	for (uint8_t c = 1; c <= playersData.size(); ++c)
+	for (uint8_t c = 1; c <= Utility::parseNumber(players, ""); ++c)
 		pd += "PLAYER" + to_string(c) + ",";
 
 	result.push_back(pd + (coins.empty() ? "" : coins + "_COINS,") + players + "_PLAYERS");
@@ -330,9 +330,11 @@ void GameRecord::rotate() {
 
 string PlayerData::toString() {
 	string p;
-	for (uint8_t c = 1; c <= ways.size(); ++c)
-		p += "P" + player + "_" + type + to_string(c) + ",";
-
+	if (type == "JOYSTICK")
+		for (uint8_t c = 1; c <= ways.size(); ++c)
+			p += "P" + player + "_" + type + to_string(c) + ",";
+	else
+		p += "P" + player + "_" + type + ",";
 	for (uint8_t c = 1; c <= Utility::parseNumber(buttons, ""); ++c)
 		p += "P" + player + "_BUTTON" + to_string(c) + ",";
 

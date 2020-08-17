@@ -1,4 +1,4 @@
- #!/bin/sh
+#!/bin/bash
 aclocal
 [ -d config ] || mkdir config
 [ -d m4 ] || mkdir m4

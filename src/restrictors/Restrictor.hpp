@@ -38,7 +38,7 @@ class Restrictor : public USB {
 
 public:
 
-	enum class Ways : uint8_t {w2, w2v, w4, w4x, w8, analog, mouse};
+	enum class Ways : uint8_t {w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
 
 	Restrictor(
 		umap<string, string>& options,

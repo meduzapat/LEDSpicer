@@ -27,6 +27,8 @@ using std::endl;
 #include "restrictors/Restrictor.hpp"
 #include "restrictors/UltraStik360.hpp"
 #include "restrictors/ServoStik.hpp"
+#include "restrictors/GPWiz49.hpp"
+#include "restrictors/GPWiz40RotoX.hpp"
 #include "utility/XMLHelper.hpp"
 
 #ifndef ROTATOR_HPP_
@@ -42,6 +44,8 @@ namespace LEDSpicer {
 using Restrictors::Restrictor;
 using Restrictors::UltraStik360;
 using Restrictors::ServoStik;
+using Restrictors::GPWiz49;
+using Restrictors::GPWiz40RotoX;
 
 umap<string, Restrictor*> restrictors;
 
