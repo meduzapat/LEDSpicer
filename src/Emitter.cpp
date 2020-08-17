@@ -33,7 +33,9 @@ int main(int argc, char **argv) {
 
 	Message msg;
 
-	bool craftProfile = false;
+	bool
+		craftProfile = false,
+		rotate       = false;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -138,6 +140,11 @@ int main(int argc, char **argv) {
 		else
 			throw Error("Missing port attribute");
 
+		// Check restrictors.
+		tinyxml2::XMLElement* xmlElement = config.getRoot()->FirstChildElement("restrictors");
+		if (xmlElement and xmlElement->FirstChildElement("restrictor"))
+			rotate = true;
+
 		// Check request.
 		vector<string> data = msg.getData();
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
@@ -171,7 +178,10 @@ int main(int argc, char **argv) {
 				}
 
 				// Rotate restrictors.
-				gd.rotate();
+				if (rotate)
+					gd.rotate();
+				else
+					LogDebug("No restrictors found");
 			}
 			msg.addData(data[1]);
 		}

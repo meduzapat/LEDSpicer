@@ -84,8 +84,9 @@ public:
 	 * Register a new Element with a single LED.
 	 * @param name
 	 * @param led
+	 * @param defaultColor
 	 */
-	void registerElement(const string& name, uint8_t led);
+	void registerElement(const string& name, uint8_t led, const Color& defaultColor);
 
 	/**
 	 * Register a new Element with three LEDs (RGB).
@@ -93,8 +94,15 @@ public:
 	 * @param led1
 	 * @param led2
 	 * @param led3
+	 * @param defaultColor
 	 */
-	void registerElement(const string& name, uint8_t led1, uint8_t led2, uint8_t led3);
+	void registerElement(
+		const string& name,
+		uint8_t led1,
+		uint8_t led2,
+		uint8_t led3,
+		const Color& defaultColor
+	);
 
 	Element* getElement(const string& name);
 

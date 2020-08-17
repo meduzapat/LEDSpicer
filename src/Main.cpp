@@ -116,7 +116,7 @@ void Main::run() {
 					break;
 				}
 				try {
-					alwaysOnElements[name] = Element::Item(DataLoader::allElements[name], &Color::getColor(color), Color::str2filter(filter));
+					alwaysOnElements[name] = Element::Item{DataLoader::allElements.at(name), &Color::getColor(color), Color::str2filter(filter)};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -147,18 +147,11 @@ void Main::run() {
 					break;
 				}
 				try {
-					if (alwaysOnGroups.count(msg.getData()[0]))
-						alwaysOnGroups[msg.getData()[0]] = Group::Item{
-							&DataLoader::layout[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						};
-					else
-						alwaysOnGroups.emplace(msg.getData()[0], Group::Item{
-							&DataLoader::layout[msg.getData()[0]],
-							&Color::getColor(msg.getData()[1]),
-							Color::str2filter(msg.getData()[2])
-						});
+					alwaysOnGroups[msg.getData()[0]] = Group::Item{
+						&DataLoader::layout.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -193,59 +186,29 @@ void Main::run() {
 				if (tryProfiles({msg.getData()[0]}))
 					break;
 
-				// Create profile.
-				LogDebug("Creating profile with EmptyProfile_" + msg.getData()[3]);
-				Profile* profile = DataLoader::processProfile("EmptyProfile_" + msg.getData()[3]);
-				// Deactivate any overwrite.
-				alwaysOnElements.clear();
-				alwaysOnGroups.clear();
-				DataLoader::controlledItems.clear();
-				profiles.push_back(profile);
-				currentProfile = profile;
-
-				// Add elements.
-				for (string& n : Utility::explode(msg.getData()[1], ',')) {
-					LogDebug("Using element " + n);
-					if (DataLoader::allElements.count(n))
-						profile->addAlwaysOnElement(DataLoader::allElements[n], "White");
-					else
-						LogDebug(n + " not found");
+				// Craft profile.
+				Profile* profile = craftProfile(msg.getData()[3], msg.getData()[1], msg.getData()[2]);
+				if (profile) {
+					// Deactivate any overwrite.
+					alwaysOnGroups.clear();
+					alwaysOnElements.clear();
+					DataLoader::controlledItems.clear();
+					profiles.push_back(profile);
+					currentProfile = profile;
+					profile->restart();
+					break;
 				}
-
-				// Add Groups.
-				for (string& n : Utility::explode(msg.getData()[2], ',')) {
-					LogDebug("Using group " + n);
-					if (DataLoader::layout.count(n))
-						profile->addAlwaysOnGroup(&DataLoader::layout[n], "White");
-					else
-						LogDebug(n + " not found");
+#ifdef DEVELOP
+				else {
+					LogDebug("Failed to craft profile with " + msg.getData()[3]);
 				}
-
-				// Add Animations.
-				for (string& n : Utility::explode(msg.getData()[2], ',')) {
-					try {
-						profile->addAnimation(DataLoader::processAnimation(n));
-					}
-					catch (...) {
-						LogDebug(n + " not found");
-						continue;
-					}
-				}
-
-				// Add Inputs.
-				for (string& n : Utility::explode(msg.getData()[2], ',')) {
-					try {
-						DataLoader::processInput(profile, n);
-					}
-					catch (...) {
-						LogDebug(n + " not found");
-						continue;
-					}
-				}
-
-				profile->restart();
+#endif
+				// Load system.
+				if (not tryProfiles({msg.getData()[3]}))
+					LogInfo("All requested profiles failed");
 				break;
 			}
+
 			// Other request that are not handled yet by ledspicerd.
 			default:
 				break;
