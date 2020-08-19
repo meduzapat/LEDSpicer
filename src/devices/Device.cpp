@@ -99,7 +99,7 @@ uint8_t Device::getNumberOfElements() const {
 	return elementsByName.size();
 }
 
-uint8_t Device::getNumberOfLeds() {
+uint8_t Device::getNumberOfLeds() const {
 	return LEDs.size();
 }
 

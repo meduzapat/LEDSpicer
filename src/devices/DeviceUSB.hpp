@@ -53,7 +53,7 @@ public:
 	/**
 	 * @return the device name with Id.
 	 */
-	virtual string getFullName();
+	virtual string getFullName() const;
 
 protected:
 

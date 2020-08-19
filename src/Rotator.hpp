@@ -38,6 +38,7 @@ using std::endl;
 #define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
 #define RESTRICTORS "restrictors"
 #define RESTRICTOR "restrictor"
+#define PLAYER_MAP "map"
 
 namespace LEDSpicer {
 
@@ -46,8 +47,6 @@ using Restrictors::UltraStik360;
 using Restrictors::ServoStik;
 using Restrictors::GPWiz49;
 using Restrictors::GPWiz40RotoX;
-
-umap<string, Restrictor*> restrictors;
 
 int main(int argc, char **argv);
 

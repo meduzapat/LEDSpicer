@@ -28,7 +28,7 @@ vector<Device*> DataLoader::devices;
 umap<string, Element*> DataLoader::allElements;
 umap<string, Group> DataLoader::layout;
 Profile* DataLoader::defaultProfile;
-umap<string, Profile*> DataLoader::profiles;
+umap<string, Profile*> DataLoader::profilesCache;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
@@ -231,7 +231,6 @@ void DataLoader::processLayout() {
 	}
 
 	defaultProfile = processProfile(defaultProfileStr);
-	profiles[defaultProfileStr] = defaultProfile;
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
@@ -261,10 +260,11 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 	group.shrinkToFit();
 }
 
-Profile* DataLoader::processProfile(const string& name) {
+Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
-	if (profiles.count(name))
-		return profiles[name];
+	// Check cache.
+	if (profilesCache.count(name + extra))
+		return profilesCache.at(name + extra);
 
 	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
@@ -357,6 +357,9 @@ Profile* DataLoader::processProfile(const string& name) {
 			}
 		}
 	}
+
+	// Save Cache.
+	profilesCache.emplace(name + extra, profilePtr);
 
 	return profilePtr;
 }

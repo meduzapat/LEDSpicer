@@ -35,6 +35,17 @@ void Restrictor::terminate() {
 	disconnect();
 }
 
+uint8_t Restrictor::getMaxIds() const {
+	return 1;
+}
+
+void Restrictor::rotate(Ways ways) {
+	umap<string, Ways> playersData;
+	for (auto& p : players)
+		playersData.emplace(p.first, ways);
+	rotate(playersData);
+}
+
 Restrictor::Ways Restrictor::str2ways(const string& ways) {
 	if (ways == "1" or ways == "2" or ways == "strange2")
 		return Ways::w2;
@@ -85,5 +96,37 @@ string Restrictor::ways2str(Ways ways) {
 		return "rotary 12";
 	}
 	return "";
+}
+
+bool Restrictor::isRotary(const Ways& ways) {
+	return (ways == Ways::rotary8 or ways == Ways::rotary12);
+}
+
+Restrictor::Ways Restrictor::getWay(const umap<string, Ways>& playersData, bool rotary) const {
+	Ways way = Ways::invalid;
+	for (auto& p : players)
+		if (playersData.count(p.first) and rotary == isRotary(playersData.at(p.first))) {
+			way = playersData.at(p.first);
+			break;
+		}
+	return way;
+}
+
+void Restrictor::disconnect() {
+
+#ifdef DRY_RUN
+	LogDebug("No disconnect - DRY RUN");
+#endif
+
+	if (not handle)
+		return;
+
+	libusb_release_interface(handle, interface);
+
+#ifdef DEVELOP
+	LogDebug("Closing interface: " + to_string(interface));
+#endif
+	libusb_close(handle);
+	handle = nullptr;
 }
 

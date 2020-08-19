@@ -26,7 +26,7 @@
 #ifndef RESTRICTORS_SERVOSTIK_HPP_
 #define RESTRICTORS_SERVOSTIK_HPP_ 1
 
-#define SERVOSTIK_NAME       "ServoStick"
+#define SERVOSTIK_NAME       "ServoStik"
 #define SERVOSTIK_PRODUCT    0x1700
 #define SERVOSTIK_INTERFACE  0
 #define SERVOSTIK_WVALUE     0x0200
@@ -42,9 +42,10 @@ class ServoStik : public Restrictor {
 
 public:
 
-	ServoStik(umap<string, string>& options) :
+	ServoStik(umap<string, string>& options, umap<string, uint8_t>& playerData) :
 		Restrictor(
 			options,
+			playerData,
 			SERVOSTIK_WVALUE,
 			SERVOSTIK_INTERFACE,
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
@@ -54,13 +55,13 @@ public:
 
 	virtual ~ServoStik() = default;
 
-	virtual void rotate(Ways way);
+	virtual void rotate(const umap<string, Ways>& playersData);
 
-	virtual uint16_t getVendor();
+	virtual uint16_t getVendor() const;
 
-	virtual uint16_t getProduct();
+	virtual uint16_t getProduct() const;
 
-	virtual string getName();
+	virtual string getName() const;
 };
 
 } /* namespace Restrictors */

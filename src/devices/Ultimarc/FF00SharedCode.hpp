@@ -46,7 +46,7 @@ public:
 
 	virtual void resetLeds();
 
-	void transfer();
+	void transfer() const;
 
 protected:
 

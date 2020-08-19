@@ -141,7 +141,7 @@ public:
 	 * @param name
 	 * @param isDefault
 	 */
-	static Profile* processProfile(const string& name);
+	static Profile* processProfile(const string& name, const string& extra = "");
 
 	/**
 	 * Reads an animation file.
@@ -186,7 +186,7 @@ public:
 	static Profile* defaultProfile;
 
 	/// Keeps references to profiles.
-	static umap<string, Profile*> profiles;
+	static umap<string, Profile*> profilesCache;
 
 	/// Port number to use for listening.
 	static string portNumber;

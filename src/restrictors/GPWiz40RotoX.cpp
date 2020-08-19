@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      GPWiz40RotoX.hpp
+ * @file      GPWiz40RotoX.cpp
  * @since     Aug 11, 2020
  * @author    Patricio A. Rossi (MeduZa) & GPWiz40RotoX related code Chris Newton (mahuti)
  *
@@ -24,7 +24,7 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void GPWiz40RotoX::rotate(Ways way) {
+void GPWiz40RotoX::rotate(const umap<string, Ways>& playersData) {
 
 	/*
 	bit0 (1) = 12-way rotary enable on Rotary Stick 1
@@ -32,39 +32,30 @@ void GPWiz40RotoX::rotate(Ways way) {
 	bit4 (16) = 8-way rotary enable on Rotary Stick 1
 	bit5 (32) = 8-way rotary enable on Rotary Stick 2
 	 */
-	/* 30,30 is default speedon / speedoff value, it would be nice to have some control over these 2 values  */
-	// vector<uint8_t> data {207,30,30,0x000001};
-	vector<uint8_t> data {207,30,30,1,0,0,0};
+	vector<uint8_t> data {207, speedOn, speedOff, 0};
 
-	switch (way) {
-	case Ways::rotary8:
-		data[3]= 1;
-		data[4]= 2;
-		data[5]= 16;
-		data[6]= 32;
-		LogDebug("Rotating " + getName() + " to 8 way rotary.");
-		break;
-	case Ways::rotary12:
-		data[3] = 1;
-		data[4] = 2;
-		LogDebug("Rotating " + getName() + " to 12 way rotary.");
-		break;
-	default:
-		data[3] = 1;
-		data[4] = 2;
-		LogDebug("Rotating " + getName() + " to 12 way rotary.");
-	}
-	transferToUSB(data);
+	for (auto& p : players)
+		if (playersData.count(p.first) and isRotary(playersData.at(p.first))) {
+			data[3] += p.second + (playersData.at(p.first) == Ways::rotary8 ? (p.second == 1 ? 16 : 32) : 0);
+			LogDebug("Rotating " + getName() + " Rotor " +  to_string(p.second) + " to " + ways2str(playersData.at(p.first)));
+		}
+
+	if (data[3])
+		transferToUSB(data);
 }
 
-uint16_t GPWiz40RotoX::getVendor() {
+uint16_t GPWiz40RotoX::getVendor() const {
 	return GGG_VENDOR;
 }
 
-uint16_t GPWiz40RotoX::getProduct() {
+uint16_t GPWiz40RotoX::getProduct() const {
 	return (GPWIZ40ROTOX_PRODUCT + getId() - 1);
 }
 
-string GPWiz40RotoX::getName() {
+string GPWiz40RotoX::getName() const {
 	return string(GPWIZ40ROTOX_NAME) + " " + to_string(getId());
+}
+
+uint8_t GPWiz40RotoX::getMaxIds() const {
+	return GPWIZ40ROTOX_MAX_ID;
 }

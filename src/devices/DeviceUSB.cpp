@@ -40,6 +40,6 @@ void DeviceUSB::closeDevice() {
 	disconnect();
 }
 
-string DeviceUSB::getFullName() {
+string DeviceUSB::getFullName() const {
 	return "Device: " + name + " Id: " + to_string(boardId);
 }

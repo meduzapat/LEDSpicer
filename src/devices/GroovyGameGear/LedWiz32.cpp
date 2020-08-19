@@ -52,7 +52,7 @@ void LedWiz32::drawHardwarePinMap() {
 	cout << endl;
 }
 
-void LedWiz32::transfer() {
+void LedWiz32::transfer() const {
 	/*
 	 * This device transfers chunks of 8 bits from 0 to 63.
 	 * 0 to 48 with modulation.
@@ -68,6 +68,6 @@ void LedWiz32::transfer() {
 	}
 }
 
-uint16_t LedWiz32::getProduct() {
+uint16_t LedWiz32::getProduct() const {
 	return LEDWIZ32_PRODUCT + boardId - 1;
 }

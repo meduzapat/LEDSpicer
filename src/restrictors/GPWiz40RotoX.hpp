@@ -31,6 +31,12 @@
 #define GPWIZ40ROTOX_INTERFACE  0
 #define GPWIZ40ROTOX_WVALUE     0x0200
 #define GPWIZ40ROTOX_MAX_BOARDS 4
+#define GPWIZ40ROTOX_MAX_ID     2
+
+#define SPEED_ON  "speedOn"
+#define SPEED_OFF "speedOff"
+
+#define DEFAULT_SPEED 12
 
 namespace LEDSpicer {
 namespace Restrictors {
@@ -42,24 +48,48 @@ class GPWiz40RotoX : public Restrictor {
 
 public:
 
-	GPWiz40RotoX(umap<string, string>& options) :
+	GPWiz40RotoX(umap<string, string>& options, umap<string, uint8_t>& playerData) :
 		Restrictor(
 			options,
+			playerData,
 			GPWIZ40ROTOX_WVALUE,
 			GPWIZ40ROTOX_INTERFACE,
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
 			GPWIZ40ROTOX_MAX_BOARDS
+		),
+		speedOn(
+			options.count(SPEED_ON) ? Utility::parseNumber(
+				options.at(SPEED_ON),
+				"Invalid value for " SPEED_ON
+			)  : DEFAULT_SPEED
+		),
+		speedOff(
+			options.count(SPEED_OFF) ? Utility::parseNumber(
+				options.at(SPEED_OFF),
+				"Invalid value for " SPEED_OFF
+			) : DEFAULT_SPEED
 		) {}
 
 	virtual ~GPWiz40RotoX() = default;
 
-	virtual void rotate(Ways way);
+	virtual void rotate(const umap<string, Ways>& playersData);
 
-	virtual uint16_t getVendor();
+	virtual uint16_t getVendor() const;
 
-	virtual uint16_t getProduct();
+	virtual uint16_t getProduct() const;
 
-	virtual string getName();
+	virtual string getName() const;
+
+	virtual uint8_t getMaxIds() const;
+
+protected:
+
+	uint8_t
+		/// The length of time the button is depressed and released before sending a signal again.
+		speedOn,
+		/// The length of time the button is depressed and released before sending a signal again.
+		speedOff;
+
 };
 
 } /* namespace Restrictors */

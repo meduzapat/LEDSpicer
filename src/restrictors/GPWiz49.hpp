@@ -32,6 +32,8 @@
 #define GPWIZ49_WVALUE     0x0200
 #define GPWIZ49_MAX_BOARDS 4
 
+#define WILLIAM "william"
+
 namespace LEDSpicer {
 namespace Restrictors {
 
@@ -42,24 +44,31 @@ class GPWiz49 : public Restrictor {
 
 public:
 
-	GPWiz49(umap<string, string>& options) :
+	GPWiz49(umap<string, string>& options, umap<string, uint8_t>& playerData) :
 		Restrictor(
 			options,
+			playerData,
 			GPWIZ49_WVALUE,
 			GPWIZ49_INTERFACE,
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
 			GPWIZ49_MAX_BOARDS
-		) {}
+		),
+		williams(options.count(WILLIAM) ? options.at(WILLIAM) == "true" : false) {}
 
 	virtual ~GPWiz49() = default;
 
-	virtual void rotate(Ways way);
+	virtual void rotate(const umap<string, Ways>& playersData);
 
-	virtual uint16_t getVendor();
+	virtual uint16_t getVendor() const;
 
-	virtual uint16_t getProduct();
+	virtual uint16_t getProduct() const;
 
-	virtual string getName();
+	virtual string getName() const;
+
+protected:
+
+	// Handles Williams Sinistar mode.
+	bool williams = false;
 };
 
 } /* namespace Restrictors */

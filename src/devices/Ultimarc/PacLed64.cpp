@@ -10,7 +10,7 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-uint16_t PacLed64::getProduct() {
+uint16_t PacLed64::getProduct() const {
 	return PAC_LED64_PRODUCT + boardId - 1;
 }
 

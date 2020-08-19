@@ -60,7 +60,7 @@ void Howler::drawHardwarePinMap() {
 		<< (int)*getLed(9) << " " << (int)*getLed(10) << " " << (int)*getLed(11) << " X X X X + G" << endl << endl;
 }
 
-void Howler::transfer() {
+void Howler::transfer() const {
 	vector<uint8_t> data(24);
 	data = howlerBankA(1, 0);
 	transferToUSB(data);
@@ -76,11 +76,11 @@ void Howler::transfer() {
 	transferToUSB(data);
 }
 
-uint16_t Howler::getProduct() {
+uint16_t Howler::getProduct() const {
 	return HOWLER_PRODUCT + boardId - 1;
 }
 
-int Howler::send(vector<uint8_t>& data) {
+int Howler::send(vector<uint8_t>& data) const {
 
 	int transferred = 0;
 	return libusb_interrupt_transfer(

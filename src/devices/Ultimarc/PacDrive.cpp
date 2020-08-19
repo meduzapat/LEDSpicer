@@ -63,7 +63,7 @@ void PacDrive::drawHardwarePinMap() {
 	cout << endl;
 }
 
-void PacDrive::transfer() {
+void PacDrive::transfer() const {
 
 	vector<uint8_t> load {0, 0, 0, 0};
 
@@ -79,7 +79,7 @@ void PacDrive::transfer() {
 	transferToUSB(load);
 }
 
-uint16_t PacDrive::getProduct() {
+uint16_t PacDrive::getProduct() const {
 	return PAC_DRIVE_PRODUCT;
 }
 

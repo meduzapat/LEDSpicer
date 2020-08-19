@@ -25,7 +25,8 @@
 #ifndef RESTRICTORS_ROTATOR_HPP_
 #define RESTRICTORS_ROTATOR_HPP_ 1
 
-#define REQUIRED_PARAM_RESTRICTOR {"name", "boardId", "player", "joystick"}
+#define REQUIRED_PARAM_RESTRICTOR {"name", "boardId"}
+#define REQUIRED_PARAM_MAP        {"player", "joystick", "id"}
 
 namespace LEDSpicer {
 namespace Restrictors {
@@ -38,15 +39,16 @@ class Restrictor : public USB {
 
 public:
 
-	enum class Ways : uint8_t {w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
+	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
 
 	Restrictor(
 		umap<string, string>& options,
+		umap<string, uint8_t>& playerData,
 		uint16_t wValue,
 		uint8_t  interface,
 		uint8_t  boardId,
 		uint8_t  maxBoards
-	) : USB(wValue, interface, boardId, maxBoards) {}
+	) : players(playerData), USB(wValue, interface, boardId, maxBoards) {}
 
 	virtual ~Restrictor() {}
 
@@ -54,11 +56,24 @@ public:
 
 	void terminate();
 
-	virtual string getName() = 0;
+	virtual string getName() const = 0;
 
-	virtual void rotate(Ways way) = 0;
+	/**
+	 * @return the number of players a hardware supports.
+	 */
+	virtual uint8_t getMaxIds() const;
 
-	virtual void transfer() = delete;
+	/**
+	 * Executes the rotation.
+	 * @param playersData
+	 */
+	virtual void rotate(const umap<string, Ways>& playersData) = 0;
+
+	/**
+	 * Rotate all players to this profile.
+	 * @param ways
+	 */
+	virtual void rotate(Ways ways);
 
 	/**
 	 * convert strings into joystick positions.
@@ -69,7 +84,20 @@ public:
 
 	static string ways2str(Ways ways);
 
+	/**
+	 * @param ways
+	 * @return Returns true if the hardware is rotary, false if is restrictor.
+	 */
+	static bool isRotary(const Ways& ways);
+
+	Ways getWay(const umap<string, Ways>& playersData, bool rotary) const;
+
 protected:
+
+	/// Supported players for this restrictor in the form of P_J => id (player_joystick)
+	umap<string, uint8_t> players;
+
+	virtual void disconnect();
 
 	virtual void afterConnect() {}
 

@@ -24,7 +24,12 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void GPWiz49::rotate(Ways way) {
+void GPWiz49::rotate(const umap<string, Ways>& playersData) {
+
+	Ways way = getWay(playersData, false);
+	if (way == Ways::invalid)
+		return;
+
 	vector<uint8_t> data {204, 1};
 	/*
 	1: 49-way (default)
@@ -71,17 +76,21 @@ void GPWiz49::rotate(Ways way) {
 		LogDebug("Rotating " + getName() + " to 8 ways.");
 		data[1] = 3;
 	}
+
+	if (williams)
+		data[1] += 10;
+
 	transferToUSB(data);
 }
 
-uint16_t GPWiz49::getVendor() {
+uint16_t GPWiz49::getVendor() const {
 	return GGG_VENDOR;
 }
 
-uint16_t GPWiz49::getProduct() {
+uint16_t GPWiz49::getProduct() const {
 	return (GPWIZ49_PRODUCT + getId() - 1);
 }
 
-string GPWiz49::getName() {
+string GPWiz49::getName() const {
 	return string(GPWIZ49_NAME) + " " + to_string(getId());
 }

@@ -37,8 +37,6 @@ MainBase::MainBase() :
 	)
 {
 
-	profiles.push_back(DataLoader::defaultProfile);
-
 	switch (DataLoader::getMode()) {
 	case DataLoader::Modes::Dump:
 	case DataLoader::Modes::Profile:
@@ -83,7 +81,7 @@ MainBase::~MainBase() {
 #endif
 	}
 
-	for (auto p : DataLoader::profiles) {
+	for (auto p : DataLoader::profilesCache) {
 #ifdef DEVELOP
 		LogDebug("Profile " + p.first + " instance deleted");
 #endif

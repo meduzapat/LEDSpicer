@@ -80,25 +80,23 @@ void Main::run() {
 				break;
 
 			case Message::Types::FinishLastProfile:
-				if (profiles.size() == 1) {
+				if (not profiles.size()) {
+#ifdef DEVELOP
 					LogDebug("Cannot terminate the default profile.");
+#endif
 					break;
 				}
-				// TODO: this starts to been annoying, I will finish them anyway.
-				if (currentProfile->isTransiting()) {
-					LogInfo("Profile " + currentProfile->getName() + " is finishing, try later.");
-					break;
-				}
+
 				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
 				terminateCurrentProfile();
 				break;
 
 			case Message::Types::FinishAllProfiles:
-				if (profiles.size() > 1) {
+				if (profiles.size()) {
 					terminateCurrentProfile();
 					profiles.clear();
 					currentProfile = DataLoader::defaultProfile;
-					profiles.push_back(currentProfile);
+					currentProfile->reset();
 				}
 				break;
 
@@ -389,10 +387,15 @@ int main(int argc, char **argv) {
 void Main::runCurrentProfile() {
 
 	if (not currentProfile->isRunning()) {
-		// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
+		// Profiles are cached and reused when not running,
+		// discard the current profile, pick and reset the previous.
+#ifdef DEVELOP
+		LogDebug("Profile " + currentProfile->getName() + " instance deleted");
+#endif
 		profiles.pop_back();
-		currentProfile = profiles.back();
-		// do not run transition.
+		currentProfile = profiles.size() ? profiles.back() : DataLoader::defaultProfile;
+
+		// Do not run transition.
 		currentProfile->reset();
 		return;
 	}

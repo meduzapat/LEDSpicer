@@ -10,7 +10,7 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-uint16_t NanoLed::getProduct() {
+uint16_t NanoLed::getProduct() const {
 	return NANO_LED_PRODUCT + boardId - 1;
 }
 

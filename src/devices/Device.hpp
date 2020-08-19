@@ -129,7 +129,7 @@ public:
 	/**
 	 * @return the device name with all the information that identify it from others.
 	 */
-	virtual string getFullName() = 0;
+	virtual string getFullName() const = 0;
 
 	/**
 	 * Populates the pins with the correct pin number used by elements and
@@ -141,7 +141,7 @@ public:
 	 * Returns the number of LEDs (pins) this board controls.
 	 * @return
 	 */
-	uint8_t getNumberOfLeds();
+	uint8_t getNumberOfLeds() const;
 
 	/**
 	 * Pack the data into the device.
@@ -175,7 +175,7 @@ protected:
 	/**
 	 * This method will be called every time a transfer need to be done.
 	 */
-	virtual void transfer() = 0;
+	virtual void transfer() const = 0;
 
 };
 
