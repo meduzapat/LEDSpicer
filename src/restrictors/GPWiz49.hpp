@@ -32,7 +32,7 @@
 #define GPWIZ49_WVALUE     0x0200
 #define GPWIZ49_MAX_BOARDS 4
 
-#define WILLIAM "william"
+#define WILLIAMS "williams"
 
 namespace LEDSpicer {
 namespace Restrictors {
@@ -53,7 +53,7 @@ public:
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
 			GPWIZ49_MAX_BOARDS
 		),
-		williams(options.count(WILLIAM) ? options.at(WILLIAM) == "true" : false) {}
+		williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "true" : false) {}
 
 	virtual ~GPWiz49() = default;
 

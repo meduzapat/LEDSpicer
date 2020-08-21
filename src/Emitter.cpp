@@ -33,6 +33,8 @@ int main(int argc, char **argv) {
 
 	Message msg;
 
+	vector<string> dataSource;
+
 	bool
 		craftProfile = false,
 		rotate       = false;
@@ -158,14 +160,48 @@ int main(int argc, char **argv) {
 			msg.setType(Message::Types::LoadProfile);
 			msg.addData(string(data[1]).append("/").append(data[0]));
 			// Arcades (mame and others).
-			if (data[1] == "arcade") {
+			if (data[1] == ARCADE_SYSTEM) {
+
+				// Set data source.
+				if (configValues.count(PARAM_DATA_SOURCE))
+					dataSource = Utility::explode(configValues[PARAM_DATA_SOURCE], ',');
+				else
+					dataSource = {DATA_SOURCE_FILE};
+
 				GameRecord gd;
-				try {
-					gd = parseMame(data[0]);
+				for (string& ds : dataSource) {
+					Utility::trim(ds);
+					try {
+						if (ds == DATA_SOURCE_MAME) {
+							gd = parseMameDataFile(data[0]);
+							if (gd.players == "0")
+								continue;
+							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_MAME);
+							break;
+						}
+						if (ds == DATA_SOURCE_FILE) {
+							gd = parseMame(data[0]);
+							if (gd.players == "0")
+								continue;
+							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_FILE);
+							break;
+						}
+						if (ds == DATA_SOURCE_CONTROLSINI) {
+							gd = parseControlsIni(data[0]);
+							if (gd.players == "0")
+								continue;
+							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_CONTROLSINI);
+							break;
+						}
+					}
+					catch (Error& e) {
+						LogDebug("Error: " + e.getMessage());
+						continue;
+					}
 				}
-				catch (Error& e) {
-					LogError("Error: " + e.getMessage());
-					return EXIT_FAILURE;
+				if (gd.players == "0") {
+					LogError("No player data detected");
+					return EXIT_SUCCESS;
 				}
 				if (craftProfile) {
 					msg.setType(Message::Types::CraftProfile);
@@ -199,7 +235,7 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 
-GameRecord parseMame(const string& rom) {
+GameRecord parseMameDataFile(const string& rom) {
 
 	string
 		output,
@@ -217,90 +253,277 @@ GameRecord parseMame(const string& rom) {
 	if (not output.size())
 		throw Error("Game " + rom + " not found.");
 
+	LogDebug("Game data: " + output);
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
 		throw Error("Invalid games data file" + output);
 
-	LogDebug("Game data: " + output);
-
-	GameRecord tempData;
-
 	tinyxml2::XMLElement* element = xml.RootElement();
 	if (not element)
 		throw Error("Missing input node for " + rom);
 
-	umap<string, string> tempAttr = XMLHelper::processNode(element);
+	return parseMameData(rom, element, true);
+}
 
-	if (not tempAttr.count(PLAYERS))
+GameRecord parseMame(const string& rom) {
+
+	string
+		output,
+		cmd = "mame -lx '" + rom + "'";
+	LogDebug("running: " + cmd);
+
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (not pipe)
+		throw Error("Failed to gather MAME data");
+
+	std::array<char, 128> buffer;
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+		output += buffer.data();
+
+	if (not output.size())
+		throw Error("Game " + rom + " not found.");
+
+	tinyxml2::XMLDocument xml;
+	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
+		throw Error("Invalid games data file" + output);
+
+	tinyxml2::XMLElement* element = xml.RootElement()->FirstChildElement(MAME_MACHINE_NODE)->FirstChildElement(MAME_INPUT_NODE);
+	if (not element)
+		throw Error("Missing input node for " + rom);
+
+	return parseMameData(rom, element, false);
+}
+
+GameRecord parseControlsIni(const string& rom) {
+
+	string cmd = "sed -n '/"+ rom +"/,$p' " CONTROLINI_FILE;
+
+	LogDebug("Running: " + cmd);
+
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (not pipe)
+		throw Error("Failed to gather MAME data");
+
+	GameRecord tempData;
+	std::array<char, 128> buffer;
+	bool
+		found  = false,
+		alter  = false,
+		mirror = false;
+
+	vector<string> buttons;
+	vector<string> controls;
+
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+
+		string tmp = buffer.data();
+
+		if (not found and tmp.find("[" + rom + "]") != string::npos) {
+			found = true;
+			continue;
+		}
+		Utility::trim(tmp);
+
+		if (tmp.empty())
+			break;
+
+		auto parts = Utility::explode(tmp, '=');
+		if (parts.size() != 2)
+			continue;
+
+		if (parts[0] == "numPlayers") {
+			tempData.players = parts[1];
+			continue;
+		}
+
+		if (parts[0] == "alternating") {
+			alter = parts[1] == "1";
+			continue;
+		}
+
+		if (parts[0] == "mirrored") {
+			mirror = parts[1] == "1";
+			continue;
+		}
+
+		if (parts[0].find("NumButtons") != string::npos) {
+			buttons.push_back(parts[1]);
+			continue;
+		}
+
+		if (parts[0].find("Controls") != string::npos) {
+			controls.push_back(parts[1]);
+			continue;
+		}
+	}
+	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
+	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
+		string player = to_string(pIx + 1);
+		if (mirror) {
+			PlayerData pd = controlIniController2ledspicer(controls[0]);
+			pd.player = player;
+			pd.buttons = buttons[0];
+			tempData.playersData.push_back(pd);
+		}
+		else {
+			PlayerData pd = controlIniController2ledspicer(controls[pIx]);
+			pd.player = player;
+			pd.buttons = buttons[pIx];
+			tempData.playersData.push_back(pd);
+		}
+	}
+	tempData.coins = alter ? "1" : tempData.players;
+
+	if (tempData.players == "0")
+		throw Error("Game " + rom + " not found.");
+
+	return tempData;
+}
+
+GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, bool compressed) {
+
+	GameRecord tempData;
+
+	umap<string, string> tempAttr = XMLHelper::processNode(inputNode);
+
+	string target = compressed ? PLAYERS : CPLAYERS;
+	if (not tempAttr.count(target))
 		throw Error("Missing players attribute for " + rom);
 
-	tempData.players = tempAttr[PLAYERS];
+	tempData.players = tempAttr[target];
 
-	if (tempAttr.count(COINS))
-		tempData.coins = tempAttr[COINS];
+	target = compressed ? COINS : CCOINS;
+	if (tempAttr.count(target ))
+		tempData.coins = tempAttr[target];
 
-	element = element->FirstChildElement(CONTROL);
+	tinyxml2::XMLElement*element = inputNode->FirstChildElement(compressed ? CONTROL : CCONTROL);
 	if (not element)
 		throw Error("Missing control section " + rom);
 
+	target = compressed ? TYPE : CTYPE;
+	string ways = compressed ? WAYS : CWAYS;
+
 	for (; element; element = element->NextSiblingElement()) {
+
 		tempAttr = XMLHelper::processNode(element);
-		if (not tempAttr.count(TYPE))
+		if (not tempAttr.count(target))
 			continue;
 
-		PlayerData pd = processControllerNode(tempAttr);
+		PlayerData pd;
+		if (tempAttr[target] == "stick")
+			pd.ways.push_back("analog");
 
-		if ((tempAttr[TYPE] == "doublejoy" or tempAttr[TYPE] == "triplejoy") and tempAttr.count(WAYS "2"))
-			pd.ways.push_back(tempAttr[WAYS "2"]);
-		if (tempAttr[TYPE] == "triplejoy" and tempAttr.count(WAYS "3"))
-			pd.ways.push_back(tempAttr[WAYS "3"]);
+		pd.type = mameController2ledspicer(tempAttr[target]);
+
+		if (tempAttr.count(ways))
+			pd.ways.push_back(tempAttr[ways]);
+
+		string target2 = compressed ? PLAYER : CPLAYER;
+		if (tempAttr.count(target2))
+			pd.player = tempAttr[target2];
+		else
+			pd.player = "1";
+
+		target2 = compressed ? BUTTONS : CBUTTONS;
+		if (tempAttr.count(target2))
+			pd.buttons = tempAttr[target2];
+
+		if ((tempAttr[target] == "doublejoy" or tempAttr[target] == "triplejoy") and tempAttr.count(ways + "2"))
+			pd.ways.push_back(tempAttr[ways + "2"]);
+		if (tempAttr[target] == "triplejoy" and tempAttr.count(ways + "3"))
+			pd.ways.push_back(tempAttr[ways + "3"]);
+
 		tempData.playersData.push_back(pd);
 	}
 	return tempData;
 }
 
-PlayerData processControllerNode(umap<string, string>& tempAttr, string variant) {
-
-	PlayerData p;
-
-	if (tempAttr[TYPE] == "stick")
-		p.ways.push_back("analog");
-
-	p.type = mameController2ledspicer(tempAttr[TYPE]);
-
-	if (tempAttr.count(WAYS + variant))
-		p.ways.push_back(tempAttr[WAYS + variant]);
-
-	if (tempAttr.count(PLAYER))
-		p.player = tempAttr[PLAYER];
-	else
-		p.player = "1";
-
-	if (tempAttr.count(BUTTONS))
-		p.buttons = tempAttr[BUTTONS];
-
-	return p;
-}
-
 string mameController2ledspicer(const string& controller) {
 	if (controller == "mouse")
-		return "MOUSE";
+		return MOUSE;
 	if (controller == "lightgun")
-		return "LIGHTGUN";
+		return LIGHTGUN;
 	if (controller == "trackball")
-		return "TRACKBALL";
+		return TRACKBALL;
 	if (controller == "dial")
-		return "DIAL";
+		return DIAL;
 	if (controller == "paddle")
-		return "PADDLE";
+		return PADDLE;
 	if (controller == "pedal")
-		return "PEDAL";
+		return PEDAL;
 	if (controller == "only_buttons")
 		return "";
 	if (controller == "positional")
-		return "POSITIONAL";
-	return "JOYSTICK";
+		return POSITIONAL;
+	return JOYSTICK;
+}
+
+PlayerData controlIniController2ledspicer(const string& controller) {
+
+	PlayerData pd;
+
+	// Order of search is important.
+	if (controller.find("vjoy2way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"vertical2"};
+		return pd;
+	}
+
+	if (controller.find("vdoublejoy2way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"vertical2", "vertical2"};
+		return pd;
+	}
+
+	if (controller.find("joy2way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"2"};
+		return pd;
+	}
+
+	if (controller.find("doublejoy4way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"4", "4"};
+		return pd;
+	}
+
+	if (controller.find("joy4way") != string::npos) {
+		pd.type    = JOYSTICK;
+		if (controller.find("Diagonal") != string::npos)
+		pd.ways    = {"4x"};
+		return pd;
+	}
+
+	if (controller.find("doublejoy8way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"8", "8"};
+		return pd;
+	}
+
+	if (controller.find("joy8way") != string::npos) {
+		pd.type    = JOYSTICK;
+		pd.ways    = {"8"};
+		return pd;
+	}
+
+	if (controller.find("dial") != string::npos) {
+		pd.type    = DIAL;
+		return pd;
+	}
+
+	if (controller.find("trackball") != string::npos) {
+		pd.type    = TRACKBALL;
+		return pd;
+	}
+
+	if (controller.find("lightgun") != string::npos) {
+		pd.type    = LIGHTGUN;
+		return pd;
+	}
+
+	pd.type = "";
+	return pd;
 }
 
 vector<string> GameRecord::toString() {
@@ -323,6 +546,10 @@ void GameRecord::rotate() {
 	string command = "rotator ";
 	for (auto& pd : playersData)
 		command += pd.rotate();
+	if (command == "rotator ") {
+		LEDSpicer::Log::debug("No rotating information found");
+		return;
+	}
 	LEDSpicer::Log::debug("Running: " + command);
 	if (system(command.c_str()) != EXIT_SUCCESS)
 		LogWarning("Failed to execute " + command);

@@ -36,8 +36,16 @@ using std::endl;
 #define EMITTER_HPP_ 1
 
 #define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
-#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
 
+#define ARCADE_SYSTEM "arcade"
+
+#define PARAM_DATA_SOURCE       "dataSource"
+#define DATA_SOURCE_MAME        "mame"
+#define DATA_SOURCE_FILE        "file"
+#define DATA_SOURCE_CONTROLSINI "controls.ini"
+
+// dataSource fields.
+#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
 #define CONTROL "C"
 #define PLAYERS "ps"
 #define PLAYER  "p"
@@ -45,6 +53,31 @@ using std::endl;
 #define BUTTONS "b"
 #define WAYS    "w"
 #define COINS   "cs"
+
+// MAME fields.
+#define MAME_MACHINE_NODE "machine"
+#define MAME_INPUT_NODE   "input"
+#define CCONTROL "control"
+#define CPLAYERS "players"
+#define CPLAYER  "player"
+#define CTYPE    "type"
+#define CBUTTONS "buttons"
+#define CWAYS    "ways"
+#define CCOINS   "coins"
+
+// controls.ini fields.
+#define CONTROLINI_FILE PACKAGE_DATA_DIR "controls.ini"
+
+
+// Controllers
+#define MOUSE      "MOUSE";
+#define LIGHTGUN   "LIGHTGUN";
+#define TRACKBALL  "TRACKBALL";
+#define DIAL       "DIAL";
+#define PADDLE     "PADDLE";
+#define PEDAL      "PEDAL";
+#define POSITIONAL "POSITIONAL";
+#define JOYSTICK   "JOYSTICK";
 
 struct PlayerData {
 
@@ -95,6 +128,10 @@ struct GameRecord {
  */
 int main(int argc, char **argv);
 
+GameRecord parseMameDataFile(const string& rom);
+GameRecord parseMame(const string& rom);
+GameRecord parseControlsIni(const string& rom);
+
 /**
  * Process the mame game data.
  * examples:
@@ -110,15 +147,8 @@ int main(int argc, char **argv);
  *   <control type="lightgun" player="1" buttons="1" minimum="0" maximum="255" sensitivity="70" keydelta="10"/>
  *   <control type="trackball" player="1" buttons="1" minimum="0" maximum="255" sensitivity="100" keydelta="10" reverse="yes"/>
  *   <control type="doublejoy" buttons="1" ways="8" ways2="8"/>
- * @param rom
- * @return
- */
-GameRecord parseMame(const string& rom);
-
-/**
- * The Controller node have information about the player's controllers
- *
-	Types:
+ *   * The Controller node have information about the player's controllers
+ * Types:
 		joy
 		doublejoy  << 2x joy
 		triplejoy  << 3x joy
@@ -136,11 +166,12 @@ GameRecord parseMame(const string& rom);
 		mahjong
 		hanafuda
 		gambling
- * @param tempAttr
- * @param variant
+ * @param rom
  * @return
  */
-PlayerData processControllerNode(umap<string, string>& tempAttr, string variant = "");
+GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, bool compressed);
+
+PlayerData controlIniController2ledspicer(const string& controller);
 
 string mameController2ledspicer(const string& controller);
 
