@@ -264,7 +264,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 
 	// Create profile.
 	LogDebug("Creating profile with " EMPTY_PROFILE + name);
-	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name);
+	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
 
 	// Add elements.
 	for (string& n : Utility::explode(elements, ',')) {

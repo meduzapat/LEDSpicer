@@ -137,9 +137,9 @@ public:
 	void readConfiguration();
 
 	/**
-	 * Reads an profile file.
+	 * Reads a profile file form disk or cache.
 	 * @param name
-	 * @param isDefault
+	 * @param extra, if set will use it to differentiate from other profiles with the same name.
 	 */
 	static Profile* processProfile(const string& name, const string& extra = "");
 
