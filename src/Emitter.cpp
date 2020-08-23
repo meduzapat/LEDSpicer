@@ -173,14 +173,14 @@ int main(int argc, char **argv) {
 					Utility::trim(ds);
 					try {
 						if (ds == DATA_SOURCE_MAME) {
-							gd = parseMameDataFile(data[0]);
+							gd = parseMame(data[0]);
 							if (gd.players == "0")
 								continue;
 							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_MAME);
 							break;
 						}
 						if (ds == DATA_SOURCE_FILE) {
-							gd = parseMame(data[0]);
+							gd = parseMameDataFile(data[0]);
 							if (gd.players == "0")
 								continue;
 							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_FILE);
@@ -358,6 +358,9 @@ GameRecord parseControlsIni(const string& rom) {
 		}
 	}
 	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
+	if (not ps)
+		throw Error("Game " + rom + " not found.");
+
 	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
 		string player = to_string(pIx + 1);
 		if (mirror) {
@@ -374,9 +377,6 @@ GameRecord parseControlsIni(const string& rom) {
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
-
-	if (tempData.players == "0")
-		throw Error("Game " + rom + " not found.");
 
 	return tempData;
 }
