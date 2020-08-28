@@ -279,14 +279,8 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 			LogDebug("Unknown element " + n);
 			continue;
 		}
-		if (parts.size() == 2) {
-			try {
-				col = &Color::getColor(parts[1]);
-			}
-			catch(...) {
-				col = &DataLoader::allElements.at(n)->getDefaultColor();
-			}
-		}
+		if (parts.size() == 2 and Color::hasColor(parts[1]))
+			col = &Color::getColor(parts[1]);
 		else
 			col = &DataLoader::allElements.at(n)->getDefaultColor();
 

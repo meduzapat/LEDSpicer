@@ -239,6 +239,13 @@ public:
 	static const Color& getColor(const string& color);
 
 	/**
+	 * Check if a color exists by name.
+	 * @param color
+	 * @return
+	 */
+	static bool hasColor(const string& color);
+
+	/**
 	 * Returns a pointer to an array of color names.
 	 * @return
 	 */

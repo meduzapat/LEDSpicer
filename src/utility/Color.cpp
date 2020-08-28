@@ -278,6 +278,10 @@ const Color& Color::getColor(const string& color) {
 	throw Error("Unknown color " + color);
 }
 
+bool Color::hasColor(const string& color) {
+	return colors.count(color);
+}
+
 void Color::setRandomColors(vector<string> colors) {
 
 	if (randomColors.size())

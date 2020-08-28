@@ -331,6 +331,10 @@ GameRecord parseControlsIni(const string& rom) {
 			found = true;
 			continue;
 		}
+
+		if (not found)
+			continue;
+
 		Utility::trim(tmp);
 
 		if (tmp.empty())
@@ -469,14 +473,18 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 		string tmp = buffer.data();
 
 
-		if (not found and tmp.find("[" + rom + "]") != string::npos) {
+		if (not found and tmp.find(rom) != string::npos) {
 			found = true;
 			continue;
 		}
+
+		if (not found)
+			continue;
+		else if (tmp.find("[") != string::npos)
+			break;
+
 		Utility::trim(tmp);
 
-		if (tmp.find("[") != string::npos)
-			break;
 
 		auto parts = Utility::explode(tmp, '=');
 		if (parts.size() != 2)
