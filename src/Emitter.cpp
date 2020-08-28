@@ -37,7 +37,9 @@ int main(int argc, char **argv) {
 
 	bool
 		craftProfile = false,
-		rotate       = false;
+		rotate       = false,
+		useColors    = false;
+
 
 	for (int i = 1; i < argc; i++) {
 
@@ -136,6 +138,10 @@ int main(int argc, char **argv) {
 		if (configValues.count("craftProfile"))
 			craftProfile = configValues["craftProfile"] == "true";
 
+		// Set use colors file.
+		if (configValues.count("colorsFile"))
+			useColors = configValues["colorsFile"] == "true";
+
 		// Port.
 		if (configValues.count("port"))
 			port = configValues["port"];
@@ -203,6 +209,8 @@ int main(int argc, char **argv) {
 					LogError("No player data detected");
 					return EXIT_SUCCESS;
 				}
+				if (useColors)
+					decorateWithColorsIni(data[0], gd);
 				if (craftProfile) {
 					msg.setType(Message::Types::CraftProfile);
 					for (string& s : gd.toString())
@@ -210,7 +218,7 @@ int main(int argc, char **argv) {
 				}
 				else {
 					msg.addData("P" + gd.players + "_B" + gd.playersData[0].buttons);
-					msg.addData(gd.playersData[0].type + gd.players + "_B" + gd.playersData[0].buttons);
+					msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
 				}
 
 				// Rotate restrictors.
@@ -363,17 +371,16 @@ GameRecord parseControlsIni(const string& rom) {
 
 	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
 		string player = to_string(pIx + 1);
+		PlayerData& pd = tempData.playersData[player];
 		if (mirror) {
-			PlayerData pd = controlIniController2ledspicer(controls[0]);
-			pd.player = player;
+			controlIniController2ledspicer(controls[0], pd);
+			pd.player  = player;
 			pd.buttons = buttons[0];
-			tempData.playersData.push_back(pd);
 		}
 		else {
-			PlayerData pd = controlIniController2ledspicer(controls[pIx]);
-			pd.player = player;
+			controlIniController2ledspicer(controls[pIx], pd);
+			pd.player  = player;
 			pd.buttons = buttons[pIx];
-			tempData.playersData.push_back(pd);
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
@@ -394,7 +401,7 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 	tempData.players = tempAttr[target];
 
 	target = compressed ? COINS : CCOINS;
-	if (tempAttr.count(target ))
+	if (tempAttr.count(target))
 		tempData.coins = tempAttr[target];
 
 	tinyxml2::XMLElement*element = inputNode->FirstChildElement(compressed ? CONTROL : CCONTROL);
@@ -410,33 +417,104 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 		if (not tempAttr.count(target))
 			continue;
 
-		PlayerData pd;
+		string target2 = compressed ? PLAYER : CPLAYER;
+		string player;
+		if (tempAttr.count(target2))
+			player = tempAttr[target2];
+		else
+			player = "1";
+
+		PlayerData& pd = tempData.playersData[player];
+
+		pd.player = player;
+
 		if (tempAttr[target] == "stick")
 			pd.ways.push_back("analog");
-
-		pd.type = mameController2ledspicer(tempAttr[target]);
+		pd.controllers.push_back(mameController2ledspicer(tempAttr[target]));
 
 		if (tempAttr.count(ways))
 			pd.ways.push_back(tempAttr[ways]);
-
-		string target2 = compressed ? PLAYER : CPLAYER;
-		if (tempAttr.count(target2))
-			pd.player = tempAttr[target2];
-		else
-			pd.player = "1";
 
 		target2 = compressed ? BUTTONS : CBUTTONS;
 		if (tempAttr.count(target2))
 			pd.buttons = tempAttr[target2];
 
-		if ((tempAttr[target] == "doublejoy" or tempAttr[target] == "triplejoy") and tempAttr.count(ways + "2"))
+		if ((tempAttr[target] == "doublejoy" or tempAttr[target] == "triplejoy") and tempAttr.count(ways + "2")) {
 			pd.ways.push_back(tempAttr[ways + "2"]);
-		if (tempAttr[target] == "triplejoy" and tempAttr.count(ways + "3"))
+			pd.controllers.push_back(JOYSTICK);
+		}
+		if (tempAttr[target] == "triplejoy" and tempAttr.count(ways + "3")) {
 			pd.ways.push_back(tempAttr[ways + "3"]);
-
-		tempData.playersData.push_back(pd);
+			pd.controllers.push_back(JOYSTICK);
+		}
 	}
 	return tempData;
+}
+
+void decorateWithColorsIni(const string& rom, GameRecord& gr) {
+
+	string cmd = "sed -n '/"+ rom +"/,$p' " COLORINI_FILE;
+
+	LogDebug("Reading color profile: " + cmd);
+
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (not pipe)
+		throw Error("Failed to gather color data");
+
+	std::array<char, 128> buffer;
+	bool found  = false;
+
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+
+		string tmp = buffer.data();
+
+
+		if (not found and tmp.find("[" + rom + "]") != string::npos) {
+			found = true;
+			continue;
+		}
+		Utility::trim(tmp);
+
+		if (tmp.find("[") != string::npos)
+			break;
+
+		auto parts = Utility::explode(tmp, '=');
+		if (parts.size() != 2)
+			continue;
+
+
+		auto pair = Utility::explode(parts[0], '_');
+			if (pair.size() != 2)
+				continue;
+
+		string player = string() + pair[0].back();
+
+		PlayerData& pd = gr.playersData[player];
+		if (pd.player.empty())
+			pd.player = player;
+
+		/*
+		 * Looks like the color file does not provide
+		 * information on the controller number, all games are one
+		 * controller only, but ledspicer supports multiple.
+		 * Some games with different controllers are provided check aafb
+		 */
+		if (pair[1] != "COIN" and pair[1] != "START" and pair[1].find("BUTTON") == string::npos) {
+			uint8_t jIdx = 1;
+			for (auto& c : pd.controlColors)
+				if (c.first.find(JOYSTICK) != string::npos)
+					++jIdx;
+			if (pair[1] == "STICK")
+				parts[0] = "P" + player + "_" + JOYSTICK;
+			parts[0] +=  to_string(jIdx);
+			LogDebug("Found color " + parts[1] + " for controller " + parts[0]);
+			pd.controlColors.emplace(parts[0], parts[1]);
+			continue;
+		}
+		LogDebug("Found color " + parts[1] + " for button " + parts[0]);
+		pd.buttonColors.emplace(parts[0], parts[1]);
+		continue;
+	}
 }
 
 string mameController2ledspicer(const string& controller) {
@@ -459,79 +537,84 @@ string mameController2ledspicer(const string& controller) {
 	return JOYSTICK;
 }
 
-PlayerData controlIniController2ledspicer(const string& controller) {
-
-	PlayerData pd;
+void controlIniController2ledspicer(const string& controller, PlayerData& pd) {
 
 	// Order of search is important.
 	if (controller.find("vjoy2way") != string::npos) {
-		pd.type    = JOYSTICK;
-		pd.ways    = {"vertical2"};
-		return pd;
+		pd.controllers.push_back(JOYSTICK);
+		pd.ways.push_back("vertical2");
+		return;
 	}
 
 	if (controller.find("vdoublejoy2way") != string::npos) {
-		pd.type    = JOYSTICK;
-		pd.ways    = {"vertical2", "vertical2"};
-		return pd;
+		pd.controllers.push_back(JOYSTICK);
+		pd.controllers.push_back(JOYSTICK);
+		pd.ways.push_back("vertical2");
+		pd.ways.push_back("vertical2");
+		return;
 	}
 
 	if (controller.find("joy2way") != string::npos) {
-		pd.type    = JOYSTICK;
-		pd.ways    = {"2"};
-		return pd;
+		pd.controllers.push_back(JOYSTICK);
+		pd.ways.push_back("2");
+		return;
 	}
 
 	if (controller.find("doublejoy4way") != string::npos) {
-		pd.type    = JOYSTICK;
-		pd.ways    = {"4", "4"};
-		return pd;
+		pd.controllers.push_back(JOYSTICK);
+		pd.controllers.push_back(JOYSTICK);
+		pd.ways.push_back("4");
+		pd.ways.push_back("4");
+		return;
 	}
 
 	if (controller.find("joy4way") != string::npos) {
-		pd.type    = JOYSTICK;
+		pd.controllers.push_back(JOYSTICK);
 		if (controller.find("Diagonal") != string::npos)
-		pd.ways    = {"4x"};
-		return pd;
+			pd.ways.push_back("4x");
+		else
+			pd.ways.push_back("4");
+		return;
 	}
 
 	if (controller.find("doublejoy8way") != string::npos) {
-		pd.type    = JOYSTICK;
+		pd.controllers.push_back(JOYSTICK);
+		pd.controllers.push_back(JOYSTICK);
 		pd.ways    = {"8", "8"};
-		return pd;
+		pd.ways.push_back("8");
+		pd.ways.push_back("8");
+		return;
 	}
 
 	if (controller.find("joy8way") != string::npos) {
-		pd.type    = JOYSTICK;
+		pd.controllers.push_back(JOYSTICK);
 		pd.ways    = {"8"};
-		return pd;
+		pd.ways.push_back("8");
+		return;
 	}
 
 	if (controller.find("dial") != string::npos) {
-		pd.type    = DIAL;
-		return pd;
+		pd.controllers.push_back(DIAL);
+		return;
 	}
 
 	if (controller.find("trackball") != string::npos) {
-		pd.type    = TRACKBALL;
-		return pd;
+		pd.controllers.push_back(TRACKBALL);
+		return;
 	}
 
 	if (controller.find("lightgun") != string::npos) {
-		pd.type    = LIGHTGUN;
-		return pd;
+		pd.controllers.push_back(LIGHTGUN);
+		return;
 	}
-
-	pd.type = "";
-	return pd;
 }
 
 vector<string> GameRecord::toString() {
 
 	vector<string> result;
 	string pd;
-	for (PlayerData& playerData : playersData)
-		pd += playerData.toString();
+	for (auto& playerData : playersData)
+		pd += playerData.second.toString();
 	result.push_back(pd.substr(0, pd.size()-1));
 	pd.clear();
 
@@ -545,7 +628,7 @@ vector<string> GameRecord::toString() {
 void GameRecord::rotate() {
 	string command = "rotator ";
 	for (auto& pd : playersData)
-		command += pd.rotate();
+		command += pd.second.rotate();
 	if (command == "rotator ") {
 		LEDSpicer::Log::debug("No rotating information found");
 		return;
@@ -556,14 +639,43 @@ void GameRecord::rotate() {
 }
 
 string PlayerData::toString() {
+
 	string p;
-	if (type == "JOYSTICK")
-		for (uint8_t c = 1; c <= ways.size(); ++c)
-			p += "P" + player + "_" + type + to_string(c) + ",";
-	else
-		p += "P" + player + "_" + type + ",";
-	for (uint8_t c = 1; c <= Utility::parseNumber(buttons, ""); ++c)
-		p += "P" + player + "_BUTTON" + to_string(c) + ",";
+
+	for (uint8_t c = 0; c < controllers.size(); ++c) {
+		uint8_t cIx = 1;
+		string con = "P" + player + "_" + controllers[c];
+		while (true) {
+			if (p.find(con + to_string(cIx)) != string::npos)
+				++cIx;
+			else
+				break;
+
+		}
+		con += to_string(cIx);
+		p += con;
+		if (controlColors.count(con))
+			p += ":" + controlColors[con];
+		p += ",";
+	}
+
+	uint8_t bTo = Utility::parseNumber(buttons, "");
+	for (uint8_t c = 0; c < bTo; ++c) {
+		string but = "P" + player + "_BUTTON" + to_string(c + 1);
+		p += but;
+		if (buttonColors.count(but))
+			p += ":" + buttonColors[but];
+		p += ",";
+	}
+
+	// Extra colors detected:
+	for (auto& c : controlColors)
+		if (p.find(c.first) == string::npos)
+			p += c.first + ":" + c.second + ",";
+
+	for (auto& c : buttonColors)
+		if (p.find(c.first) == string::npos)
+			p += c.first + ":" + c.second + ",";
 
 	return p;
 }

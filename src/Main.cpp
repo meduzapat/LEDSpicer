@@ -47,12 +47,12 @@ void signalHandler(int sig) {
 		return;
 	case SIGSEGV:
 	case SIGILL:
-		// display back trace
-	#ifdef DEVELOP
+		// Display back trace.
+#ifdef DEVELOP
 		void* array[10];
 		size_t size = backtrace(array, 10);
 		backtrace_symbols_fd(array, size, STDERR_FILENO);
-	#endif
+#endif
 		exit(EXIT_FAILURE);
 		break;
 	}

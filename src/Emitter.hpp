@@ -68,25 +68,29 @@ using std::endl;
 // controls.ini fields.
 #define CONTROLINI_FILE PACKAGE_DATA_DIR "controls.ini"
 
-
 // Controllers
-#define MOUSE      "MOUSE";
-#define LIGHTGUN   "LIGHTGUN";
-#define TRACKBALL  "TRACKBALL";
-#define DIAL       "DIAL";
-#define PADDLE     "PADDLE";
-#define PEDAL      "PEDAL";
-#define POSITIONAL "POSITIONAL";
-#define JOYSTICK   "JOYSTICK";
+#define MOUSE      "MOUSE"
+#define LIGHTGUN   "LIGHTGUN"
+#define TRACKBALL  "TRACKBALL"
+#define DIAL       "DIAL"
+#define PADDLE     "PADDLE"
+#define PEDAL      "PEDAL"
+#define POSITIONAL "POSITIONAL"
+#define JOYSTICK   "JOYSTICK"
+
+#define COLORINI_FILE PACKAGE_DATA_DIR "colors.ini"
 
 struct PlayerData {
 
 	string
 		player  = "",
-		type    = "",
 		buttons = "";
 
+	vector<string> controllers;
 	vector<string> ways;
+
+	umap<string, string> controlColors;
+	umap<string, string> buttonColors;
 
 	/**
 	 * @return The dataset as a string.
@@ -105,7 +109,7 @@ struct GameRecord {
 		players = "0",
 		coins   = "0";
 
-	vector<PlayerData> playersData;
+	umap<string, PlayerData> playersData;
 
 	/**
 	 * @return The dataset as a string.
@@ -133,6 +137,13 @@ GameRecord parseMame(const string& rom);
 GameRecord parseControlsIni(const string& rom);
 
 /**
+ * Decorate the game record with colors from the color.ini file.
+ * @param rom
+ * @param gr
+ */
+void decorateWithColorsIni(const string& rom, GameRecord& gr);
+
+/**
  * Process the mame game data.
  * examples:
  *   <M n="abcheck" ps="3" cs="1"><C t="only_buttons" p="1" b="2"/><C t="only_buttons" p="2" b="2"/><C t="only_buttons" p="3" b="2"/></M>
@@ -147,7 +158,7 @@ GameRecord parseControlsIni(const string& rom);
  *   <control type="lightgun" player="1" buttons="1" minimum="0" maximum="255" sensitivity="70" keydelta="10"/>
  *   <control type="trackball" player="1" buttons="1" minimum="0" maximum="255" sensitivity="100" keydelta="10" reverse="yes"/>
  *   <control type="doublejoy" buttons="1" ways="8" ways2="8"/>
- *   * The Controller node have information about the player's controllers
+ * The Controller node have information about the player's controllers
  * Types:
 		joy
 		doublejoy  << 2x joy
@@ -171,7 +182,7 @@ GameRecord parseControlsIni(const string& rom);
  */
 GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, bool compressed);
 
-PlayerData controlIniController2ledspicer(const string& controller);
+void controlIniController2ledspicer(const string& controller, PlayerData& pd);
 
 string mameController2ledspicer(const string& controller);
 
