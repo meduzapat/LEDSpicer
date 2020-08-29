@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
 						msg.addData(s);
 				}
 				else {
-					msg.addData("P" + gd.players + "_B" + gd.playersData[0].buttons);
+					msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
 					msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
 				}
 
@@ -473,13 +473,14 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 		string tmp = buffer.data();
 
 
-		if (not found and tmp.find(rom) != string::npos) {
+		if (not found and tmp.find("[" + rom + "]") != string::npos) {
 			found = true;
 			continue;
 		}
 
 		if (not found)
 			continue;
+
 		else if (tmp.find("[") != string::npos)
 			break;
 
