@@ -168,6 +168,8 @@ emitter_LDADD = \
 rotator_SOURCES =                    \
 	src/restrictors/ServoStik.cpp    \
 	src/restrictors/UltraStik360.cpp \
+    src/restrictors/GPWiz49.cpp      \
+	src/restrictors/GPWiz40RotoX.cpp \
 	src/Rotator.cpp
 
 rotator_CPPFLAGS =     \
@@ -649,6 +651,8 @@ EXTRA_DIST +=                       \
 	src/DataLoader.hpp              \
 	src/restrictors/ServoStik.hpp    \
 	src/restrictors/UltraStik360.hpp \
+	src/restrictors/GPWiz40RotoX.hpp \
+	src/restrictors/GPWiz49.hpp      \
 	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \

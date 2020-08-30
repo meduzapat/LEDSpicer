@@ -67,15 +67,15 @@ public:
 
 	virtual void drawHardwarePinMap();
 
-	void transfer();
+	void transfer() const;
 
-	uint16_t getProduct();
+	uint16_t getProduct() const;
 
 	virtual void resetLeds();
 
 protected:
 
-	virtual int send(vector<uint8_t>& data);
+	virtual int send(vector<uint8_t>& data) const;
 
 };
 

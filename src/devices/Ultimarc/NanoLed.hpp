@@ -45,7 +45,7 @@ public:
 
 	virtual void drawHardwarePinMap();
 
-	uint16_t getProduct();
+	uint16_t getProduct() const;
 
 };
 

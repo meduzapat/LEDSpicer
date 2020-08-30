@@ -20,11 +20,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../restrictors/ServoStik.hpp"
+#include "ServoStik.hpp"
 
 using namespace LEDSpicer::Restrictors;
 
-void ServoStik::rotate(Ways way) {
+void ServoStik::rotate(const umap<string, Ways>& playersData) {
+
+	Ways way = getWay(playersData, false);
+	if (way == Ways::invalid)
+		return;
+
 	vector<uint8_t> data {0, 0xdd, 0, 0};
 	switch (way) {
 	case Ways::w2:
@@ -41,14 +46,14 @@ void ServoStik::rotate(Ways way) {
 	transferToUSB(data);
 }
 
-uint16_t ServoStik::getVendor() {
+uint16_t ServoStik::getVendor() const {
 	return ULTIMARC_VENDOR;
 }
 
-uint16_t ServoStik::getProduct() {
+uint16_t ServoStik::getProduct() const {
 	return (SERVOSTIK_PRODUCT + getId() - 1);
 }
 
-string ServoStik::getName() {
+string ServoStik::getName() const {
 	return string(SERVOSTIK_NAME) + " " + to_string(getId());
 }

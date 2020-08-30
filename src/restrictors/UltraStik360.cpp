@@ -26,7 +26,11 @@ using namespace LEDSpicer::Restrictors;
 
 umap<UltraStik360::Ways, vector<uint8_t>> UltraStik360::umdataCache;
 
-void UltraStik360::rotate(Ways way) {
+void UltraStik360::rotate(const umap<string, Ways>& playersData) {
+
+	Ways way = getWay(playersData, false);
+	if (way == Ways::invalid)
+		return;
 
 	LogDebug("Rotating " + getName() + " to " + ways2str(way));
 
@@ -82,15 +86,15 @@ void UltraStik360::rotate(Ways way) {
 	}
 }
 
-uint16_t UltraStik360::getVendor() {
+uint16_t UltraStik360::getVendor() const {
 	return ULTIMARC_VENDOR;
 }
 
-uint16_t UltraStik360::getProduct() {
+uint16_t UltraStik360::getProduct() const {
 	return (ULTRASTIK_PRODUCT + getId() - 1);
 }
 
-string UltraStik360::getName() {
+string UltraStik360::getName() const {
 	return string(ULTRASTIK_NAME) + " " + to_string(getId());
 }
 
@@ -189,6 +193,8 @@ string UltraStik360::ways2file(Ways ways) {
 	case Ways::w8:
 		return "8Way";
 	case Ways::analog:
+    case Ways::w49:
+    case Ways::w16:
 		return "Analog";
 	case Ways::mouse:
 		if (handleMouse)

@@ -78,11 +78,26 @@ void USB::connect() {
 	if (handle)
 		return;
 
-	handle = libusb_open_device_with_vid_pid(usbSession, getVendor(), getProduct());
-	if (not handle)
-		throw Error("Failed to open device " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " id " + to_string(getId()));
+	libusb_device** list;
+	libusb_device* device;
+	libusb_get_device_list(usbSession, &list);
+	for (size_t idx = 0; list[idx] != nullptr; idx++) {
+		device = list[idx];
+		libusb_device_descriptor desc = {0};
+		libusb_get_device_descriptor(device, &desc);
 
-	libusb_set_auto_detach_kernel_driver(handle, true);
+		if (desc.idVendor == getVendor() and desc.idProduct == getProduct())
+			break;
+		device = nullptr;
+	}
+
+	if (device and libusb_open(device, &handle) == LIBUSB_SUCCESS) {
+		libusb_set_auto_detach_kernel_driver(handle, true);
+		libusb_free_device_list(list, 1);
+		return;
+	}
+	libusb_free_device_list(list, 1);
+	throw Error("Failed to open device " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " id " + to_string(getId()));
 }
 
 void USB::disconnect() {
@@ -119,7 +134,7 @@ void USB::claimInterface() {
 	if (libusb_claim_interface(handle, interface))
 		throw Error(
 			"Unable to claim interface to " +
-			to_string(getVendor()) + ":" + to_string(getProduct())
+			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct())
 		);
 }
 
@@ -138,11 +153,11 @@ void USB::closeSession() {
 	usbSession = nullptr;
 }
 
-uint8_t USB::getId() {
+uint8_t USB::getId() const {
 	return boardId;
 }
 
-int USB::send(vector<uint8_t>& data) {
+int USB::send(vector<uint8_t>& data) const {
 	return libusb_control_transfer(
 		handle,
 		REQUEST_TYPE,
@@ -155,7 +170,7 @@ int USB::send(vector<uint8_t>& data) {
 	);
 }
 
-void USB::transferToUSB(vector<uint8_t>& data) {
+void USB::transferToUSB(vector<uint8_t>& data) const {
 
 #ifdef SHOW_OUTPUT
 	cout << "Data sent:" << endl;

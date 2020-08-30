@@ -67,21 +67,20 @@ public:
 	/**
 	 * @return the vendor's code.
 	 */
-	virtual uint16_t getVendor() = 0;
+	virtual uint16_t getVendor() const = 0;
 
 	/**
 	 * @return the vendor's code.
 	 */
-	virtual uint16_t getProduct() = 0;
+	virtual uint16_t getProduct() const = 0;
 
 	/**
 	 * Returns the board Id.
 	 * @return
 	 */
-	uint8_t getId();
+	uint8_t getId() const;
 
 protected:
-
 
 	/// USB device handle.
 	libusb_device_handle* handle = nullptr;
@@ -112,14 +111,14 @@ protected:
 	 * Prepares the data and send it to the send function.
 	 * @param data
 	 */
-	virtual void transferToUSB(vector<uint8_t>& data);
+	virtual void transferToUSB(vector<uint8_t>& data) const;
 
 	/**
 	 * Sends the data to the USB device.
 	 * @param data
 	 * @return result code.
 	 */
-	virtual int send(vector<uint8_t>& data);
+	virtual int send(vector<uint8_t>& data) const;
 
 
 	/**

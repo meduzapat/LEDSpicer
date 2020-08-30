@@ -39,7 +39,7 @@ public:
 
 	using DeviceUSB::DeviceUSB;
 
-	uint16_t getVendor() {
+	uint16_t getVendor() const {
 		return ULTIMARC_VENDOR;
 	}
 

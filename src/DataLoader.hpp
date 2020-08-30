@@ -137,11 +137,11 @@ public:
 	void readConfiguration();
 
 	/**
-	 * Reads an profile file.
+	 * Reads a profile file form disk or cache.
 	 * @param name
-	 * @param isDefault
+	 * @param extra, if set will use it to differentiate from other profiles with the same name.
 	 */
-	static Profile* processProfile(const string& name);
+	static Profile* processProfile(const string& name, const string& extra = "");
 
 	/**
 	 * Reads an animation file.
@@ -186,7 +186,7 @@ public:
 	static Profile* defaultProfile;
 
 	/// Keeps references to profiles.
-	static umap<string, Profile*> profiles;
+	static umap<string, Profile*> profilesCache;
 
 	/// Port number to use for listening.
 	static string portNumber;

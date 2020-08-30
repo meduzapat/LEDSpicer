@@ -85,7 +85,7 @@ void Ultimate::drawHardwarePinMap() {
 	cout << endl;
 }
 
-void Ultimate::transfer() {
+void Ultimate::transfer() const {
 
 	vector<uint8_t> load;
 	load.push_back(0x04);
@@ -93,6 +93,6 @@ void Ultimate::transfer() {
 	transferToUSB(load);
 }
 
-uint16_t Ultimate::getProduct() {
+uint16_t Ultimate::getProduct() const {
 	return IPAC_ULTIMATE_PRODUCT + boardId - 1;
 }

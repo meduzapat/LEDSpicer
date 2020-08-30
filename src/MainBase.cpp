@@ -37,8 +37,6 @@ MainBase::MainBase() :
 	)
 {
 
-	profiles.push_back(DataLoader::defaultProfile);
-
 	switch (DataLoader::getMode()) {
 	case DataLoader::Modes::Dump:
 	case DataLoader::Modes::Profile:
@@ -83,7 +81,7 @@ MainBase::~MainBase() {
 #endif
 	}
 
-	for (auto p : DataLoader::profiles) {
+	for (auto p : DataLoader::profilesCache) {
 #ifdef DEVELOP
 		LogDebug("Profile " + p.first + " instance deleted");
 #endif
@@ -265,16 +263,30 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 Profile* MainBase::craftProfile(const string& name, const string& elements, const string& groups) {
 
 	// Create profile.
-	LogDebug("Creating profile with " EMPTY_PROFILE + name);
-	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name);
+	if (DataLoader::profilesCache.count(EMPTY_PROFILE + name + elements + groups)) {
+		LogDebug("Reusing profile " EMPTY_PROFILE + name);
+		return DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
+	}
 
+	LogDebug("Creating profile with " EMPTY_PROFILE + name);
+	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
 	// Add elements.
 	for (string& n : Utility::explode(elements, ',')) {
-		LogDebug("Using element " + n);
-		if (DataLoader::allElements.count(n))
-			profile->addAlwaysOnElement(DataLoader::allElements.at(n), DataLoader::allElements.at(n)->getDefaultColor());
+		const Color* col = nullptr;
+		auto parts = Utility::explode(n, ':');
+		n = parts[0];
+		if (not DataLoader::allElements.count(n)) {
+			LogDebug("Unknown element " + n);
+			continue;
+		}
+		if (parts.size() == 2 and Color::hasColor(parts[1]))
+			col = &Color::getColor(parts[1]);
 		else
-			LogDebug(n + " not found");
+			col = &DataLoader::allElements.at(n)->getDefaultColor();
+
+		LogDebug("Using element " + n + " color " + col->getName());
+		profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col);
+
 	}
 
 	// Add Groups.

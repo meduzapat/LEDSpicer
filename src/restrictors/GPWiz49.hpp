@@ -1,8 +1,8 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ServoStik.hpp
- * @since     Jul 9, 2020
- * @author    Patricio A. Rossi (MeduZa)
+ * @file      GPWiz49.hpp
+ * @since     Aug 11, 2020
+ * @author    Patricio A. Rossi (MeduZa) & GPWiz49 related code Chris Newton (mahuti)
  *
  * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
  *
@@ -23,37 +23,39 @@
 #include "Restrictor.hpp"
 #include "Brands.hpp"
 
-#ifndef RESTRICTORS_SERVOSTIK_HPP_
-#define RESTRICTORS_SERVOSTIK_HPP_ 1
+#ifndef RESTRICTORS_GPWIZ49_HPP_
+#define RESTRICTORS_GPWIZ49_HPP_ 1
 
-#define SERVOSTIK_NAME       "ServoStik"
-#define SERVOSTIK_PRODUCT    0x1700
-#define SERVOSTIK_INTERFACE  0
-#define SERVOSTIK_WVALUE     0x0200
-#define SERVOSTIK_MAX_BOARDS 4
+#define GPWIZ49_NAME       "GPWiz49"
+#define GPWIZ49_PRODUCT    0x0007
+#define GPWIZ49_INTERFACE  0
+#define GPWIZ49_WVALUE     0x0200
+#define GPWIZ49_MAX_BOARDS 4
+
+#define WILLIAMS "williams"
 
 namespace LEDSpicer {
 namespace Restrictors {
 
 /**
- * LEDSpicer::Restrictor::ServoStick
+ * LEDSpicer::Restrictor::GPWiz49
  */
-class ServoStik : public Restrictor {
+class GPWiz49 : public Restrictor {
 
 public:
 
-	ServoStik(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	GPWiz49(umap<string, string>& options, umap<string, uint8_t>& playerData) :
 		Restrictor(
 			options,
 			playerData,
-			SERVOSTIK_WVALUE,
-			SERVOSTIK_INTERFACE,
+			GPWIZ49_WVALUE,
+			GPWIZ49_INTERFACE,
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
-			SERVOSTIK_MAX_BOARDS
-		) {}
+			GPWIZ49_MAX_BOARDS
+		),
+		williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "true" : false) {}
 
-
-	virtual ~ServoStik() = default;
+	virtual ~GPWiz49() = default;
 
 	virtual void rotate(const umap<string, Ways>& playersData);
 
@@ -62,9 +64,14 @@ public:
 	virtual uint16_t getProduct() const;
 
 	virtual string getName() const;
+
+protected:
+
+	// Handles Williams Sinistar mode.
+	bool williams = false;
 };
 
 } /* namespace Restrictors */
 } /* namespace LEDSpicer */
 
-#endif /* RESTRICTORS_SERVOSTIK_HPP_ */
+#endif /* RESTRICTORS_GPWIZ49_HPP_ */

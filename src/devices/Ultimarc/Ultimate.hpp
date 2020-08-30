@@ -66,9 +66,9 @@ public:
 
 	virtual void drawHardwarePinMap();
 
-	void transfer();
+	void transfer() const;
 
-	uint16_t getProduct();
+	uint16_t getProduct() const;
 
 	virtual void resetLeds();
 

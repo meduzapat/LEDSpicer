@@ -35,6 +35,17 @@ void Restrictor::terminate() {
 	disconnect();
 }
 
+uint8_t Restrictor::getMaxIds() const {
+	return 1;
+}
+
+void Restrictor::rotate(Ways ways) {
+	umap<string, Ways> playersData;
+	for (auto& p : players)
+		playersData.emplace(p.first, ways);
+	rotate(playersData);
+}
+
 Restrictor::Ways Restrictor::str2ways(const string& ways) {
 	if (ways == "1" or ways == "2" or ways == "strange2")
 		return Ways::w2;
@@ -44,10 +55,18 @@ Restrictor::Ways Restrictor::str2ways(const string& ways) {
 		return Ways::w4;
 	if (ways == "4x")
 		return Ways::w4x;
-	if (ways == "16" or ways == "analog")
+	if (ways == "49")
+		return Ways::w49;
+	if (ways == "16")
+		return Ways::w16;
+	if (ways == "analog")
 		return Ways::analog;
 	if (ways == "mouse")
 		return Ways::mouse;
+	if (ways == "rotary8")
+		return Ways::rotary8;
+	if (ways == "rotary12")
+		return Ways::rotary12;
 	return Ways::w8;
 }
 
@@ -63,11 +82,51 @@ string Restrictor::ways2str(Ways ways) {
 		return "diagonal 4 ways";
 	case Ways::w8:
 		return "8 ways";
+	case Ways::w16:
+		return "16 ways";
+	case Ways::w49:
+		return "49 ways";
 	case Ways::analog:
 		return "analog";
 	case Ways::mouse:
 		return "mouse";
+	case Ways::rotary8:
+		return "rotary 8";
+	case Ways::rotary12:
+		return "rotary 12";
 	}
 	return "";
+}
+
+bool Restrictor::isRotary(const Ways& ways) {
+	return (ways == Ways::rotary8 or ways == Ways::rotary12);
+}
+
+Restrictor::Ways Restrictor::getWay(const umap<string, Ways>& playersData, bool rotary) const {
+	Ways way = Ways::invalid;
+	for (auto& p : players)
+		if (playersData.count(p.first) and rotary == isRotary(playersData.at(p.first))) {
+			way = playersData.at(p.first);
+			break;
+		}
+	return way;
+}
+
+void Restrictor::disconnect() {
+
+#ifdef DRY_RUN
+	LogDebug("No disconnect - DRY RUN");
+#endif
+
+	if (not handle)
+		return;
+
+	libusb_release_interface(handle, interface);
+
+#ifdef DEVELOP
+	LogDebug("Closing interface: " + to_string(interface));
+#endif
+	libusb_close(handle);
+	handle = nullptr;
 }
 

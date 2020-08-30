@@ -47,12 +47,12 @@ void signalHandler(int sig) {
 		return;
 	case SIGSEGV:
 	case SIGILL:
-		// display back trace
-	#ifdef DEVELOP
+		// Display back trace.
+#ifdef DEVELOP
 		void* array[10];
 		size_t size = backtrace(array, 10);
 		backtrace_symbols_fd(array, size, STDERR_FILENO);
-	#endif
+#endif
 		exit(EXIT_FAILURE);
 		break;
 	}
@@ -80,31 +80,33 @@ void Main::run() {
 				break;
 
 			case Message::Types::FinishLastProfile:
-				if (profiles.size() == 1) {
+				if (not profiles.size()) {
+#ifdef DEVELOP
 					LogDebug("Cannot terminate the default profile.");
+#endif
 					break;
 				}
-				// TODO: this starts to been annoying, I will finish them anyway.
-				if (currentProfile->isTransiting()) {
-					LogInfo("Profile " + currentProfile->getName() + " is finishing, try later.");
-					break;
-				}
+
 				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
 				terminateCurrentProfile();
 				break;
 
 			case Message::Types::FinishAllProfiles:
-				if (profiles.size() > 1) {
+				if (profiles.size()) {
 					terminateCurrentProfile();
 					profiles.clear();
 					currentProfile = DataLoader::defaultProfile;
-					profiles.push_back(currentProfile);
+					currentProfile->reset();
 				}
 				break;
 
 			case Message::Types::SetElement: {
-				if (msg.getData().size() != 3) {
+				if (msg.getData().size() < 2) {
 					LogNotice("Invalid message ");
+					break;
+				}
+				if (msg.getData().size() == 2) {
+					msg.addData("Normal");
 					break;
 				}
 				string
@@ -138,8 +140,12 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetGroup:
-				if (msg.getData().size() != 3) {
+				if (msg.getData().size() < 2) {
 					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
+					break;
+				}
+				if (msg.getData().size() == 2) {
+					msg.addData("Normal");
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
@@ -216,7 +222,7 @@ void Main::run() {
 		}
 		runCurrentProfile();
 	}
-	currentProfile = profiles[0];
+	currentProfile = DataLoader::defaultProfile;
 	terminateCurrentProfile();
 }
 
@@ -389,10 +395,15 @@ int main(int argc, char **argv) {
 void Main::runCurrentProfile() {
 
 	if (not currentProfile->isRunning()) {
-		// Profiles are cached and reused when not running, discard the current profile, pick and reset the previous.
+		// Profiles are cached and reused when not running,
+		// discard the current profile, pick and reset the previous.
+#ifdef DEVELOP
+		LogDebug("Profile " + currentProfile->getName() + " instance deleted");
+#endif
 		profiles.pop_back();
-		currentProfile = profiles.back();
-		// do not run transition.
+		currentProfile = profiles.size() ? profiles.back() : DataLoader::defaultProfile;
+
+		// Do not run transition.
 		currentProfile->reset();
 		return;
 	}

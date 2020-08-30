@@ -47,6 +47,8 @@ using std::vector;
 #define COLOR_HPP_ 1
 
 #define Color_Random "Random"
+#define Color_On     "On"
+#define Color_Off    "Off"
 
 namespace LEDSpicer {
 
@@ -239,6 +241,13 @@ public:
 	static const Color& getColor(const string& color);
 
 	/**
+	 * Check if a color exists by name.
+	 * @param color
+	 * @return
+	 */
+	static bool hasColor(const string& color);
+
+	/**
 	 * Returns a pointer to an array of color names.
 	 * @return
 	 */
@@ -267,6 +276,12 @@ protected:
 
 	/// List of color names.
 	static vector<string> names;
+
+	/// Pseudo color to represent On state.
+	static const Color On;
+
+	/// Pseudo color to represent Off state.
+	static const Color Off;
 
 	uint8_t
 		r = 0,

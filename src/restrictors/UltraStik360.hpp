@@ -28,7 +28,7 @@
 #define RESTRICTORS_ULTRASTIK360_HPP_ 1
 
 // NOTE: for old ultrastiks before 2015 product is 0x0501 and interface is 0
-#define ULTRASTIK_NAME       "UltraStick 360"
+#define ULTRASTIK_NAME       "UltraStik360"
 #define ULTRASTIK_PRODUCT    0x0511
 #define ULTRASTIK_INTERFACE  2
 #define ULTRASTIK_WVALUE     0x0200
@@ -54,9 +54,10 @@ class UltraStik360: public Restrictor {
 
 public:
 
-	UltraStik360(umap<string, string>& options) :
+	UltraStik360(umap<string, string>& options, umap<string, uint8_t>& playerData) :
 		Restrictor(
 			options,
+			playerData,
 			ULTRASTIK_WVALUE,
 			ULTRASTIK_INTERFACE,
 			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
@@ -67,13 +68,13 @@ public:
 
 	virtual ~UltraStik360() = default;
 
-	virtual void rotate(Ways way);
+	virtual void rotate(const umap<string, Ways>& playersData);
 
-	virtual uint16_t getVendor();
+	virtual uint16_t getVendor() const;
 
-	virtual uint16_t getProduct();
+	virtual uint16_t getProduct() const;
 
-	virtual string getName();
+	virtual string getName() const;
 
 protected:
 

@@ -61,7 +61,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 Ultimarc, Ultimarc brand and Ultimarc products are property of Ultimarc Limited Company.
 For more information about Ultimarc visit their website at https://www.ultimarc.com
 
-Led-Wiz™ is property of Ithaca Digital Visual Technologies Inc.
+Led-Wiz™, GP-Wiz™, Roto-X™ are property of Ithaca Digital Visual Technologies Inc.
 For more information about Led-Wiz visit their website at https://groovygamegear.com
 
 All names used are trademarked by their respective trademark holders.

@@ -23,7 +23,7 @@ void FF00SharedCode::resetLeds() {
 	transferToUSB(data);
 }
 
-void FF00SharedCode::transfer() {
+void FF00SharedCode::transfer() const {
 
 	// Send FE00 command.
 	vector<uint8_t> data FF00_MSG(0xFE, 0);

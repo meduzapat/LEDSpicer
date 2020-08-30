@@ -24,6 +24,22 @@
 
 using namespace LEDSpicer;
 
+umap<string, uint8_t> processPlayerNode(tinyxml2::XMLElement* restrictor) {
+	umap<string, uint8_t> playerData;
+	tinyxml2::XMLElement* element = restrictor->FirstChildElement(PLAYER_MAP);
+	if (element) {
+		for (; element; element = element->NextSiblingElement(PLAYER_MAP)) {
+			umap<string, string> playerAttr = XMLHelper::processNode(element);
+			Utility::checkAttributes(REQUIRED_PARAM_MAP, playerAttr, PLAYER_MAP);
+			uint8_t n = Utility::parseNumber(playerAttr["id"], "Invalid value for ID");
+			if (not Utility::verifyValue(n, uint8_t(1), uint8_t(UINT8_MAX), false))
+				throw Error("ID must be greater than 0");
+			playerData.emplace(playerAttr["player"] + "_" + playerAttr["joystick"], n);
+		}
+	}
+	return playerData;
+}
+
 int main(int argc, char **argv) {
 
 	string
@@ -48,7 +64,7 @@ int main(int argc, char **argv) {
 				"You can repeat 'player joystick ways' as many times as needed:\n"
 				" value for player: 1, 2, etc.\n"
 				" value for joystick: 1, 2, etc.\n"
-				" value for ways: 1, 2, strange2, vertical2, '3 (half4)', 4, 4x, 8, '5 (half8)', analog, mouse.\n"
+				" value for ways: 1, 2, strange2, vertical2, '3 (half4)', 4, 4x, 8, '5 (half8)', 16, 49, analog, mouse, rotary8, rotary12.\n"
 				"Note: if your hardware does not support a specific ways the closes available one will be used.\n\n"
 				"Examples:\n"
 				"Rotate player 1 joystick 1 into 4 ways:\n"
@@ -128,48 +144,49 @@ int main(int argc, char **argv) {
 			if (element) {
 				for (; element; element = element->NextSiblingElement(RESTRICTOR)) {
 					umap<string, string> restrictorAttr = XMLHelper::processNode(element);
+					umap<string, uint8_t> playerData;
+					if (restrictorAttr.count("player") and restrictorAttr.count("joystick"))
+						playerData.emplace(restrictorAttr["player"] + "_" + restrictorAttr["joystick"], 1);
+					else
+						playerData = std::move(processPlayerNode(element));
+					if (playerData.empty())
+						continue;
 					Utility::checkAttributes(REQUIRED_PARAM_RESTRICTOR, restrictorAttr, RESTRICTOR);
 					Restrictor* restrictor = nullptr;
-					if (restrictorAttr["name"] == "UltraStik360") {
-						restrictor = new UltraStik360(restrictorAttr);
+					if (restrictorAttr["name"] == ULTRASTIK_NAME) {
+						restrictor = new UltraStik360(restrictorAttr, playerData);
 					}
-					else if (restrictorAttr["name"] == "ServoStik") {
-						restrictor = new ServoStik(restrictorAttr);
+					else if (restrictorAttr["name"] == SERVOSTIK_NAME) {
+						restrictor = new ServoStik(restrictorAttr, playerData);
+					}
+					else if (restrictorAttr["name"] == GPWIZ49_NAME) {
+						restrictor = new GPWiz49(restrictorAttr, playerData);
+					}
+					else if (restrictorAttr["name"] == GPWIZ40ROTOX_NAME) {
+						restrictor = new GPWiz40RotoX(restrictorAttr, playerData);
 					}
 					else {
-						LogError("Unknown restrictor type");
+						LogError("Unknown hardware type type");
 						continue;
 					}
-					restrictors.emplace(restrictorAttr["player"] + "_" + restrictorAttr["joystick"], restrictor);
+					if (playerData.size() > restrictor->getMaxIds())
+						LogError(restrictor->getName() + " supports only " + to_string(restrictor->getMaxIds()) + " players");
+
+					restrictor->initialize();
+
+					// Run Rotations.
+					if (resetWays.empty())
+						restrictor->rotate(playersData);
+					// Reset all.
+					else
+						restrictor->rotate(Restrictor::str2ways(resetWays));
+
+					restrictor->terminate();
+					delete restrictor;
 				}
 			}
 		}
 
-		// Run Rotations.
-		if (resetWays.empty()) {
-			// Process players
-			for (auto& playerData : playersData) {
-				LogDebug("Checking player " + playerData.first + " for " + Restrictor::ways2str(playerData.second));
-				if (not restrictors.count(playerData.first))
-					continue;
-				LogInfo("Rotating player " + playerData.first + " into " + Restrictor::ways2str(playerData.second));
-				restrictors[playerData.first]->initialize();
-				restrictors[playerData.first]->rotate(playerData.second);
-			}
-		}
-		else {
-			// Reset all.
-			for (auto& r : restrictors) {
-				r.second->initialize();
-				r.second->rotate(Restrictor::str2ways(resetWays));
-			}
-		}
-
-		// Clean up.
-		for (auto& r : restrictors) {
-			r.second->terminate();
-			delete r.second;
-		}
 		USB::closeSession();
 	}
 	catch(Error& e) {
