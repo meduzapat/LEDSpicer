@@ -101,8 +101,12 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetElement: {
-				if (msg.getData().size() != 3) {
+				if (msg.getData().size() < 2) {
 					LogNotice("Invalid message ");
+					break;
+				}
+				if (msg.getData().size() == 2) {
+					msg.addData("Normal");
 					break;
 				}
 				string
@@ -136,8 +140,12 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetGroup:
-				if (msg.getData().size() != 3) {
+				if (msg.getData().size() < 2) {
 					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
+					break;
+				}
+				if (msg.getData().size() == 2) {
+					msg.addData("Normal");
 					break;
 				}
 				if (not DataLoader::layout.count(msg.getData()[0])) {
@@ -214,7 +222,7 @@ void Main::run() {
 		}
 		runCurrentProfile();
 	}
-	currentProfile = profiles[0];
+	currentProfile = DataLoader::defaultProfile;
 	terminateCurrentProfile();
 }
 

@@ -1,3 +1,17 @@
+ledspicer (0.5.1) focal; urgency=medium
+
+  * Fixes some issues.
+  * Adds colors.ini color feature to emitter and ledspicer.
+  * Adds pseudo color On and Off.
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Wed, 19 Aug 2020 12:35:29 -0500
+
+ledspicer (0.5.0) focal; urgency=medium
+
+  * Adds Support for GGG GP49 and GP40 + rotoX
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Wed, 19 Aug 2020 12:35:29 -0500
+
 ledspicer (0.4.9) focal; urgency=medium
 
   * fixes some issues on emmiter.

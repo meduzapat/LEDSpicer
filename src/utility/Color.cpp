@@ -27,6 +27,8 @@ using namespace LEDSpicer;
 umap<string, Color> Color::colors;
 vector<string> Color::names;
 vector<Color*> Color::randomColors;
+const Color Color::On(255, 255, 255);
+const Color Color::Off(0, 0, 0);
 
 Color::Color(const string& color) {
 	set(color);
@@ -264,6 +266,10 @@ const vector<string>& Color::getNames() {
 }
 
 string Color::getName() const {
+	if (&On == this)
+		return "On";
+	if (&Off == this)
+		return "Off";
 	for (auto& color : colors)
 		if (color.second == *this)
 			return color.first;
@@ -275,6 +281,10 @@ const Color& Color::getColor(const string& color) {
 		return colors[color];
 	if (color == Color_Random)
 		return *randomColors[std::rand() / ((RAND_MAX + 1u) / randomColors.size())];
+	if (color == Color_On)
+		return On;
+	if (color == Color_Off)
+		return Off;
 	throw Error("Unknown color " + color);
 }
 
@@ -293,7 +303,7 @@ void Color::setRandomColors(vector<string> colors) {
 	else
 		for (string& c : colors) {
 			if (c == Color_Random)
-				throw Error(Color_Random " cannot be part of the list of colors because is getting build");
+				throw Error(c + " cannot be part of the list of colors because is getting build");
 			if (Color::colors.count(c))
 				randomColors.push_back(&Color::colors[c]);
 #ifdef DEVELOP
