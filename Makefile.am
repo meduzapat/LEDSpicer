@@ -110,11 +110,12 @@ ledspicer_pc_DATA = \
 # ledspicerd #
 ##############
 
-bin_PROGRAMS = \
-	ledspicerd \
-	emitter    \
-	inputseeker\
-	rotator
+bin_PROGRAMS =   \
+	ledspicerd   \
+	emitter      \
+	inputseeker  \
+	rotator      \
+	processLookup
 
 ledspicerd_SOURCES =                \
 	src/Handler.cpp                 \
@@ -190,6 +191,23 @@ rotator_LDADD = \
 
 inputseeker_SOURCES = \
 	src/InputSeeker.cpp
+
+#################
+# processLookup #
+#################
+
+processLookup_SOURCES = \
+	src/ProcessLookup.cpp
+
+processLookup_CPPFLAGS = \
+	$(AM_CPPFLAGS)       \
+	$(TINYXML2_CFLAGS)
+
+processLookup_LDFLAGS = \
+	$(TINYXML2_LIBS)
+
+processLookup_LDADD = \
+	libledspicer1.la
 
 ##########
 # actors #
@@ -678,11 +696,12 @@ EXTRA_DIST +=                       \
 	src/inputs/Actions.hpp        \
 	src/inputs/Blinker.hpp        \
 	src/inputs/Network.hpp        \
-	src/MainBase.hpp     \
-	src/Main.hpp         \
-	src/Emitter.hpp      \
-	src/Rotator.hpp      \
-	src/InputSeeker.hpp  \
+	src/MainBase.hpp      \
+	src/Main.hpp          \
+	src/Emitter.hpp       \
+	src/Rotator.hpp       \
+	src/ProcessLookup.hpp \
+	src/InputSeeker.hpp   \
 	data/ledspicer.conf        \
 	data/singleColor.xml       \
 	data/basicColors.xml       \

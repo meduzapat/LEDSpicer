@@ -41,6 +41,7 @@ ledspicerd
 emitter
 inputseeker
 rotator
+processLookup
 .dirstamp
 .libs/
 *.slo

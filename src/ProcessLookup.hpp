@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Rotator.hpp
+ * @file      ProcessLookup.hpp
  * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,34 +20,52 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// To handle daemonization and uid/gid.
+#include <unistd.h>
+
+#include <fstream>
 #include <iostream>
 using std::cout;
 using std::endl;
 
-#include "restrictors/Restrictor.hpp"
-#include "restrictors/UltraStik360.hpp"
-#include "restrictors/ServoStik.hpp"
-#include "restrictors/GPWiz49.hpp"
-#include "restrictors/GPWiz40RotoX.hpp"
+#include <chrono>
+using std::chrono::milliseconds;
+#include <thread>
+
+// To handle c signals.
+#include <csignal>
+using std::signal;
+
 #include "utility/XMLHelper.hpp"
 
-#ifndef ROTATOR_HPP_
-#define ROTATOR_HPP_ 1
+// for dirs
+#include <sys/types.h>
+#include <dirent.h>
 
-#define RESTRICTORS "restrictors"
-#define RESTRICTOR "restrictor"
-#define PLAYER_MAP "map"
+#ifndef PROCESSLOOKUP_HPP_
+#define PROCESSLOOKUP_HPP_ 1
 
 namespace LEDSpicer {
 
-using Restrictors::Restrictor;
-using Restrictors::UltraStik360;
-using Restrictors::ServoStik;
-using Restrictors::GPWiz49;
-using Restrictors::GPWiz40RotoX;
+#define PROC_DIRECTORY    "/proc/"
+#define NODE_MAIN_PROCESS "processLookup"
+#define NODE_MAP          "map"
+
+#define PARAM_MILLISECONDS "runEvery"
+#define PARAM_PROCESS_NAME "processName"
+#define PARAM_PROCESS_POS  "position"
+#define PARAM_SYSTEM       "system"
+
+#define CMDLINE "/cmdline"
+
+#ifdef MiSTer
+#define MISTER_BINARY "MiSTer"
+#endif
+
+bool running = true;
 
 int main(int argc, char **argv);
 
-#endif /* ROTATOR_HPP_ */
+#endif /* PROCESSLOOKUP_HPP_ */
 
 } /* namespace LEDSpicer */

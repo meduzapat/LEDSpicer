@@ -40,7 +40,6 @@ using std::chrono::milliseconds;
 #ifndef DATALOADER_HPP_
 #define DATALOADER_HPP_ 1
 
-#define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
 #define ACTOR_DIR   "animations/"
 #define PROFILE_DIR "profiles/"
 #define INPUT_DIR   "inputs/"

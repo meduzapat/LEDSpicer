@@ -35,8 +35,6 @@ using std::endl;
 #ifndef EMITTER_HPP_
 #define EMITTER_HPP_ 1
 
-#define CONFIG_FILE PACKAGE_CONF_DIR "/" PACKAGE ".conf"
-
 #define ARCADE_SYSTEM "arcade"
 
 #define PARAM_DATA_SOURCE       "dataSource"

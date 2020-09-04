@@ -29,6 +29,7 @@
 #ifndef SRC_LEDSPICER_XMLHELPER_HPP_
 #define SRC_LEDSPICER_XMLHELPER_HPP_ 1
 
+#define CONFIG_FILE PACKAGE_CONF_DIR PACKAGE ".conf"
 #define XML_FILE_FOREIGN ""
 
 // Conflicting with tinyxml2 Error function, global shit :(

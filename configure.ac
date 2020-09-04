@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.5.1],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.5.2],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -30,6 +30,19 @@ AC_SUBST([LIB_VERSION], [1:1:0])
 DATA_VERSION=["1.0"]
 AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
 
+dnl Enable MiSTer only code.
+AC_ARG_ENABLE(mister,
+	AS_HELP_STRING([--enable-mister],
+	[Enables the compilation of MiSTer only features @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) mister=yes ;;
+		no)  mister=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-mister]) ;;
+	esac],
+	[mister=no])
+AM_CONDITIONAL([MiSTer],[test x$mister = xyes])
+
+if test x$mister = xno ; then
 dnl Enable pulseaudio plugin.
 AC_ARG_ENABLE(pulseaudio,
 	AS_HELP_STRING([--enable-pulseaudio],
@@ -40,6 +53,10 @@ AC_ARG_ENABLE(pulseaudio,
 		*) AC_MSG_ERROR([bad value ${enableval} for --enable-pulseaudio]) ;;
 	esac],
 	[pulseaudio=yes])
+else
+[pulseaudio=no]
+AC_DEFINE([MiSTer],[1],[Enables MiSTer code])
+fi
 AM_CONDITIONAL([PULSEAUDIO],[test x$pulseaudio = xyes])
 
 dnl ******************
@@ -252,6 +269,7 @@ Inputs dir   : $INPUTS_DIR
 Data dir     : $datadir
 Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
+MiSTer code  : $mister
 --------- Output Plugins -----------
 NanoLed      : $nanoled
 PacDrive     : $pacdrive
