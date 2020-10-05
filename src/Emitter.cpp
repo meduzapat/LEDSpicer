@@ -37,9 +37,8 @@ int main(int argc, char **argv) {
 
 	bool
 		craftProfile = false,
-		rotate       = false,
+		rotate       = true,
 		useColors    = false;
-
 
 	for (int i = 1; i < argc; i++) {
 
@@ -73,6 +72,7 @@ int main(int argc, char **argv) {
 				"                              Removes all group's background color.\n" <<
 				"options:\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
+				"-n or --no-rotate            Avoid trigger rotators(only used when LoadProfileByEmulator)\n"
 				"-v or --version              Display version information\n"
 				"-h or --help                 Display this help screen.\n"
 				"If -c or --config is not provided emitter will use " CONFIG_FILE
@@ -97,6 +97,12 @@ int main(int argc, char **argv) {
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
 			configFile = argv[++i];
+			continue;
+		}
+
+		// No Rotate.
+		if (commandline == "-n" or commandline == "--no-rotate") {
+			rotate = false;
 			continue;
 		}
 
@@ -149,9 +155,10 @@ int main(int argc, char **argv) {
 			throw Error("Missing port attribute");
 
 		// Check restrictors.
-		tinyxml2::XMLElement* xmlElement = config.getRoot()->FirstChildElement("restrictors");
-		if (xmlElement and xmlElement->FirstChildElement("restrictor"))
-			rotate = true;
+		if (rotate) {
+			tinyxml2::XMLElement* xmlElement = config.getRoot()->FirstChildElement("restrictors");
+			rotate = (xmlElement and xmlElement->FirstChildElement("restrictor"));
+		}
 
 		// Check request.
 		vector<string> data = msg.getData();
@@ -161,7 +168,8 @@ int main(int argc, char **argv) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}
-
+			// Check for path and extension and clean.
+			data[0] = Utility::explode(Utility::explode(data[0], '/').back(), '.')[0];
 			msg.reset();
 			msg.setType(Message::Types::LoadProfile);
 			msg.addData(string(data[1]).append("/").append(data[0]));

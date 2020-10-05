@@ -434,10 +434,11 @@ umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode
 			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated element map for " + elementAttr["target"] + " map " + elementAttr["value"]);
 
+			auto e = allElements[elementAttr["target"]];
 			itemsMap.emplace(elementAttr["trigger"], new Element::Item(
-				allElements[elementAttr["target"]],
-				&Color::getColor(elementAttr[PARAM_COLOR]),
-				Color::str2filter(elementAttr["filter"])
+				e,
+				elementAttr.count(PARAM_COLOR) ? &Color::getColor(elementAttr[PARAM_COLOR]) : &e->getDefaultColor(),
+				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal")
 			));
 		}
 
@@ -449,10 +450,11 @@ umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode
 			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
 
+			auto g = layout.at(elementAttr["target"]);
 			itemsMap.emplace(elementAttr["trigger"], new Group::Item(
-				&layout.at(elementAttr["target"]),
-				&Color::getColor(elementAttr[PARAM_COLOR]),
-				Color::str2filter(elementAttr["filter"])
+				&g,
+				elementAttr.count(PARAM_COLOR) ? &Color::getColor(elementAttr[PARAM_COLOR]) : &g.getDefaultColor(),
+				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal")
 			));
 		}
 	}

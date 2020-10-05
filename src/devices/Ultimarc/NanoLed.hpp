@@ -53,4 +53,6 @@ public:
 } /* namespace Devices */
 } /* namespace LEDSpicer */
 
+deviceFactory(LEDSpicer::Devices::Ultimarc::NanoLed)
+
 #endif /* NANOLED_HPP_ */

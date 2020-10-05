@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Devices::GroovyGameGear;
 
+uint8_t LedWiz32::dumpFrame = 0;
+
 void LedWiz32::resetLeds() {
 	setLeds(0);
 	transfer();
@@ -37,6 +39,7 @@ void LedWiz32::afterClaimInterface() {
 }
 
 void LedWiz32::drawHardwarePinMap() {
+
 	uint8_t half = LEDWIZ32_LEDS / 2;
 	cout
 		<< getFullName() << " Pins " << LEDWIZ32_LEDS << endl
@@ -63,6 +66,7 @@ void LedWiz32::transfer() const {
 		load.push_back(48 * (l / 255.00));
 		if (load.size() == 8) {
 			transferToUSB(load);
+			std::this_thread::sleep_for(std::chrono::microseconds(LEDWIZ_WAIT));
 			load.clear();
 		}
 	}

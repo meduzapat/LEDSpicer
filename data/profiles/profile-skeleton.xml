@@ -25,12 +25,12 @@
 	<animations>
 		<animation name="" />
 	</animations>
-	<!-- Defines overwrites for elements backgrond, always on color -->
+	<!-- Defines overwrites for elements background, always on color -->
 	<alwaysOnElements>
-		<element name="" color=""/>
+		<element name="" color="" />
 	</alwaysOnElements>
-	<!-- Defines overwrites for groups backgrond, always on color -->
+	<!-- Defines overwrites for groups background, always on color -->
 	<alwaysOnGroups>
-		<group name="" color=""/>
+		<group name="" color="" />
 	</alwaysOnGroups>
 </LEDSpicer>

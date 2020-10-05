@@ -290,14 +290,15 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	}
 
 	// Add Groups.
-	for (string& n : Utility::explode(groups, ',')) {
+/*	for (string& n : Utility::explode(groups, ',')) {
 		LogDebug("Using group " + n);
 		if (DataLoader::layout.count(n))
 			profile->addAlwaysOnGroup(
-					&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor());
+				&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor()
+			);
 		else
 			LogDebug(n + " not found");
-	}
+	}*/
 
 	// Add Animations.
 	for (string& n : Utility::explode(groups, ',')) {

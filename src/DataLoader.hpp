@@ -60,6 +60,7 @@ using std::chrono::milliseconds;
 #define PARAM_DEFAULT_PROFILE "defaultProfile"
 #define PARAM_USER_ID         "userId"
 #define PARAM_GROUP_ID        "groupId"
+#define PARAM_FILTER          "filter"
 
 #define NODE_DEVICES          "devices"
 #define NODE_DEVICE           "device"
@@ -82,7 +83,7 @@ using std::chrono::milliseconds;
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
-#define REQUIRED_PARAM_MAP            {"type", "target", "trigger", "color", "filter"}
+#define REQUIRED_PARAM_MAP            {"type", "target", "trigger"}
 
 #define EMPTY_PROFILE "profile_"
 #define DEFAULT_COLOR "White"

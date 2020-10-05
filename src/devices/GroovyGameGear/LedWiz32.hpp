@@ -21,6 +21,8 @@
  */
 
 #include "GroovyGameGear.hpp"
+#include <chrono>
+#include <thread>
 
 #ifndef LEDWIZ32_HPP_
 #define LEDWIZ32_HPP_ 1
@@ -31,6 +33,7 @@
 #define LEDWIZ32_INTERFACE     0
 #define LEDWIZ32_LEDS          32
 #define LEDWIZ32_MAX_BOARDS    16
+#define LEDWIZ_WAIT            1000 //microseconds
 
 namespace LEDSpicer {
 namespace Devices {
@@ -66,6 +69,8 @@ public:
 	void resetLeds();
 
 protected:
+
+	static uint8_t dumpFrame;
 
 	virtual void afterClaimInterface();
 };
