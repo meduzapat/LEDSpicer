@@ -48,14 +48,14 @@ public:
 	Profile(
 		const string& name,
 		const Color& backgroundColor,
-		FrameActor* start,
-		FrameActor* end
+		const vector<Actor*>& startTransitions,
+		const vector<Actor*>& endTransitions
 	):
 		name(name),
 		backgroundColor(backgroundColor),
-		actual(start),
-		start(start),
-		end(end)
+		startTransitions(startTransitions),
+		endTransitions(endTransitions),
+		currentActors(startTransitions.size() ? &this->startTransitions : &animations)
 	{}
 
 	virtual ~Profile() = default;
@@ -139,22 +139,20 @@ protected:
 	/// Color to use when cleaning up.
 	Color backgroundColor;
 
-	/// Flag to know when the profile finished.
-	bool running = true;
-
 	/// Keeps the profile name.
 	string name;
 
-	FrameActor
-		/// The current animation.
-		* actual,
-		/// The starting animation.
-		* start,
-		/// The ending animation.
-		* end;
+	/// What the profile is doing.
+	vector<Actor*>* currentActors;
 
 	/// List of animations by group to run.
 	vector<Actor*> animations;
+
+	/// List of animations by group to run at start.
+	vector<Actor*> startTransitions;
+
+	/// List of animations by group to run at end.
+	vector<Actor*> endTransitions;
 
 	/// Keeps a list of always on elements.
 	vector<Element::Item> alwaysOnElements;

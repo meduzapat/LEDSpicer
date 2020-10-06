@@ -31,7 +31,7 @@ Actor::Actor(
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	filter(Color::str2filter(parameters["filter"])),
+	filter(Color::str2filter(parameters.count("filter") ? parameters["filter"] : "Normal")),
 	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	group(group)
@@ -124,6 +124,14 @@ void Actor::setFPS(uint8_t FPS) {
 
 uint8_t Actor::getFPS() {
 	return FPS;
+}
+
+void Actor::setStartTime(uint16_t seconds) {
+	secondsToStart = seconds;
+}
+
+void Actor::setEndTime(uint16_t seconds) {
+	secondsToEnd = seconds;
 }
 
 uint8_t Actor::getNumberOfElements() const {

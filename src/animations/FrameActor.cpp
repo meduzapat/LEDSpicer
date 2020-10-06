@@ -112,6 +112,14 @@ bool FrameActor::isRunning() {
 	return true;
 }
 
+void FrameActor::setStartCycles(uint8_t cycles) {
+	startAt = cycles;
+}
+
+void FrameActor::setEndCycles(uint8_t cycles)  {
+	this->cycles = cycles;
+}
+
 void FrameActor::advanceFrame() {
 	if (currentFrame == totalFrames) {
 		currentFrame = 0;

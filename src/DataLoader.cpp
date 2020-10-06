@@ -270,37 +270,81 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 	umap<string, string> tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 
-	FrameActor
-	 * start = nullptr,
-	 * end   = nullptr;
+	vector<Actor*>
+		startTransitions,
+		endTransitions;
 
+	// startTrasition only exist to keep retrocompatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
-		tempAttr["group"]  = "All";
-		tempAttr["filter"] = "Normal";
-		tempAttr["cycles"] = "1";
-		start = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
-		if (not start)
-			LogWarning("Actor " + tempAttr["type"] + " cannot be used as a start transition");
+		auto a = createAnimation(tempAttr);
+		startTransitions.push_back(a);
+		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+			if (a->acceptCycles())
+				a->setEndCycles(DEFAULT_ENDCYCLES);
+			else
+				a->setEndTime(DEFAULT_ENDTIME);
+		}
 	}
 
+	// endTrasition only exist to keep retrocompatibility.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
-		tempAttr["group"]  = "All";
-		tempAttr["filter"] = "Normal";
-		tempAttr["cycles"] = "1";
-		end = dynamic_cast<FrameActor*>(createAnimation(tempAttr));
-		if (not end)
-			LogWarning("Actor " + tempAttr["type"] + " cannot be used as an end transition");
+		auto a = createAnimation(tempAttr);
+		endTransitions.push_back(a);
+		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+			if (a->acceptCycles())
+				a->setEndCycles(DEFAULT_ENDCYCLES);
+			else
+				a->setEndTime(DEFAULT_ENDTIME);
+		}
+	}
+
+	xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS);
+	if (xmlElement) {
+		// Check for animations.
+		xmlElement = xmlElement->FirstChildElement(NODE_ANIMATION);
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
+			tempAttr = processNode(xmlElement);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_START_TRANSITIONS " inside profile " + name);
+			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+					if (a->acceptCycles())
+						a->setEndCycles(DEFAULT_ENDCYCLES);
+					else
+						a->setEndTime(DEFAULT_ENDTIME);
+				}
+				startTransitions.push_back(a);
+			}
+		}
+	}
+
+	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITIONS);
+	if (xmlElement) {
+		// Check for animations.
+		xmlElement = xmlElement->FirstChildElement(NODE_ANIMATION);
+		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
+			tempAttr = processNode(xmlElement);
+			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_END_TRANSITIONS " inside profile " + name);
+			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+					if (a->acceptCycles())
+						a->setEndCycles(DEFAULT_ENDCYCLES);
+					else
+						a->setEndTime(DEFAULT_ENDTIME);
+				}
+				endTransitions.push_back(a);
+			}
+		}
 	}
 
 	Profile* profilePtr = new Profile(
 		name,
 		Color(tempAttr["backgroundColor"]),
-		start,
-		end
+		startTransitions,
+		endTransitions
 	);
 
 	// Check for animations.
@@ -313,6 +357,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 			profilePtr->addAnimation(processAnimation(tempAttr[PARAM_NAME]));
 		}
 	}
+
 	// Check for always on elements.
 	xmlElement = profile.getRoot()->FirstChildElement("alwaysOnElements");
 	if (xmlElement) {
@@ -395,7 +440,7 @@ vector<Actor*> DataLoader::processAnimation(const string& file) {
 Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 
 	string
-		groupName = actorData["group"],
+		groupName = actorData.count("group") and not actorData.at("group").empty() ? actorData["group"] : "All",
 		actorName = actorData["type"];
 
 	if (not layout.count(groupName))

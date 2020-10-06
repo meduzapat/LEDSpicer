@@ -62,19 +62,21 @@ using std::chrono::milliseconds;
 #define PARAM_GROUP_ID        "groupId"
 #define PARAM_FILTER          "filter"
 
-#define NODE_DEVICES          "devices"
-#define NODE_DEVICE           "device"
-#define NODE_ELEMENT          "element"
-#define NODE_LAYOUT           "layout"
-#define NODE_GROUP            "group"
-#define NODE_COLOR            "color"
-#define NODE_ANIMATIONS       "animations"
-#define NODE_ANIMATION        "animation"
-#define NODE_START_TRANSITION "startTransition"
-#define NODE_END_TRANSITION   "endTransition"
-#define NODE_INPUTS           "inputs"
-#define NODE_INPUT            "input"
-#define NODE_ACTOR            "actor"
+#define NODE_DEVICES           "devices"
+#define NODE_DEVICE            "device"
+#define NODE_ELEMENT           "element"
+#define NODE_LAYOUT            "layout"
+#define NODE_GROUP             "group"
+#define NODE_COLOR             "color"
+#define NODE_ANIMATIONS        "animations"
+#define NODE_ANIMATION         "animation"
+#define NODE_START_TRANSITION  "startTransition"
+#define NODE_END_TRANSITION    "endTransition"
+#define NODE_START_TRANSITIONS "startTransitions"
+#define NODE_END_TRANSITIONS   "endTransitions"
+#define NODE_INPUTS            "inputs"
+#define NODE_INPUT             "input"
+#define NODE_ACTOR             "actor"
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port", "userId", "groupId"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
@@ -85,8 +87,10 @@ using std::chrono::milliseconds;
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
 #define REQUIRED_PARAM_MAP            {"type", "target", "trigger"}
 
-#define EMPTY_PROFILE "profile_"
-#define DEFAULT_COLOR "White"
+#define EMPTY_PROFILE    "profile_"
+#define DEFAULT_COLOR     "White"
+#define DEFAULT_ENDCYCLES 1
+#define DEFAULT_ENDTIME   5
 
 namespace LEDSpicer {
 

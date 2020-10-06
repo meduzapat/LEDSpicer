@@ -98,6 +98,46 @@ public:
 	 */
 	static uint8_t getFPS();
 
+	/**
+	 * If the actor can be handled by time.
+	 * @return
+	 */
+	virtual bool acceptTime() {
+		return true;
+	}
+
+	/**
+	 * If the actor can be handled by cycles.
+	 * @return
+	 */
+	virtual bool acceptCycles() {
+		return false;
+	}
+
+	/**
+	 * Change the start time.
+	 * @param seconds
+	 */
+	void setStartTime(uint16_t seconds);
+
+	/**
+	 * Change the end time.
+	 * @param seconds
+	 */
+	void setEndTime(uint16_t seconds);
+
+	/**
+	 * Change the start cycles.
+	 * @param cycles
+	 */
+	virtual void setStartCycles(uint8_t cycles) {}
+
+	/**
+	 * Change the end cycles.
+	 * @param cycles
+	 */
+	virtual void setEndCycles(uint8_t seconds)  {}
+
 protected:
 
 	/// How the color information will be draw back.

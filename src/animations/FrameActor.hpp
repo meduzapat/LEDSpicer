@@ -68,6 +68,22 @@ public:
 
 	virtual bool isRunning();
 
+	virtual bool acceptCycles() {
+		return true;
+	}
+
+	/**
+	 * Change the start cycles.
+	 * @param cycles
+	 */
+	virtual void setStartCycles(uint8_t cycles);
+
+	/**
+	 * Change the end cycles.
+	 * @param cycles
+	 */
+	virtual void setEndCycles(uint8_t seconds);
+
 protected:
 
 	uint8_t

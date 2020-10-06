@@ -29,14 +29,19 @@ void Profile::addAnimation(const vector<Actor*>& animation) {
 }
 
 void Profile::drawConfig() {
+
 	cout << "* Background color: " << backgroundColor.getName() << endl;
-	if (start) {
-		cout << endl << "* Start transition:" << endl;
-		start->drawConfig();
+
+	if (startTransitions.size()) {
+		cout << endl << "* Start transitions:" << endl;
+		for (auto a : startTransitions)
+			a->drawConfig();
 	}
-	if (end) {
+
+	if (endTransitions.size()) {
 		cout << endl << "* Ending transition:" << endl;
-		end->drawConfig();
+		for (auto a : startTransitions)
+			a->drawConfig();
 	}
 
 	if (animations.size()) {
@@ -79,72 +84,72 @@ void Profile::runFrame() {
 	for (Input* i : inputs)
 		i->process();
 
-	if (actual) {
-		if (actual->isRunning()) {
-			actual->draw();
+	bool running = false;
+	if (currentActors) {
+		for (auto actor : *currentActors) {
+			if (actor->isRunning()) {
+				running = true;
+				actor->draw();
+			}
 		}
-		else {
-			if (actual == end)
-				running = false;
-			actual = nullptr;
+
+		if (not running) {
+			if (isStarting()) {
+				reset();
+			}
+			else if (isTerminating())
+				currentActors = nullptr;
 		}
 	}
-
-	if (not actual and running)
-		for (auto actor : animations) {
-			if (actor->isRunning())
-				actor->draw();
-		}
 }
 
 void Profile::reset() {
-	running = true;
-	actual  = nullptr;
+	currentActors = &animations;
 	restartActors();
+	for (Input* i : inputs)
+		i->activate();
 }
 
 void Profile::restart() {
-	running = true;
-	restartActors();
-
-	if (start) {
-		actual = start;
-		actual->restart();
+	if (startTransitions.size()) {
+		currentActors = &startTransitions;
+		restartActors();
+		return;
 	}
+	reset();
 }
 
 void Profile::terminate() {
 	for (Input* i : inputs)
 		i->deactivate();
 
-	if (end) {
-		actual = end;
-		actual->restart();
+	if (endTransitions.size()) {
+		currentActors = &endTransitions;
+		restartActors();
+		return;
 	}
-	running = end != nullptr;
+	currentActors = nullptr;
 }
 
 void Profile::restartActors() {
-	for (Input* i : inputs)
-		i->activate();
-	for (auto actor : animations)
+	for (auto actor : *currentActors)
 		actor->restart();
 }
 
 bool Profile::isTransiting() const {
-	return (actual == start or actual == end) and actual != nullptr;
+	return  (currentActors != &animations and (currentActors == &startTransitions or currentActors == &endTransitions));
 }
 
 bool Profile::isTerminating() const {
-	return actual == end and actual != nullptr;
+	return (currentActors == &endTransitions);
 }
 
 bool Profile::isStarting() const {
-	return actual == start and actual != nullptr;
+	return (currentActors == &startTransitions);
 }
 
 bool Profile::isRunning() const {
-	return running;
+	return (currentActors != nullptr);
 }
 
 const LEDSpicer::Color& Profile::getBackgroundColor() const {
