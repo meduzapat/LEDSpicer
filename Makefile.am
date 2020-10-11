@@ -45,6 +45,7 @@ libledspicer1_la_SOURCES =    \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
 	src/animations/StepActor.cpp      \
+	src/animations/AudioActor.cpp     \
 	src/inputs/Input.cpp  \
 	src/inputs/Reader.cpp \
 	src/Message.cpp \
@@ -90,6 +91,7 @@ devicesheader_HEADERS =       \
 
 animationsheaderdir=$(pkgincludedir)/animations
 animationsheader_HEADERS =            \
+	src/animations/AudioActor.hpp     \
 	src/animations/Actor.hpp          \
 	src/animations/FrameActor.hpp     \
 	src/animations/DirectionActor.hpp \
@@ -314,6 +316,33 @@ PulseAudio_la_LDFLAGS = \
 else
 EXTRA_DIST += \
 	src/animations/PulseAudio.cpp
+endif
+
+#############
+# AlsaAudio #
+#############
+
+if ALSAAUDIO
+actors_LTLIBRARIES += \
+	AlsaAudio.la
+
+AlsaAudio_la_SOURCES = \
+	src/animations/AlsaAudio.cpp
+
+AlsaAudio_la_LIBADD = \
+	libledspicer1.la   \
+	$(LIBALSA_LIBS)
+
+AlsaAudio_la_CPPFLAGS = \
+	$(AM_CPPFLAGS)       \
+	$(LIBALSA_CFLAGS)
+
+AlsaAudio_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+else
+EXTRA_DIST += \
+	src/animations/AlsaAudio.cpp
 endif
 
 ##############
@@ -688,7 +717,9 @@ EXTRA_DIST +=                       \
 	src/animations/Serpentine.hpp \
 	src/animations/Random.hpp     \
 	src/animations/Filler.hpp     \
+	src/animations/AudioActor.hpp \
 	src/animations/PulseAudio.hpp \
+	src/animations/AlsaAudio.hpp  \
 	src/animations/FileReader.hpp \
 	src/inputs/Mame.hpp           \
 	src/inputs/Reader.hpp         \

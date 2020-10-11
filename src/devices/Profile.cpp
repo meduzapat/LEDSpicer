@@ -81,6 +81,8 @@ void Profile::drawConfig() {
 
 void Profile::runFrame() {
 
+	Actor::newFrame();
+
 	for (Input* i : inputs)
 		i->process();
 

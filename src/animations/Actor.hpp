@@ -138,6 +138,11 @@ public:
 	 */
 	virtual void setEndCycles(uint8_t seconds)  {}
 
+	/**
+	 * Function called when a new frame begins.
+	 */
+	static void newFrame();
+
 protected:
 
 	/// How the color information will be draw back.
@@ -145,6 +150,8 @@ protected:
 
 	/// Hardware frames per second.
 	static uint8_t FPS;
+
+	static uint8_t frame;
 
 	uint16_t
 		secondsToStart = 0,

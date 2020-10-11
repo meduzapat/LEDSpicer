@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.5.2],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.5.4],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -58,6 +58,19 @@ else
 AC_DEFINE([MiSTer],[1],[Enables MiSTer code])
 fi
 AM_CONDITIONAL([PULSEAUDIO],[test x$pulseaudio = xyes])
+
+dnl Enable alsaaudio plugin.
+AC_ARG_ENABLE(alsaaudio,
+	AS_HELP_STRING([--enable-alsaaudio],
+	[Enables the alsaaudio plugin @<:@default=yes@:>@]),
+	[case "${enableval}" in
+		yes) alsaaudio=yes ;;
+		no)  alsaaudio=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-alsaaudio]) ;;
+	esac],
+	[alsaaudio=yes])
+
+AM_CONDITIONAL([ALSAAUDIO],[test x$alsaaudio = xyes])
 
 dnl ******************
 dnl * Output plugins *
@@ -176,6 +189,7 @@ PKG_CHECK_MODULES([PTHREADSTUBS], pthread-stubs,
 	[PTHREADSTUBS_LIBS="-lpthread"],
 	AC_MSG_ERROR([pthread development library not found.])
 )
+
 if test x$pulseaudio = xyes ; then
 	AC_MSG_NOTICE([User $USER will be used to allow pulseaudio to work, change it if needed in service file])
 	PKG_CHECK_MODULES([LIBPULSE], [libpulse >= 0.9.~],
@@ -184,6 +198,14 @@ if test x$pulseaudio = xyes ; then
 		AC_SUBST(USERNAME)
 		AC_SUBST([PULSEAUDIO]),
 		AC_MSG_ERROR([libpulse development library not found.])
+	)
+fi
+
+if test x$alsaaudio = xyes ; then
+	PKG_CHECK_MODULES([LIBALSA], [alsa >= 0.2],
+		echo -e "\talsa ver `pkg-config --short-errors --modversion alsa` found"
+		AC_SUBST([ALSAAUDIO]),
+		AC_MSG_ERROR([libalsa development library not found.])
 	)
 fi
 
@@ -262,6 +284,7 @@ Linker       : $LD $LDFLAGS $LIBS
 Includes     :$LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS $LINKER_CFLAGS
 Libraries    :$LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS $LINKER_LIBS
 Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
+ALSA         : $alsaaudio: $LIBALSA_CFLAGS $LIBALSA_LIBS
 Prefix       : $prefix
 Devices dir  : $DEVICES_DIR
 Actors dir   : $ACTORS_DIR

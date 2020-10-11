@@ -24,7 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
-uint8_t Actor::FPS = 0;
+uint8_t Actor::FPS   = 0;
+uint8_t Actor::frame = 0;
 
 Actor::Actor(
 	umap<string, string>& parameters,
@@ -42,7 +43,9 @@ Actor::Actor(
 }
 
 void Actor::draw() {
-
+	++frame;
+	if (frame == FPS)
+		frame = 0;
 	affectAllElements();
 	calculateElements();
 	if (not affectedElements.empty())
@@ -132,6 +135,12 @@ void Actor::setStartTime(uint16_t seconds) {
 
 void Actor::setEndTime(uint16_t seconds) {
 	secondsToEnd = seconds;
+}
+
+void Actor::newFrame() {
+	if (frame == FPS)
+		frame = 0;
+	++frame;
 }
 
 uint8_t Actor::getNumberOfElements() const {
