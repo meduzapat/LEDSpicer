@@ -276,7 +276,7 @@ void PulseAudio::calcPeak() {
 		uint16_t v = abs(rawData[c]);
 		if (v > top)
 			top = v;
-		v = TO_PERC(v);
+		v = v ? TO_PERC(v) : 0;
 		// Even for left, odd for right.
 		if (c % 2) {
 			if (v > value.r)

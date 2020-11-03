@@ -33,6 +33,7 @@ libledspicer1_la_SOURCES =    \
 	src/utility/Direction.cpp \
 	src/utility/Color.cpp     \
 	src/utility/Colors.cpp    \
+	src/utility/Colorful.cpp  \
 	src/utility/Socks.cpp     \
 	src/utility/Time.cpp      \
 	src/restrictors/Restrictor.cpp \
@@ -75,7 +76,8 @@ utilityheader_HEADERS =       \
 	src/utility/Speed.hpp     \
 	src/utility/Direction.hpp \
 	src/utility/Color.hpp     \
-	src/utility/Colors.hpp
+	src/utility/Colors.hpp    \
+	src/utility/Colorful.hpp
 
 restrictorssheaderdir=$(pkgincludedir)/restrictors
 restrictorssheader_HEADERS =    \

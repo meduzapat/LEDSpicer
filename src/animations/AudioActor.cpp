@@ -302,11 +302,11 @@ void AudioActor::waves() {
 
 	for (uint8_t c = 0; c < waveData.size(); ++c)
 		changeElementColor(c, waveData[c], filter);
-
 }
 
+#define CALC_PERC(t, b) round(abs(percent - (b)) * 100.00 / ((t) - (b)))
+
 LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
-	#define CALC_PERC(t, b) round(abs(percent - (b)) * 100.00 / ((t) - (b)))
 
 	// Off.
 	if (not percent)

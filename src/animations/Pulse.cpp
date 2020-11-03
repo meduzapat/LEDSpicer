@@ -25,22 +25,27 @@
 using namespace LEDSpicer::Animations;
 
 void Pulse::calculateElements() {
+	const Color* color = colors[currentColor];
 	float c;
 	if (mode == Modes::Linear)
 		c = currentFrame;
 	else
 		c = static_cast<float>(currentFrame * currentFrame) / totalFrames;
 #ifdef DEVELOP
-	cout << "Pulse: " << DrawDirection(cDirection) << " F: " <<  static_cast<int>(currentFrame + 1) << " = " << PERCENT(c, totalFrames) << endl;
+	cout << "Pulse: " << DrawDirection(cDirection) << " F: " <<  to_string(currentFrame + 1) << " = " << PERCENT(c, totalFrames) << " ";
+	color->drawColor();
+	cout << endl;
 #endif
-	changeElementsColor(this->fade(PERCENT(c, totalFrames)), filter);
+	changeElementsColor(color->fade(PERCENT(c, totalFrames)), filter);
+	if (isLastFrame())
+		advanceColor();
 }
 
 void Pulse::drawConfig() {
 	cout << "Type: Pulse " << endl;
 	DirectionActor::drawConfig();
-	cout << "Color: ";
-	this->drawColor();
+	cout << "Colors: ";
+	this->drawColors();
 	cout << endl << SEPARATOR << endl;
 }
 
