@@ -334,6 +334,11 @@ LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
 	return userPref.c00;
 }
 
+void AudioActor::restart() {
+	value.l = value.r = 0;
+	values.clear();
+}
+
 void AudioActor::drawConfig() {
 	cout <<
 		"mode: "        << mode2str(userPref.mode) << endl <<

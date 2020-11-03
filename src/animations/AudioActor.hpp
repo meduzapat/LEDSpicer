@@ -62,6 +62,8 @@ public:
 
 	static string channel2str(Channels channel);
 
+	virtual void restart();
+
 protected:
 
 	struct Values {
