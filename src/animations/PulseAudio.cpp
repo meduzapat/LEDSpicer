@@ -49,12 +49,16 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	}
 
 	tml = pa_threaded_mainloop_new();
-	if (not tml)
-		throw Error("Failed create pulseaudio main loop");
+	if (not tml) {
+		LogError("Failed create pulseaudio main loop");
+		throw;
+	}
 
 	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PACKAGE_STRING);
-	if (not context)
-		throw Error("Failed to create pulseaudio context");
+	if (not context) {
+		LogError("Failed to create pulseaudio context");
+		throw;
+	}
 	pa_context_set_state_callback(context, PulseAudio::onContextSetState, &userPref);
 	pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
 	pa_threaded_mainloop_start(tml);
@@ -165,10 +169,10 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 	source = "";
 
 #ifdef DEVELOP
+	char cmt[PA_CHANNEL_MAP_SNPRINT_MAX], sst[PA_SAMPLE_SPEC_SNPRINT_MAX];
 	LogDebug("Found: "       + string(info->monitor_source_name));
 	LogDebug("Index: "       + to_string(info->index));
 	LogDebug("Description: " + string(info->description));
-	char cmt[PA_CHANNEL_MAP_SNPRINT_MAX], sst[PA_SAMPLE_SPEC_SNPRINT_MAX];
 	LogDebug("Sample: "      + string(pa_sample_spec_snprint(sst, sizeof(sst), &info->sample_spec)));
 	LogDebug("Channels: "    + string(pa_channel_map_snprint(cmt, sizeof(cmt), &info->channel_map)));
 	LogDebug("Total bytes: " + to_string(pa_frame_size(&info->sample_spec)));

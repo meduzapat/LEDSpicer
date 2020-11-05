@@ -187,6 +187,9 @@ public:
 	static umap<string, Group> layout;
 
 	/// Stores the default profile name.
+	static string defaultProfileName;
+
+	/// Stores the default profile name.
 	static Profile* defaultProfile;
 
 	/// Keeps references to profiles.

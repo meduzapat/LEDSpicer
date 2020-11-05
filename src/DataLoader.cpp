@@ -28,6 +28,7 @@ vector<Device*> DataLoader::devices;
 umap<string, Element*> DataLoader::allElements;
 umap<string, Group> DataLoader::layout;
 Profile* DataLoader::defaultProfile;
+string DataLoader::defaultProfileName;
 umap<string, Profile*> DataLoader::profilesCache;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
@@ -200,7 +201,7 @@ void DataLoader::processLayout() {
 
 	tempAttr = processNode(layoutNode);
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, NODE_LAYOUT);
-	string defaultProfileStr = tempAttr[PARAM_DEFAULT_PROFILE];
+	defaultProfileName = tempAttr[PARAM_DEFAULT_PROFILE];
 
 	tinyxml2::XMLElement* xmlElement = layoutNode->FirstChildElement(NODE_GROUP);
 	if (xmlElement)
@@ -229,8 +230,6 @@ void DataLoader::processLayout() {
 		group.shrinkToFit();
 		layout.emplace("All", group);
 	}
-
-	defaultProfile = processProfile(defaultProfileStr);
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {

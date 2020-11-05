@@ -62,7 +62,7 @@ void Main::run() {
 
 	LogInfo(PACKAGE_NAME " Running");
 
-	currentProfile = DataLoader::defaultProfile;
+	currentProfile = DataLoader::defaultProfile = DataLoader::processProfile(DataLoader::defaultProfileName);
 	currentProfile->restart();
 
 	while (running) {

@@ -77,14 +77,25 @@ void AudioActor::calculateElements() {
 }
 
 void AudioActor::resetPeak() {
+#ifdef DEVELOP
+	displayPeak();
+#endif
 	if (frame == lastF)
 		return;
 	lastF = frame;
 	value.l = value.r = 0;
+	calcPeak();
 }
 
 void AudioActor::resetPeaks() {
+#ifdef DEVELOP
+	displayPeaks();
+#endif
 	// Check is on read peaks
+	if (frame == lastFs) {
+		return;
+	}
+	calcPeaks();
 	lastFs = frame;
 	values.clear();
 }
@@ -95,15 +106,18 @@ void AudioActor::displayPeak() {
 		<< "L:" << std::left << std::setfill(' ') << std::setw(5) << to_string(value.l)
 		<< " R:" << std::setw(5) << to_string(value.r) << endl;
 }
+
+void AudioActor::displayPeaks() {
+	if (values.size())
+		cout
+			<< "L:" << std::left << std::setfill(' ') << std::setw(5) << to_string(values[0].l)
+			<< " R:" << std::setw(5) << to_string(values[0].r) << endl;
+}
 #endif
 
 void AudioActor::single() {
 
 	resetPeak();
-	calcPeak();
-#ifdef DEVELOP
-	displayPeak();
-#endif
 
 	if (not value.l and not value.r)
 		return;
@@ -145,13 +159,6 @@ void AudioActor::vuMeters() {
 	};
 
 	resetPeak();
-	calcPeak();
-#ifdef DEVELOP
-	displayPeak();
-#endif
-
-	if (not value.l and not value.r)
-		return;
 
 	uint16_t val;
 	// Convert to mono and them to elements.
@@ -208,13 +215,7 @@ void AudioActor::vuMeters() {
 
 void AudioActor::levels() {
 
-	if (frame != lastFs) {
-		resetPeaks();
-		calcPeaks();
-	}
-
-	if (values.empty())
-		return;
+	resetPeaks();
 
 	uint8_t e = userPref.channel == Channels::Both ? totalElements : 0;
 	for (uint8_t c = 0, c2 = 0; c < totalElements; ++c, ++c2) {

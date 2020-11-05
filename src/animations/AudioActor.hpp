@@ -130,6 +130,11 @@ protected:
 	 * for debug.
 	 */
 	void displayPeak();
+
+	/**
+	 * for debug.
+	 */
+	void displayPeaks();
 #endif
 
 	/**
