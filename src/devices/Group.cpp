@@ -26,14 +26,8 @@ using namespace LEDSpicer::Devices;
 
 void Group::drawElements() {
 	cout << (int)elements.size() << " Element(s): " << endl;
-	for (auto element : elements) {
-		cout << std::left << std::setfill(' ') << std::setw(15) << element->getName() <<
-			" Pin" << (element->getPins().size() == 1 ? " " : "s") <<  ": ";
-		for (auto pin : element->getPins()) {
-			cout << std::setw(2) << (int)*pin << " ";
-		}
-		cout << endl;
-	}
+	for (auto element : elements)
+		element->draw();
 }
 
 uint8_t Group::size() const {

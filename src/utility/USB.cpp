@@ -44,7 +44,7 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 		if (libusb_init(&usbSession) != 0)
 			throw new Error("Unable to open USB session");
 	}
-#ifdef DEVELOP
+#ifdef SHOW_USB_OUTPUT
 	/*
 		LIBUSB_LOG_LEVEL_NONE
 		LIBUSB_LOG_LEVEL_ERROR

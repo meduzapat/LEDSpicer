@@ -409,8 +409,12 @@ void Main::runCurrentProfile() {
 	}
 
 	// Reset elements.
-	for (auto& eD : DataLoader::allElements)
-		eD.second->setColor(currentProfile->getBackgroundColor());
+	for (auto& eD : DataLoader::allElements) {
+		if (eD.second->isTimed())
+			eD.second->checkTime();
+		else
+			eD.second->setColor(currentProfile->getBackgroundColor());
+	}
 
 	// Set always on groups from profile.
 	for (auto& gE : currentProfile->getAlwaysOnGroups())

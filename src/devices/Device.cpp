@@ -68,9 +68,9 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 	return &LEDs.at(ledPos);
 }
 
-void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor) {
+void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor, uint timeOn) {
 	validateLed(led);
-	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor));
+	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor, timeOn));
 }
 
 void Device::registerElement(

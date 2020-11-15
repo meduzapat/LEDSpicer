@@ -86,7 +86,7 @@ public:
 	 * @param led
 	 * @param defaultColor
 	 */
-	void registerElement(const string& name, uint8_t led, const Color& defaultColor);
+	void registerElement(const string& name, uint8_t led, const Color& defaultColor, uint timeOn);
 
 	/**
 	 * Register a new Element with three LEDs (RGB).

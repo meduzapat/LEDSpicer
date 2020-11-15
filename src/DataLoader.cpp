@@ -153,11 +153,23 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], "Invalid Value for pin in " + device->getFullName()) - 1;
+			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], "Invalid Value for " PARAM_LED " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
-				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR)
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
+				0
+			);
+			pinCheck[pin] = true;
+		}
+		// Solenoids, Motors, Recoils, any other time sensitive hardware.
+		else if (tempAttr.count(PARAM_TIMED)) {
+			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], "Invalid Value for " PARAM_TIMED    " in " + device->getFullName()) - 1;
+			device->registerElement(
+				tempAttr[PARAM_NAME],
+				pin,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
+				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], "Invalid value for " PARAM_TIME_ON) : DEFAULT_SOLENOID
 			);
 			pinCheck[pin] = true;
 		}

@@ -91,10 +91,6 @@ void Color::set(const Color& color) {
 Color* Color::set(const Color& color, const Filters& filter, uint8_t percent) {
 
 	switch (filter) {
-	case Color::Filters::Normal:
-		set(color);
-		break;
-
 	case Color::Filters::Combine:
 		set(this->transition(color, percent));
 		break;
@@ -104,10 +100,13 @@ Color* Color::set(const Color& color, const Filters& filter, uint8_t percent) {
 		break;
 
 	case Color::Filters::Invert:
-		set(
-			this->invert()
-		);
+		set(color.invert());
 		break;
+
+	default:
+		set(color);
+		break;
+
 	}
 	return this;
 }
