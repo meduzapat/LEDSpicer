@@ -1,3 +1,27 @@
+ledspicer (0.5.4) focal; urgency=medium
+
+  * Adds colors to Filler and Pulse
+  * Fixes an issue with PA
+  * Better debug output for several actors
+  * Adds ALSA audio plugin (still need to be tested)
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Thu, 5 Nov 2020 20:07:29 -0500
+
+ledspicer (0.5.3) focal; urgency=medium
+
+  * Adds animation files to transitions.
+  * Removes some mandatory parameters.
+  * Fixes a timing issue with ledwiz32
+  * Fixes and issue on nanoled.
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Tue, 6 Oct 2020 20:07:29 -0500
+
+ledspicer (0.5.2) focal; urgency=medium
+
+  * This is the release 0.5.2 that includes the process lookup!
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Mon, 7 Sep 2020 20:07:29 -0500
+
 ledspicer (0.5.1) focal; urgency=medium
 
   * Fixes some issues.

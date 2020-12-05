@@ -59,6 +59,9 @@ protected:
 	/// Keeps the ON/OFF flag.
 	bool on = false;
 
+	/// Flag to know if the effect is blink or just stay on.
+	bool doBlink = true;
+
 	struct Record {
 
 		Record() = default;
