@@ -96,14 +96,14 @@ bool FrameActor::isRunning() {
 
 	if (cycles) {
 		if (cycle > cycles)
-			return false;
+			return checkRepeats();
 
 		if (cycle == cycles) {
 #ifdef DEVELOP
 			LogDebug("Ending Actor after " + to_string(cycles) + " cycles.");
 #endif
 			++cycle;
-			return false;
+			return checkRepeats();
 		}
 		if (isLastFrame())
 			++cycle;

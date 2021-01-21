@@ -35,6 +35,7 @@ Actor::Actor(
 	filter(Color::str2filter(parameters.count("filter") ? parameters["filter"] : "Normal")),
 	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
+	repeat(parameters.count("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0),
 	group(group)
 {
 	affectedElements.resize(group->size(), false);
@@ -95,7 +96,7 @@ bool Actor::isRunning() {
 
 	if (startTime) {
 		if (not startTime->isTime())
-			return false;
+			return checkRepeats();
 		delete startTime;
 		startTime = nullptr;
 #ifdef DEVELOP
@@ -115,7 +116,7 @@ bool Actor::isRunning() {
 
 	// Time Over: there is an end time that ran out, and not start time, so is not running.
 	if (not startTime and not endTime and secondsToEnd)
-		return false;
+		return checkRepeats();
 
 	return true;
 }
@@ -165,3 +166,14 @@ void Actor::affectAllElements(bool value) {
 bool Actor::isElementAffected(uint8_t index) {
 	return affectedElements[index];
 }
+
+bool Actor::checkRepeats() {
+
+	if (not repeat or repeat == 1 or repeated == repeat)
+		return false;
+
+	++repeat;
+	restart();
+	return true;
+}
+

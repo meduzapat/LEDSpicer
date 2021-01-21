@@ -202,6 +202,12 @@ protected:
 	 */
 	bool isElementAffected(uint8_t index);
 
+	/**
+	 * Checks if the actor will repeat.
+	 * @return
+	 */
+	bool checkRepeats();
+
 private:
 
 	/**
@@ -211,6 +217,12 @@ private:
 
 	/// A pointer to the real group of elements.
 	Group* const group;
+
+	/// If this actor will repeat, default 0, repeat for ever.
+	uint8_t
+		repeat    = 0,
+		repeated  = 0;
+
 };
 
 // The functions to create and destroy actors.

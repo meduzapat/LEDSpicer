@@ -164,7 +164,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		}
 		// Solenoids, Motors, Recoils, any other time sensitive hardware.
 		else if (tempAttr.count(PARAM_TIMED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], "Invalid Value for " PARAM_TIMED    " in " + device->getFullName()) - 1;
+			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], "Invalid Value for " PARAM_TIMED " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
