@@ -48,6 +48,7 @@ void signalHandler(int sig) {
 	case SIGSEGV:
 	case SIGILL:
 		// Display back trace.
+		cerr << PACKAGE_NAME " ended with signal " << sig << endl;
 #ifdef DEVELOP
 		void* array[10];
 		size_t size = backtrace(array, 10);
@@ -341,9 +342,7 @@ int main(int argc, char **argv) {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 
-#ifdef DEVELOP
 		signal(SIGSEGV, signalHandler);
-#endif
 		signal(SIGTERM, signalHandler);
 		signal(SIGQUIT, signalHandler);
 		signal(SIGABRT, signalHandler);
@@ -352,7 +351,7 @@ int main(int argc, char **argv) {
 		signal(SIGSTOP, SIG_IGN);
 		signal(SIGHUP, signalHandler);
 
-		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
+		if (DataLoader::getMode() == DataLoader::Modes::Profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
 
 #ifdef DEVELOP
