@@ -22,6 +22,8 @@
 
 #include "DataLoader.hpp"
 
+#define invalidValueFor(val) "Invalid Value for " val
+
 using namespace LEDSpicer;
 
 vector<Device*> DataLoader::devices;
@@ -56,11 +58,13 @@ void DataLoader::readConfiguration() {
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
 	// Set log level.
-	if ((mode != Modes::Dump or mode != Modes::Profile) and tempAttr.count(PARAM_LOG_LEVEL))
+	if (mode == Modes::Dump or mode == Modes::Profile)
+		Device::setDumpMode();
+	else if (tempAttr.count(PARAM_LOG_LEVEL))
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
 
 	// Set FPS.
-	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], "Invalid value for FPS");
+	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], invalidValueFor("FPS"));
 	if (fps == 0)
 		throw LEDError("FPS = 0, No speed, nothing to do, done");
 	setInterval(1000 / (fps > MAXIMUM_FPS ? MAXIMUM_FPS : fps));
@@ -86,8 +90,8 @@ void DataLoader::readConfiguration() {
 
 	// Drop root.
 	dropRootPrivileges(
-		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], "Invalid value for user ID")),
-		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], "Invalid value for group ID"))
+		static_cast<uid_t>(Utility::parseNumber(tempAttr[PARAM_USER_ID], invalidValueFor("user ID"))),
+		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], invalidValueFor("group ID")))
 	);
 }
 
@@ -153,7 +157,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], "Invalid Value for " PARAM_LED " in " + device->getFullName()) - 1;
+			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
@@ -164,12 +168,12 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		}
 		// Solenoids, Motors, Recoils, any other time sensitive hardware.
 		else if (tempAttr.count(PARAM_TIMED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], "Invalid Value for " PARAM_TIMED " in " + device->getFullName()) - 1;
+			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], invalidValueFor(PARAM_TIMED) " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
-				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], "Invalid value for " PARAM_TIME_ON) : DEFAULT_SOLENOID
+				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID
 			);
 			pinCheck[pin] = true;
 		}
@@ -177,9 +181,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr[PARAM_NAME]);
 			uint8_t
-				r = Utility::parseNumber(tempAttr[PARAM_RED], "Invalid Value for red pin in " + device->getFullName()) - 1,
-				g = Utility::parseNumber(tempAttr[PARAM_GREEN], "Invalid Value for green pin in " + device->getFullName()) - 1,
-				b = Utility::parseNumber(tempAttr[PARAM_BLUE], "Invalid Value for blue pin in " + device->getFullName()) - 1;
+				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor("red pin") " in " + device->getFullName()) - 1,
+				g = Utility::parseNumber(tempAttr[PARAM_GREEN], invalidValueFor("green pin") " in " + device->getFullName()) - 1,
+				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor("blue pin") " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				r, g , b,
@@ -285,7 +289,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	// startTrasition only exist to keep retrocompatibility.
+	// startTrasition only exist to keep retro-compatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);

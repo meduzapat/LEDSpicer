@@ -102,24 +102,23 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetElement: {
-				if (msg.getData().size() < 2) {
-					LogNotice("Invalid message ");
+				if (msg.getData().size() < 1 or not DataLoader::allElements.count(msg.getData()[0])) {
+					LogNotice("Invalid message for " + Message::type2str(msg.getType()));
 					break;
 				}
-				if (msg.getData().size() == 2) {
+
+				if (msg.getData().size() == 1)
+					msg.addData(DataLoader::allElements.at(msg.getData()[0])->getDefaultColor().getName());
+
+				if (msg.getData().size() == 2)
 					msg.addData("Normal");
-					break;
-				}
-				string
-					name   = msg.getData()[0],
-					color  = msg.getData()[1],
-					filter = msg.getData()[2];
-				if (not DataLoader::allElements.count(name)) {
-					LogNotice("Unknown element " + name);
-					break;
-				}
+
 				try {
-					alwaysOnElements[name] = Element::Item{DataLoader::allElements.at(name), &Color::getColor(color), Color::str2filter(filter)};
+					alwaysOnElements[msg.getData()[0]] = Element::Item{
+						DataLoader::allElements.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -128,12 +127,11 @@ void Main::run() {
 			}
 
 			case Message::Types::ClearElement:
-				if (msg.getData().size() != 1) {
+				if (msg.getData().size() != 1 or not alwaysOnElements.count(msg.getData()[0])) {
 					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
 					break;
 				}
-				if (alwaysOnElements.count(msg.getData()[0]))
-					alwaysOnElements.erase(msg.getData()[0]);
+				alwaysOnElements.erase(msg.getData()[0]);
 				break;
 
 			case Message::Types::ClearAllElements:
@@ -141,18 +139,17 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetGroup:
-				if (msg.getData().size() < 2) {
-					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
+				if (msg.getData().size() < 1 or not DataLoader::layout.count(msg.getData()[0])) {
+					LogNotice("Missing/Invalid group for " + Message::type2str(Message::Types::SetGroup));
 					break;
 				}
-				if (msg.getData().size() == 2) {
+
+				if (msg.getData().size() == 1)
+					msg.addData(DataLoader::layout.at(msg.getData()[0]).getDefaultColor().getName());
+
+				if (msg.getData().size() == 2)
 					msg.addData("Normal");
-					break;
-				}
-				if (not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice("Unknown group " + msg.getData()[0]);
-					break;
-				}
+
 				try {
 					alwaysOnGroups[msg.getData()[0]] = Group::Item{
 						&DataLoader::layout.at(msg.getData()[0]),
@@ -166,12 +163,11 @@ void Main::run() {
 				break;
 
 			case Message::Types::ClearGroup:
-				if (msg.getData().size() != 1) {
+				if (msg.getData().size() != 1 or not alwaysOnGroups.count(msg.getData()[0])) {
 					LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
 					break;
 				}
-				if (alwaysOnGroups.count(msg.getData()[0]))
-					alwaysOnGroups.erase(msg.getData()[0]);
+				alwaysOnGroups.erase(msg.getData()[0]);
 				break;
 
 			case Message::Types::ClearAllGroups:

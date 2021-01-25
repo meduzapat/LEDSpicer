@@ -59,8 +59,7 @@ void Actor::draw() {
 					continue;
 				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
 			}
-		}
-	}
+		}}
 }
 
 void Actor::drawConfig() {
@@ -71,6 +70,8 @@ void Actor::drawConfig() {
 		cout << "Start After: " << secondsToStart << " sec" << endl;
 	if (secondsToEnd)
 		cout << "Stop After: " << secondsToEnd << " sec" << endl;
+	if (repeat)
+		cout << "Will repeat for: " << repeat << " times" << endl;
 }
 
 void Actor::restart() {

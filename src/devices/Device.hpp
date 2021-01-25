@@ -148,7 +148,15 @@ public:
 	 */
 	void packData();
 
+	/**
+	 * Calling this method will make the USB not to connect to the real hard.
+	 */
+	void static setDumpMode();
+
 protected:
+
+	/// if set to true will not connect.
+	static bool dumpMode;
 
 	/// The device name.
 	string name;

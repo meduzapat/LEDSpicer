@@ -89,7 +89,7 @@ using std::chrono::milliseconds;
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
 #define REQUIRED_PARAM_MAP            {"type", "target", "trigger"}
 
-#define EMPTY_PROFILE    "profile_"
+#define EMPTY_PROFILE     "profile_"
 #define DEFAULT_COLOR     "White"
 #define DEFAULT_ENDCYCLES 1
 #define DEFAULT_ENDTIME   5
@@ -105,7 +105,6 @@ using Devices::Device;
 using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
-using Devices::Device;
 using Inputs::Input;
 using Inputs::InputHandler;
 

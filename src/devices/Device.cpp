@@ -25,6 +25,8 @@
 
 using namespace LEDSpicer::Devices;
 
+bool Device::dumpMode = false;
+
 Device::Device(
 	uint8_t  elements,
 	const string& name
@@ -36,12 +38,20 @@ Device::Device(
 }
 
 void Device::initialize() {
+
+	if (dumpMode)
+		return;
+
 	LogDebug("Initializing Device " + name);
 	openDevice();
 	resetLeds();
 }
 
 void Device::terminate() {
+
+	if (dumpMode)
+		return;
+
 	LogDebug("Disconnect Device " + name);
 	resetLeds();
 	closeDevice();
@@ -118,4 +128,8 @@ void Device::packData() {
 
 umap<string, Element>* Device::getElements() {
 	return &elementsByName;
+}
+
+void Device::setDumpMode() {
+	dumpMode = true;
 }
