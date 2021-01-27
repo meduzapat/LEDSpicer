@@ -14,7 +14,9 @@ install_prerequisites:
 	  --enable-pacdrive \
 	  --enable-pacled64 \
 	  --enable-ultimateio \
-	  --enable-ledwiz32
+	  --enable-ledwiz32 \
+	  --enable-howler \
+	  --disable-alsaaudio
 	make
 	make DESTDIR=/tmp/project install
 	apt-get install -y ruby ruby-dev
