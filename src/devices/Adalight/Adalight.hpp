@@ -27,7 +27,7 @@
 #define ADALIGHT_HPP_ 1
 
 #define ADALIGHT_NAME "AdalightName"
-#define ADALIGHT_LEDS 23 * 3 // 12 Leds * RGB
+#define ADALIGHT_LEDS 23 * 3 // 12 Leds * RGB fixed number for now but should be moved to parameter
 
 namespace LEDSpicer {
 namespace Devices {
