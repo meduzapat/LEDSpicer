@@ -162,7 +162,7 @@ AM_CONDITIONAL([RASPBERRYPI],[test x$raspberrypi = xyes])
 
 dnl Enable ADALIGHT plugin.
 AC_ARG_ENABLE(adalight,
-	AS_HELP_STRING([--enable-raspberrypi],
+	AS_HELP_STRING([--enable-adalight],
 	[Enables the output plugin adalight @<:@default=no@:>@]),
 	[case "${enableval}" in
 		yes) adalight=yes ;;
