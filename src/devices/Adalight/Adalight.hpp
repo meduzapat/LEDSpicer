@@ -21,13 +21,13 @@
  */
 
 #include "../Device.hpp"
+#include "utility/Utility.hpp"
 #include <libserialport.h>
 
 #ifndef ADALIGHT_HPP_
 #define ADALIGHT_HPP_ 1
 
 #define ADALIGHT_NAME "AdalightName"
-#define ADALIGHT_LEDS 23 * 3 // 12 Leds * RGB fixed number for now but should be moved to parameter
 
 namespace LEDSpicer {
 namespace Devices {
@@ -44,7 +44,10 @@ public:
 	Adalight(
 		uint8_t  boardId,
 		umap<string, string>& options) :
-		Device(ADALIGHT_LEDS, ADALIGHT_NAME) {}
+		Device(
+			options.count("leds") ? Utility::parseNumber(options["leds"], "Invalid Value for number of leds") * 3 : 0,
+		  ADALIGHT_NAME
+		) {}
 
 	virtual ~Adalight() = default;
 
