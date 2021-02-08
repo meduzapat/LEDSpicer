@@ -228,8 +228,8 @@ if test x$raspberrypi = xyes ; then
 fi
 
 if test x$adalight = xyes ; then
-   dnl AC_CHECK_HEADER([CppLinuxSerial/SerialPort.hpp], [], [AC_MSG_ERROR([CppLinuxSerial/SerialPort.hpp header not found. please install it from https://github.com/gbmhunter/CppLinuxSerial/])], [])
-   [ADALIGHT_LIBS="-lCppLinuxSerial"]
+   dnl AC_CHECK_HEADER([libserialport.h], [], [AC_MSG_ERROR([libserialport header not found. please install it, project documentation is available here: https://sigrok.org/wiki/Libserialport])], [])
+   [ADALIGHT_LIBS="-lserialport"]
    AC_SUBST(ADALIGHT_LIBS)
 
 fi

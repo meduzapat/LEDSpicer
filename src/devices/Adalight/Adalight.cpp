@@ -98,7 +98,7 @@ int Adalight::check(enum sp_return result)
                 abort();
         case SP_ERR_FAIL:
                 error_message = sp_last_error_message();
-                throw Error("Adalight Error: Failed: %s\n", error_message);
+                throw Error("Adalight Error: Failed: " + string(error_message));
                 sp_free_error_message(error_message);
                 abort();
         case SP_ERR_SUPP:
