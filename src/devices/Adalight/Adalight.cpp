@@ -63,6 +63,11 @@ string Adalight::getFullName() const {
 void Adalight::drawHardwarePinMap() {
 }
 
+void Adalight::packData() {
+	transfer();
+	oldLEDs = LEDs;
+}
+
 
 void Adalight::transfer() const {
 	std::string serialData;

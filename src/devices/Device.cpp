@@ -114,15 +114,14 @@ uint8_t Device::getNumberOfLeds() const {
 }
 
 void Device::packData() {
-// TODO: find a more elegant way to have the program refresh adalight at each frame
-// 	if (LEDs == oldLEDs) {
-// #ifdef DEVELOP
-// 	#ifdef SHOW_OUTPUT
-// 	LogDebug("No changes, data not sent for " + getFullName());
-// 	#endif
-// #endif
-// 		return;
-// 	}
+	if (LEDs == oldLEDs) {
+#ifdef DEVELOP
+	#ifdef SHOW_OUTPUT
+	LogDebug("No changes, data not sent for " + getFullName());
+	#endif
+#endif
+		return;
+	}
 	transfer();
 	oldLEDs = LEDs;
 }

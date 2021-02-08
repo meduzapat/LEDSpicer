@@ -58,7 +58,8 @@ public:
 	virtual void drawHardwarePinMap();
 
 	virtual void transfer() const;
-	// void packData();
+
+  virtual void packData();
 
 
 protected:
@@ -68,6 +69,7 @@ protected:
   int check(enum sp_return result);
 	void openDevice();
 	void closeDevice();
+
 };
 
 } /* namespace Devices */
