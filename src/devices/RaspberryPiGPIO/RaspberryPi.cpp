@@ -27,8 +27,22 @@ using namespace LEDSpicer::Devices::RaspberryPi;
 bool RaspberryPi::initialized = false;
 
 void RaspberryPi::resetLeds() {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+    usedleds.empty();
+    uint8_t* firstled = getLed(0);
+    for (auto& element : *getElements()) {
+        LogDebug("Element " + element.second.getName());
+        for (auto& pin : element.second.getPins() ) {
+          uint8_t gpiopin = pin - firstled + 1;
+          gpioSetMode(gpiopin, PI_OUTPUT);
+          usedleds.push_back(gpiopin);
+          LogDebug("gpiopin : " + to_string(gpiopin));
+        }
+    }
+
+	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l) {
+        LogDebug("Reset Led " + to_string(l));
 		gpioPWM(l, 0);
+	}
 	setLeds(0);
 }
 
@@ -81,6 +95,7 @@ void RaspberryPi::drawHardwarePinMap() {
 }
 
 void RaspberryPi::transfer() const {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+    for (auto & l : usedleds) {
 		gpioPWM(l, LEDs[l]);
+    }
 }

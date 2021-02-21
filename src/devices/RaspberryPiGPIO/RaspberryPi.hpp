@@ -61,6 +61,8 @@ protected:
 	virtual void openDevice();
 
 	virtual void closeDevice();
+
+	vector<uint8_t> usedleds;
 };
 
 } /* namespace RaspberryPi */
