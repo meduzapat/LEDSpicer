@@ -48,7 +48,7 @@ void RaspberryPi::closeDevice() {
 		gpioTerminate();
 }
 
-string RaspberryPi::getFullName() {
+string RaspberryPi::getFullName() const {
 	return "Raspberry PI GPIO";
 }
 
@@ -80,7 +80,7 @@ void RaspberryPi::drawHardwarePinMap() {
 		<< " G" << std::setw(3)                             << (int)*getLed(21) << endl << endl;
 }
 
-void RaspberryPi::transfer() {
+void RaspberryPi::transfer() const {
 	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
 		gpioPWM(l, LEDs[l]);
 }
