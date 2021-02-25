@@ -27,6 +27,14 @@ using namespace LEDSpicer::Devices::RaspberryPi;
 bool RaspberryPi::initialized = false;
 
 void RaspberryPi::resetLeds() {
+    for (auto & l : usedleds) {
+        LogDebug("Reset Led " + to_string(l));
+		gpioPWM(l, 0);
+	}
+	setLeds(0);
+}
+
+void RaspberryPi::openDevice() {
     usedleds.empty();
     uint8_t* firstled = getLed(0);
     for (auto& element : *getElements()) {
@@ -39,14 +47,6 @@ void RaspberryPi::resetLeds() {
         }
     }
 
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l) {
-        LogDebug("Reset Led " + to_string(l));
-		gpioPWM(l, 0);
-	}
-	setLeds(0);
-}
-
-void RaspberryPi::openDevice() {
 	if (initialized)
 		throw Error(getFullName() + " device can only be loaded once");
 
