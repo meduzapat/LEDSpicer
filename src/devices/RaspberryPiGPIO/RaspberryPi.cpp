@@ -98,6 +98,6 @@ void RaspberryPi::drawHardwarePinMap() {
 
 void RaspberryPi::transfer() const {
     for (auto & l : usedleds) {
-		gpioPWM(l, LEDs[l]);
+		gpioPWM(l, LEDs[l - 1]);
     }
 }
