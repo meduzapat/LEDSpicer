@@ -35,6 +35,14 @@ void RaspberryPi::resetLeds() {
 }
 
 void RaspberryPi::openDevice() {
+
+	if (initialized)
+		throw Error(getFullName() + " device can only be loaded once");
+
+	if (gpioInitialise() < 0) {
+		throw Error("Failed to initialized " + getFullName());
+	}
+
     usedleds.empty();
     uint8_t* firstled = getLed(0);
     for (auto& element : *getElements()) {
@@ -45,14 +53,8 @@ void RaspberryPi::openDevice() {
           usedleds.push_back(gpiopin);
           LogDebug("gpiopin : " + to_string(gpiopin));
         }
-    }
-
-	if (initialized)
-		throw Error(getFullName() + " device can only be loaded once");
-
-	if (gpioInitialise() < 0) {
-		throw Error("Failed to initialized" + getFullName());
-	}
+    };
+    usedleds.shrink_to_fit();
 
 	initialized = true;
 }
