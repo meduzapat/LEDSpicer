@@ -48,11 +48,11 @@ public:
 
 	virtual void resetLeds();
 
-	virtual string getFullName();
+	virtual string getFullName() const;
 
 	virtual void drawHardwarePinMap();
 
-	virtual void transfer();
+	virtual void transfer() const;
 
 protected:
 
@@ -61,6 +61,8 @@ protected:
 	virtual void openDevice();
 
 	virtual void closeDevice();
+
+	vector<uint8_t> usedleds;
 };
 
 } /* namespace RaspberryPi */

@@ -27,18 +27,34 @@ using namespace LEDSpicer::Devices::RaspberryPi;
 bool RaspberryPi::initialized = false;
 
 void RaspberryPi::resetLeds() {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+    for (auto & l : usedleds) {
+        LogDebug("Reset Led " + to_string(l));
 		gpioPWM(l, 0);
+	}
 	setLeds(0);
 }
 
 void RaspberryPi::openDevice() {
+
 	if (initialized)
 		throw Error(getFullName() + " device can only be loaded once");
 
 	if (gpioInitialise() < 0) {
-		throw Error("Failed to initialized" + getFullName());
+		throw Error("Failed to initialized " + getFullName());
 	}
+
+    usedleds.empty();
+    uint8_t* firstled = getLed(0);
+    for (auto& element : *getElements()) {
+        LogDebug("Element " + element.second.getName());
+        for (auto& pin : element.second.getPins() ) {
+          uint8_t gpiopin = pin - firstled + 1;
+          gpioSetMode(gpiopin, PI_OUTPUT);
+          usedleds.push_back(gpiopin);
+          LogDebug("gpiopin : " + to_string(gpiopin));
+        }
+    };
+    usedleds.shrink_to_fit();
 
 	initialized = true;
 }
@@ -48,7 +64,7 @@ void RaspberryPi::closeDevice() {
 		gpioTerminate();
 }
 
-string RaspberryPi::getFullName() {
+string RaspberryPi::getFullName() const {
 	return "Raspberry PI GPIO";
 }
 
@@ -80,7 +96,8 @@ void RaspberryPi::drawHardwarePinMap() {
 		<< " G" << std::setw(3)                             << (int)*getLed(21) << endl << endl;
 }
 
-void RaspberryPi::transfer() {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
-		gpioPWM(l, LEDs[l]);
+void RaspberryPi::transfer() const {
+    for (auto & l : usedleds) {
+		gpioPWM(l, LEDs[l - 1]);
+    }
 }
