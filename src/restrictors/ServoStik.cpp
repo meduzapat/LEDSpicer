@@ -37,7 +37,7 @@ void ServoStik::rotate(const umap<string, Ways>& playersData) {
 	case Ways::w4:
 		LogDebug("Rotating " + getName() + " to 4 ways.");
 		data[3] = 0;
-		break;			
+		break;
 	default:
 		LogDebug("Rotating " + getName() + " to 8 ways.");
 		data[3] = 1;
