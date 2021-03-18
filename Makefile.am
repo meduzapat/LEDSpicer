@@ -545,6 +545,32 @@ endif
 devicesdir = \
 	$(DEVICES_DIR)
 
+###############
+#   ADALIGHT  #
+###############
+if ADALIGHT
+devices_LTLIBRARIES += \
+	Adalight.la
+
+Adalight_la_SOURCES = \
+	src/devices/Adalight/Adalight.cpp
+
+Adalight_la_LIBADD = \
+	libledspicer1.la    \
+	$(ADALIGHT_LIBS)
+
+Adalight_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+Adalight_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
+else
+EXTRA_DIST += \
+	src/devices/Adalight/Adalight.cpp
+endif
+
+
 ##########
 # inputs #
 ##########
@@ -658,7 +684,7 @@ animations_data_DATA = \
 profiles_datadir=$(pkgdatadir)/profiles
 profiles_data_DATA =         \
 	data/profiles/readme.txt
-	
+
 inputs_datadir=$(pkgdatadir)/inputs
 inputs_data_DATA = \
 	data/inputs/readme.txt
@@ -714,6 +740,7 @@ EXTRA_DIST +=                       \
 	src/devices/WolfWareTech/Howler.hpp         \
 	src/devices/WolfWareTech/WolfWareTech.hpp   \
 	src/devices/RaspberryPiGPIO/RaspberryPi.hpp \
+	src/devices/Adalight/Adalight.hpp \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \
@@ -759,4 +786,3 @@ EXTRA_DIST +=                       \
 	AUTHORS             \
 	ChangeLog           \
 	NEWS
-

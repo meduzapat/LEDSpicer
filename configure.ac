@@ -160,6 +160,18 @@ AC_ARG_ENABLE(raspberrypi,
 	[raspberrypi=no])
 AM_CONDITIONAL([RASPBERRYPI],[test x$raspberrypi = xyes])
 
+dnl Enable ADALIGHT plugin.
+AC_ARG_ENABLE(adalight,
+	AS_HELP_STRING([--enable-adalight],
+	[Enables the output plugin adalight @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) adalight=yes ;;
+		no)  adalight=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-adalight]) ;;
+	esac],
+	[adalight=no])
+AM_CONDITIONAL([ADALIGHT],[test x$adalight = xyes])
+
 dnl Enable develop mode
 AC_ARG_ENABLE(develop,
 	AS_HELP_STRING([--enable-develop],
@@ -213,6 +225,13 @@ if test x$raspberrypi = xyes ; then
 	AC_CHECK_HEADER([pigpio.h], [], [AC_MSG_ERROR([pigpio.h header not found.])], [])
 	[RASPBERRYPI_LIBS="-lpigpio"]
 	AC_SUBST(RASPBERRYPI_LIBS)
+fi
+
+if test x$adalight = xyes ; then
+   dnl AC_CHECK_HEADER([libserialport.h], [], [AC_MSG_ERROR([libserialport header not found. please install it, project documentation is available here: https://sigrok.org/wiki/Libserialport])], [])
+   [ADALIGHT_LIBS="-lserialport"]
+   AC_SUBST(ADALIGHT_LIBS)
+
 fi
 
 dnl expand bindir on configuration files.
@@ -300,4 +319,5 @@ PacLed64     : $pacled64
 Ultimate IO  : $ultimateio
 LedWiz 32    : $ledwiz32
 Howler       : $howler
-Raspberry Pi : $raspberrypi"
+Raspberry Pi : $raspberrypi
+Adalight     : $adalight"
