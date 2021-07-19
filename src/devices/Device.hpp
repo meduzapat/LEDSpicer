@@ -146,7 +146,7 @@ public:
 	/**
 	 * Pack the data into the device.
 	 */
-	void packData();
+	virtual void packData();
 
 	/**
 	 * Calling this method will make the USB not to connect to the real hard.
