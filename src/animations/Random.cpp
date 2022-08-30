@@ -41,7 +41,7 @@ void Random::calculateElements() {
 
 	uint8_t percent = PERCENT(currentFrame, totalFrames);
 #ifdef DEVELOP
-	cout << "Random: F: " << to_string(currentFrame + 1) << " " << to_string(percent) << "% ";
+	cout << "Random: F: " << std::setw(3) << to_string(currentFrame + 1) << std::setw(4) << to_string(percent) << "% ";
 #endif
 	for (uint8_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, oldColors[c]->transition(*newColors[c], percent), filter);

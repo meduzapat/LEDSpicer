@@ -44,6 +44,7 @@ namespace LEDSpicer {
 
 /**
  * LEDSpicer::USB
+ *
  * Class to handle connections to the USB controller.
  */
 class USB {

@@ -22,9 +22,7 @@
 
 #include "Adalight.hpp"
 
-using namespace LEDSpicer::Devices;
-
-bool Adalight::initialized = false;
+using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::resetLeds() {
 	cout << "resetLeds" << endl;
@@ -32,28 +30,42 @@ void Adalight::resetLeds() {
 }
 
 void Adalight::openDevice() {
-	cout << "openDevice" << endl;
-	if (initialized)
-		throw Error(getFullName() + " device can only be loaded once");
 
-	// Create serial port object and open serial port
-	check(sp_get_port_by_name("/dev/ttyUSB0", &serialPort));
-  check(sp_open(serialPort, SP_MODE_READ_WRITE));
-	check(sp_set_baudrate(serialPort, 115200));
-	check(sp_set_bits(serialPort, 8));
-	check(sp_set_parity(serialPort, SP_PARITY_NONE));
-	check(sp_set_stopbits(serialPort, 1));
-	check(sp_set_flowcontrol(serialPort, SP_FLOWCONTROL_NONE));
-
-	initialized = true;
+	DeviceSerial::openDevice();
+	termios tty;
+	// Serial port config swiped from RXTX library (rxtx.qbang.org):
+	tcgetattr(fd, &tty);
+	tty.c_iflag     = INPCK;
+	tty.c_lflag     = 0;
+	tty.c_oflag     = 0;
+	tty.c_cflag     = CREAD | CS8 | CLOCAL;
+	tty.c_cc[VMIN]  = 0;
+	tty.c_cc[VTIME] = 0;
+	cfsetispeed(&tty, B115200);
+	cfsetospeed(&tty, B115200);
+	tcsetattr(fd, TCSANOW, &tty);
 }
 
-void Adalight::closeDevice() {
-	cout << "closeDevice" << endl;
-	if (initialized){
-		check(sp_close(serialPort));
-	  sp_free_port(serialPort);
-	}
+void Adalight::transfer() const {
+	// Ada Serial devices assumes RGB LEDs
+	uint8_t t = LEDs.size() / 3;
+	vector<uint8_t> serialData {
+		// Magic word
+		'A', 'd', 'a',
+		// LED count high byte
+		0,
+		// LED count low byte
+		static_cast<uint8_t>(t - 1),
+	};
+	// Checksum
+	serialData.push_back(static_cast<uint8_t>(serialData[4] ^ 0x55));
+
+	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
+		serialData.push_back(LEDs[l]);
+
+	tcdrain(fd);
+	if (write(fd, serialData.data(), serialData.size()) < 0)
+		LogError("Fail to send the serial data");
 }
 
 string Adalight::getFullName() const {
@@ -61,59 +73,16 @@ string Adalight::getFullName() const {
 }
 
 void Adalight::drawHardwarePinMap() {
-}
-
-void Adalight::packData() {
-	transfer();
-	oldLEDs = LEDs;
-}
-
-
-void Adalight::transfer() const {
-	std::string serialData;
-  int rgbLedNumber = getNumberOfLeds()/3; //adalight assumes rgb leds
-	serialData.push_back('A');                              // Magic word
-	serialData.push_back('d');
-	serialData.push_back('a');
-	serialData.push_back(((rgbLedNumber - 1) >> 8));   // LED count high byte
-	serialData.push_back(((rgbLedNumber - 1) & 0xff)); // LED count low byte
-	serialData.push_back((serialData[3] ^ serialData[4] ^ 0x55)); // Checksum
-
-
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
-    serialData.push_back(LEDs[l]);
-
-  int size = 6 + LEDs.size(); // 6 is header length
-
-
-  /* We'll allow a 1 second timeout for send and receive. */
-  unsigned int timeout = 1000;
-  sp_blocking_write(serialPort, serialData.data(), size, timeout);
-
-}
-
-/* Helper function for error handling. */
-int Adalight::check(enum sp_return result)
-{
-        char *error_message;
-
-        switch (result) {
-        case SP_ERR_ARG:
-                throw Error("Adalight Error: Invalid argument.\n");
-                abort();
-        case SP_ERR_FAIL:
-                error_message = sp_last_error_message();
-                throw Error("Adalight Error: Failed: " + string(error_message));
-                sp_free_error_message(error_message);
-                abort();
-        case SP_ERR_SUPP:
-                throw Error("Adalight Error: Not supported.\n");
-                abort();
-        case SP_ERR_MEM:
-                throw Error("Adalight Error: Couldn't allocate memory.\n");
-                abort();
-        case SP_OK:
-        default:
-                return result;
-        }
+	cout
+		<< getFullName() << " Pins " << LEDs.size() << endl
+		<< "Hardware pin map:" << endl << "0  2 G  +5v" << endl;
+	for (uint8_t r = 0; r < LEDs.size(); r += 3) {
+		LEDs[r] = r + 1;
+		LEDs[r + 1] = r + 2;
+		LEDs[r + 2] = r + 3;
+		cout <<
+			" --- " << endl <<
+			(int)*getLed(r) << " " << (int)*getLed(r + 1) << " " << (int)*getLed(r + 2) << endl;
+	}
+	cout << endl;
 }

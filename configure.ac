@@ -227,13 +227,6 @@ if test x$raspberrypi = xyes ; then
 	AC_SUBST(RASPBERRYPI_LIBS)
 fi
 
-if test x$adalight = xyes ; then
-   dnl AC_CHECK_HEADER([libserialport.h], [], [AC_MSG_ERROR([libserialport header not found. please install it, project documentation is available here: https://sigrok.org/wiki/Libserialport])], [])
-   [ADALIGHT_LIBS="-lserialport"]
-   AC_SUBST(ADALIGHT_LIBS)
-
-fi
-
 dnl expand bindir on configuration files.
 AS_AC_EXPAND(BINDIR, $bindir)
 

@@ -29,23 +29,6 @@ void PacDrive::resetLeds() {
 	transfer();
 }
 
-PacDrive::PacDrive(uint8_t boardId, umap<string, string>& options) :
-	Ultimarc(
-		PAC_DRIVE_WVALUE,
-		PAC_DRIVE_INTERFACE,
-		PAC_DRIVE_LEDS,
-		PAC_DRIVE_MAX_BOARDS,
-		boardId,
-		PAC_DRIVE_NAME
-	) {
-
-	if (options.count("changePoint"))
-		changePoint = Utility::parseNumber(
-			options["changePoint"],
-			"Invalid value for changePoint " + getFullName()
-		);
-}
-
 void PacDrive::drawHardwarePinMap() {
 	uint8_t half = PAC_DRIVE_LEDS / 2;
 	cout

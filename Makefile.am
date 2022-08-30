@@ -36,12 +36,14 @@ libledspicer1_la_SOURCES =    \
 	src/utility/Colorful.cpp  \
 	src/utility/Socks.cpp     \
 	src/utility/Time.cpp      \
+	src/utility/Monochromatic.cpp  \
 	src/restrictors/Restrictor.cpp \
 	src/devices/Element.cpp   \
 	src/devices/Group.cpp     \
 	src/devices/Profile.cpp   \
 	src/devices/Device.cpp    \
 	src/devices/DeviceUSB.cpp \
+	src/devices/DeviceSerial.cpp      \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
@@ -65,18 +67,19 @@ pkginclude_HEADERS = \
 	src/Messages.hpp
 
 utilityheaderdir=$(pkgincludedir)/utility
-utilityheader_HEADERS =       \
-	src/utility/Log.hpp       \
-	src/utility/Error.hpp     \
-	src/utility/USB.hpp       \
-	src/utility/Utility.hpp   \
-	src/utility/Socks.hpp     \
-	src/utility/Time.hpp      \
-	src/utility/XMLHelper.hpp \
-	src/utility/Speed.hpp     \
-	src/utility/Direction.hpp \
-	src/utility/Color.hpp     \
-	src/utility/Colors.hpp    \
+utilityheader_HEADERS =           \
+	src/utility/Log.hpp           \
+	src/utility/Error.hpp         \
+	src/utility/USB.hpp           \
+	src/utility/Utility.hpp       \
+	src/utility/Socks.hpp         \
+	src/utility/Time.hpp          \
+	src/utility/Monochromatic.hpp \
+	src/utility/XMLHelper.hpp     \
+	src/utility/Speed.hpp         \
+	src/utility/Direction.hpp     \
+	src/utility/Color.hpp         \
+	src/utility/Colors.hpp        \
 	src/utility/Colorful.hpp
 
 restrictorssheaderdir=$(pkgincludedir)/restrictors
@@ -84,11 +87,12 @@ restrictorssheader_HEADERS =    \
 	src/restrictors/Restrictor.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
-devicesheader_HEADERS =       \
-	src/devices/Element.hpp   \
-	src/devices/Group.hpp     \
-	src/devices/Device.hpp    \
-	src/devices/DeviceUSB.hpp \
+devicesheader_HEADERS =          \
+	src/devices/Element.hpp      \
+	src/devices/Group.hpp        \
+	src/devices/Device.hpp       \
+	src/devices/DeviceUSB.hpp    \
+	src/devices/DeviceSerial.hpp \
 	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
@@ -556,7 +560,7 @@ Adalight_la_SOURCES = \
 	src/devices/Adalight/Adalight.cpp
 
 Adalight_la_LIBADD = \
-	libledspicer1.la    \
+	libledspicer1.la \
 	$(ADALIGHT_LIBS)
 
 Adalight_la_LDFLAGS = \

@@ -21,6 +21,7 @@
  */
 
 #include "Ultimarc.hpp"
+#include "utility/Monochromatic.hpp"
 
 #ifndef PACDRIVE_HPP_
 #define PACDRIVE_HPP_ 1
@@ -39,11 +40,20 @@ namespace Ultimarc {
 /**
  * LEDSpicer::PacLED
  */
-class PacDrive : public Ultimarc {
+class PacDrive : public Ultimarc, public Monochromatic {
 
 public:
 
-	PacDrive(uint8_t boardId, umap<string, string>& options);
+	PacDrive(uint8_t boardId, umap<string, string>& options) :
+		Ultimarc(
+			PAC_DRIVE_WVALUE,
+			PAC_DRIVE_INTERFACE,
+			PAC_DRIVE_LEDS,
+			PAC_DRIVE_MAX_BOARDS,
+			boardId,
+			PAC_DRIVE_NAME
+		),
+		Monochromatic(options, PAC_DRIVE_NAME) {}
 
 	virtual ~PacDrive() = default;
 
@@ -56,8 +66,6 @@ public:
 	virtual void resetLeds();
 
 protected:
-
-	uint8_t changePoint = 64;
 
 	virtual void connect();
 

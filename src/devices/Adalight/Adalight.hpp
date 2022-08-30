@@ -20,33 +20,32 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../Device.hpp"
+#include "devices/DeviceSerial.hpp"
 #include "utility/Utility.hpp"
-#include <libserialport.h>
 
 #ifndef ADALIGHT_HPP_
 #define ADALIGHT_HPP_ 1
 
-#define ADALIGHT_NAME "AdalightName"
+#define ADALIGHT_NAME "Adalight"
 
 namespace LEDSpicer {
 namespace Devices {
+namespace Adalight {
 
 /**
  * LEDSpicer::Devices::Adalight
  *
  * Adalight smart led controller (using WLED firmware on ESP8266)
  */
-class Adalight : public Device {
+class Adalight : public DeviceSerial {
 
 public:
 
-	Adalight(
-		uint8_t  boardId,
-		umap<string, string>& options) :
-		Device(
-			options.count("leds") ? Utility::parseNumber(options["leds"], "Invalid Value for number of leds") * 3 : 0,
-		  ADALIGHT_NAME
+	Adalight(uint8_t  boardId, umap<string, string>& options) :
+		DeviceSerial(
+			ADALIGHT_NAME,
+			Utility::parseNumber(options.count("leds") ? options["leds"] : "", "Invalid Value for number of leds") * 3,
+			options
 		) {}
 
 	virtual ~Adalight() = default;
@@ -59,22 +58,15 @@ public:
 
 	virtual void transfer() const;
 
-  virtual void packData();
-
-
 protected:
 
-	static bool initialized;
-	struct sp_port *serialPort;
-  int check(enum sp_return result);
 	void openDevice();
-	void closeDevice();
 
 };
 
 } /* namespace Devices */
 } /* namespace LEDSpicer */
-
-deviceFactory(LEDSpicer::Devices::Adalight)
+} /* namespace AdaLight */
+deviceFactory(LEDSpicer::Devices::Adalight::Adalight)
 
 #endif /* ADALIGHT_HPP_ */
