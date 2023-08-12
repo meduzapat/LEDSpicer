@@ -20,6 +20,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdint>
+
 // To handle unordered map.
 #include <unordered_map>
 #ifndef umap
