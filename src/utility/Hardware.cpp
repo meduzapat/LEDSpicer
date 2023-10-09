@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Ultimarc.hpp
- * @since     Sep 27, 2018
+ * @file      Hardware.cpp
+ * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,32 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
+#include "Hardware.hpp"
 
-#ifndef ULTIMARC_HPP_
-#define ULTIMARC_HPP_ 1
+using namespace LEDSpicer;
 
-namespace LEDSpicer::Devices::Ultimarc {
+bool Hardware::dumpMode = false;
 
-/**
- * Ultimarc family data and definitions.
- */
-class Ultimarc : public DeviceUSB {
-
-public:
-
-	using DeviceUSB::DeviceUSB;
-
-	uint16_t getVendor() const {
-		return ULTIMARC_VENDOR;
-	}
-
-protected:
-
-	virtual void afterClaimInterface() {}
-
-};
-
-} /* namespace */
-
-#endif /* ULTIMARC_HPP_ */
+void Hardware::setDumpMode() {
+	dumpMode = true;
+}

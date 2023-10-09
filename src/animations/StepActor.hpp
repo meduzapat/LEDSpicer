@@ -25,8 +25,7 @@
 
 #include "DirectionActor.hpp"
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::StepActor
@@ -123,6 +122,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* STEPACTOR_HPP_ */

@@ -5,6 +5,7 @@
  * @author    Bzzrd
  *
  * @copyright Copyright © 2021 Bzzrd
+ * @copyright Copyright © 2022 Patricio A Rossi
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,28 +25,6 @@
 
 using namespace LEDSpicer::Devices::Adalight;
 
-void Adalight::resetLeds() {
-	cout << "resetLeds" << endl;
-	setLeds(0);
-}
-
-void Adalight::openDevice() {
-
-	DeviceSerial::openDevice();
-	termios tty;
-	// Serial port config swiped from RXTX library (rxtx.qbang.org):
-	tcgetattr(fd, &tty);
-	tty.c_iflag     = INPCK;
-	tty.c_lflag     = 0;
-	tty.c_oflag     = 0;
-	tty.c_cflag     = CREAD | CS8 | CLOCAL;
-	tty.c_cc[VMIN]  = 0;
-	tty.c_cc[VTIME] = 0;
-	cfsetispeed(&tty, B115200);
-	cfsetospeed(&tty, B115200);
-	tcsetattr(fd, TCSANOW, &tty);
-}
-
 void Adalight::transfer() const {
 	// Ada Serial devices assumes RGB LEDs
 	uint8_t t = LEDs.size() / 3;
@@ -63,26 +42,20 @@ void Adalight::transfer() const {
 	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
 		serialData.push_back(LEDs[l]);
 
-	tcdrain(fd);
-	if (write(fd, serialData.data(), serialData.size()) < 0)
-		LogError("Fail to send the serial data");
-}
-
-string Adalight::getFullName() const {
-	return "Adalight serial adapter";
+	transferToConnection(serialData);
 }
 
 void Adalight::drawHardwarePinMap() {
-	cout
-		<< getFullName() << " Pins " << LEDs.size() << endl
-		<< "Hardware pin map:" << endl << "0  2 G  +5v" << endl;
+	std::cout
+		<< getFullName() << " Pins " << LEDs.size() << std::endl
+		<< "Hardware pin map:" << std::endl << "0  2 G  +5v" << std::endl;
 	for (uint8_t r = 0; r < LEDs.size(); r += 3) {
 		LEDs[r] = r + 1;
 		LEDs[r + 1] = r + 2;
 		LEDs[r + 2] = r + 3;
-		cout <<
-			" --- " << endl <<
-			(int)*getLed(r) << " " << (int)*getLed(r + 1) << " " << (int)*getLed(r + 2) << endl;
+		std::cout <<
+			" --- " << std::endl <<
+			static_cast<int>(*getLed(r)) << " " << static_cast<int>(*getLed(r + 1)) << " " << static_cast<int>(*getLed(r + 2)) << std::endl;
 	}
-	cout << endl;
+	std::cout << std::endl;
 }

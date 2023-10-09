@@ -58,10 +58,12 @@ void DataLoader::readConfiguration() {
 	Utility::checkAttributes(REQUIRED_PARAM_ROOT, tempAttr, "root");
 
 	// Set log level.
-	if (mode == Modes::Dump or mode == Modes::Profile)
+	if (mode == Modes::Dump or mode == Modes::Profile) {
 		Device::setDumpMode();
-	else if (tempAttr.count(PARAM_LOG_LEVEL))
+	}
+	else if (tempAttr.count(PARAM_LOG_LEVEL)) {
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
+	}
 
 	// Set FPS.
 	uint8_t fps = Utility::parseNumber(tempAttr[PARAM_FPS], invalidValueFor("FPS"));
@@ -111,8 +113,9 @@ void DataLoader::processColorFile(const string& file) {
 		Utility::checkAttributes(REQUIRED_PARAM_COLOR, colorAttr, NODE_COLOR);
 		if (colorAttr[PARAM_NAME] == "random")
 			continue;
-		if (colorsData.count(colorAttr[PARAM_NAME]))
+		if (colorsData.count(colorAttr[PARAM_NAME])) {
 			LogWarning("Duplicated color " + colorAttr[PARAM_NAME]);
+		}
 		colorsData[colorAttr[PARAM_NAME]] = colorAttr[PARAM_COLOR];
 	}
 
@@ -203,8 +206,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	);
 	// Checks orphan Pins.
 	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
-		if (not pinCheck[pin])
+		if (not pinCheck[pin]) {
 			LogInfo("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
+		}
 }
 
 void DataLoader::processLayout() {
@@ -426,11 +430,10 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
 Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 
-	uint8_t devId = deviceData.count("boardId") ? Utility::parseNumber(deviceData["boardId"], "Device id should be a number") : 1;
 	string deviceName = deviceData["name"];
 	if (not deviceHandlers.count(deviceName))
 		deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
-	return deviceHandlers[deviceName]->createDevice(devId, deviceData);
+	return deviceHandlers[deviceName]->createDevice(deviceData);
 }
 
 vector<Actor*> DataLoader::processAnimation(const string& file) {

@@ -19,7 +19,7 @@ void NanoLed::drawHardwarePinMap() {
 	cout << getFullName() << " Pins " << NANO_LED_LEDS << endl << "Hardware pin map:" << endl;
 	for (uint8_t led = 0; led < NANO_LED_LEDS; ++led) {
 		setLed(led, led + 1);
-		cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(led) << endl;
+		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(led)) << endl;
 	}
 	cout << "This device only have 1 connector with 60 LEDs in series."<< endl;
 }

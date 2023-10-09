@@ -28,9 +28,7 @@
 
 #define ADALIGHT_NAME "Adalight"
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Adalight {
+namespace LEDSpicer::Devices::Adalight {
 
 /**
  * LEDSpicer::Devices::Adalight
@@ -41,32 +39,22 @@ class Adalight : public DeviceSerial {
 
 public:
 
-	Adalight(uint8_t  boardId, umap<string, string>& options) :
-		DeviceSerial(
-			ADALIGHT_NAME,
-			Utility::parseNumber(options.count("leds") ? options["leds"] : "", "Invalid Value for number of leds") * 3,
-			options
-		) {}
+	Adalight(umap<string, string>& options) :
+	DeviceSerial(
+		options,
+		ADALIGHT_NAME
+	) {}
 
 	virtual ~Adalight() = default;
-
-	virtual void resetLeds();
-
-	string getFullName() const;
 
 	virtual void drawHardwarePinMap();
 
 	virtual void transfer() const;
 
-protected:
-
-	void openDevice();
-
 };
 
-} /* namespace Devices */
-} /* namespace LEDSpicer */
-} /* namespace AdaLight */
+} /* namespace */
+
 deviceFactory(LEDSpicer::Devices::Adalight::Adalight)
 
 #endif /* ADALIGHT_HPP_ */

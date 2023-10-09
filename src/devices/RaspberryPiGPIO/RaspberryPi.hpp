@@ -26,23 +26,23 @@
 #ifndef RASPBERRYPI_HPP_
 #define RASPBERRYPI_HPP_ 1
 
-#define RPI_NAME "Raspberry Pi"
-#define RPI_LEDS 28
+#define RPI_NAME     "Raspberry Pi"
+#define RPI_LEDS     28
+#define RPI_TRANSFER 1 // Individual.
 
-namespace LEDSpicer {
-namespace Devices {
-namespace RaspberryPi {
+namespace LEDSpicer::Devices::RaspberryPi {
 
 /**
  * LEDSpicer::Devices::RaspberryPi::RaspberryPi
  *
  * Raspberry Pi GPIO ports.
+ * This is a connectionless device.
  */
 class RaspberryPi : public Device {
 
 public:
 
-	RaspberryPi(uint8_t boardId, umap<string, string>& options) : Device(RPI_LEDS, RPI_NAME) {}
+	RaspberryPi(umap<string, string>& options) : Device(RPI_LEDS, RPI_NAME) {}
 
 	virtual ~RaspberryPi() = default;
 
@@ -56,18 +56,18 @@ public:
 
 protected:
 
+	/// Rpi can be initialized only once.
 	static bool initialized;
 
-	virtual void openDevice();
+	virtual void openHardware();
 
-	virtual void closeDevice();
+	virtual void closeHardware();
 
+	/// Keeps track of only used LEDs to be send.
 	vector<uint8_t> usedleds;
 };
 
-} /* namespace RaspberryPi */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::RaspberryPi::RaspberryPi)
 

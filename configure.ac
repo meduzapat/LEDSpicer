@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.5.6],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.5.7],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
-AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
+AC_COPYRIGHT([Copyright © 2018 - 2023 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -21,7 +21,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
-AC_LIBTOOL_DLOPEN
+
 LT_INIT([disable-static dlopen])
 
 m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/pkgconfig))
@@ -29,6 +29,7 @@ m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/
 AC_SUBST([LIB_VERSION], [1:1:0])
 DATA_VERSION=["1.0"]
 AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
+AC_DEFINE([COPYRIGHT], ["Copyright © 2018 - 2023 Patricio A. Rossi (MeduZa)"], [Copyright message])
 
 dnl Enable MiSTer only code.
 AC_ARG_ENABLE(mister,
@@ -264,12 +265,16 @@ AC_CHECK_LIB([dl], [dlopen],
 )
 AC_SUBST([LINKER_LIBS])
 
-ACTORS_DIR=["${libdir}/${PACKAGE_TARNAME}/actors"]
+ACTORS_DIR="${libdir}/${PACKAGE_TARNAME}/actors"
 AC_SUBST([ACTORS_DIR])
-DEVICES_DIR=["${libdir}/${PACKAGE_TARNAME}/devices"]
+AS_AC_EXPAND(LSAD, $ACTORS_DIR)
+DEVICES_DIR="${libdir}/${PACKAGE_TARNAME}/devices"
 AC_SUBST([DEVICES_DIR])
-INPUTS_DIR=["${libdir}/${PACKAGE_TARNAME}/inputs"]
+AS_AC_EXPAND(LSDD, $DEVICES_DIR)
+INPUTS_DIR="${libdir}/${PACKAGE_TARNAME}/inputs"
 AC_SUBST([INPUTS_DIR])
+AS_AC_EXPAND(LSID, $INPUTS_DIR)
+AS_AC_EXPAND(LSDDD, $datadir)
 
 dnl *************
 dnl * Makefiles *
@@ -283,7 +288,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 dnl Dump the build configuration for the developer
-echo -e "\n--------- build environment -----------
+AC_MSG_RESULT([\n--------- build environment -----------
 Program      : $PACKAGE_NAME
 Version      : $PACKAGE_VERSION
 WebSite      : $PACKAGE_URL
@@ -298,10 +303,10 @@ Libraries    :$LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS $LINKER_LIBS
 Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
 ALSA         : $alsaaudio: $LIBALSA_CFLAGS $LIBALSA_LIBS
 Prefix       : $prefix
-Devices dir  : $DEVICES_DIR
-Actors dir   : $ACTORS_DIR
-Inputs dir   : $INPUTS_DIR
-Data dir     : $datadir
+Devices dir  : $LSDD
+Actors dir   : $LSAD
+Inputs dir   : $LSID
+Data dir     : $LSDDD
 Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 MiSTer code  : $mister
@@ -313,4 +318,5 @@ Ultimate IO  : $ultimateio
 LedWiz 32    : $ledwiz32
 Howler       : $howler
 Raspberry Pi : $raspberrypi
-Adalight     : $adalight"
+Adalight     : $adalight
+])

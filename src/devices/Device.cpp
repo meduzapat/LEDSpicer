@@ -25,14 +25,13 @@
 
 using namespace LEDSpicer::Devices;
 
-bool Device::dumpMode = false;
-
 Device::Device(
-	uint8_t  elements,
+	uint8_t  pins,
 	const string& name
-) : name(name) {
-	LEDs.resize(elements);
-	oldLEDs.resize(elements, 1);
+) : Hardware(name) {
+	LEDs.resize(pins);
+	// So is different.
+	oldLEDs.resize(pins, 1);
 	LEDs.shrink_to_fit();
 	oldLEDs.shrink_to_fit();
 }
@@ -42,8 +41,8 @@ void Device::initialize() {
 	if (dumpMode)
 		return;
 
-	LogDebug("Initializing Device " + name);
-	openDevice();
+	LogDebug("Initializing Device " + getFullName());
+	openHardware();
 	resetLeds();
 }
 
@@ -52,9 +51,9 @@ void Device::terminate() {
 	if (dumpMode)
 		return;
 
-	LogDebug("Disconnect Device " + name);
+	LogDebug("Disconnect Device " + getFullName());
 	resetLeds();
-	closeDevice();
+	closeHardware();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
@@ -100,6 +99,11 @@ Element* Device::getElement(const string& name) {
 	return &elementsByName.at(name);
 }
 
+void Device::resetLeds() {
+	setLeds(0);
+	transfer();
+}
+
 void Device::validateLed(uint8_t led) const {
 	if (led >= LEDs.size())
 		throw Error("Invalid led number " + to_string(led + 1));
@@ -130,6 +134,3 @@ umap<string, Element>* Device::getElements() {
 	return &elementsByName;
 }
 
-void Device::setDumpMode() {
-	dumpMode = true;
-}

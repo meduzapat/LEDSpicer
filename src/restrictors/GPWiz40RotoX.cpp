@@ -24,6 +24,10 @@
 
 using namespace LEDSpicer::Restrictors;
 
+uint8_t GPWiz40RotoX::getMaxIds() const {
+	return GPWIZ40ROTOX_MAX_ID;
+}
+
 void GPWiz40RotoX::rotate(const umap<string, Ways>& playersData) {
 
 	/*
@@ -37,11 +41,11 @@ void GPWiz40RotoX::rotate(const umap<string, Ways>& playersData) {
 	for (auto& p : players)
 		if (playersData.count(p.first) and isRotary(playersData.at(p.first))) {
 			data[3] += p.second + (playersData.at(p.first) == Ways::rotary8 ? (p.second == 1 ? 16 : 32) : 0);
-			LogDebug("Rotating " + getName() + " Rotor " +  to_string(p.second) + " to " + ways2str(playersData.at(p.first)));
+			LogDebug("Rotating " + getFullName() + " Rotor " +  to_string(p.second) + " to " + ways2str(playersData.at(p.first)));
 		}
 
 	if (data[3])
-		transferToUSB(data);
+		transferToConnection(data);
 }
 
 uint16_t GPWiz40RotoX::getVendor() const {
@@ -50,12 +54,4 @@ uint16_t GPWiz40RotoX::getVendor() const {
 
 uint16_t GPWiz40RotoX::getProduct() const {
 	return (GPWIZ40ROTOX_PRODUCT + getId() - 1);
-}
-
-string GPWiz40RotoX::getName() const {
-	return string(GPWIZ40ROTOX_NAME) + " " + to_string(getId());
-}
-
-uint8_t GPWiz40RotoX::getMaxIds() const {
-	return GPWIZ40ROTOX_MAX_ID;
 }

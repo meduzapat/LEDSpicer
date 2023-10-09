@@ -34,8 +34,7 @@
 #define MID_POINT 55
 #define LOW_POINT 25
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Inputs::AudioActor
@@ -159,7 +158,6 @@ protected:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* AUDIOACTOR_HPP_ */

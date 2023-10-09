@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      AlsaAudio.hpp
- * @since     Oct 6, 2020
+ * @file      RestrictorUSB.hpp
+ * @since     Jul 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
@@ -20,47 +20,49 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALSA_PCM_NEW_HW_PARAMS_API
-	#define ALSA_PCM_NEW_HW_PARAMS_API
-#endif
+#include "Restrictor.hpp"
+#include "utility/USB.hpp"
 
-#include <alsa/asoundlib.h>
-#include "AudioActor.hpp"
+#ifndef RESTRICTORS_USB_HPP_
+#define RESTRICTORS_USB_HPP_ 1
 
-#ifndef ALSAAUDIO_HPP_
-#define ALSAAUDIO_HPP_ 1
-
-#define PEAKS 64
-
-namespace LEDSpicer::Animations {
+namespace LEDSpicer::Restrictors {
 
 /**
- * LEDSpicer::Animations::AlsaAudio
+ * LEDSpicer::Restrictor::RestrictorUSB
+ * Class to handle restrictor for joysticks connected to USB.
  */
-class AlsaAudio: public AudioActor {
+class RestrictorUSB : public USB, public Restrictor {
 
 public:
 
-	AlsaAudio(umap<string, string>& parameters, Group* const group);
+	RestrictorUSB(
+		umap<string, uint8_t>& playerData,
+		uint16_t wValue,
+		uint8_t  interface,
+		uint8_t  boardId,
+		uint8_t  maxBoards,
+		const string& name
+	) :
+		USB(wValue, interface, boardId, maxBoards),
+		Restrictor(playerData, name) {}
 
-	virtual ~AlsaAudio();
+	virtual ~RestrictorUSB() = default;
 
-	void drawConfig();
+	virtual string getFullName() const;
 
 protected:
 
-	static uint8_t instances;
+	virtual void openHardware();
 
-	static snd_pcm_t* pcm;
+	virtual void closeHardware();
 
-	virtual void calcPeak();
+	virtual void afterConnect() {}
 
-	virtual void calcPeaks();
+	virtual void afterClaimInterface() {};
 
 };
 
 } /* namespace */
 
-actorFactory(LEDSpicer::Animations::AlsaAudio)
-
-#endif /* ALSAAUDIO_HPP_ */
+#endif /* RESTRICTORS_USB_HPP_ */

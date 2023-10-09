@@ -24,11 +24,6 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-void PacDrive::resetLeds() {
-	setLeds(0);
-	transfer();
-}
-
 void PacDrive::drawHardwarePinMap() {
 	uint8_t half = PAC_DRIVE_LEDS / 2;
 	cout
@@ -39,9 +34,9 @@ void PacDrive::drawHardwarePinMap() {
 		setLed(r, r + 1);
 		setLed(l, l + 1);
 		cout <<
-			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(r) <<
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(r)) <<
 			"   " <<
-			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(l) << endl;
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(l)) << endl;
 	}
 	cout << endl;
 }
@@ -59,7 +54,7 @@ void PacDrive::transfer() const {
 				load[2] |= 1 << (led - 8);
 		}
 	}
-	transferToUSB(load);
+	transferToConnection(load);
 }
 
 uint16_t PacDrive::getProduct() const {
@@ -69,6 +64,11 @@ uint16_t PacDrive::getProduct() const {
 void PacDrive::connect() {
 
 	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
+
+#ifdef DRY_RUN
+	LogDebug("No USB handle - DRY RUN");
+	return;
+#endif
 
 	libusb_device** list;
 	libusb_device* device;

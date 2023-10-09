@@ -1,10 +1,10 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Ultimarc.hpp
- * @since     Sep 27, 2018
+ * @file      RestrictorSerial.cpp
+ * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2023 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,32 +20,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
+#include "RestrictorSerial.hpp"
 
-#ifndef ULTIMARC_HPP_
-#define ULTIMARC_HPP_ 1
+using namespace LEDSpicer::Restrictors;
 
-namespace LEDSpicer::Devices::Ultimarc {
+string RestrictorSerial::getFullName() const {
+	return name + " Serial at " + (port.empty() ? "<unknown port>" : port);
+}
 
-/**
- * Ultimarc family data and definitions.
- */
-class Ultimarc : public DeviceUSB {
+void RestrictorSerial::openHardware() {
+	connect();
+}
 
-public:
-
-	using DeviceUSB::DeviceUSB;
-
-	uint16_t getVendor() const {
-		return ULTIMARC_VENDOR;
-	}
-
-protected:
-
-	virtual void afterClaimInterface() {}
-
-};
-
-} /* namespace */
-
-#endif /* ULTIMARC_HPP_ */
+void RestrictorSerial::closeHardware() {
+	disconnect();
+}

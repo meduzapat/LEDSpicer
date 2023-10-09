@@ -20,40 +20,38 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Restrictor.hpp"
-#include "Brands.hpp"
+#include "RestrictorUSB.hpp"
 
 #ifndef RESTRICTORS_GPWIZ49_HPP_
 #define RESTRICTORS_GPWIZ49_HPP_ 1
 
 #define GPWIZ49_NAME       "GPWiz49"
+#define GPWIZ49_FULLNAME   "GroovyGameGear GP-Wiz49"
 #define GPWIZ49_PRODUCT    0x0007
 #define GPWIZ49_INTERFACE  0
 #define GPWIZ49_WVALUE     0x0200
 #define GPWIZ49_MAX_BOARDS 4
-
 #define WILLIAMS "williams"
 
-namespace LEDSpicer {
-namespace Restrictors {
+namespace LEDSpicer::Restrictors {
 
 /**
  * LEDSpicer::Restrictor::GPWiz49
  */
-class GPWiz49 : public Restrictor {
+class GPWiz49 : public RestrictorUSB {
 
 public:
 
 	GPWiz49(umap<string, string>& options, umap<string, uint8_t>& playerData) :
-		Restrictor(
-			options,
-			playerData,
-			GPWIZ49_WVALUE,
-			GPWIZ49_INTERFACE,
-			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
-			GPWIZ49_MAX_BOARDS
-		),
-		williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "true" : false) {}
+	RestrictorUSB(
+		playerData,
+		GPWIZ49_WVALUE,
+		GPWIZ49_INTERFACE,
+		Utility::parseNumber(options["boardId"], "Invalid Board ID"),
+		GPWIZ49_MAX_BOARDS,
+		GPWIZ49_FULLNAME
+	),
+	williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "true" : false) {}
 
 	virtual ~GPWiz49() = default;
 
@@ -63,15 +61,12 @@ public:
 
 	virtual uint16_t getProduct() const;
 
-	virtual string getName() const;
-
 protected:
 
 	// Handles Williams Sinistar mode.
 	bool williams = false;
 };
 
-} /* namespace Restrictors */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* RESTRICTORS_GPWIZ49_HPP_ */

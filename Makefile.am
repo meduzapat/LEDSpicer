@@ -27,6 +27,8 @@ libledspicer1_la_SOURCES =    \
 	src/utility/Log.cpp       \
 	src/utility/Error.cpp     \
 	src/utility/Utility.cpp   \
+	src/utility/Hardware.cpp  \
+	src/utility/Serial.cpp    \
 	src/utility/USB.cpp       \
 	src/utility/XMLHelper.cpp \
 	src/utility/Speed.cpp     \
@@ -36,14 +38,16 @@ libledspicer1_la_SOURCES =    \
 	src/utility/Colorful.cpp  \
 	src/utility/Socks.cpp     \
 	src/utility/Time.cpp      \
-	src/utility/Monochromatic.cpp  \
-	src/restrictors/Restrictor.cpp \
-	src/devices/Element.cpp   \
-	src/devices/Group.cpp     \
-	src/devices/Profile.cpp   \
-	src/devices/Device.cpp    \
-	src/devices/DeviceUSB.cpp \
-	src/devices/DeviceSerial.cpp      \
+	src/utility/Monochromatic.cpp \
+	src/restrictors/Restrictor.cpp       \
+	src/restrictors/RestrictorUSB.cpp    \
+	src/restrictors/RestrictorSerial.cpp \
+	src/devices/Element.cpp      \
+	src/devices/Group.cpp        \
+	src/devices/Profile.cpp      \
+	src/devices/Device.cpp       \
+	src/devices/DeviceSerial.cpp \
+	src/devices/DeviceUSB.cpp    \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
@@ -70,6 +74,9 @@ utilityheaderdir=$(pkgincludedir)/utility
 utilityheader_HEADERS =           \
 	src/utility/Log.hpp           \
 	src/utility/Error.hpp         \
+	src/utility/Hardware.hpp      \
+	src/utility/Connection.hpp    \
+	src/utility/Serial.hpp        \
 	src/utility/USB.hpp           \
 	src/utility/Utility.hpp       \
 	src/utility/Socks.hpp         \
@@ -83,16 +90,23 @@ utilityheader_HEADERS =           \
 	src/utility/Colorful.hpp
 
 restrictorssheaderdir=$(pkgincludedir)/restrictors
-restrictorssheader_HEADERS =    \
-	src/restrictors/Restrictor.hpp
+restrictorssheader_HEADERS =         \
+	src/restrictors/ServoStik.hpp    \
+	src/restrictors/UltraStik360.hpp \
+	src/restrictors/GPWiz40RotoX.hpp \
+	src/restrictors/GPWiz49.hpp      \
+	src/restrictors/TOS428.hpp       \
+	src/restrictors/Restrictor.hpp   \
+	src/restrictors/RestrictorUSB.hpp    \
+	src/restrictors/RestrictorSerial.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
 devicesheader_HEADERS =          \
 	src/devices/Element.hpp      \
 	src/devices/Group.hpp        \
 	src/devices/Device.hpp       \
-	src/devices/DeviceUSB.hpp    \
 	src/devices/DeviceSerial.hpp \
+	src/devices/DeviceUSB.hpp    \
 	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
@@ -177,8 +191,9 @@ emitter_LDADD = \
 rotator_SOURCES =                    \
 	src/restrictors/ServoStik.cpp    \
 	src/restrictors/UltraStik360.cpp \
-    src/restrictors/GPWiz49.cpp      \
+	src/restrictors/GPWiz49.cpp      \
 	src/restrictors/GPWiz40RotoX.cpp \
+	src/restrictors/TOS428.cpp       \
 	src/Rotator.cpp
 
 rotator_CPPFLAGS =     \
@@ -728,10 +743,6 @@ EXTRA_DIST +=                       \
 	src/devices/DeviceHandler.hpp   \
 	src/inputs/InputHandler.hpp     \
 	src/DataLoader.hpp              \
-	src/restrictors/ServoStik.hpp    \
-	src/restrictors/UltraStik360.hpp \
-	src/restrictors/GPWiz40RotoX.hpp \
-	src/restrictors/GPWiz49.hpp      \
 	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \

@@ -32,10 +32,9 @@
 #define PAC_DRIVE_INTERFACE  0
 #define PAC_DRIVE_LEDS       16
 #define PAC_DRIVE_MAX_BOARDS 4
+#define PAC_DRIVE_TRANSFER   0 // All.
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+namespace LEDSpicer::Devices::Ultimarc {
 
 /**
  * LEDSpicer::PacLED
@@ -44,16 +43,16 @@ class PacDrive : public Ultimarc, public Monochromatic {
 
 public:
 
-	PacDrive(uint8_t boardId, umap<string, string>& options) :
-		Ultimarc(
-			PAC_DRIVE_WVALUE,
-			PAC_DRIVE_INTERFACE,
-			PAC_DRIVE_LEDS,
-			PAC_DRIVE_MAX_BOARDS,
-			boardId,
-			PAC_DRIVE_NAME
-		),
-		Monochromatic(options, PAC_DRIVE_NAME) {}
+	PacDrive(umap<string, string>& options) :
+	Ultimarc(
+		PAC_DRIVE_WVALUE,
+		PAC_DRIVE_INTERFACE,
+		PAC_DRIVE_LEDS,
+		PAC_DRIVE_MAX_BOARDS,
+		options,
+		PAC_DRIVE_NAME
+	),
+	Monochromatic(options, PAC_DRIVE_NAME) {}
 
 	virtual ~PacDrive() = default;
 
@@ -63,8 +62,6 @@ public:
 
 	uint16_t getProduct() const;
 
-	virtual void resetLeds();
-
 protected:
 
 	virtual void connect();
@@ -72,7 +69,7 @@ protected:
 	virtual void afterConnect() {}
 };
 
-}}} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::Ultimarc::PacDrive)
 

@@ -31,8 +31,7 @@
 
 #define REQUIRED_PARAM_PROFILE {"backgroundColor"}
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 using Animations::FrameActor;
 using Animations::Actor;
@@ -171,6 +170,6 @@ private:
 	void restartActors();
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* PROFILE_HPP_ */

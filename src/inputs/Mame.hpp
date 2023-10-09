@@ -29,8 +29,7 @@ using LEDSpicer::Socks;
 
 #define MAME_PORT "8000"
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Mame
@@ -59,8 +58,7 @@ protected:
 	bool active = true;
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 inputFactory(LEDSpicer::Inputs::Mame)
 

@@ -28,8 +28,7 @@
 
 #define REQUIRED_PARAM_ACTOR_FILLER {"speed", "direction", "mode"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Fill
@@ -95,8 +94,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Filler)
 

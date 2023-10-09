@@ -76,8 +76,9 @@ void Main::run() {
 			switch (msg.getType()) {
 
 			case Message::Types::LoadProfile:
-				if (not tryProfiles(msg.getData()))
+				if (not tryProfiles(msg.getData())) {
 					LogInfo("All requested profiles failed");
+				}
 				break;
 
 			case Message::Types::FinishLastProfile:
@@ -207,8 +208,9 @@ void Main::run() {
 				}
 #endif
 				// Load system.
-				if (not tryProfiles({msg.getData()[3]}))
+				if (not tryProfiles({msg.getData()[3]})) {
 					LogInfo("All requested profiles failed");
+				}
 				break;
 			}
 
@@ -281,7 +283,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"

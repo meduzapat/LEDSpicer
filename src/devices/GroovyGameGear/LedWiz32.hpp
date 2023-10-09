@@ -34,10 +34,9 @@
 #define LEDWIZ32_LEDS          32
 #define LEDWIZ32_MAX_BOARDS    16
 #define LEDWIZ_WAIT            1000 //microseconds
+#define LEDWIZ32_TRANSFER      2 // Batches.
 
-namespace LEDSpicer {
-namespace Devices {
-namespace GroovyGameGear {
+namespace LEDSpicer::Devices::GroovyGameGear {
 
 /**
  * LEDSpicer::Devices::GroovyGameGear::LedWiz32
@@ -48,13 +47,13 @@ class LedWiz32 : public GroovyGameGear {
 
 public:
 
-	LedWiz32(uint8_t boardId, umap<string, string>& options) :
+	LedWiz32(umap<string, string>& options) :
 	GroovyGameGear(
 		LEDWIZ32_WVALUE,
 		LEDWIZ32_INTERFACE,
 		LEDWIZ32_LEDS,
 		LEDWIZ32_MAX_BOARDS,
-		boardId,
+		options,
 		LEDWIZ32_NAME
 	) {}
 
@@ -66,8 +65,6 @@ public:
 
 	uint16_t getProduct() const;
 
-	void resetLeds();
-
 protected:
 
 	static uint8_t dumpFrame;
@@ -75,9 +72,7 @@ protected:
 	virtual void afterClaimInterface();
 };
 
-} /* namespace GroovyGameGear */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::GroovyGameGear::LedWiz32)
 

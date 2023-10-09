@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Serial.cpp
+ * @file      DeviceSerial.cpp
  * @since     Aug 26, 2022
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -24,16 +24,14 @@
 
 using namespace LEDSpicer::Devices;
 
-
-void DeviceSerial::openDevice() {
-	LogInfo("Opening connection to " + port);
-	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
-		throw Error("Can't open device " + getFullName());
-}
-void DeviceSerial::closeDevice() {
-	close(fd);
-}
-
 string DeviceSerial::getFullName() const {
-	return "Device: " + name + " at " + port;
+	return name + " Serial at " + (port.empty() ? "<unknown port>" : port);
+}
+
+void DeviceSerial::openHardware() {
+	connect();
+}
+
+void DeviceSerial::closeHardware() {
+	disconnect();
 }

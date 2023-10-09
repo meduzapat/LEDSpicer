@@ -45,8 +45,9 @@ void Reader::activate() {
 			continue;
 		LogInfo("Opening device " + l.first);
 		l.second = open((DEV_INPUT + l.first).c_str(), O_RDONLY | O_NONBLOCK);
-		if (l.second < 0)
+		if (l.second < 0) {
 			LogWarning("Unable to open " DEV_INPUT + l.first);
+		}
 	}
 }
 

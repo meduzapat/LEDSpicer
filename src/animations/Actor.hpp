@@ -37,8 +37,7 @@ using std::vector;
 
 #define REQUIRED_PARAM_ACTOR {"type", "group", "filter"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 using Devices::Group;
 using Devices::Element;
@@ -230,6 +229,6 @@ private:
 	extern "C" LEDSpicer::Animations::Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
 	extern "C" void destroyActor(LEDSpicer::Animations::Actor* instance) { delete instance; }
 
-}} /* namespace LEDSpicer::Animations */
+} /* namespace */
 
 #endif /* ACTOR_HPP_ */

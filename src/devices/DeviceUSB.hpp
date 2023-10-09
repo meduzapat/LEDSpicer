@@ -26,8 +26,8 @@
 
 #ifndef DEVICEUSB_HPP_
 #define DEVICEUSB_HPP_ 1
-namespace LEDSpicer {
-namespace Devices {
+
+namespace LEDSpicer::Devices {
 
 /**
  * LEDSpicer::Devices::Device
@@ -40,13 +40,13 @@ public:
 	DeviceUSB(
 		uint16_t wValue,
 		uint8_t  interface,
-		uint8_t  elements,
+		uint8_t  pins,
 		uint8_t  maxBoards,
-		uint8_t  boardId,
+		umap<string, string>& options,
 		const string& name
 	) :
-		Device(elements, name),
-		USB(wValue, interface, boardId, maxBoards) {}
+		Device(pins, name),
+		USB(wValue, interface, options.count("boardId") ? Utility::parseNumber(options["boardId"], "Device id should be a number") : 1, maxBoards) {}
 
 	virtual ~DeviceUSB() = default;
 
@@ -57,12 +57,12 @@ public:
 
 protected:
 
-	virtual void openDevice();
+	virtual void openHardware();
 
-	virtual void closeDevice();
+	virtual void closeHardware();
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* DEVICEUSB_HPP_ */

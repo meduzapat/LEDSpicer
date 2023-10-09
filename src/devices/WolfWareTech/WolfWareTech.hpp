@@ -21,14 +21,11 @@
  */
 
 #include "devices/DeviceUSB.hpp"
-#include "Brands.hpp"
 
 #ifndef WOLFWARETECH_HPP_
 #define WOLFWARETECH_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
-namespace WolfWareTech {
+namespace LEDSpicer::Devices::WolfWareTech {
 
 /**
  * This is the Base Header for the WolfWare Tech controllers.
@@ -51,8 +48,6 @@ protected:
 	virtual void afterClaimInterface() {}
 };
 
-} /* namespace WolfWareTech */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* WOLFWARETECH_HPP_ */

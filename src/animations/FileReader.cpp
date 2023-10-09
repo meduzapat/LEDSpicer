@@ -89,8 +89,9 @@ void FileReader::processRGBA(const string& filename) {
 			LogDebug("Extracting frame with " + to_string(colorData.size()) + " colors (" + to_string(ceil) + " elements" + (colorData.size() % 3 ? " needs " + to_string(ceil * 3) + " colors" : "") + ")");
 		}
 #ifdef DEVELOP
-		if (ceil > getNumberOfElements())
+		if (ceil > getNumberOfElements()) {
 			LogWarning("More colors than element colors detected");
+		}
 #endif
 		vector<Color> frameTmp;
 		Color colorTmp;

@@ -82,7 +82,7 @@ using std::chrono::milliseconds;
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port", "userId", "groupId"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
-#define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
+#define REQUIRED_PARAM_DEVICE         {"name"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}

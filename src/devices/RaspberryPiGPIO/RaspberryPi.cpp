@@ -27,14 +27,12 @@ using namespace LEDSpicer::Devices::RaspberryPi;
 bool RaspberryPi::initialized = false;
 
 void RaspberryPi::resetLeds() {
-    for (auto & l : usedleds) {
-        LogDebug("Reset Led " + to_string(l));
+	for (auto& l : usedleds)
 		gpioPWM(l, 0);
-	}
 	setLeds(0);
 }
 
-void RaspberryPi::openDevice() {
+void RaspberryPi::openHardware() {
 
 	if (initialized)
 		throw Error(getFullName() + " device can only be loaded once");
@@ -43,23 +41,24 @@ void RaspberryPi::openDevice() {
 		throw Error("Failed to initialized " + getFullName());
 	}
 
-    usedleds.empty();
-    uint8_t* firstled = getLed(0);
-    for (auto& element : *getElements()) {
-        LogDebug("Element " + element.second.getName());
-        for (auto& pin : element.second.getPins() ) {
-          uint8_t gpiopin = pin - firstled + 1;
-          gpioSetMode(gpiopin, PI_OUTPUT);
-          usedleds.push_back(gpiopin);
-          LogDebug("gpiopin : " + to_string(gpiopin));
-        }
-    };
-    usedleds.shrink_to_fit();
+	// Only handle used element's pins.
+	uint8_t* firstled = getLed(0);
+	for (auto& element : *getElements()) {
+		LogDebug("Element " + element.second.getName());
+		for (auto& pin : element.second.getPins()) {
+			// Find the element pin position in the pins array.
+			uint8_t gpiopin = pin - firstled + 1;
+			gpioSetMode(gpiopin, PI_OUTPUT);
+			usedleds.push_back(gpiopin);
+			LogDebug("gpiopin : " + to_string(gpiopin));
+		}
+	};
+	usedleds.shrink_to_fit();
 
 	initialized = true;
 }
 
-void RaspberryPi::closeDevice() {
+void RaspberryPi::closeHardware() {
 	if (initialized)
 		gpioTerminate();
 }
@@ -75,29 +74,30 @@ void RaspberryPi::drawHardwarePinMap() {
 		<< getFullName() << " Pins " << LEDs.size() << endl
 		<< "Hardware pin map:" << endl
 		<< " +  +" << endl << std::setfill(' ') << std::right
-		<< std::setw(2) << (int)*getLed(2)  << "  +" << endl
-		<< std::setw(2) << (int)*getLed(3)  << "  G" << endl
-		<< std::setw(2) << (int)*getLed(4)  << std::setw(3) << (int)*getLed(14) << endl
-		<< " G" << std::setw(3)                             << (int)*getLed(15) << endl
-		<< std::setw(2) << (int)*getLed(17) << std::setw(3) << (int)*getLed(18) << endl
-		<< std::setw(2) << (int)*getLed(27) << "  G" << endl
-		<< std::setw(2) << (int)*getLed(22) << std::setw(3) << (int)*getLed(23) << endl
-		<< " +" << std::setw(3)                             << (int)*getLed(24) << endl
-		<< std::setw(2) << (int)*getLed(10) << "  G" << endl
-		<< std::setw(2) << (int)*getLed(9)  << std::setw(3) << (int)*getLed(25) << endl
-		<< std::setw(2) << (int)*getLed(11) << std::setw(3) << (int)*getLed(8)  << endl
-		<< " G" << std::setw(3)                             << (int)*getLed(7)  << endl
-		<< std::setw(2) << (int)*getLed(0)  << std::setw(3) << (int)*getLed(1) << endl
-		<< std::setw(2) << (int)*getLed(5)  << "  G" << endl
-		<< std::setw(2) << (int)*getLed(6)  << std::setw(3) << (int)*getLed(12) << endl
-		<< std::setw(2) << (int)*getLed(13) << "  G" << endl
-		<< std::setw(2) << (int)*getLed(19) << std::setw(3) << (int)*getLed(16) << endl
-		<< std::setw(2) << (int)*getLed(26) << std::setw(3) << (int)*getLed(20) << endl
-		<< " G" << std::setw(3)                             << (int)*getLed(21) << endl << endl;
+		<< std::setw(2) << static_cast<int>(*getLed(2))  << "  +" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(3))  << "  G" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(4))  << std::setw(3) << static_cast<int>(*getLed(14)) << endl
+		<< " G" << std::setw(3)                             << static_cast<int>(*getLed(15)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(17)) << std::setw(3) << static_cast<int>(*getLed(18)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(27)) << "  G" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(22)) << std::setw(3) << static_cast<int>(*getLed(23)) << endl
+		<< " +" << std::setw(3)                             << static_cast<int>(*getLed(24)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(10)) << "  G" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(9))  << std::setw(3) << static_cast<int>(*getLed(25)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(11)) << std::setw(3) << static_cast<int>(*getLed(8))  << endl
+		<< " G" << std::setw(3)                             << static_cast<int>(*getLed(7))  << endl
+		<< std::setw(2) << static_cast<int>(*getLed(0))  << std::setw(3) << static_cast<int>(*getLed(1))  << endl
+		<< std::setw(2) << static_cast<int>(*getLed(5))  << "  G" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(6))  << std::setw(3) << static_cast<int>(*getLed(12)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(13)) << "  G" << endl
+		<< std::setw(2) << static_cast<int>(*getLed(19)) << std::setw(3) << static_cast<int>(*getLed(16)) << endl
+		<< std::setw(2) << static_cast<int>(*getLed(26)) << std::setw(3) << static_cast<int>(*getLed(20)) << endl
+		<< " G" << std::setw(3)                             << static_cast<int>(*getLed(21)) << endl << endl;
+	cout << "Note: Only pins with an assigned element will be used" << endl;
 }
 
 void RaspberryPi::transfer() const {
-    for (auto & l : usedleds) {
+	for (auto& l : usedleds) {
 		gpioPWM(l, LEDs[l - 1]);
-    }
+	}
 }

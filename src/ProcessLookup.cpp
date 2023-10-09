@@ -42,8 +42,9 @@ void callEmitter(const string& rom, const string& system = "") {
 	else
 		command = "emitter LoadProfileByEmulator " + rom + " " + system;
 	LogDebug("Running: " + command);
-	if (std::system(command.c_str()) != EXIT_SUCCESS)
+	if (std::system(command.c_str()) != EXIT_SUCCESS) {
 		LogWarning("Failed to execute " + command);
+	}
 }
 
 #ifdef MiSTer
@@ -207,10 +208,12 @@ void findRunningProcess() {
 				maps.at(m.first).id = dirEntity->d_name;
 				currentMap = &m.second;
 				parts = Utility::explode(parts[1], ' ');
-				if (parts.size() > m.second.parameterPos)
+				if (parts.size() > m.second.parameterPos) {
 					callEmitter(parts[m.second.parameterPos], m.second.system);
-				else
+				}
+				else {
 					LogWarning("Parameter not found at " + to_string(m.second.parameterPos));
+				}
 				break;
 			}
 		}
@@ -287,7 +290,7 @@ int main(int argc, char **argv) {
 			cout
 				<< endl <<
 				"processLookup is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"

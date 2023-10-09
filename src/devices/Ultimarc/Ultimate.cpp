@@ -28,12 +28,12 @@ void Ultimate::resetLeds() {
 
 	// Set Off Ramp Speed.
 	vector<uint8_t> data ULTIMAGE_MSG(0xC0, 0);
-	transferToUSB(data);
+	transferToConnection(data);
 
 	// Turn off all LEDs and internal buffer.
 	setLeds(0);
 	data[3] = 0x80;
-	transferToUSB(data);
+	transferToConnection(data);
 }
 
 void Ultimate::afterConnect() {
@@ -74,11 +74,11 @@ void Ultimate::drawHardwarePinMap() {
 		setLed(lLed, fillerL++);
 		setLed(fillerR - 1, fillerR);
 		fillerR++;
-		cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(lLed);
+		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(lLed));
 		if (not ((lLed + 1) % 3)) {
 			cout << "   ";
 			for (uint8_t c = 0; c < 3; ++c)
-				cout << std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(rLed++);
+				cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(rLed++));
 			cout << endl;
 		}
 	}
@@ -90,7 +90,7 @@ void Ultimate::transfer() const {
 	vector<uint8_t> load;
 	load.push_back(0x04);
 	load.insert(load.end(), LEDs.begin(), LEDs.end());
-	transferToUSB(load);
+	transferToConnection(load);
 }
 
 uint16_t Ultimate::getProduct() const {

@@ -26,8 +26,7 @@
 #ifndef DEVICEHANDLER_HPP_
 #define DEVICEHANDLER_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 /**
  * LEDSpicer::Devices::DeviceHandler
@@ -49,9 +48,8 @@ public:
 	/**
 	 * Creates a device calling the create function and keep record of it.
 	 * @see createFunction pointer.
-	 * @param board ID
 	 */
-	Device* createDevice(uint8_t boardId, umap<string, string>& options);
+	Device* createDevice(umap<string, string>& options);
 
 protected:
 
@@ -60,11 +58,10 @@ protected:
 
 	/**
 	 * Pointer to the plugin's creation function.
-	 * @param board ID
 	 * @param plugin parameters.
 	 * @return a new created plugin.
 	 */
-	Device*(*createFunction)(uint8_t, umap<string, string>&) = nullptr;
+	Device*(*createFunction)(umap<string, string>&) = nullptr;
 
 	/**
 	 * Pointer to the plugin's destruction function.
@@ -73,7 +70,6 @@ protected:
 	void(*destroyFunction)(Device*) = nullptr;
 };
 
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* DEVICEHANDLER_HPP_ */

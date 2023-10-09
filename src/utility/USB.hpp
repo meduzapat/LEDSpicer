@@ -22,23 +22,19 @@
 
 // To handle USB devices.
 #include <libusb.h>
+#include "Connection.hpp"
+#include "Brands.hpp"
 
-#include "utility/Error.hpp"
-#include "utility/Log.hpp"
-#include "utility/Utility.hpp"
+#ifndef LSUSB_HPP_
+#define LSUSB_HPP_ 1
 
-#ifndef USB_HPP_
-#define USB_HPP_ 1
-
-/// the number of columns to display when dumping pins.
-#define MAX_DUMP_COLUMNS 40
 /// The request type field for the setup packet.
 #define REQUEST_TYPE LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE
 /// The request field for the setup packet.
 #define REQUEST      0x09
 
 /// Default USB timeout
-#define TIMEOUT 500
+#define USB_TIMEOUT 500
 
 namespace LEDSpicer {
 
@@ -47,23 +43,15 @@ namespace LEDSpicer {
  *
  * Class to handle connections to the USB controller.
  */
-class USB {
+class USB : public Connection {
 
 public:
+
+	USB() = delete;
 
 	USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoards);
 
 	virtual ~USB() = default;
-
-	/**
-	 * Claims the interface.
-	 */
-	void claimInterface();
-
-	/**
-	 * This function will be used to close the USB session, need to be called only once when ledspicer exit.
-	 */
-	static void closeSession();
 
 	/**
 	 * @return the vendor's code.
@@ -80,6 +68,12 @@ public:
 	 * @return
 	 */
 	uint8_t getId() const;
+
+	/**
+	 * This function will be used to close the USB session,
+	 * need to be called only once when ledspicer exit.
+	 */
+	static void closeSession();
 
 protected:
 
@@ -104,23 +98,27 @@ protected:
 	virtual void connect();
 
 	/**
-	 * Disconnects to the USB board.
+	 * Claims the interface.
+	 */
+	void claimInterface();
+
+	/**
+	 * Disconnects from the USB board.
 	 */
 	virtual void disconnect();
 
 	/**
-	 * Prepares the data and send it to the send function.
+	 * Prepares the data and send it to the connection function.
 	 * @param data
 	 */
-	virtual void transferToUSB(vector<uint8_t>& data) const;
+	virtual void transferToConnection(vector<uint8_t>& data) const;
 
 	/**
-	 * Sends the data to the USB device.
-	 * @param data
-	 * @return result code.
+	 * Read from connection.
+	 * @param size
+	 * @return
 	 */
-	virtual int send(vector<uint8_t>& data) const;
-
+	virtual vector<uint8_t> transferFromConnection(uint size) const;
 
 	/**
 	 * This function will be called after connect.
@@ -132,8 +130,17 @@ protected:
 	 */
 	virtual void afterClaimInterface() = 0;
 
+	/**
+	 * Sends the data to the USB device.
+	 * This functions can be overrided to send data in a different way.
+	 * Some devices needs a different transmition way.
+	 * @param data
+	 * @return result code.
+	 */
+	virtual int send(vector<uint8_t>& data) const;
+
 };
 
 } /* namespace LEDSpicer */
 
-#endif /* USB_HPP_ */
+#endif /* LSUSB_HPP_ */

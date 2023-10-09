@@ -21,14 +21,14 @@
  */
 
 #include <fstream>
-#include "Restrictor.hpp"
-#include "Brands.hpp"
+#include "RestrictorUSB.hpp"
 
 #ifndef RESTRICTORS_ULTRASTIK360_HPP_
 #define RESTRICTORS_ULTRASTIK360_HPP_ 1
 
 // NOTE: for old ultrastiks before 2015 product is 0x0501 and interface is 0
 #define ULTRASTIK_NAME       "UltraStik360"
+#define ULTRASTIK_FULLNAME   "Ultimarc UltraStik360"
 #define ULTRASTIK_PRODUCT    0x0511
 #define ULTRASTIK_INTERFACE  2
 #define ULTRASTIK_WVALUE     0x0200
@@ -37,8 +37,8 @@
 
 #define UM_FILES_DIR PACKAGE_DATA_DIR "umaps/"
 #define DEFAULT_MAP_BORDERS {30,58,86,114,142,170,198,226}
-namespace LEDSpicer {
-namespace Restrictors {
+
+namespace LEDSpicer::Restrictors {
 
 /**
  * LEDSpicer::Rotators::UltraStik360
@@ -50,21 +50,21 @@ namespace Restrictors {
  * byte11-92 map data.
  * byte95 Flash: (pre 2015) false RAM(0xFF), true FLASH(0x00), 2015+ should be 0.
  */
-class UltraStik360: public Restrictor {
+class UltraStik360: public RestrictorUSB {
 
 public:
 
 	UltraStik360(umap<string, string>& options, umap<string, uint8_t>& playerData) :
-		Restrictor(
-			options,
-			playerData,
-			ULTRASTIK_WVALUE,
-			ULTRASTIK_INTERFACE,
-			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
-			ULTRASTIK_MAX_BOARDS
-		),
-		handleRestrictor(options.count("hasRestrictor") ? options["hasRestrictor"] == "true" : false),
-		handleMouse(options.count("handleMouse") ? options["handleMouse"] == "true" : false) {}
+	RestrictorUSB(
+		playerData,
+		ULTRASTIK_WVALUE,
+		ULTRASTIK_INTERFACE,
+		Utility::parseNumber(options["boardId"], "Invalid Board ID"),
+		ULTRASTIK_MAX_BOARDS,
+		ULTRASTIK_FULLNAME
+	),
+	handleRestrictor(options.count("hasRestrictor") ? options["hasRestrictor"] == "true" : false),
+	handleMouse(options.count("handleMouse") ? options["handleMouse"] == "true" : false) {}
 
 	virtual ~UltraStik360() = default;
 
@@ -73,8 +73,6 @@ public:
 	virtual uint16_t getVendor() const;
 
 	virtual uint16_t getProduct() const;
-
-	virtual string getName() const;
 
 protected:
 
@@ -90,7 +88,6 @@ protected:
 
 };
 
-} /* namespace Restrictors */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* RESTRICTORS_ULTRASTIK360_HPP_ */

@@ -63,7 +63,7 @@ AlsaAudio::~AlsaAudio() {
 		return;
 
 	LogInfo("Closing ALSA");
-		snd_pcm_close (pcm);
+	snd_pcm_close (pcm);
 }
 
 void AlsaAudio::calcPeak() {

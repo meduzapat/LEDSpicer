@@ -33,8 +33,8 @@
 #define SAMPLE_FORMAT PA_SAMPLE_S16LE
 #define RATE 11025
 #define TOP 10
-namespace LEDSpicer {
-namespace Animations {
+
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::PulseAudio
@@ -109,8 +109,7 @@ protected:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::PulseAudio)
 

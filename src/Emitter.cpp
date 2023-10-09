@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 			cout
 				<< endl <<
 				"Emitter is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
@@ -188,23 +188,14 @@ int main(int argc, char **argv) {
 					try {
 						if (ds == DATA_SOURCE_MAME) {
 							gd = parseMame(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_MAME);
 							break;
 						}
 						if (ds == DATA_SOURCE_FILE) {
 							gd = parseMameDataFile(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_FILE);
 							break;
 						}
 						if (ds == DATA_SOURCE_CONTROLSINI) {
 							gd = parseControlsIni(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_CONTROLSINI);
 							break;
 						}
 					}
@@ -212,6 +203,9 @@ int main(int argc, char **argv) {
 						LogDebug("Error: " + e.getMessage());
 						continue;
 					}
+					if (gd.players == "0")
+						continue;
+					LogDebug("got " + gd.players + " players data from " + ds);
 				}
 				if (gd.players == "0") {
 					LogError("No player data detected");
@@ -230,10 +224,12 @@ int main(int argc, char **argv) {
 				}
 
 				// Rotate restrictors.
-				if (rotate)
+				if (rotate) {
 					gd.rotate();
-				else
+				}
+				else {
 					LogDebug("No restrictors found");
+				}
 			}
 			msg.addData(data[1]);
 		}

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Serial.hpp
+ * @file      DeviceSerial.hpp
  * @since     Aug 26, 2022
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -21,32 +21,27 @@
  */
 
 #include "Device.hpp"
+#include "utility/Serial.hpp"
 
-// To handle terminal.
-#include <termios.h>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef DEVICESERIAL_HPP_
+#define DEVICESERIAL_HPP_ 1
 
-#ifndef SERIAL_HPP_
-#define SERIAL_HPP_ 1
+#define SERIAL_MAX_BOARDS 128
 
-#define DEFAULT_SERIAL_PORT "/dev/ttyUSB0"
-namespace LEDSpicer {
-namespace Devices {
-
+namespace LEDSpicer::Devices {
 
 /**
- * LEDSpicer::Serial
+ * LEDSpicer::Device::DeviceSerial
  *
- * Library to handle serial connections.
+ * Library to handle serial Device connections.
  */
-class DeviceSerial : public Device {
+class DeviceSerial : public Serial, public Device {
 
 public:
 
-	DeviceSerial(const string& name, uint8_t leds, umap<string, string>& options) :
-		Device(leds, name),
-		port(options.count("port") ? options["port"] : DEFAULT_SERIAL_PORT) {}
+	DeviceSerial(umap<string, string>& options, const string& name) :
+		Device(Utility::parseNumber(options.count("leds") ? options["leds"] : "", "Invalid Value for number of leds") * 3, name),
+		Serial(options.count("port") ? options["port"] : DEFAULT_SERIAL_PORT) {}
 
 	virtual ~DeviceSerial() = default;
 
@@ -54,18 +49,11 @@ public:
 
 protected:
 
-	termios params;
+	virtual void openHardware();
 
-	const string port;
-
-	int fd = 0;
-
-	virtual void openDevice();
-
-	virtual void closeDevice();
-
+	virtual void closeHardware();
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
-#endif /* SERIAL_HPP_ */
+#endif /* DEVICESERIAL_HPP_ */

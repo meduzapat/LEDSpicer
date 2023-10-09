@@ -53,8 +53,9 @@ void Mame::process() {
 		return;
 	}
 
-	if (Log::isLogging(LOG_DEBUG) and buffer.find("mame_start=1") != string::npos)
+	if (Log::isLogging(LOG_DEBUG) and buffer.find("mame_start=1") != string::npos) {
 		Log::debug("MAME running");
+	}
 
 	umap<string, bool> messages;
 

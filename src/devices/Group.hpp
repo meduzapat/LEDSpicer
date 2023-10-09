@@ -25,8 +25,7 @@
 #ifndef LAYOUT_HPP_
 #define LAYOUT_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 /**
  * LEDSpicer::Devices::Group
@@ -132,6 +131,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* LAYOUT_HPP_ */

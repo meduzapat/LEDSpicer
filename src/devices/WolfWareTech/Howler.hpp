@@ -42,9 +42,7 @@
 #define howlerBankB(bankNumber, row) {HOWLER_WVALUE, HOWLER_CMD_SET_RGB_LED_BANK, bankNumber, LEDs[row + 33], LEDs[row + 36], LEDs[row + 39], LEDs[row + 42], LEDs[row + 45], LEDs[row + 48], LEDs[row + 6],  LEDs[row + 90], LEDs[row + 93], LEDs[row + 9],  LEDs[row + 87], LEDs[row + 84], LEDs[row + 81], LEDs[row + 78], LEDs[row + 75], LEDs[row + 72], 0, 0, 0, 0, 0}
 
 
-namespace LEDSpicer {
-namespace Devices {
-namespace WolfWareTech {
+namespace LEDSpicer::Devices::WolfWareTech {
 
 /**
  * LEDSpicer::Devices::WolfWareTech::Howler
@@ -53,13 +51,13 @@ class Howler: public WolfWareTech {
 
 public:
 
-	Howler(uint8_t boardId, umap<string, string>& options) :
+	Howler(umap<string, string>& options) :
 	WolfWareTech(
 		HOWLER_WVALUE,
 		HOWLER_INTERFACE,
 		HOWLER_LEDS,
 		HOWLER_MAX_BOARDS,
-		boardId,
+		options,
 		HOWLER_NAME
 	) {}
 
@@ -71,17 +69,13 @@ public:
 
 	uint16_t getProduct() const;
 
-	virtual void resetLeds();
-
 protected:
 
 	virtual int send(vector<uint8_t>& data) const;
 
 };
 
-} /* namespace WolfWareTech */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::WolfWareTech::Howler)
 

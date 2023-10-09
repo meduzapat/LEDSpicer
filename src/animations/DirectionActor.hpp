@@ -30,8 +30,7 @@ using std::string;
 #ifndef DIRECTIONACTOR_HPP_
 #define DIRECTIONACTOR_HPP_ 1
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::DirectionActor
@@ -124,6 +123,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* DIRECTIONACTOR_HPP_ */

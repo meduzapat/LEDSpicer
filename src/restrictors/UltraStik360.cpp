@@ -28,11 +28,11 @@ umap<UltraStik360::Ways, vector<uint8_t>> UltraStik360::umdataCache;
 
 void UltraStik360::rotate(const umap<string, Ways>& playersData) {
 
-	Ways way = getWay(playersData, false);
+	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)
 		return;
 
-	LogDebug("Rotating " + getName() + " to " + ways2str(way));
+	LogDebug("Rotating " + getFullName() + " to " + ways2str(way));
 
 	vector<uint8_t> data(96, 0);
 	uint8_t c;
@@ -80,7 +80,7 @@ void UltraStik360::rotate(const umap<string, Ways>& playersData) {
 	for (uint8_t d: data) {
 		dataT.push_back(d);
 		if (dataT.size() == ULTRASTIK_DATA_SIZE) {
-			transferToUSB(dataT);
+			transferToConnection(dataT);
 			dataT.clear();
 		}
 	}
@@ -94,13 +94,9 @@ uint16_t UltraStik360::getProduct() const {
 	return (ULTRASTIK_PRODUCT + getId() - 1);
 }
 
-string UltraStik360::getName() const {
-	return string(ULTRASTIK_NAME) + " " + to_string(getId());
-}
-
 umap<string, vector<uint8_t>> UltraStik360::processUmFile(const string& file) {
 
-	LogDebug(getName() + " Reading UM file " + file);
+	LogDebug(getFullName() + " Reading UM file " + file);
 	umap<string, vector<uint8_t>> result;
 
 	// Read file.

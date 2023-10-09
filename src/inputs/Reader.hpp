@@ -30,8 +30,7 @@
 
 #define DEV_INPUT "/dev/input/by-id/"
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Reader
@@ -71,7 +70,6 @@ protected:
 	void readAll();
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* READER_HPP_ */

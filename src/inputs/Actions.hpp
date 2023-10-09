@@ -26,8 +26,7 @@
 #include "utility/Speed.hpp"
 #include "Reader.hpp"
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Actions
@@ -113,8 +112,7 @@ protected:
 
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 inputFactory(LEDSpicer::Inputs::Actions)
 

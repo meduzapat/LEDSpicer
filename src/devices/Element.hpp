@@ -38,8 +38,7 @@ using std::chrono::system_clock;
 
 #define SINGLE_PIN 0
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 /**
  * Helper base class to unify elements and groups.
@@ -233,6 +232,6 @@ protected:
 	system_clock::time_point clockTime;
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* ELEMENT_HPP_ */

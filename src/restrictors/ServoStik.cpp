@@ -26,7 +26,7 @@ using namespace LEDSpicer::Restrictors;
 
 void ServoStik::rotate(const umap<string, Ways>& playersData) {
 
-	Ways way = getWay(playersData, false);
+	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)
 		return;
 
@@ -35,14 +35,14 @@ void ServoStik::rotate(const umap<string, Ways>& playersData) {
 	case Ways::w2:
 	case Ways::w2v:
 	case Ways::w4:
-		LogDebug("Rotating " + getName() + " to 4 ways.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways.");
 		data[3] = 0;
 		break;
 	default:
-		LogDebug("Rotating " + getName() + " to 8 ways.");
+		LogDebug("Rotating " + getFullName() + " to 8 ways.");
 		data[3] = 1;
 	}
-	transferToUSB(data);
+	transferToConnection(data);
 }
 
 uint16_t ServoStik::getVendor() const {
@@ -53,6 +53,3 @@ uint16_t ServoStik::getProduct() const {
 	return (SERVOSTIK_PRODUCT + getId() - 1);
 }
 
-string ServoStik::getName() const {
-	return string(SERVOSTIK_NAME) + " " + to_string(getId());
-}

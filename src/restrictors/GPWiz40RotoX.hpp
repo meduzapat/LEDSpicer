@@ -20,13 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Restrictor.hpp"
-#include "Brands.hpp"
+#include "RestrictorUSB.hpp"
 
 #ifndef RESTRICTORS_GPWIZ40ROTOX_HPP_
 #define RESTRICTORS_GPWIZ40ROTOX_HPP_ 1
 
 #define GPWIZ40ROTOX_NAME       "GPWiz40RotoX"
+#define GPWIZ40ROTOX_FULLNAME   "GroovyGameGear GP-Wiz40 RotoX"
 #define GPWIZ40ROTOX_PRODUCT    0x0035
 #define GPWIZ40ROTOX_INTERFACE  0
 #define GPWIZ40ROTOX_WVALUE     0x0200
@@ -38,37 +38,36 @@
 
 #define DEFAULT_SPEED 12
 
-namespace LEDSpicer {
-namespace Restrictors {
+namespace LEDSpicer::Restrictors {
 
 /**
  * LEDSpicer::Restrictor::GPWiz40RotoX
  */
-class GPWiz40RotoX : public Restrictor {
+class GPWiz40RotoX : public RestrictorUSB {
 
 public:
 
 	GPWiz40RotoX(umap<string, string>& options, umap<string, uint8_t>& playerData) :
-		Restrictor(
-			options,
-			playerData,
-			GPWIZ40ROTOX_WVALUE,
-			GPWIZ40ROTOX_INTERFACE,
-			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
-			GPWIZ40ROTOX_MAX_BOARDS
-		),
-		speedOn(
-			options.count(SPEED_ON) ? Utility::parseNumber(
-				options.at(SPEED_ON),
-				"Invalid value for " SPEED_ON
-			)  : DEFAULT_SPEED
-		),
-		speedOff(
-			options.count(SPEED_OFF) ? Utility::parseNumber(
-				options.at(SPEED_OFF),
-				"Invalid value for " SPEED_OFF
-			) : DEFAULT_SPEED
-		) {}
+	RestrictorUSB(
+		playerData,
+		GPWIZ40ROTOX_WVALUE,
+		GPWIZ40ROTOX_INTERFACE,
+		Utility::parseNumber(options["boardId"], "Invalid Board ID"),
+		GPWIZ40ROTOX_MAX_BOARDS,
+		GPWIZ40ROTOX_FULLNAME
+	),
+	speedOn(
+		options.count(SPEED_ON) ? Utility::parseNumber(
+			options.at(SPEED_ON),
+			"Invalid value for " SPEED_ON
+		)  : DEFAULT_SPEED
+	),
+	speedOff(
+		options.count(SPEED_OFF) ? Utility::parseNumber(
+			options.at(SPEED_OFF),
+			"Invalid value for " SPEED_OFF
+		) : DEFAULT_SPEED
+	) {}
 
 	virtual ~GPWiz40RotoX() = default;
 
@@ -77,8 +76,6 @@ public:
 	virtual uint16_t getVendor() const;
 
 	virtual uint16_t getProduct() const;
-
-	virtual string getName() const;
 
 	virtual uint8_t getMaxIds() const;
 
@@ -92,7 +89,6 @@ protected:
 
 };
 
-} /* namespace Restrictors */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* RESTRICTORS_GPWIZ40ROTOX_HPP_ */

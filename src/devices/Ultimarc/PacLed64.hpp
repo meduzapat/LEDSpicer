@@ -19,9 +19,7 @@
 #define PAC_LED64_LEDS       64
 #define PAC_LED64_MAX_BOARDS 4
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+namespace LEDSpicer::Devices::Ultimarc {
 
 /**
  * LEDSpicer::Devices::Ultimarc::PacLed64
@@ -30,15 +28,13 @@ class PacLed64: public FF00SharedCode {
 
 public:
 
-	PacLed64();
-
-	PacLed64(uint8_t boardId, umap<string, string>& options) :
+	PacLed64(umap<string, string>& options) :
 	FF00SharedCode(
 		PAC_LED64_WVALUE,
 		0, // to be defined.
 		PAC_LED64_LEDS,
 		PAC_LED64_MAX_BOARDS,
-		boardId,
+		options,
 		PAC_LED64_NAME
 	) {}
 
@@ -50,9 +46,7 @@ public:
 
 };
 
-} /* namespace Ultimarc */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::Ultimarc::PacLed64)
 

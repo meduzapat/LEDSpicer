@@ -29,8 +29,7 @@
 
 #define REQUIRED_PARAM_ACTOR_PULSE {"speed", "direction"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Pulse
@@ -65,8 +64,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Pulse)
 

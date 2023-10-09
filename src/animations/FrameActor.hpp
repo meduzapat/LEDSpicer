@@ -26,8 +26,7 @@
 #ifndef FRAMEACTOR_HPP_
 #define FRAMEACTOR_HPP_ 1
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::FrameActor
@@ -105,6 +104,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* FRAMEACTOR_HPP_ */
