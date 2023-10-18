@@ -24,7 +24,11 @@
 
 using namespace LEDSpicer::Devices;
 
-void DeviceUSB::openDevice() {
+string DeviceUSB::getFullName() const {
+	return name + " Id: " + to_string(boardId);
+}
+
+void DeviceUSB::openHardware() {
 	connect();
 #ifndef DRY_RUN
 	afterConnect();
@@ -35,11 +39,6 @@ void DeviceUSB::openDevice() {
 #endif
 }
 
-void DeviceUSB::closeDevice() {
-	LogDebug("Disconnecting " + getFullName());
+void DeviceUSB::closeHardware() {
 	disconnect();
-}
-
-string DeviceUSB::getFullName() const {
-	return "Device: " + name + " Id: " + to_string(boardId);
 }

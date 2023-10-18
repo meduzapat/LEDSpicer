@@ -26,6 +26,7 @@ using namespace LEDSpicer::Animations;
 
 Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
+	Colors(parameters["colors"]),
 	mode(str2mode(parameters["mode"]))
 {
 
@@ -38,7 +39,6 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	if (totalStepFrames > 2)
 		setTotalStepFrames(totalStepFrames / 2);
 
-	extractColors(parameters["colors"]);
 	float
 		percent = 0,
 		increment;

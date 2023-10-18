@@ -20,43 +20,37 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/USB.hpp"
+#include "utility/Hardware.hpp"
 
 #ifndef RESTRICTORS_ROTATOR_HPP_
 #define RESTRICTORS_ROTATOR_HPP_ 1
 
-#define REQUIRED_PARAM_RESTRICTOR {"name", "boardId"}
-#define REQUIRED_PARAM_MAP        {"player", "joystick", "id"}
+#define REQUIRED_PARAM_RESTRICTOR {"name"}
+#define REQUIRED_PARAM_MAP        {"player", "joystick"}
+#define RESTRICTOR_SINGLE_ID      1
 
-namespace LEDSpicer {
-namespace Restrictors {
+namespace LEDSpicer::Restrictors {
 
 /**
  * LEDSpicer::Restrictor::Restrictor
  * Class to handle restrictor for joysticks.
  */
-class Restrictor : public USB {
+class Restrictor : public Hardware {
 
 public:
 
 	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
 
 	Restrictor(
-		umap<string, string>& options,
 		umap<string, uint8_t>& playerData,
-		uint16_t wValue,
-		uint8_t  interface,
-		uint8_t  boardId,
-		uint8_t  maxBoards
-	) : players(playerData), USB(wValue, interface, boardId, maxBoards) {}
+		const string& name
+	) : Hardware(name), players(playerData) {}
 
-	virtual ~Restrictor() {}
+	virtual ~Restrictor() = default;
 
 	void initialize();
 
 	void terminate();
-
-	virtual string getName() const = 0;
 
 	/**
 	 * @return the number of players a hardware supports.
@@ -76,12 +70,17 @@ public:
 	virtual void rotate(Ways ways);
 
 	/**
-	 * convert strings into joystick positions.
+	 * Convert strings into joystick positions.
 	 * @param ways
 	 * @return defaults to 8 ways.
 	 */
 	static Ways str2ways(const string& ways);
 
+	/**
+	 * Convert Ways into strings.
+	 * @param ways
+	 * @return
+	 */
 	static string ways2str(Ways ways);
 
 	/**
@@ -90,22 +89,13 @@ public:
 	 */
 	static bool isRotary(const Ways& ways);
 
-	Ways getWay(const umap<string, Ways>& playersData, bool rotary) const;
-
 protected:
 
 	/// Supported players for this restrictor in the form of P_J => id (player_joystick)
 	umap<string, uint8_t> players;
 
-	virtual void disconnect();
-
-	virtual void afterConnect() {}
-
-	virtual void afterClaimInterface() {};
-
 };
 
-} /* namespace Restrictors */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* RESTRICTORS_ROTATOR_HPP_ */

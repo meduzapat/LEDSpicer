@@ -54,38 +54,46 @@ using std::chrono::milliseconds;
 #define PARAM_NAME            "name"
 #define PARAM_DEFAULT_COLOR   "defaultColor"
 #define PARAM_LED             "led"
+#define PARAM_TIMED           "solenoid"
+#define PARAM_TIME_ON         "timeOn"
 #define PARAM_RED             "red"
 #define PARAM_GREEN           "green"
 #define PARAM_BLUE            "blue"
 #define PARAM_DEFAULT_PROFILE "defaultProfile"
 #define PARAM_USER_ID         "userId"
 #define PARAM_GROUP_ID        "groupId"
+#define PARAM_FILTER          "filter"
 
-#define NODE_DEVICES          "devices"
-#define NODE_DEVICE           "device"
-#define NODE_ELEMENT          "element"
-#define NODE_LAYOUT           "layout"
-#define NODE_GROUP            "group"
-#define NODE_COLOR            "color"
-#define NODE_ANIMATIONS       "animations"
-#define NODE_ANIMATION        "animation"
-#define NODE_START_TRANSITION "startTransition"
-#define NODE_END_TRANSITION   "endTransition"
-#define NODE_INPUTS           "inputs"
-#define NODE_INPUT            "input"
-#define NODE_ACTOR            "actor"
+#define NODE_DEVICES           "devices"
+#define NODE_DEVICE            "device"
+#define NODE_ELEMENT           "element"
+#define NODE_LAYOUT            "layout"
+#define NODE_GROUP             "group"
+#define NODE_COLOR             "color"
+#define NODE_ANIMATIONS        "animations"
+#define NODE_ANIMATION         "animation"
+#define NODE_START_TRANSITION  "startTransition"
+#define NODE_END_TRANSITION    "endTransition"
+#define NODE_START_TRANSITIONS "startTransitions"
+#define NODE_END_TRANSITIONS   "endTransitions"
+#define NODE_INPUTS            "inputs"
+#define NODE_INPUT             "input"
+#define NODE_ACTOR             "actor"
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port", "userId", "groupId"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
-#define REQUIRED_PARAM_DEVICE         {"name", "boardId"}
+#define REQUIRED_PARAM_DEVICE         {"name"}
 #define REQUIRED_PARAM_DEVICE_ELEMENT {"name", "type"}
 #define REQUIRED_PARAM_RGB_LED        {"red", "green", "blue"}
 #define REQUIRED_PARAM_LAYOUT         {"defaultProfile"}
 #define REQUIRED_PARAM_NAME_ONLY      {"name"}
-#define REQUIRED_PARAM_MAP            {"type", "target", "trigger", "color", "filter"}
+#define REQUIRED_PARAM_MAP            {"type", "target", "trigger"}
 
-#define EMPTY_PROFILE "profile_"
-#define DEFAULT_COLOR "White"
+#define EMPTY_PROFILE     "profile_"
+#define DEFAULT_COLOR     "White"
+#define DEFAULT_ENDCYCLES 1
+#define DEFAULT_ENDTIME   5
+#define DEFAULT_SOLENOID  50
 
 namespace LEDSpicer {
 
@@ -97,7 +105,6 @@ using Devices::Device;
 using Devices::Profile;
 using Devices::Group;
 using Devices::Element;
-using Devices::Device;
 using Inputs::Input;
 using Inputs::InputHandler;
 
@@ -180,6 +187,9 @@ public:
 
 	/// Stores groups by name.
 	static umap<string, Group> layout;
+
+	/// Stores the default profile name.
+	static string defaultProfileName;
 
 	/// Stores the default profile name.
 	static Profile* defaultProfile;

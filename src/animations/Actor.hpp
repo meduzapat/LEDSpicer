@@ -37,8 +37,7 @@ using std::vector;
 
 #define REQUIRED_PARAM_ACTOR {"type", "group", "filter"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 using Devices::Group;
 using Devices::Element;
@@ -98,6 +97,51 @@ public:
 	 */
 	static uint8_t getFPS();
 
+	/**
+	 * If the actor can be handled by time.
+	 * @return
+	 */
+	virtual bool acceptTime() {
+		return true;
+	}
+
+	/**
+	 * If the actor can be handled by cycles.
+	 * @return
+	 */
+	virtual bool acceptCycles() {
+		return false;
+	}
+
+	/**
+	 * Change the start time.
+	 * @param seconds
+	 */
+	void setStartTime(uint16_t seconds);
+
+	/**
+	 * Change the end time.
+	 * @param seconds
+	 */
+	void setEndTime(uint16_t seconds);
+
+	/**
+	 * Change the start cycles.
+	 * @param cycles
+	 */
+	virtual void setStartCycles(uint8_t cycles) {}
+
+	/**
+	 * Change the end cycles.
+	 * @param cycles
+	 */
+	virtual void setEndCycles(uint8_t seconds)  {}
+
+	/**
+	 * Function called when a new frame begins.
+	 */
+	static void newFrame();
+
 protected:
 
 	/// How the color information will be draw back.
@@ -105,6 +149,8 @@ protected:
 
 	/// Hardware frames per second.
 	static uint8_t FPS;
+
+	static uint8_t frame;
 
 	uint16_t
 		secondsToStart = 0,
@@ -155,6 +201,12 @@ protected:
 	 */
 	bool isElementAffected(uint8_t index);
 
+	/**
+	 * Checks if the actor will repeat.
+	 * @return
+	 */
+	bool checkRepeats();
+
 private:
 
 	/**
@@ -164,6 +216,12 @@ private:
 
 	/// A pointer to the real group of elements.
 	Group* const group;
+
+	/// If this actor will repeat, default 0, repeat for ever.
+	uint8_t
+		repeat    = 0,
+		repeated  = 0;
+
 };
 
 // The functions to create and destroy actors.
@@ -171,6 +229,6 @@ private:
 	extern "C" LEDSpicer::Animations::Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
 	extern "C" void destroyActor(LEDSpicer::Animations::Actor* instance) { delete instance; }
 
-}} /* namespace LEDSpicer::Animations */
+} /* namespace */
 
 #endif /* ACTOR_HPP_ */

@@ -22,40 +22,27 @@
 
 #include <pulse/pulseaudio.h>
 #include <pulse/error.h>
-#include <cmath>
 #include <mutex>
 
-#include "utility/Direction.hpp"
-#include "Actor.hpp"
+#include "AudioActor.hpp"
 
 #ifndef PULSEAUDIO_HPP_
 #define PULSEAUDIO_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSEAUDIO {"mode", "off", "low", "mid", "high", "channel"}
-#define VU_MIN_ELEMETS 6
 #define STREAM_NAME "Peek Reader"
-#define MIN_MAX_PEAK 10
 #define SAMPLE_FORMAT PA_SAMPLE_S16LE
 #define RATE 11025
+#define TOP 10
 
-#define HIG_POINT 95
-#define MID_POINT 55
-#define LOW_POINT 25
-
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::PulseAudio
  * Pulseaudio output plugin.
  */
-class PulseAudio: public Actor, public Direction {
+class PulseAudio: public AudioActor {
 
 public:
-
-	enum class Modes : uint8_t {VuMeter, Levels, Single, Wave};
-
-	enum Channels : uint8_t {Left = 1, Right, Both, Mono};
 
 	PulseAudio(umap<string, string>& parameters, Group* const layout);
 
@@ -63,63 +50,23 @@ public:
 
 	void drawConfig();
 
-	static Modes str2mode(const string& mode);
-
-	static string mode2str(Modes mode);
-
-	static Channels str2channel(const string& channel);
-
-	static string channel2str(Channels channel);
-
 protected:
-
-	void calculateElements();
-
-private:
-
-	struct Values {
-		uint16_t
-			l = 0,
-			r = 0;
-	};
-
-	struct UserPref {
-		const Color
-			/// Color to use when off
-			& off,
-			/// Color to use when low
-			& c00,
-			/// Color to use when mid
-			& c50,
-			/// Color to use when full
-			& c75;
-		Modes mode;
-		Channels channel;
-	} userPref;
-
 
 	static pa_threaded_mainloop* tml;
 	static pa_context* context;
 	static pa_stream* stream;
 
-	static uint8_t
-		instances,
-		totalChannels;
+	static uint8_t instances;
 
 	static string source;
-
-	static uint16_t peak;
 
 	/// To avoid updating when is reading the buffer.
 	static std::mutex mutex;
 
-	/// Total elements per side, stereo or mono.
-	uint8_t total = 0;
-
 	/// Raw peak data.
-	static vector<int16_t> rawData;
+	static vector<uint16_t> rawData;
 
-	vector<Color> waveData;
+	static uint16_t top;
 
 	static void disconnect();
 
@@ -154,46 +101,15 @@ private:
 	 */
 	static void onSinkInfo(pa_context* context, const pa_sink_info* info, int eol, void* userdata);
 
-	/**
-	 * Calculates and returns the peaks out of raw data.
-	 * @return
-	 */
-	Values getPeak();
+	virtual void calcPeak();
 
-	/**
-	 * Calculates and sets the peak.
-	 * @param peaks
-	 */
-	void setPeak(const Values& peaks);
+	virtual void calcPeaks();
 
-	/**
-	 * Calculates VU meters.
-	 */
-	void vuMeters();
+	void calculateElements();
 
-	/**
-	 * Calculates multiple VU meters.
-	 */
-	void levels();
-
-	void waves();
-
-	/**
-	 * Calculates a single VU for all.
-	 */
-	void single();
-
-	/**
-	 * Detects the color based on the percent.
-	 * @param percent
-	 * @param gradient true for smooth gradient, lines with inside gradients.
-	 * @return
-	 */
-	Color detectColor(uint8_t percent, bool gradient = true);
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::PulseAudio)
 

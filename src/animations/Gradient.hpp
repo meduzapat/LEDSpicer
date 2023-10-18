@@ -30,8 +30,7 @@
 
 #define REQUIRED_PARAM_ACTOR_GRADIENT {"speed", "direction", "colors", "mode"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Rainbow
@@ -70,8 +69,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Gradient)
 

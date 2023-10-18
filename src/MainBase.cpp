@@ -231,10 +231,12 @@ Device* MainBase::selectDevice() {
 }
 
 void MainBase::wait(milliseconds wasted) {
-	if (wasted < DataLoader::waitTime)
+	if (wasted < DataLoader::waitTime) {
 		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
-	else
+	}
+	else {
 		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(DataLoader::waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
+	}
 }
 
 Profile* MainBase::tryProfiles(const vector<string>& data) {
@@ -290,14 +292,17 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	}
 
 	// Add Groups.
-	for (string& n : Utility::explode(groups, ',')) {
+/*	for (string& n : Utility::explode(groups, ',')) {
 		LogDebug("Using group " + n);
-		if (DataLoader::layout.count(n))
+		if (DataLoader::layout.count(n)) {
 			profile->addAlwaysOnGroup(
-					&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor());
-		else
+				&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor()
+			);
+		}
+		else {
 			LogDebug(n + " not found");
-	}
+		}
+	}*/
 
 	// Add Animations.
 	for (string& n : Utility::explode(groups, ',')) {

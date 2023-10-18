@@ -37,7 +37,11 @@ public:
 
 	Colors() = default;
 
+	Colors(const string& colors);
+
 	virtual ~Colors() = default;
+
+	void drawColors();
 
 protected:
 

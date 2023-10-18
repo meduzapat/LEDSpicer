@@ -42,11 +42,14 @@ void callEmitter(const string& rom, const string& system = "") {
 	else
 		command = "emitter LoadProfileByEmulator " + rom + " " + system;
 	LogDebug("Running: " + command);
-	if (std::system(command.c_str()) != EXIT_SUCCESS)
+	if (std::system(command.c_str()) != EXIT_SUCCESS) {
 		LogWarning("Failed to execute " + command);
+	}
 }
 
 #ifdef MiSTer
+
+string lastRunning = "";
 
 /*
  * MiSTer FPGA runs a process to control the menu and the load of cores.
@@ -75,6 +78,7 @@ string getMiSTerName(const string& path) {
 
 void checkIfProcessIsRunning() {
 
+	// Read command line.
 	string data = PROC_DIRECTORY + currentMap->id + CMDLINE;
 	std::ifstream cmdFile;
 	cmdFile.open(data.c_str(), std::ios::in);
@@ -82,6 +86,7 @@ void checkIfProcessIsRunning() {
 		throw Error("cannot find " MISTER_BINARY);
 	std::getline(cmdFile, data);
 	cmdFile.close();
+
 	if (data.empty())
 		return;
 	vector<string> parts = Utility::explode(data, '\0');
@@ -89,18 +94,30 @@ void checkIfProcessIsRunning() {
 	if (parts.empty())
 		return;
 
-	// parameterPos != 0 ROM running.
+	// parameterPos != 0 core running.
 	if (currentMap->parameterPos) {
-		// Size: 1 or 2 with menu.rbf rom ended.
-		if (parts.size() > 1 and parts.at(1) != "menu.rbf")
+
+		// Core running.
+		if (lastRunning == data)
 			return;
-		currentMap->parameterPos = 0;
-		LogDebug("Core ended");
+
+		// Core ended.
 		callEmitter("");
-		return;
+		currentMap->parameterPos = 0;
+
+		// Is back to menu?
+		if (parts.size() > 1 and parts.at(1) == "menu.rbf") {
+			LogDebug("Core ended");
+			lastRunning = "";
+			return;
+		}
+
+		// Core is running but is not the same than before, different core loaded.
+		LogDebug("Different Core loaded.");
+		lastRunning = data;
 	}
 
-	// parameterPos == 0 ROM not running.
+	// Detect core.
 	string name;
 	switch (parts.size()) {
 
@@ -110,8 +127,10 @@ void checkIfProcessIsRunning() {
 	 * 3 arcade
 	 */
 	case 2:
+		// Detect menu.
 		if (parts.at(1) == "menu.rbf")
 			return;
+		// detect name
 		parts = Utility::explode(parts[1], '/');
 		parts = Utility::explode(parts.back(), '_');
 		LogDebug("Non Arcade core detected");
@@ -122,7 +141,6 @@ void checkIfProcessIsRunning() {
 		LogDebug("Arcade core detected");
 		callEmitter(getMiSTerName(parts[2]), "arcade");
 		currentMap->parameterPos = 1;
-		break;
 		break;
 	}
 }
@@ -153,12 +171,14 @@ void findRunningProcess() {
 
 	// Loop while not NULL
 	while ((dirEntity = readdir(dir))) {
+
 		if (dirEntity->d_type != DT_DIR)
 			continue;
 
 		if (dirEntity->d_name[0] < '0' || dirEntity->d_name[0] > '9')
 			continue;
 
+		// Read command line.
 		string file = PROC_DIRECTORY;
 		file.append(dirEntity->d_name);
 		file.append(CMDLINE);
@@ -170,6 +190,8 @@ void findRunningProcess() {
 		cmdFile.close();
 		if (file.empty())
 			continue;
+
+		// Process command line.
 		vector<string> parts = Utility::explode(file, '\0');
 		if (parts.size() < 2)
 			continue;
@@ -186,10 +208,12 @@ void findRunningProcess() {
 				maps.at(m.first).id = dirEntity->d_name;
 				currentMap = &m.second;
 				parts = Utility::explode(parts[1], ' ');
-				if (parts.size() > m.second.parameterPos)
+				if (parts.size() > m.second.parameterPos) {
 					callEmitter(parts[m.second.parameterPos], m.second.system);
-				else
+				}
+				else {
 					LogWarning("Parameter not found at " + to_string(m.second.parameterPos));
+				}
 				break;
 			}
 		}
@@ -251,7 +275,6 @@ int main(int argc, char **argv) {
 		if (commandline == "-h" or commandline == "--help") {
 			cout <<
 				"processLookup command line usage:\n"
-				"processLookup <options> player joystick ways\n"
 				"Options:\n"
 				"-f or --foreground           Run on foreground\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
@@ -267,7 +290,7 @@ int main(int argc, char **argv) {
 			cout
 				<< endl <<
 				"processLookup is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"

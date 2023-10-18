@@ -48,6 +48,7 @@ void signalHandler(int sig) {
 	case SIGSEGV:
 	case SIGILL:
 		// Display back trace.
+		cerr << PACKAGE_NAME " ended with signal " << sig << endl;
 #ifdef DEVELOP
 		void* array[10];
 		size_t size = backtrace(array, 10);
@@ -62,7 +63,7 @@ void Main::run() {
 
 	LogInfo(PACKAGE_NAME " Running");
 
-	currentProfile = DataLoader::defaultProfile;
+	currentProfile = DataLoader::defaultProfile = DataLoader::processProfile(DataLoader::defaultProfileName);
 	currentProfile->restart();
 
 	while (running) {
@@ -75,8 +76,9 @@ void Main::run() {
 			switch (msg.getType()) {
 
 			case Message::Types::LoadProfile:
-				if (not tryProfiles(msg.getData()))
+				if (not tryProfiles(msg.getData())) {
 					LogInfo("All requested profiles failed");
+				}
 				break;
 
 			case Message::Types::FinishLastProfile:
@@ -101,24 +103,23 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetElement: {
-				if (msg.getData().size() < 2) {
-					LogNotice("Invalid message ");
+				if (msg.getData().size() < 1 or not DataLoader::allElements.count(msg.getData()[0])) {
+					LogNotice("Invalid message for " + Message::type2str(msg.getType()));
 					break;
 				}
-				if (msg.getData().size() == 2) {
+
+				if (msg.getData().size() == 1)
+					msg.addData(DataLoader::allElements.at(msg.getData()[0])->getDefaultColor().getName());
+
+				if (msg.getData().size() == 2)
 					msg.addData("Normal");
-					break;
-				}
-				string
-					name   = msg.getData()[0],
-					color  = msg.getData()[1],
-					filter = msg.getData()[2];
-				if (not DataLoader::allElements.count(name)) {
-					LogNotice("Unknown element " + name);
-					break;
-				}
+
 				try {
-					alwaysOnElements[name] = Element::Item{DataLoader::allElements.at(name), &Color::getColor(color), Color::str2filter(filter)};
+					alwaysOnElements[msg.getData()[0]] = Element::Item{
+						DataLoader::allElements.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					};
 				}
 				catch (Error& e) {
 					LogNotice(e.getMessage());
@@ -127,12 +128,11 @@ void Main::run() {
 			}
 
 			case Message::Types::ClearElement:
-				if (msg.getData().size() != 1) {
+				if (msg.getData().size() != 1 or not alwaysOnElements.count(msg.getData()[0])) {
 					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
 					break;
 				}
-				if (alwaysOnElements.count(msg.getData()[0]))
-					alwaysOnElements.erase(msg.getData()[0]);
+				alwaysOnElements.erase(msg.getData()[0]);
 				break;
 
 			case Message::Types::ClearAllElements:
@@ -140,18 +140,17 @@ void Main::run() {
 				break;
 
 			case Message::Types::SetGroup:
-				if (msg.getData().size() < 2) {
-					LogNotice("Invalid message for " + Message::type2str(Message::Types::SetGroup));
+				if (msg.getData().size() < 1 or not DataLoader::layout.count(msg.getData()[0])) {
+					LogNotice("Missing/Invalid group for " + Message::type2str(Message::Types::SetGroup));
 					break;
 				}
-				if (msg.getData().size() == 2) {
+
+				if (msg.getData().size() == 1)
+					msg.addData(DataLoader::layout.at(msg.getData()[0]).getDefaultColor().getName());
+
+				if (msg.getData().size() == 2)
 					msg.addData("Normal");
-					break;
-				}
-				if (not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice("Unknown group " + msg.getData()[0]);
-					break;
-				}
+
 				try {
 					alwaysOnGroups[msg.getData()[0]] = Group::Item{
 						&DataLoader::layout.at(msg.getData()[0]),
@@ -165,12 +164,11 @@ void Main::run() {
 				break;
 
 			case Message::Types::ClearGroup:
-				if (msg.getData().size() != 1) {
+				if (msg.getData().size() != 1 or not alwaysOnGroups.count(msg.getData()[0])) {
 					LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
 					break;
 				}
-				if (alwaysOnGroups.count(msg.getData()[0]))
-					alwaysOnGroups.erase(msg.getData()[0]);
+				alwaysOnGroups.erase(msg.getData()[0]);
 				break;
 
 			case Message::Types::ClearAllGroups:
@@ -210,8 +208,9 @@ void Main::run() {
 				}
 #endif
 				// Load system.
-				if (not tryProfiles({msg.getData()[3]}))
+				if (not tryProfiles({msg.getData()[3]})) {
 					LogInfo("All requested profiles failed");
+				}
 				break;
 			}
 
@@ -284,7 +283,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
@@ -341,9 +340,7 @@ int main(int argc, char **argv) {
 		DataLoader config(configFile, "Configuration");
 		config.readConfiguration();
 
-#ifdef DEVELOP
 		signal(SIGSEGV, signalHandler);
-#endif
 		signal(SIGTERM, signalHandler);
 		signal(SIGQUIT, signalHandler);
 		signal(SIGABRT, signalHandler);
@@ -352,7 +349,7 @@ int main(int argc, char **argv) {
 		signal(SIGSTOP, SIG_IGN);
 		signal(SIGHUP, signalHandler);
 
-		if (DataLoader::getMode() == DataLoader::Modes::Profile and DataLoader::defaultProfile->getName() != profile)
+		if (DataLoader::getMode() == DataLoader::Modes::Profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
 
 #ifdef DEVELOP
@@ -409,8 +406,12 @@ void Main::runCurrentProfile() {
 	}
 
 	// Reset elements.
-	for (auto& eD : DataLoader::allElements)
-		eD.second->setColor(currentProfile->getBackgroundColor());
+	for (auto& eD : DataLoader::allElements) {
+		if (eD.second->isTimed())
+			eD.second->checkTime();
+		else
+			eD.second->setColor(currentProfile->getBackgroundColor());
+	}
 
 	// Set always on groups from profile.
 	for (auto& gE : currentProfile->getAlwaysOnGroups())

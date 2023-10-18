@@ -18,9 +18,7 @@
 #define NANO_LED_LEDS       60
 #define NANO_LED_MAX_BOARDS 4
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+namespace LEDSpicer::Devices::Ultimarc {
 
 /**
  * LEDSpicer::Devices::Ultimarc::NanoLed
@@ -31,13 +29,13 @@ class NanoLed: public FF00SharedCode {
 
 public:
 
-	NanoLed(uint8_t boardId, umap<string, string>& options) :
+	NanoLed(umap<string, string>& options) :
 	FF00SharedCode(
 		NANO_LED_WVALUE,
 		0, // to be defined.
 		NANO_LED_LEDS,
 		NANO_LED_MAX_BOARDS,
-		boardId,
+		options,
 		NANO_LED_NAME
 	) {}
 
@@ -49,8 +47,8 @@ public:
 
 };
 
-} /* namespace Ultimarc */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
+
+deviceFactory(LEDSpicer::Devices::Ultimarc::NanoLed)
 
 #endif /* NANOLED_HPP_ */

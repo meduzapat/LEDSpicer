@@ -25,18 +25,25 @@
 using namespace LEDSpicer::Restrictors;
 
 void Restrictor::initialize() {
-	LogDebug("Initializing Restrictor " + getName());
-	connect();
-	claimInterface();
+
+	if (dumpMode)
+		return;
+
+	LogDebug("Initializing Restrictor " + getFullName());
+	openHardware();
 }
 
 void Restrictor::terminate() {
-	LogDebug("Disconnect " + getName());
-	disconnect();
+
+	if (dumpMode)
+		return;
+
+	LogDebug("Disconnect " + getFullName());
+	closeHardware();
 }
 
 uint8_t Restrictor::getMaxIds() const {
-	return 1;
+	return RESTRICTOR_SINGLE_ID;
 }
 
 void Restrictor::rotate(Ways ways) {
@@ -101,32 +108,3 @@ string Restrictor::ways2str(Ways ways) {
 bool Restrictor::isRotary(const Ways& ways) {
 	return (ways == Ways::rotary8 or ways == Ways::rotary12);
 }
-
-Restrictor::Ways Restrictor::getWay(const umap<string, Ways>& playersData, bool rotary) const {
-	Ways way = Ways::invalid;
-	for (auto& p : players)
-		if (playersData.count(p.first) and rotary == isRotary(playersData.at(p.first))) {
-			way = playersData.at(p.first);
-			break;
-		}
-	return way;
-}
-
-void Restrictor::disconnect() {
-
-#ifdef DRY_RUN
-	LogDebug("No disconnect - DRY RUN");
-#endif
-
-	if (not handle)
-		return;
-
-	libusb_release_interface(handle, interface);
-
-#ifdef DEVELOP
-	LogDebug("Closing interface: " + to_string(interface));
-#endif
-	libusb_close(handle);
-	handle = nullptr;
-}
-

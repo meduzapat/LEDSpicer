@@ -20,38 +20,36 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Restrictor.hpp"
-#include "Brands.hpp"
+#include "RestrictorUSB.hpp"
 
 #ifndef RESTRICTORS_SERVOSTIK_HPP_
 #define RESTRICTORS_SERVOSTIK_HPP_ 1
 
 #define SERVOSTIK_NAME       "ServoStik"
+#define SERVOSTIK_FULLNAME   "Ultimarc ServoStik"
 #define SERVOSTIK_PRODUCT    0x1700
 #define SERVOSTIK_INTERFACE  0
 #define SERVOSTIK_WVALUE     0x0200
 #define SERVOSTIK_MAX_BOARDS 4
 
-namespace LEDSpicer {
-namespace Restrictors {
+namespace LEDSpicer::Restrictors {
 
 /**
  * LEDSpicer::Restrictor::ServoStick
  */
-class ServoStik : public Restrictor {
+class ServoStik : public RestrictorUSB {
 
 public:
 
 	ServoStik(umap<string, string>& options, umap<string, uint8_t>& playerData) :
-		Restrictor(
-			options,
-			playerData,
-			SERVOSTIK_WVALUE,
-			SERVOSTIK_INTERFACE,
-			Utility::parseNumber(options["boardId"], "Invalid Board ID"),
-			SERVOSTIK_MAX_BOARDS
-		) {}
-
+	RestrictorUSB(
+		playerData,
+		SERVOSTIK_WVALUE,
+		SERVOSTIK_INTERFACE,
+		Utility::parseNumber(options["boardId"], "Invalid Board ID"),
+		SERVOSTIK_MAX_BOARDS,
+		SERVOSTIK_FULLNAME
+	) {}
 
 	virtual ~ServoStik() = default;
 
@@ -61,10 +59,8 @@ public:
 
 	virtual uint16_t getProduct() const;
 
-	virtual string getName() const;
 };
 
-} /* namespace Restrictors */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* RESTRICTORS_SERVOSTIK_HPP_ */

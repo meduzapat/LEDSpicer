@@ -26,25 +26,34 @@
 using namespace LEDSpicer::Devices;
 
 Device::Device(
-	uint8_t  elements,
+	uint8_t  pins,
 	const string& name
-) : name(name) {
-	LEDs.resize(elements);
-	oldLEDs.resize(elements, 1);
+) : Hardware(name) {
+	LEDs.resize(pins);
+	// So is different.
+	oldLEDs.resize(pins, 1);
 	LEDs.shrink_to_fit();
 	oldLEDs.shrink_to_fit();
 }
 
 void Device::initialize() {
-	LogDebug("Initializing Device " + name);
-	openDevice();
+
+	if (dumpMode)
+		return;
+
+	LogDebug("Initializing Device " + getFullName());
+	openHardware();
 	resetLeds();
 }
 
 void Device::terminate() {
-	LogDebug("Disconnect Device " + name);
+
+	if (dumpMode)
+		return;
+
+	LogDebug("Disconnect Device " + getFullName());
 	resetLeds();
-	closeDevice();
+	closeHardware();
 }
 
 Device* Device::setLed(uint8_t led, uint8_t intensity) {
@@ -68,9 +77,9 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 	return &LEDs.at(ledPos);
 }
 
-void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor) {
+void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor, uint timeOn) {
 	validateLed(led);
-	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor));
+	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor, timeOn));
 }
 
 void Device::registerElement(
@@ -88,6 +97,11 @@ void Device::registerElement(
 
 Element* Device::getElement(const string& name) {
 	return &elementsByName.at(name);
+}
+
+void Device::resetLeds() {
+	setLeds(0);
+	transfer();
 }
 
 void Device::validateLed(uint8_t led) const {
@@ -119,3 +133,4 @@ void Device::packData() {
 umap<string, Element>* Device::getElements() {
 	return &elementsByName;
 }
+

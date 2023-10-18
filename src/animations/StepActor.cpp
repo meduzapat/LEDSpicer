@@ -107,7 +107,7 @@ void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions
 		percent = 100 - percent;
 
 #ifdef DEVELOP
-	cout << "Element " << static_cast<uint>(index) << " faded " << percent << "%" << endl;
+	cout << "Element " << static_cast<uint>(index) << " faded " << percent << "%";
 #endif
 
 	changeElementColor(index, color.fade(percent), filter);

@@ -30,13 +30,15 @@ using std::vector;
 #include "utility/Color.hpp"
 #include "utility/Error.hpp"
 
+#include <chrono>
+using std::chrono::system_clock;
+
 #ifndef ELEMENT_HPP_
 #define ELEMENT_HPP_ 1
 
 #define SINGLE_PIN 0
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 /**
  * Helper base class to unify elements and groups.
@@ -72,7 +74,7 @@ public:
 	 * @param pin
 	 * @param defaultColor
 	 */
-	Element(const string& name, uint8_t* pin, const Color& defaultColor);
+	Element(const string& name, uint8_t* pin, const Color& defaultColor, uint timeOn = 0);
 
 	/**
 	 * Creates a new RGB Element.
@@ -198,6 +200,21 @@ public:
 	 */
 	const Color& getDefaultColor();
 
+	/**
+	 * @return true if this element turns itself off after several ms.
+	 */
+	bool isTimed();
+
+	/**
+	 * check if the time is over and turn the element off.
+	 */
+	void checkTime();
+
+	/**
+	 * Draws information about this element.
+	 */
+	void draw();
+
 protected:
 
 	/// keeps the element name.
@@ -208,8 +225,13 @@ protected:
 
 	/// Color used for the craft profile elements.
 	const Color& defaultColor;
+
+	/// If bigger than zero, the pin will go OFF after that time (in ms)
+	uint16_t timeOn = 0;
+
+	system_clock::time_point clockTime;
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* ELEMENT_HPP_ */

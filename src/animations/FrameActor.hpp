@@ -26,8 +26,7 @@
 #ifndef FRAMEACTOR_HPP_
 #define FRAMEACTOR_HPP_ 1
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::FrameActor
@@ -68,6 +67,22 @@ public:
 
 	virtual bool isRunning();
 
+	virtual bool acceptCycles() {
+		return true;
+	}
+
+	/**
+	 * Change the start cycles.
+	 * @param cycles
+	 */
+	virtual void setStartCycles(uint8_t cycles);
+
+	/**
+	 * Change the end cycles.
+	 * @param cycles
+	 */
+	virtual void setEndCycles(uint8_t seconds);
+
 protected:
 
 	uint8_t
@@ -89,6 +104,6 @@ protected:
 
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* FRAMEACTOR_HPP_ */

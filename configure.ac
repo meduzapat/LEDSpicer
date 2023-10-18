@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.5.2],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.5.7],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
-AC_COPYRIGHT([Copyright © 2018 - 2020 Patricio A. Rossi])
+AC_COPYRIGHT([Copyright © 2018 - 2023 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -21,7 +21,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
-AC_LIBTOOL_DLOPEN
+
 LT_INIT([disable-static dlopen])
 
 m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/pkgconfig))
@@ -29,6 +29,7 @@ m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/
 AC_SUBST([LIB_VERSION], [1:1:0])
 DATA_VERSION=["1.0"]
 AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
+AC_DEFINE([COPYRIGHT], ["Copyright © 2018 - 2023 Patricio A. Rossi (MeduZa)"], [Copyright message])
 
 dnl Enable MiSTer only code.
 AC_ARG_ENABLE(mister,
@@ -58,6 +59,19 @@ else
 AC_DEFINE([MiSTer],[1],[Enables MiSTer code])
 fi
 AM_CONDITIONAL([PULSEAUDIO],[test x$pulseaudio = xyes])
+
+dnl Enable alsaaudio plugin.
+AC_ARG_ENABLE(alsaaudio,
+	AS_HELP_STRING([--enable-alsaaudio],
+	[Enables the alsaaudio plugin @<:@default=yes@:>@]),
+	[case "${enableval}" in
+		yes) alsaaudio=yes ;;
+		no)  alsaaudio=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-alsaaudio]) ;;
+	esac],
+	[alsaaudio=yes])
+
+AM_CONDITIONAL([ALSAAUDIO],[test x$alsaaudio = xyes])
 
 dnl ******************
 dnl * Output plugins *
@@ -147,6 +161,18 @@ AC_ARG_ENABLE(raspberrypi,
 	[raspberrypi=no])
 AM_CONDITIONAL([RASPBERRYPI],[test x$raspberrypi = xyes])
 
+dnl Enable ADALIGHT plugin.
+AC_ARG_ENABLE(adalight,
+	AS_HELP_STRING([--enable-adalight],
+	[Enables the output plugin adalight @<:@default=no@:>@]),
+	[case "${enableval}" in
+		yes) adalight=yes ;;
+		no)  adalight=no ;;
+		*) AC_MSG_ERROR([bad value ${enableval} for --enable-adalight]) ;;
+	esac],
+	[adalight=no])
+AM_CONDITIONAL([ADALIGHT],[test x$adalight = xyes])
+
 dnl Enable develop mode
 AC_ARG_ENABLE(develop,
 	AS_HELP_STRING([--enable-develop],
@@ -176,6 +202,7 @@ PKG_CHECK_MODULES([PTHREADSTUBS], pthread-stubs,
 	[PTHREADSTUBS_LIBS="-lpthread"],
 	AC_MSG_ERROR([pthread development library not found.])
 )
+
 if test x$pulseaudio = xyes ; then
 	AC_MSG_NOTICE([User $USER will be used to allow pulseaudio to work, change it if needed in service file])
 	PKG_CHECK_MODULES([LIBPULSE], [libpulse >= 0.9.~],
@@ -184,6 +211,14 @@ if test x$pulseaudio = xyes ; then
 		AC_SUBST(USERNAME)
 		AC_SUBST([PULSEAUDIO]),
 		AC_MSG_ERROR([libpulse development library not found.])
+	)
+fi
+
+if test x$alsaaudio = xyes ; then
+	PKG_CHECK_MODULES([LIBALSA], [alsa >= 0.2],
+		echo -e "\talsa ver `pkg-config --short-errors --modversion alsa` found"
+		AC_SUBST([ALSAAUDIO]),
+		AC_MSG_ERROR([libalsa development library not found.])
 	)
 fi
 
@@ -230,12 +265,16 @@ AC_CHECK_LIB([dl], [dlopen],
 )
 AC_SUBST([LINKER_LIBS])
 
-ACTORS_DIR=["${libdir}/${PACKAGE_TARNAME}/actors"]
+ACTORS_DIR="${libdir}/${PACKAGE_TARNAME}/actors"
 AC_SUBST([ACTORS_DIR])
-DEVICES_DIR=["${libdir}/${PACKAGE_TARNAME}/devices"]
+AS_AC_EXPAND(LSAD, $ACTORS_DIR)
+DEVICES_DIR="${libdir}/${PACKAGE_TARNAME}/devices"
 AC_SUBST([DEVICES_DIR])
-INPUTS_DIR=["${libdir}/${PACKAGE_TARNAME}/inputs"]
+AS_AC_EXPAND(LSDD, $DEVICES_DIR)
+INPUTS_DIR="${libdir}/${PACKAGE_TARNAME}/inputs"
 AC_SUBST([INPUTS_DIR])
+AS_AC_EXPAND(LSID, $INPUTS_DIR)
+AS_AC_EXPAND(LSDDD, $datadir)
 
 dnl *************
 dnl * Makefiles *
@@ -249,7 +288,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 dnl Dump the build configuration for the developer
-echo -e "\n--------- build environment -----------
+AC_MSG_RESULT([\n--------- build environment -----------
 Program      : $PACKAGE_NAME
 Version      : $PACKAGE_VERSION
 WebSite      : $PACKAGE_URL
@@ -262,11 +301,12 @@ Linker       : $LD $LDFLAGS $LIBS
 Includes     :$LIBUSB_CFLAGS $TINYXML2_CFLAGS $PTHREADSTUBS_CFLAGS $LINKER_CFLAGS
 Libraries    :$LIBUSB_LIBS $TINYXML2_LIBS $PTHREADSTUBS_LIBS $LINKER_LIBS
 Libpulse     : $pulseaudio: $LIBPULSE_CFLAGS $LIBPULSE_LIBS
+ALSA         : $alsaaudio: $LIBALSA_CFLAGS $LIBALSA_LIBS
 Prefix       : $prefix
-Devices dir  : $DEVICES_DIR
-Actors dir   : $ACTORS_DIR
-Inputs dir   : $INPUTS_DIR
-Data dir     : $datadir
+Devices dir  : $LSDD
+Actors dir   : $LSAD
+Inputs dir   : $LSID
+Data dir     : $LSDDD
 Config dir   : $sysconfdir
 Develop mode : $DEVELOP_MODE
 MiSTer code  : $mister
@@ -277,4 +317,6 @@ PacLed64     : $pacled64
 Ultimate IO  : $ultimateio
 LedWiz 32    : $ledwiz32
 Howler       : $howler
-Raspberry Pi : $raspberrypi"
+Raspberry Pi : $raspberrypi
+Adalight     : $adalight
+])

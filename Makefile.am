@@ -27,24 +27,32 @@ libledspicer1_la_SOURCES =    \
 	src/utility/Log.cpp       \
 	src/utility/Error.cpp     \
 	src/utility/Utility.cpp   \
+	src/utility/Hardware.cpp  \
+	src/utility/Serial.cpp    \
 	src/utility/USB.cpp       \
 	src/utility/XMLHelper.cpp \
 	src/utility/Speed.cpp     \
 	src/utility/Direction.cpp \
 	src/utility/Color.cpp     \
 	src/utility/Colors.cpp    \
+	src/utility/Colorful.cpp  \
 	src/utility/Socks.cpp     \
 	src/utility/Time.cpp      \
-	src/restrictors/Restrictor.cpp \
-	src/devices/Element.cpp   \
-	src/devices/Group.cpp     \
-	src/devices/Profile.cpp   \
-	src/devices/Device.cpp    \
-	src/devices/DeviceUSB.cpp \
+	src/utility/Monochromatic.cpp \
+	src/restrictors/Restrictor.cpp       \
+	src/restrictors/RestrictorUSB.cpp    \
+	src/restrictors/RestrictorSerial.cpp \
+	src/devices/Element.cpp      \
+	src/devices/Group.cpp        \
+	src/devices/Profile.cpp      \
+	src/devices/Device.cpp       \
+	src/devices/DeviceSerial.cpp \
+	src/devices/DeviceUSB.cpp    \
 	src/animations/Actor.cpp          \
 	src/animations/FrameActor.cpp     \
 	src/animations/DirectionActor.cpp \
 	src/animations/StepActor.cpp      \
+	src/animations/AudioActor.cpp     \
 	src/inputs/Input.cpp  \
 	src/inputs/Reader.cpp \
 	src/Message.cpp \
@@ -63,33 +71,47 @@ pkginclude_HEADERS = \
 	src/Messages.hpp
 
 utilityheaderdir=$(pkgincludedir)/utility
-utilityheader_HEADERS =       \
-	src/utility/Log.hpp       \
-	src/utility/Error.hpp     \
-	src/utility/USB.hpp       \
-	src/utility/Utility.hpp   \
-	src/utility/Socks.hpp     \
-	src/utility/Time.hpp      \
-	src/utility/XMLHelper.hpp \
-	src/utility/Speed.hpp     \
-	src/utility/Direction.hpp \
-	src/utility/Color.hpp     \
-	src/utility/Colors.hpp
+utilityheader_HEADERS =           \
+	src/utility/Log.hpp           \
+	src/utility/Error.hpp         \
+	src/utility/Hardware.hpp      \
+	src/utility/Connection.hpp    \
+	src/utility/Serial.hpp        \
+	src/utility/USB.hpp           \
+	src/utility/Utility.hpp       \
+	src/utility/Socks.hpp         \
+	src/utility/Time.hpp          \
+	src/utility/Monochromatic.hpp \
+	src/utility/XMLHelper.hpp     \
+	src/utility/Speed.hpp         \
+	src/utility/Direction.hpp     \
+	src/utility/Color.hpp         \
+	src/utility/Colors.hpp        \
+	src/utility/Colorful.hpp
 
 restrictorssheaderdir=$(pkgincludedir)/restrictors
-restrictorssheader_HEADERS =    \
-	src/restrictors/Restrictor.hpp
+restrictorssheader_HEADERS =         \
+	src/restrictors/ServoStik.hpp    \
+	src/restrictors/UltraStik360.hpp \
+	src/restrictors/GPWiz40RotoX.hpp \
+	src/restrictors/GPWiz49.hpp      \
+	src/restrictors/TOS428.hpp       \
+	src/restrictors/Restrictor.hpp   \
+	src/restrictors/RestrictorUSB.hpp    \
+	src/restrictors/RestrictorSerial.hpp
 
 devicesheaderdir=$(pkgincludedir)/devices
-devicesheader_HEADERS =       \
-	src/devices/Element.hpp   \
-	src/devices/Group.hpp     \
-	src/devices/Device.hpp    \
-	src/devices/DeviceUSB.hpp \
+devicesheader_HEADERS =          \
+	src/devices/Element.hpp      \
+	src/devices/Group.hpp        \
+	src/devices/Device.hpp       \
+	src/devices/DeviceSerial.hpp \
+	src/devices/DeviceUSB.hpp    \
 	src/devices/Profile.hpp
 
 animationsheaderdir=$(pkgincludedir)/animations
 animationsheader_HEADERS =            \
+	src/animations/AudioActor.hpp     \
 	src/animations/Actor.hpp          \
 	src/animations/FrameActor.hpp     \
 	src/animations/DirectionActor.hpp \
@@ -169,8 +191,9 @@ emitter_LDADD = \
 rotator_SOURCES =                    \
 	src/restrictors/ServoStik.cpp    \
 	src/restrictors/UltraStik360.cpp \
-    src/restrictors/GPWiz49.cpp      \
+	src/restrictors/GPWiz49.cpp      \
 	src/restrictors/GPWiz40RotoX.cpp \
+	src/restrictors/TOS428.cpp       \
 	src/Rotator.cpp
 
 rotator_CPPFLAGS =     \
@@ -314,6 +337,33 @@ PulseAudio_la_LDFLAGS = \
 else
 EXTRA_DIST += \
 	src/animations/PulseAudio.cpp
+endif
+
+#############
+# AlsaAudio #
+#############
+
+if ALSAAUDIO
+actors_LTLIBRARIES += \
+	AlsaAudio.la
+
+AlsaAudio_la_SOURCES = \
+	src/animations/AlsaAudio.cpp
+
+AlsaAudio_la_LIBADD = \
+	libledspicer1.la   \
+	$(LIBALSA_LIBS)
+
+AlsaAudio_la_CPPFLAGS = \
+	$(AM_CPPFLAGS)       \
+	$(LIBALSA_CFLAGS)
+
+AlsaAudio_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+else
+EXTRA_DIST += \
+	src/animations/AlsaAudio.cpp
 endif
 
 ##############
@@ -514,6 +564,32 @@ endif
 devicesdir = \
 	$(DEVICES_DIR)
 
+###############
+#   ADALIGHT  #
+###############
+if ADALIGHT
+devices_LTLIBRARIES += \
+	Adalight.la
+
+Adalight_la_SOURCES = \
+	src/devices/Adalight/Adalight.cpp
+
+Adalight_la_LIBADD = \
+	libledspicer1.la \
+	$(ADALIGHT_LIBS)
+
+Adalight_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+Adalight_la_CPPFLAGS = \
+	$(devices_CPPFLAGS)
+
+else
+EXTRA_DIST += \
+	src/devices/Adalight/Adalight.cpp
+endif
+
+
 ##########
 # inputs #
 ##########
@@ -627,7 +703,7 @@ animations_data_DATA = \
 profiles_datadir=$(pkgdatadir)/profiles
 profiles_data_DATA =         \
 	data/profiles/readme.txt
-	
+
 inputs_datadir=$(pkgdatadir)/inputs
 inputs_data_DATA = \
 	data/inputs/readme.txt
@@ -667,10 +743,6 @@ EXTRA_DIST +=                       \
 	src/devices/DeviceHandler.hpp   \
 	src/inputs/InputHandler.hpp     \
 	src/DataLoader.hpp              \
-	src/restrictors/ServoStik.hpp    \
-	src/restrictors/UltraStik360.hpp \
-	src/restrictors/GPWiz40RotoX.hpp \
-	src/restrictors/GPWiz49.hpp      \
 	src/devices/GroovyGameGear/GroovyGameGear.hpp \
 	src/devices/GroovyGameGear/LedWiz32.hpp \
 	src/devices/Ultimarc/FF00SharedCode.hpp \
@@ -683,12 +755,15 @@ EXTRA_DIST +=                       \
 	src/devices/WolfWareTech/Howler.hpp         \
 	src/devices/WolfWareTech/WolfWareTech.hpp   \
 	src/devices/RaspberryPiGPIO/RaspberryPi.hpp \
+	src/devices/Adalight/Adalight.hpp \
 	src/animations/Gradient.hpp   \
 	src/animations/Pulse.hpp      \
 	src/animations/Serpentine.hpp \
 	src/animations/Random.hpp     \
 	src/animations/Filler.hpp     \
+	src/animations/AudioActor.hpp \
 	src/animations/PulseAudio.hpp \
+	src/animations/AlsaAudio.hpp  \
 	src/animations/FileReader.hpp \
 	src/inputs/Mame.hpp           \
 	src/inputs/Reader.hpp         \
@@ -726,4 +801,3 @@ EXTRA_DIST +=                       \
 	AUTHORS             \
 	ChangeLog           \
 	NEWS
-

@@ -24,6 +24,10 @@
 
 using namespace LEDSpicer;
 
+Colors::Colors(const string& colors) {
+	extractColors(colors);
+}
+
 void Colors::extractColors(string colors) {
 
 	if (colors.empty()) {
@@ -41,4 +45,14 @@ void Colors::extractColors(string colors) {
 
 	if (this->colors.size() > UINT8_MAX)
 		throw Error("Too many colors (" + to_string(this->colors.size()) + "), the maximum is " + to_string(UINT8_MAX) + " .");
+}
+
+void Colors::drawColors() {
+
+	uint8_t count = 0;
+	for (const Color* c : colors) {
+		c->drawColor();
+		if (++count < colors.size())
+			cout << ", ";
+	}
 }

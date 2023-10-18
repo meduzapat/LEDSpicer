@@ -21,20 +21,20 @@
  */
 
 #include "DirectionActor.hpp"
+#include "utility/Colorful.hpp"
 #include <cmath>
 
 #ifndef PULSE_HPP_
 #define PULSE_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_PULSE {"speed", "direction", "color"}
+#define REQUIRED_PARAM_ACTOR_PULSE {"speed", "direction"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Pulse
  */
-class Pulse : public DirectionActor, public Color {
+class Pulse : public DirectionActor, public Colorful {
 
 public:
 
@@ -42,7 +42,7 @@ public:
 
 	Pulse(umap<string, string>& parameters, Group* const layout):
 		DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
-		Color(parameters["color"]),
+		Colorful(parameters.count("color") ? parameters["color"] : parameters.count("colors") ? parameters["colors"] : ""),
 		mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
 	{}
 
@@ -64,8 +64,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Pulse)
 

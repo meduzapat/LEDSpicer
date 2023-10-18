@@ -21,9 +21,7 @@
  */
 
 #include "USB.hpp"
-#ifdef SHOW_OUTPUT
-#include <iomanip>
-#endif
+
 using namespace LEDSpicer;
 
 libusb_context* USB::usbSession = nullptr;
@@ -44,7 +42,7 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 		if (libusb_init(&usbSession) != 0)
 			throw new Error("Unable to open USB session");
 	}
-#ifdef DEVELOP
+#ifdef SHOW_USB_OUTPUT
 	/*
 		LIBUSB_LOG_LEVEL_NONE
 		LIBUSB_LOG_LEVEL_ERROR
@@ -114,8 +112,9 @@ void USB::disconnect() {
 	LogDebug("Reseting interface: " + to_string(interface));
 #endif
 	auto r = libusb_reset_device(handle);
-	if (r)
+	if (r) {
 		LogWarning(string(libusb_error_name(r)));
+	}
 #ifdef DEVELOP
 	LogDebug("Closing interface: " + to_string(interface));
 #endif
@@ -166,17 +165,17 @@ int USB::send(vector<uint8_t>& data) const {
 		interface,
 		data.data(),
 		data.size(),
-		TIMEOUT
+		USB_TIMEOUT
 	);
 }
 
-void USB::transferToUSB(vector<uint8_t>& data) const {
+void USB::transferToConnection(vector<uint8_t>& data) const {
 
 #ifdef SHOW_OUTPUT
 	cout << "Data sent:" << endl;
 	uint8_t count = MAX_DUMP_COLUMNS;
 	for (auto b : data) {
-		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)b << ' ';
+		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << static_cast<int>(b) << ' ';
 		if (not --count) {
 			count = MAX_DUMP_COLUMNS;
 			cout << endl;
@@ -191,10 +190,15 @@ void USB::transferToUSB(vector<uint8_t>& data) const {
 		return;
 
 	LogDebug(
-		"wValue: "  + Utility::hex2str(wValue) +
+		"Error sending to USB: wValue: "  + Utility::hex2str(wValue) +
 		" wIndex: "  + Utility::hex2str(interface) +
 		" wLength: " + to_string(data.size())
 	);
 	throw Error(string(libusb_error_name(responseCode)));
 #endif
+}
+
+vector<uint8_t> USB::transferFromConnection(uint size) const {
+	std::vector<uint8_t> response(size);
+	return response;
 }

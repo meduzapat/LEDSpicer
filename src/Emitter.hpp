@@ -26,7 +26,7 @@ using std::endl;
 
 #include <cstdlib>
 #include <cstring>
-
+#include <array>
 #include <memory>
 
 #include "Messages.hpp"

@@ -32,8 +32,7 @@ using LEDSpicer::Devices::Group;
 #ifndef INPUT_HPP_
 #define INPUT_HPP_ 1
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Input
@@ -99,7 +98,6 @@ protected:
 	extern "C" LEDSpicer::Inputs::Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
 	extern "C" void destroyInput(LEDSpicer::Inputs::Input* instance) {delete instance;}
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* INPUT_HPP_ */

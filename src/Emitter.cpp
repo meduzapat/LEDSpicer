@@ -37,9 +37,8 @@ int main(int argc, char **argv) {
 
 	bool
 		craftProfile = false,
-		rotate       = false,
+		rotate       = true,
 		useColors    = false;
-
 
 	for (int i = 1; i < argc; i++) {
 
@@ -73,6 +72,7 @@ int main(int argc, char **argv) {
 				"                              Removes all group's background color.\n" <<
 				"options:\n"
 				"-c <conf> or --config <conf> Use an alternative configuration file\n"
+				"-n or --no-rotate            Avoid trigger rotators(only used when LoadProfileByEmulator)\n"
 				"-v or --version              Display version information\n"
 				"-h or --help                 Display this help screen.\n"
 				"If -c or --config is not provided emitter will use " CONFIG_FILE
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 			cout
 				<< endl <<
 				"Emitter is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " Copyright © 2018 - 2020 - Patricio A. Rossi (MeduZa)\n\n"
+				PACKAGE_STRING " " COPYRIGHT "\n\n"
 				"For more information visit <" PACKAGE_URL ">\n\n"
 				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
 				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
@@ -97,6 +97,12 @@ int main(int argc, char **argv) {
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
 			configFile = argv[++i];
+			continue;
+		}
+
+		// No Rotate.
+		if (commandline == "-n" or commandline == "--no-rotate") {
+			rotate = false;
 			continue;
 		}
 
@@ -149,9 +155,10 @@ int main(int argc, char **argv) {
 			throw Error("Missing port attribute");
 
 		// Check restrictors.
-		tinyxml2::XMLElement* xmlElement = config.getRoot()->FirstChildElement("restrictors");
-		if (xmlElement and xmlElement->FirstChildElement("restrictor"))
-			rotate = true;
+		if (rotate) {
+			tinyxml2::XMLElement* xmlElement = config.getRoot()->FirstChildElement("restrictors");
+			rotate = (xmlElement and xmlElement->FirstChildElement("restrictor"));
+		}
 
 		// Check request.
 		vector<string> data = msg.getData();
@@ -161,7 +168,8 @@ int main(int argc, char **argv) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
 			}
-
+			// Check for path and extension and clean.
+			data[0] = Utility::explode(Utility::explode(data[0], '/').back(), '.')[0];
 			msg.reset();
 			msg.setType(Message::Types::LoadProfile);
 			msg.addData(string(data[1]).append("/").append(data[0]));
@@ -180,23 +188,14 @@ int main(int argc, char **argv) {
 					try {
 						if (ds == DATA_SOURCE_MAME) {
 							gd = parseMame(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_MAME);
 							break;
 						}
 						if (ds == DATA_SOURCE_FILE) {
 							gd = parseMameDataFile(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_FILE);
 							break;
 						}
 						if (ds == DATA_SOURCE_CONTROLSINI) {
 							gd = parseControlsIni(data[0]);
-							if (gd.players == "0")
-								continue;
-							LogDebug("got " + gd.players + " players data from " DATA_SOURCE_CONTROLSINI);
 							break;
 						}
 					}
@@ -204,6 +203,9 @@ int main(int argc, char **argv) {
 						LogDebug("Error: " + e.getMessage());
 						continue;
 					}
+					if (gd.players == "0")
+						continue;
+					LogDebug("got " + gd.players + " players data from " + ds);
 				}
 				if (gd.players == "0") {
 					LogError("No player data detected");
@@ -222,10 +224,12 @@ int main(int argc, char **argv) {
 				}
 
 				// Rotate restrictors.
-				if (rotate)
+				if (rotate) {
 					gd.rotate();
-				else
+				}
+				else {
 					LogDebug("No restrictors found");
+				}
 			}
 			msg.addData(data[1]);
 		}

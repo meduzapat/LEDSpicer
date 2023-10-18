@@ -20,15 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Brands.hpp"
 #include "devices/DeviceUSB.hpp"
 
 #ifndef ULTIMARC_HPP_
 #define ULTIMARC_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+namespace LEDSpicer::Devices::Ultimarc {
 
 /**
  * Ultimarc family data and definitions.
@@ -49,6 +46,6 @@ protected:
 
 };
 
-}}}
+} /* namespace */
 
 #endif /* ULTIMARC_HPP_ */

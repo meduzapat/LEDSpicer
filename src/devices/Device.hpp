@@ -21,30 +21,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For ints.
-#include <cstdint>
-
+#include "utility/Hardware.hpp"
 #include "Group.hpp"
-#include "utility/Log.hpp"
 
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
+namespace LEDSpicer::Devices {
 
 /**
  * LEDSpicer::Devices::Device
  * Generic Device settings and functionality.
+ * TODO: For devices that send individual values per transmition, only send, used LEDs.
+ * check XXX_TRANSFER definitions, 0 all, 1 individual, 2 batches.
+ * Right now only raspberry pi uses this feature.
  */
-class Device {
+class Device : public Hardware {
 
 public:
 
-	Device(
-		uint8_t  elements,
-		const string& name
-	);
+	Device(uint8_t elements, const string& name);
 
 	virtual ~Device() = default;
 
@@ -57,6 +53,11 @@ public:
 	 * Terminates the device.
 	 */
 	void terminate();
+
+	/**
+	 * This method will be called every time a pack of data is ready for transfer.
+	 */
+	virtual void transfer() const = 0;
 
 	/**
 	 * Set a LED to an intensity
@@ -86,7 +87,7 @@ public:
 	 * @param led
 	 * @param defaultColor
 	 */
-	void registerElement(const string& name, uint8_t led, const Color& defaultColor);
+	void registerElement(const string& name, uint8_t led, const Color& defaultColor, uint timeOn);
 
 	/**
 	 * Register a new Element with three LEDs (RGB).
@@ -104,6 +105,11 @@ public:
 		const Color& defaultColor
 	);
 
+	/**
+	 * Returns a pointer to an element using the name.
+	 * @param name
+	 * @return
+	 */
 	Element* getElement(const string& name);
 
 	/**
@@ -119,17 +125,16 @@ public:
 	 */
 	uint8_t getNumberOfElements() const;
 
+	/**
+	 * Returns all elements mapped by name.
+	 * @return
+	 */
 	umap<string, Element>* getElements();
 
 	/**
 	 * Sets all LEDs off.
 	 */
-	virtual void resetLeds() = 0;
-
-	/**
-	 * @return the device name with all the information that identify it from others.
-	 */
-	virtual string getFullName() const = 0;
+	virtual void resetLeds();
 
 	/**
 	 * Populates the pins with the correct pin number used by elements and
@@ -146,12 +151,9 @@ public:
 	/**
 	 * Pack the data into the device.
 	 */
-	void packData();
+	virtual void packData();
 
 protected:
-
-	/// The device name.
-	string name;
 
 	/// Device LEDs (pins)
 	vector<uint8_t> LEDs;
@@ -162,28 +164,13 @@ protected:
 	/// Maps elements by name.
 	umap<string, Element> elementsByName;
 
-	/**
-	 * This method will be called to initialize a device.
-	 */
-	virtual void openDevice() = 0;
-
-	/**
-	 * This method will be called to terminate a device.
-	 */
-	virtual void closeDevice() = 0;
-
-	/**
-	 * This method will be called every time a transfer need to be done.
-	 */
-	virtual void transfer() const = 0;
-
 };
 
 // The functions to create and destroy devices.
 #define deviceFactory(plugin) \
-	extern "C" LEDSpicer::Devices::Device* createDevice(uint8_t boardId, umap<string, string>& options) { return new plugin(boardId, options); } \
+	extern "C" LEDSpicer::Devices::Device* createDevice(umap<string, string>& options) { return new plugin(options); } \
 	extern "C" void destroyDevice(LEDSpicer::Devices::Device* instance) { delete instance; }
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* DEVICE_HPP_ */

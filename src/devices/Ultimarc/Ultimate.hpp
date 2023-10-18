@@ -34,12 +34,11 @@
 #define IPAC_ULTIMATE_INTERFACE  2
 #define IPAC_ULTIMATE_LEDS       96
 #define IPAC_ULTIMAGE_MAX_BOARDS 4
+#define IPAC_ULTIMAGE_TRANSFER   0// All.
 
 #define ULTIMAGE_MSG(byte1, byte2) {0x03, 0, 0, byte1, byte2}
 
-namespace LEDSpicer {
-namespace Devices {
-namespace Ultimarc {
+namespace LEDSpicer::Devices::Ultimarc {
 
 /**
  * LEDSpicer::Devices::Ultimate
@@ -50,15 +49,15 @@ class Ultimate : public Ultimarc {
 public:
 
 	/**
-	 * @param boardId
+	 * @param options
 	 */
-	Ultimate(uint8_t boardId, umap<string, string>& options) :
+	Ultimate(umap<string, string>& options) :
 	Ultimarc(
 		IPAC_ULTIMATE_WVALUE,
 		0, // to be defined.
 		IPAC_ULTIMATE_LEDS,
 		IPAC_ULTIMAGE_MAX_BOARDS,
-		boardId,
+		options,
 		IPAC_ULTIMATE_NAME
 	) {}
 
@@ -78,7 +77,7 @@ protected:
 
 };
 
-}}} /* namespace LEDSpicer */
+} /* namespace */
 
 deviceFactory(LEDSpicer::Devices::Ultimarc::Ultimate)
 

@@ -6,13 +6,15 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 [![Donations are welcome](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
 
+**LEDSpicer Overview: Illuminate Your Project with Dynamic LEDs and Joystick Control**
 
-LEDSpicer is a linear LED controller daemon that will handle single color or RGB LEDs connected to different devices.
+LEDSpicer is a versatile linear LED controller daemon designed for managing single-color or RGB LEDs across various devices.
 
-It allows the execution of animations and profiles and can handle input from the user to interact with the LEDs, 
-profiles can be triggered based on different events, user input, network input, game name, etc.
+With LEDSpicer, you can effortlessly execute captivating animations and profiles, providing a dynamic and visually appealing experience. The daemon seamlessly integrates with user input, allowing interactive control over the LEDs. What sets LEDSpicer apart is its ability to trigger profiles based on diverse events, including user input, network interactions, or specific game names. It seamlessly integrates with MAME events, enabling precise control of LEDs based on in-game actions.
 
-Includes some utilities to make an arcade cabinet more attractive and cool!
+Moreover, LEDSpicer goes beyond mere illumination by offering support for joystick restrictors and rotators. Elevate your gaming experience with precision-controlled joysticks, creating a harmonious blend of visual and mechanical excellence.
+
+Enhance your project's visual aesthetics and user engagement with LEDSpicer – where LED control meets simplicity and creativity, extending its reach to the realm of joystick restrictors and rotators.
 
 >A program to flavor your Arcade project.
 
@@ -20,10 +22,8 @@ Includes some utilities to make an arcade cabinet more attractive and cool!
 
 You can get the program installed using the [PPA](https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer) (I'm working on getting LEDSpicer into the repositories).
 
-Or In the [project wiki](https://sourceforge.net/p/ledspicer/wiki/Home/) you will find 
+Or In the [project wiki](https://github.com/meduzapat/LEDSpicer/wiki/) you will find 
 all the information you need to compile and install the program yourself.
-
-[![Download LEDSpicer](https://sourceforge.net/sflogo.php?type=11&group_id=2963748)](https://sourceforge.net/p/ledspicer/)
 
 ## Comments are welcome.
 
@@ -42,7 +42,7 @@ for more videos visit the YT channel.
 
 ## License
 
-Copyright (C) 2018 - 2020 Patricio A. Rossi
+Copyright (C) 2018 - 2023 Patricio A. Rossi
 
 LEDSpicer is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the

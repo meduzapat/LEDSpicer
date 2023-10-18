@@ -25,8 +25,7 @@
 
 #include "Reader.hpp"
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Impulse
@@ -44,8 +43,7 @@ public:
 	virtual void process();
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 inputFactory(LEDSpicer::Inputs::Impulse)
 

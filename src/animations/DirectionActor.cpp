@@ -132,7 +132,7 @@ uint8_t DirectionActor::calculateNextOf(
 			// change of direction.
 			if (index == amount) {
 				currentDirection = Directions::Backward;
-				--index;
+//				--index;
 				break;
 			}
 			++index;
@@ -141,7 +141,7 @@ uint8_t DirectionActor::calculateNextOf(
 		// change of direction.
 		if (index == 0) {
 			currentDirection = Directions::Forward;
-			++index;
+//			++index;
 			break;
 		}
 		--index;

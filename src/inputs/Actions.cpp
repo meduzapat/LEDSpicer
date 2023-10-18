@@ -27,7 +27,8 @@ using namespace LEDSpicer::Inputs;
 Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 	Reader(parameters, inputMaps),
 	Speed(parameters.count("speed") ? parameters["speed"] : ""),
-	frames(static_cast<uint8_t>(speed) * 3)
+	frames(static_cast<uint8_t>(speed) * 3),
+	doBlink(parameters.count("blink") ? (parameters["blink"] == "true") : true)
 {
 	string linkedElements = parameters.count("linkedElements") ? parameters["linkedElements"] : "";
 	// process list
@@ -83,14 +84,14 @@ void Actions::process() {
 			continue;
 
 		string eventCodeStr = to_string(event.code);
-		if (!itemsMap.count(eventCodeStr))
+		if (not itemsMap.count(eventCodeStr))
 			continue;
 
 		if (controlledItems->count(eventCodeStr))
 			controlledItems->erase(eventCodeStr);
 
 		// Non Grouped elements.
-		if (!groupMapLookup.count(event.code)) {
+		if (not groupMapLookup.count(event.code)) {
 			if (blinkingItems.count(event.code)) {
 				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " stop blinking");
 				blinkingItems.erase(event.code);
@@ -146,6 +147,12 @@ void Actions::drawConfig() {
 }
 
 void Actions::blink() {
+	if (not doBlink) {
+		for (auto& e : blinkingItems)
+			if (not controlledItems->count(std::to_string(e.first)))
+				controlledItems->emplace(std::to_string(e.first), e.second);
+		return;
+	}
 	if (frames == cframe) {
 		cframe = 0;
 		for (auto& e : blinkingItems) {

@@ -24,8 +24,11 @@
 
 using namespace LEDSpicer::Devices;
 
-Element::Element(const string& name, uint8_t* pin, const Color& defaultColor) :
-	name(name), pins{pin}, defaultColor(defaultColor)
+Element::Element(const string& name, uint8_t* pin, const Color& defaultColor, uint timeOn) :
+	name(name),
+	pins{pin},
+	defaultColor(defaultColor),
+	timeOn(timeOn)
 {
 	pins.shrink_to_fit();
 }
@@ -56,13 +59,25 @@ void Element::setColor(const Color& color) {
 		*pins[Color::Channels::Green] = color.getG();
 		*pins[Color::Channels::Blue]  = color.getB();
 	}
+	else if (timeOn) {
+		if (color == Color::Off) {
+			*pins[SINGLE_PIN] = 0;
+		}
+		else if (not *pins[SINGLE_PIN]) {
+			*pins[SINGLE_PIN] = 255;
+			clockTime = std::chrono::system_clock::now() + std::chrono::milliseconds(timeOn);
+		}
+	}
 	else {
 		*pins[SINGLE_PIN] = color.getMonochrome();
 	}
 }
 
 void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
-	setColor(*getColor().set(color, filter, percent));
+	if (filter == Color::Filters::Normal)
+		setColor(color);
+	else
+		setColor(*getColor().set(color, filter, percent));
 }
 
 LEDSpicer::Color Element::getColor() {
@@ -110,4 +125,22 @@ string Element::getName() {
 
 const LEDSpicer::Color& Element::getDefaultColor() {
 	return defaultColor;
+}
+
+bool Element::isTimed() {
+	return timeOn != 0;
+}
+
+void Element::checkTime() {
+	if (*pins[SINGLE_PIN] and std::chrono::system_clock::now() > clockTime)
+		*pins[SINGLE_PIN] = 0;
+}
+
+void Element::draw() {
+	cout << std::left << std::setfill(' ') << std::setw(15) << name <<
+		" Pin" << (pins.size() == 1 ? " " : "s") <<  ": ";
+	for (auto pin : pins) {
+		cout << std::setw(2) << to_string(*pin) << " ";
+	}
+	cout << (timeOn ? "*Timed (" + to_string(timeOn) + "ms)" : "") <<endl;
 }

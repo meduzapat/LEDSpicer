@@ -26,7 +26,7 @@ using namespace LEDSpicer::Restrictors;
 
 void GPWiz49::rotate(const umap<string, Ways>& playersData) {
 
-	Ways way = getWay(playersData, false);
+	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)
 		return;
 
@@ -44,43 +44,43 @@ void GPWiz49::rotate(const umap<string, Ways>& playersData) {
 
 	switch (way) {
 	case Ways::w2:
-		LogDebug("Rotating " + getName() + " to 2 way horizontal.");
+		LogDebug("Rotating " + getFullName() + " to 2 way horizontal.");
 		data[1]= 6;
 		break;
 	case Ways::w2v:
-		LogDebug("Rotating " + getName() + " to 2 way vertical.");
+		LogDebug("Rotating " + getFullName() + " to 2 way vertical.");
 		data[1]= 7;
 		break;
 	case Ways::w4:
-		LogDebug("Rotating " + getName() + " to 4 ways.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways.");
 		data[1]= 4;
 		break;
 	case Ways::w4x:
-		LogDebug("Rotating " + getName() + " to 4 ways diagonal.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways diagonal.");
 		data[1]= 5;
 		break;
 	case Ways::w16:
-		LogDebug("Rotating " + getName() + " to 16 ways with large dead zone in center.");
+		LogDebug("Rotating " + getFullName() + " to 16 ways with large dead zone in center.");
 		data[1]= 8;
 		break;
 	case Ways::w49:
-		LogDebug("Rotating " + getName() + " to 49 ways - progressive");
+		LogDebug("Rotating " + getFullName() + " to 49 ways - progressive");
 		data[1]= 2;
 		break;
 	case Ways::analog:
 	case Ways::mouse:
-		LogDebug("Rotating " + getName() + " 49 ways Raw");
+		LogDebug("Rotating " + getFullName() + " 49 ways Raw");
 		data[1]= 1;
 		break;
 	default:
-		LogDebug("Rotating " + getName() + " to 8 ways.");
+		LogDebug("Rotating " + getFullName() + " to 8 ways.");
 		data[1] = 3;
 	}
 
 	if (williams)
 		data[1] += 10;
 
-	transferToUSB(data);
+	transferToConnection(data);
 }
 
 uint16_t GPWiz49::getVendor() const {
@@ -89,8 +89,4 @@ uint16_t GPWiz49::getVendor() const {
 
 uint16_t GPWiz49::getProduct() const {
 	return (GPWIZ49_PRODUCT + getId() - 1);
-}
-
-string GPWiz49::getName() const {
-	return string(GPWIZ49_NAME) + " " + to_string(getId());
 }

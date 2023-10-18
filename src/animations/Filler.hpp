@@ -21,19 +21,19 @@
  */
 
 #include "StepActor.hpp"
+#include "utility/Colorful.hpp"
 
 #ifndef FILLER_HPP_
 #define FILLER_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_FILLER {"speed", "direction", "mode", "color"}
+#define REQUIRED_PARAM_ACTOR_FILLER {"speed", "direction", "mode"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Fill
  */
-class Filler: public StepActor, public Color {
+class Filler: public StepActor, public Colorful {
 
 public:
 
@@ -94,8 +94,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Filler)
 

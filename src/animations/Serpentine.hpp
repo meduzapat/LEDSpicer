@@ -29,8 +29,7 @@
 
 #define REQUIRED_PARAM_ACTOR_SERPENTINE {"speed", "direction", "tailLength", "tailColor", "tailIntensity"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Serpentine
@@ -63,7 +62,7 @@ private:
 	void calculateTailPosition();
 };
 
-}} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Serpentine)
 

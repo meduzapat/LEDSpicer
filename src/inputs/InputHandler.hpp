@@ -26,8 +26,7 @@
 #ifndef INPUTSHANDLER_HPP_
 #define INPUTSHANDLER_HPP_ 1
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 using LEDSpicer::Devices::Items;
 
@@ -77,7 +76,6 @@ protected:
 
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* INPUTSHANDLER_HPP_ */

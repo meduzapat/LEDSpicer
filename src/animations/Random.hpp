@@ -28,8 +28,7 @@
 
 #define REQUIRED_PARAM_ACTOR_RANDOM {"speed", "colors"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::Random
@@ -64,8 +63,7 @@ private:
 	void generateNewColors();
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::Random)
 

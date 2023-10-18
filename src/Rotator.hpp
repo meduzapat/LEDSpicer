@@ -29,13 +29,14 @@ using std::endl;
 #include "restrictors/ServoStik.hpp"
 #include "restrictors/GPWiz49.hpp"
 #include "restrictors/GPWiz40RotoX.hpp"
+#include "restrictors/TOS428.hpp"
 #include "utility/XMLHelper.hpp"
 
 #ifndef ROTATOR_HPP_
 #define ROTATOR_HPP_ 1
 
-#define RESTRICTORS "restrictors"
 #define RESTRICTOR "restrictor"
+#define RESTRICTORS RESTRICTOR "s"
 #define PLAYER_MAP "map"
 
 namespace LEDSpicer {
@@ -45,6 +46,7 @@ using Restrictors::UltraStik360;
 using Restrictors::ServoStik;
 using Restrictors::GPWiz49;
 using Restrictors::GPWiz40RotoX;
+using Restrictors::TOS428;
 
 int main(int argc, char **argv);
 

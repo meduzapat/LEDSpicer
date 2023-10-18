@@ -26,7 +26,7 @@ using namespace LEDSpicer::Devices;
 
 DeviceHandler::DeviceHandler(const string& deviceName) :
 	Handler(DEVICES_DIR + deviceName + ".so"),
-	createFunction(reinterpret_cast<Device*(*)(uint8_t, umap<string, string>&)>(dlsym(handler, "createDevice"))),
+	createFunction(reinterpret_cast<Device*(*)(umap<string, string>&)>(dlsym(handler, "createDevice"))),
 	destroyFunction(reinterpret_cast<void(*)(Device*)>(dlsym(handler, "destroyDevice")))
 {
 	if (char *errstr = dlerror())
@@ -45,8 +45,8 @@ DeviceHandler::~DeviceHandler() {
 	}
 }
 
-Device* DeviceHandler::createDevice(uint8_t boardId, umap<string, string>& options) {
-	Device* device = createFunction(boardId, options);
+Device* DeviceHandler::createDevice(umap<string, string>& options) {
+	Device* device = createFunction(options);
 	devices.push_back(device);
 	return device;
 }

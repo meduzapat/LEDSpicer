@@ -14,7 +14,10 @@ install_prerequisites:
 	  --enable-pacdrive \
 	  --enable-pacled64 \
 	  --enable-ultimateio \
-	  --enable-ledwiz32
+	  --enable-ledwiz32 \
+	  --enable-howler \
+	  --disable-alsaaudio \
+	  --enable-adalight
 	make
 	make DESTDIR=/tmp/project install
 	apt-get install -y ruby ruby-dev
@@ -102,3 +105,27 @@ package_pacled64:
 	    --depends ledspicer \
 	    --description "This package contains the output plugin for the Ultimarc PacLed 64, a 64 leds controller." \
 	    ./usr/lib/ledspicer/devices/UltimarcPacLed64.so
+
+package_howler: SHELL:=/bin/bash
+package_howler:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-howler \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the howler, a 96 leds controller." \
+	    ./usr/lib/ledspicer/devices/Howler.so
+	    
+package_adalight: SHELL:=/bin/bash
+package_adalight:
+	@cd /tmp/project; \
+	  fpm -s dir \
+	    -t deb \
+	    -n ledspicer-adalight \
+	    -v $(VERSION) \
+	    --iteration 1 \
+	    --depends ledspicer \
+	    --description "This package contains the output plugin for the adalight, a 30 leds controller." \
+	    ./usr/lib/ledspicer/devices/Adalight.so

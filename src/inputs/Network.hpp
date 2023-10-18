@@ -28,8 +28,7 @@
 
 #define DEFAULT_PORT "16162"
 
-namespace LEDSpicer {
-namespace Inputs {
+namespace LEDSpicer::Inputs {
 
 /**
  * LEDSpicer::Inputs::Network
@@ -54,8 +53,7 @@ protected:
 	static Socks sock;
 };
 
-} /* namespace Inputs */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 inputFactory(LEDSpicer::Inputs::Network)
 

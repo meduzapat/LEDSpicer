@@ -21,14 +21,11 @@
  */
 
 #include "devices/DeviceUSB.hpp"
-#include "Brands.hpp"
 
 #ifndef GGG_HPP_
 #define GGG_HPP_ 1
 
-namespace LEDSpicer {
-namespace Devices {
-namespace GroovyGameGear {
+namespace LEDSpicer::Devices::GroovyGameGear {
 
 /**
  * LEDSpicer::Devices::GroovyGameGear
@@ -50,8 +47,6 @@ protected:
 
 };
 
-} /* namespace GroovyGameGear */
-} /* namespace Devices */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* GGG_HPP_ */

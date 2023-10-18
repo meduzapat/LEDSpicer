@@ -26,8 +26,7 @@
 #ifndef ACTORHANDLER_HPP_
 #define ACTORHANDLER_HPP_ 1
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Animations::ActorHandler
@@ -65,7 +64,6 @@ protected:
 	void(*destroyFunction)(Actor*) = nullptr;
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 #endif /* ACTORHANDLER_HPP_ */

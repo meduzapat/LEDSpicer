@@ -266,6 +266,12 @@ public:
 	 */
 	static void setRandomColors(vector<string> colors);
 
+	/// Pseudo color to represent On state.
+	static const Color On;
+
+	/// Pseudo color to represent Off state.
+	static const Color Off;
+
 protected:
 
 	/// Loaded colors.
@@ -276,12 +282,6 @@ protected:
 
 	/// List of color names.
 	static vector<string> names;
-
-	/// Pseudo color to represent On state.
-	static const Color On;
-
-	/// Pseudo color to represent Off state.
-	static const Color Off;
 
 	uint8_t
 		r = 0,

@@ -27,8 +27,7 @@
 
 #define REQUIRED_PARAM_ACTOR_FILEREADER {"speed", "direction", "filename", "format"}
 
-namespace LEDSpicer {
-namespace Animations {
+namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::FileReader
@@ -69,8 +68,7 @@ private:
 
 };
 
-} /* namespace Animations */
-} /* namespace LEDSpicer */
+} /* namespace */
 
 actorFactory(LEDSpicer::Animations::FileReader)
 

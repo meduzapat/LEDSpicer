@@ -26,7 +26,7 @@ using namespace LEDSpicer::Animations;
 
 Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
-	Color(parameters["color"]),
+	Colorful(parameters.count("color") ? parameters["color"] : parameters.count("colors") ? parameters["colors"] : ""),
 	mode(str2mode(parameters["mode"]))
 {
 	if (mode == Modes::Random) {
@@ -57,7 +57,9 @@ void Filler::generateNextRandom() {
 
 void Filler::calculateElements() {
 #ifdef DEVELOP
-	cout << "Filler: " << DrawDirection(cDirection) << (filling ? " Filling " : " Emptying ");
+	cout << "Filler: " << DrawDirection(cDirection) << (filling ? " Filling " : " Emptying ") << " ";
+	colors[currentColor]->drawColor();
+	cout << " ";
 #endif
 	switch (mode) {
 	// Normal
@@ -102,33 +104,41 @@ void Filler::calculateElements() {
 		if (mode == Modes::Random)
 			generateNextRandom();
 	}
+
+	if (not currentFrame and not currentStepFrame and filling)
+		advanceColor();
+
+#ifdef DEVELOP
+	cout << endl;
+#endif
 }
 
 void Filler::fillElementsLinear(const Data& values) {
+	const Color* color = colors[currentColor];
 	for (uint8_t c = values.begin; c <= values.end; ++c)
 		if ( c != currentFrame) {
-			changeElementColor(c, *this, filter);
+			changeElementColor(c, *color, filter);
 #ifdef DEVELOP
 			cout << static_cast<int>(c) << " ";
 #endif
 		}
 	if (speed != Speeds::VeryFast)
-		changeFrameElement(*this, values.dir);
+		changeFrameElement(*color, values.dir);
 }
 
 void Filler::fillElementsRandom() {
-
+	const Color* color = colors[currentColor];
 	for (uint8_t e = 0; e <= totalFrames; ++e)
 		if (previousFrameAffectedElements[e]) {
-			changeElementColor(e, *this, filter);
+			changeElementColor(e, *color, filter);
 #ifdef DEVELOP
 			cout << static_cast<int>(e) << " ";
 #endif
 		}
 	if (speed == Speeds::VeryFast)
-		changeElementColor(currentRandom, *this, filter);
+		changeElementColor(currentRandom, *color, filter);
 	else
-		changeFrameElement(currentRandom, *this, filling ? Directions::Forward : Directions::Backward);
+		changeFrameElement(currentRandom, *color, filling ? Directions::Forward : Directions::Backward);
 
 	if (currentStepFrame == totalStepFrames) {
 		previousFrameAffectedElements[currentRandom] = filling;
@@ -141,8 +151,8 @@ void Filler::drawConfig() {
 		"Type: Filler" << endl <<
 		"Mode: " << mode2str(mode) << endl;
 	StepActor::drawConfig();
-	cout << "Color: ";
-	this->drawColor();
+	cout << "Colors: ";
+	this->drawColors();
 	cout << endl << SEPARATOR << endl;
 }
 
@@ -165,6 +175,7 @@ Filler::Modes Filler::str2mode(const string& mode) {
 }
 
 void Filler::restart() {
+	currentColor = colors.size() - 1;
 	StepActor::restart();
 	filling = true;
 	if (mode == Modes::Random) {

@@ -24,16 +24,18 @@
 
 using namespace LEDSpicer::Animations;
 
-uint8_t Actor::FPS = 0;
+uint8_t Actor::FPS   = 0;
+uint8_t Actor::frame = 0;
 
 Actor::Actor(
 	umap<string, string>& parameters,
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	filter(Color::str2filter(parameters["filter"])),
+	filter(Color::str2filter(parameters.count("filter") ? parameters["filter"] : "Normal")),
 	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
+	repeat(parameters.count("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0),
 	group(group)
 {
 	affectedElements.resize(group->size(), false);
@@ -42,7 +44,9 @@ Actor::Actor(
 }
 
 void Actor::draw() {
-
+	++frame;
+	if (frame == FPS)
+		frame = 0;
 	affectAllElements();
 	calculateElements();
 	if (not affectedElements.empty())
@@ -55,8 +59,7 @@ void Actor::draw() {
 					continue;
 				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
 			}
-		}
-	}
+		}}
 }
 
 void Actor::drawConfig() {
@@ -67,6 +70,8 @@ void Actor::drawConfig() {
 		cout << "Start After: " << secondsToStart << " sec" << endl;
 	if (secondsToEnd)
 		cout << "Stop After: " << secondsToEnd << " sec" << endl;
+	if (repeat)
+		cout << "Will repeat for: " << repeat << " times" << endl;
 }
 
 void Actor::restart() {
@@ -92,7 +97,7 @@ bool Actor::isRunning() {
 
 	if (startTime) {
 		if (not startTime->isTime())
-			return false;
+			return checkRepeats();
 		delete startTime;
 		startTime = nullptr;
 #ifdef DEVELOP
@@ -112,7 +117,7 @@ bool Actor::isRunning() {
 
 	// Time Over: there is an end time that ran out, and not start time, so is not running.
 	if (not startTime and not endTime and secondsToEnd)
-		return false;
+		return checkRepeats();
 
 	return true;
 }
@@ -124,6 +129,20 @@ void Actor::setFPS(uint8_t FPS) {
 
 uint8_t Actor::getFPS() {
 	return FPS;
+}
+
+void Actor::setStartTime(uint16_t seconds) {
+	secondsToStart = seconds;
+}
+
+void Actor::setEndTime(uint16_t seconds) {
+	secondsToEnd = seconds;
+}
+
+void Actor::newFrame() {
+	if (frame == FPS)
+		frame = 0;
+	++frame;
 }
 
 uint8_t Actor::getNumberOfElements() const {
@@ -148,3 +167,14 @@ void Actor::affectAllElements(bool value) {
 bool Actor::isElementAffected(uint8_t index) {
 	return affectedElements[index];
 }
+
+bool Actor::checkRepeats() {
+
+	if (not repeat or repeat == 1 or repeated == repeat)
+		return false;
+
+	++repeat;
+	restart();
+	return true;
+}
+

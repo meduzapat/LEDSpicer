@@ -96,20 +96,28 @@ bool FrameActor::isRunning() {
 
 	if (cycles) {
 		if (cycle > cycles)
-			return false;
+			return checkRepeats();
 
 		if (cycle == cycles) {
 #ifdef DEVELOP
 			LogDebug("Ending Actor after " + to_string(cycles) + " cycles.");
 #endif
 			++cycle;
-			return false;
+			return checkRepeats();
 		}
 		if (isLastFrame())
 			++cycle;
 	}
 
 	return true;
+}
+
+void FrameActor::setStartCycles(uint8_t cycles) {
+	startAt = cycles;
+}
+
+void FrameActor::setEndCycles(uint8_t cycles)  {
+	this->cycles = cycles;
 }
 
 void FrameActor::advanceFrame() {

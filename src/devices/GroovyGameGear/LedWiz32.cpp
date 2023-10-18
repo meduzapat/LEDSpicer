@@ -24,19 +24,17 @@
 
 using namespace LEDSpicer::Devices::GroovyGameGear;
 
-void LedWiz32::resetLeds() {
-	setLeds(0);
-	transfer();
-}
+uint8_t LedWiz32::dumpFrame = 0;
 
 void LedWiz32::afterClaimInterface() {
-	LogDebug("Initializing " LEDWIZ32_NAME " controllers ICs");
+	LogDebug("Initializing " + getFullName() + " controllers ICs");
 	// This will initialize the 4 controllers and set the pulse to 1.
 	vector<uint8_t> data {64, 255, 255, 255, 255, 1, 0, 0};
-	transferToUSB(data);
+	transferToConnection(data);
 }
 
 void LedWiz32::drawHardwarePinMap() {
+
 	uint8_t half = LEDWIZ32_LEDS / 2;
 	cout
 		<< getFullName() << " Pins " << LEDWIZ32_LEDS << endl
@@ -46,8 +44,8 @@ void LedWiz32::drawHardwarePinMap() {
 		setLed(r, r + 1);
 		setLed(l, l + 1);
 		cout <<
-			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(r) << "   " <<
-			std::left << std::setfill(' ') << std::setw(3) << (int)*getLed(l) << endl;
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(r)) << "   " <<
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(l)) << endl;
 	}
 	cout << endl;
 }
@@ -62,7 +60,8 @@ void LedWiz32::transfer() const {
 	for (auto l : LEDs) {
 		load.push_back(48 * (l / 255.00));
 		if (load.size() == 8) {
-			transferToUSB(load);
+			transferToConnection(load);
+			std::this_thread::sleep_for(std::chrono::microseconds(LEDWIZ_WAIT));
 			load.clear();
 		}
 	}
