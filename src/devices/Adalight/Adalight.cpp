@@ -27,7 +27,7 @@ using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::transfer() const {
 	// Ada Serial devices assumes RGB LEDs
-	uint8_t t = LEDs.size() / 3;
+	uint8_t t = LEDs.size();
 	vector<uint8_t> serialData {
 		// Magic word
 		'A', 'd', 'a',
@@ -39,7 +39,7 @@ void Adalight::transfer() const {
 	// Checksum
 	serialData.push_back(static_cast<uint8_t>(serialData[4] ^ 0x55));
 
-	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
+	for (uint16_t l = 0; l < t; ++l)
 		serialData.push_back(LEDs[l]);
 
 	transferToConnection(serialData);
