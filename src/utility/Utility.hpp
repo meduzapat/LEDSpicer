@@ -42,6 +42,9 @@ using std::vector;
 #define PERCENT(x , y) ((x) * 100 / (y))
 
 #define SEPARATOR "------------------------------"
+#define GROUP_SEPARATOR static_cast<char>(29)
+#define FIELD_SEPARATOR  static_cast<char>(30)
+#define RECORD_SEPARATOR static_cast<char>(31)
 
 namespace LEDSpicer {
 

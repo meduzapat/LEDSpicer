@@ -30,27 +30,28 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 	frames(static_cast<uint8_t>(speed) * 3),
 	doBlink(parameters.count("blink") ? (parameters["blink"] == "true") : true)
 {
-	string linkedElements = parameters.count("linkedElements") ? parameters["linkedElements"] : "";
+	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
 	// process list
-	if (linkedElements.empty())
+	if (linkedTriggers.empty())
 		return;
 
 	uint groupIdx = 0;
-	for (auto& l : Utility::explode(linkedElements, '|')) {
-		auto group = Utility::explode(l, ',');
+	// This is a list of linked maps separated by RECORD_SEPARATOR
+	for (auto& l : Utility::explode(linkedTriggers, RECORD_SEPARATOR)) {
+		// This is a list of two or more triggers, separated by INPUT_MAP_SEPARATOR.
+		auto group = Utility::explode(l, FIELD_SEPARATOR);
 		if (group.size() < 2) {
-			LogWarning("ignoring group with less than two items.");
+			LogWarning("Ignoring group with less than two items.");
 			continue;
 		}
 		// Extract group info.
 		vector<Record> tempRecord;
 		uint mapIdx = 0;
 		bool firstItem = true;
-		for (auto& e : group) {
-			Utility::trim(e);
-			string mapS  = findItemMapByName(e);
-			uint16_t map = Utility::parseNumber(mapS, "Unable to parse number");
-			tempRecord.emplace_back(std::move(Record(map, firstItem, itemsMap[mapS], nullptr)));
+		for (auto& link : group) {
+			Utility::trim(link);
+			uint16_t map = Utility::parseNumber(link, "Unable to parse number");
+			tempRecord.emplace_back(std::move(Record(map, firstItem, itemsMap[link], nullptr)));
 			if (firstItem) {
 				firstItems.push_back(map);
 				firstItem = false;
@@ -58,7 +59,7 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 			// Update lookup table.
 			groupMapLookup.emplace(map, LookupMap{groupIdx, mapIdx++});
 		}
-		// Link last element to 1st element
+		// Link last element to 1st element.
 		tempRecord.back().next = &tempRecord[0];
 		// Link rest of the table.
 		for (uint c = 0; c < tempRecord.size() - 1; ++c)

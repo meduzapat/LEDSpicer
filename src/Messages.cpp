@@ -31,7 +31,7 @@ bool Messages::read() {
 		if (buffer.empty())
 			return false;
 		Message msg;
-		vector<string> chunks = Utility::explode(buffer, DELIMITER);
+		vector<string> chunks = Utility::explode(buffer, RECORD_SEPARATOR);
 		if (not chunks.size()) {
 			LogNotice("Malformed message received");
 			return false;

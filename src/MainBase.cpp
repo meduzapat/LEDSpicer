@@ -273,9 +273,10 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	LogDebug("Creating profile with " EMPTY_PROFILE + name);
 	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
 	// Add elements.
-	for (string& n : Utility::explode(elements, ',')) {
+	LogDebug("Adding elements");
+	for (string& n : Utility::explode(elements, FIELD_SEPARATOR)) {
 		const Color* col = nullptr;
-		auto parts = Utility::explode(n, ':');
+		auto parts = Utility::explode(n, GROUP_SEPARATOR);
 		n = parts[0];
 		if (not DataLoader::allElements.count(n)) {
 			LogDebug("Unknown element " + n);
@@ -292,7 +293,8 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	}
 
 	// Add Groups.
-/*	for (string& n : Utility::explode(groups, ',')) {
+/*	LogDebug("Adding groups");
+	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
 		LogDebug("Using group " + n);
 		if (DataLoader::layout.count(n)) {
 			profile->addAlwaysOnGroup(
@@ -305,7 +307,8 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	}*/
 
 	// Add Animations.
-	for (string& n : Utility::explode(groups, ',')) {
+	LogDebug("Adding Animations");
+	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
 		LogDebug("Loading animation " + n);
 		try {
 			profile->addAnimation(DataLoader::processAnimation(n));
@@ -317,7 +320,8 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 	}
 
 	// Add Inputs.
-	for (string& n : Utility::explode(groups, ',')) {
+	LogDebug("Adding Inputs");
+	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
 		LogDebug("Loading input " + n);
 		try {
 			DataLoader::processInput(profile, n);

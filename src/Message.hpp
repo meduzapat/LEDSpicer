@@ -31,8 +31,6 @@ using std::vector;
 #ifndef MESSAGE_HPP_
 #define MESSAGE_HPP_ 1
 
-#define DELIMITER '|'
-
 namespace LEDSpicer {
 
 struct Message {

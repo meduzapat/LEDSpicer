@@ -79,7 +79,7 @@ public:
 
 protected:
 
-	/// Output list of mapped items by trigger.
+	/// List of elements that need to be Output, mapped items by trigger.
 	static umap<string, Items*>* controlledItems;
 
 	/// Input specific map. trigger -> Item.
