@@ -30,7 +30,7 @@ Input* Reader::readController = nullptr;
 
 Reader::Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps) : Input(parameters, inputMaps) {
 	if (parameters.count("listenEvents"))
-		for (auto& e : Utility::explode(parameters["listenEvents"], ',')) {
+		for (auto& e : Utility::explode(parameters["listenEvents"], ID_GROUP_SEPARATOR)) {
 			Utility::trim(e);
 			if (not listenEvents.count(e))
 				listenEvents.emplace(e, -1);

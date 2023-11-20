@@ -36,10 +36,10 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 		return;
 
 	uint groupIdx = 0;
-	// This is a list of linked maps separated by RECORD_SEPARATOR
-	for (auto& l : Utility::explode(linkedTriggers, RECORD_SEPARATOR)) {
-		// This is a list of two or more triggers, separated by INPUT_MAP_SEPARATOR.
-		auto group = Utility::explode(l, FIELD_SEPARATOR);
+	// This is a list of linked maps separated by ID_GROUP_SEPARATOR ex 1,2,3|4,5,6|etc..
+	for (auto& l : Utility::explode(linkedTriggers, ID_GROUP_SEPARATOR)) {
+		// This is a list of two or more triggers, separated by ID_SEPARATOR ex: 1,2,3.
+		auto group = Utility::explode(l, ID_SEPARATOR);
 		if (group.size() < 2) {
 			LogWarning("Ignoring group with less than two items.");
 			continue;

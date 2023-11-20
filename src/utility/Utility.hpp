@@ -45,7 +45,8 @@ using std::vector;
 #define GROUP_SEPARATOR static_cast<char>(29)
 #define FIELD_SEPARATOR  static_cast<char>(30)
 #define RECORD_SEPARATOR static_cast<char>(31)
-
+#define ID_SEPARATOR       ','
+#define ID_GROUP_SEPARATOR '|'
 namespace LEDSpicer {
 
 class Utility {
