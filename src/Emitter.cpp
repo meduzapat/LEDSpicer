@@ -268,7 +268,7 @@ GameRecord parseMameDataFile(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
 
 	LogDebug("Game data: " + output);
 
@@ -299,7 +299,7 @@ GameRecord parseMame(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
@@ -380,24 +380,26 @@ GameRecord parseControlsIni(const string& rom) {
 	}
 	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
 	if (not ps)
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
+
+	if (not mirror and controls.size() != ps)
+		throw Error("Game " + rom + " with " + to_string(ps) + " players, invalid mirrored value or missing players information");
 
 	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
 		string player = to_string(pIx + 1);
 		PlayerData& pd = tempData.playersData[player];
+		pd.player  = player;
 		if (mirror) {
 			controlIniController2ledspicer(controls[0], pd);
-			pd.player  = player;
 			pd.buttons = buttons[0];
 		}
 		else {
 			controlIniController2ledspicer(controls[pIx], pd);
-			pd.player  = player;
 			pd.buttons = buttons[pIx];
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
-
+	LogDebug("Controller data for game " + rom + " found.");
 	return tempData;
 }
 
@@ -461,6 +463,7 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 			pd.controllers.push_back(JOYSTICK);
 		}
 	}
+	LogDebug("Controller data for game " + rom + " found.");
 	return tempData;
 }
 
