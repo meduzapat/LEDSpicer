@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -63,6 +63,7 @@ using std::chrono::milliseconds;
 #define PARAM_USER_ID         "userId"
 #define PARAM_GROUP_ID        "groupId"
 #define PARAM_FILTER          "filter"
+#define PARAM_BRIGHTNESS      "brightness"
 
 #define NODE_DEVICES           "devices"
 #define NODE_DEVICE            "device"
