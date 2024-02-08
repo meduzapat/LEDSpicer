@@ -158,14 +158,25 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
+		int brightness = tempAttr.count(PARAM_BRIGHTNESS) ?
+			Utility::parseNumber(
+				tempAttr[PARAM_BRIGHTNESS],
+				invalidValueFor(PARAM_BRIGHTNESS) " in " + device->getFullName() + " element " + tempAttr[PARAM_NAME]
+			) : 0;
+		if (not Utility::verifyValue(brightness, 1, 99, false)) {
+			brightness = 0;
+		}
+
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
 			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
+
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
-				0
+				0,
+				brightness
 			);
 			pinCheck[pin] = true;
 		}
@@ -176,7 +187,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 				tempAttr[PARAM_NAME],
 				pin,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
-				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID
+				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID,
+				0
 			);
 			pinCheck[pin] = true;
 		}
@@ -190,7 +202,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				r, g , b,
-				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR)
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
+				brightness
 			);
 			pinCheck[r] = true;
 			pinCheck[g] = true;
