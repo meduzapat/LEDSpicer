@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -77,9 +77,15 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 	return &LEDs.at(ledPos);
 }
 
-void Device::registerElement(const string& name, uint8_t led, const Color& defaultColor, uint timeOn) {
+void Device::registerElement(
+	const string& name,
+	uint8_t led,
+	const Color& defaultColor,
+	uint timeOn,
+	uint8_t brightness
+) {
 	validateLed(led);
-	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor, timeOn));
+	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor, timeOn, brightness));
 }
 
 void Device::registerElement(
@@ -87,12 +93,18 @@ void Device::registerElement(
 	uint8_t led1,
 	uint8_t led2,
 	uint8_t led3,
-	const Color& defaultColor
+	const Color& defaultColor,
+	uint8_t brightness
 ) {
 	validateLed(led1);
 	validateLed(led2);
 	validateLed(led3);
-	elementsByName.emplace(name, Element(name, &LEDs[led1], &LEDs[led2], &LEDs[led3], defaultColor));
+	elementsByName.emplace(name, Element(
+		name,
+		&LEDs[led1], &LEDs[led2], &LEDs[led3],
+		defaultColor,
+		brightness
+	));
 }
 
 Element* Device::getElement(const string& name) {
