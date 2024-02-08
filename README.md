@@ -43,7 +43,7 @@ for more videos visit the YT channel.
 
 ## License
 
-Copyright (C) 2018 - 2023 Patricio A. Rossi
+Copyright (C) 2018 - 2024 Patricio A. Rossi
 
 LEDSpicer is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
