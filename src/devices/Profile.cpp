@@ -44,15 +44,6 @@ void Profile::drawConfig() {
 			a->drawConfig();
 	}
 
-	if (animations.size()) {
-		cout << endl << "* Animation Actors:" << endl;
-		uint count = 1;
-		for(auto actor : animations) {
-			cout << "Actor " << count++ << ":" << endl;
-			actor->drawConfig();
-		}
-	}
-
 	if (alwaysOnGroups.size()) {
 		cout << endl << "* Groups Overwrite Color: " << endl;
 		for (auto& g : alwaysOnGroups) {
@@ -68,6 +59,15 @@ void Profile::drawConfig() {
 			cout << e.element->getName() << " ";
 			e.color->drawColor();
 			cout << endl;
+		}
+	}
+
+	if (animations.size()) {
+		cout << endl << "* Animation Actors:" << endl;
+		uint count = 1;
+		for(auto actor : animations) {
+			cout << "Actor " << count++ << ":" << endl;
+			actor->drawConfig();
 		}
 	}
 

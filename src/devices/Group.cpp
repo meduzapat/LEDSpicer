@@ -27,7 +27,7 @@ using namespace LEDSpicer::Devices;
 void Group::drawElements() {
 	cout << (int)elements.size() << " Element(s): " << endl;
 	for (auto element : elements)
-		element->draw();
+		cout << element->getName() << endl;
 }
 
 uint8_t Group::size() const {

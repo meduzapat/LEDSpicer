@@ -204,11 +204,17 @@ void Color::loadColors(const umap<string, string>& colorsData, const string& for
 }
 
 void Color::drawColors() {
+	int count = 0;
 	for (auto& c : colors) {
-		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
+		cout << std::left << std::setw(15) << std::setfill(' ') << c.first << " = ";
 		c.second.drawHex();
-		cout << endl;
+		if (++count % 4 == 0)
+			cout << endl;
+		else
+			cout << " | ";
 	}
+	if (count % 4 != 0)
+		cout << endl;
 }
 
 void Color::drawColors(vector<const Color*>& colors) {

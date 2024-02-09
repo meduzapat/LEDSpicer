@@ -150,10 +150,19 @@ void Element::checkTime() {
 }
 
 void Element::draw() {
-	cout << std::left << std::setfill(' ') << std::setw(15) << name <<
-		" Pin" << (pins.size() == 1 ? " " : "s") <<  ": ";
-	for (auto pin : pins) {
-		cout << std::setw(2) << to_string(*pin) << " ";
-	}
-	cout << (timeOn ? "*Timed (" + to_string(timeOn) + "ms)" : "") <<endl;
+	cout <<
+		std::left << std::setfill(' ') << std::setw(20) << name <<
+		" Pin" << (pins.size() == 1 ? (timeOn ? "*" : " ") : "s") << ": ";
+	for (auto pin : pins)
+		cout << std::right << std::setw(2) << to_string(*pin) << " ";
+
+	if (timeOn)
+		cout << std::left << std::setw(6) << (to_string(timeOn) + "ms");
+
+	cout <<
+		" Default Color: " << std::left << std::setw(15) << defaultColor.getName() <<
+		(brightness ? " Brightness:" + to_string(brightness) + "%" : "") << endl;
+
+	if (timeOn)
+		cout << "  * Timed pins like solenoids" << endl;
 }
