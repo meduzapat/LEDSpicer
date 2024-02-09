@@ -191,7 +191,7 @@ void MainBase::dumpConfiguration() {
 
 	cout << endl << "Elements:" << endl;
 	for (auto element : DataLoader::allElements)
-		cout << std::setfill(' ') << std::setw(20) << std::left << element.first << "default Color: " << element.second->getDefaultColor().getName() << endl;
+		element.second->draw();
 
 	cout << endl;
 }
