@@ -43,7 +43,7 @@ void Ultimate::afterConnect() {
 
 	libusb_device *device = libusb_get_device(handle);
 
-	if (!device)
+	if (not device)
 		throw Error("Unable to retrieve device information");
 
 	libusb_device_descriptor descriptor;

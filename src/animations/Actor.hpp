@@ -92,22 +92,20 @@ public:
 	static void setFPS(uint8_t FPS);
 
 	/**
-	 * Sets the system FPS.
-	 * @param FPS
+	 * @return Gets the system FPS.
 	 */
 	static uint8_t getFPS();
 
 	/**
-	 * If the actor can be handled by time.
-	 * @return
+	 *
+	 * @return true If the actor can be handled by time.
 	 */
 	virtual bool acceptTime() {
 		return true;
 	}
 
 	/**
-	 * If the actor can be handled by cycles.
-	 * @return
+	 * @return true If the actor can be handled by cycles.
 	 */
 	virtual bool acceptCycles() {
 		return false;
@@ -150,30 +148,36 @@ protected:
 	/// Hardware frames per second.
 	static uint8_t FPS;
 
+	/// Current frame
 	static uint8_t frame;
 
 	uint16_t
+		/// Number of secods to wait until start processing this actor.
 		secondsToStart = 0,
+		/// Number of secods to wait to stop this actor.
 		secondsToEnd   = 0;
 
-	/// The actor will start after a number of seconds.
+	/// Start time clock for this actor.
 	Time* startTime = nullptr;
 
-	/// The actor will end after a number of seconds.
+	/// End time clock for this actor.
 	Time* endTime = nullptr;
 
 	/**
 	 * Do the elements calculation.
+	 *
+	 * Every Actor will do their magic here.
 	 */
 	virtual void calculateElements() = 0;
 
 	/**
-	 * @return the number of elements on this group.
+	 * @return the number of elements on the animation's group.
 	 */
 	uint8_t getNumberOfElements() const;
 
 	/**
-	 * Changes the color with a new one applying filters.
+	 * Changes an element color with a new one applying filters.
+	 *
 	 * @param index the element to change.
 	 * @param color the new color, only used by filter Normal, Combine, Difference, Mask.
 	 * @param filter
@@ -183,6 +187,7 @@ protected:
 
 	/**
 	 * Changes the colors with a new one applying filters.
+	 *
 	 * @param color the new color, only used by filter Normal, Combine, Difference and Mask.
 	 * @param filter
 	 * @param percent the amount of effect to apply, only used by Combine.
@@ -191,35 +196,34 @@ protected:
 
 	/**
 	 * Mark all elements to the desired state.
+	 *
 	 * @param value
 	 */
 	void affectAllElements(bool value = false);
 
 	/**
-	 * Returns if an element got affected (dirty/changed) on this frame.
-	 * @return
+	 * @return true if an element got affected (dirty/changed) on this frame.
 	 */
 	bool isElementAffected(uint8_t index);
 
 	/**
 	 * Checks if the actor will repeat.
-	 * @return
+	 * @return true if the actor will repeat.
 	 */
 	bool checkRepeats();
 
 private:
 
-	/**
-	 * Array with a list of affected elements.
-	 */
+	/// Array with a list of affected elements.
 	vector<bool> affectedElements;
 
 	/// A pointer to the real group of elements.
 	Group* const group;
 
-	/// If this actor will repeat, default 0, repeat for ever.
 	uint8_t
+		/// If this actor will repeat, default 0, repeat for ever.
 		repeat    = 0,
+		/// Times repeated.
 		repeated  = 0;
 
 };

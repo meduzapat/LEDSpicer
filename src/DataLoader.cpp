@@ -306,13 +306,13 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	// startTrasition only exist to keep retro-compatibility.
+	/// @deprecated startTrasition only exist to keep retro-compatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
 		auto a = createAnimation(tempAttr);
 		startTransitions.push_back(a);
-		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 			if (a->acceptCycles())
 				a->setEndCycles(DEFAULT_ENDCYCLES);
 			else
@@ -320,13 +320,13 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	// endTrasition only exist to keep retrocompatibility.
+	/// @deprecated endTrasition only exist to keep retrocompatibility.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
 		auto a = createAnimation(tempAttr);
 		endTransitions.push_back(a);
-		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 			if (a->acceptCycles())
 				a->setEndCycles(DEFAULT_ENDCYCLES);
 			else
@@ -342,7 +342,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_START_TRANSITIONS " inside profile " + name);
 			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
-				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
 					else
@@ -361,7 +361,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_END_TRANSITIONS " inside profile " + name);
 			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
-				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
 					else

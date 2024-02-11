@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 	closedir(dir);
 
 
-	if (!isatty(STDIN_FILENO)) {
+	if (not isatty(STDIN_FILENO)) {
 		cerr << "Not a terminal" << endl;
 		return EXIT_FAILURE;
 	}

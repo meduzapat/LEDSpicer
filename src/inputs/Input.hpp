@@ -50,8 +50,7 @@ public:
 
 	/**
 	 * Sets the controlled elements and groups.
-	 * @param controlledElements
-	 * @param controlledGroups
+	 * @param controlledItems a list of elements and/or groups.
 	 */
 	static void setInputControllers(umap<string, Items*>* controlledItems);
 

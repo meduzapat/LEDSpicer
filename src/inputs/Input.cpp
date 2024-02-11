@@ -38,7 +38,7 @@ void Input::setInputControllers(umap<string, Items*>* controlledElements) {
 
 void Input::drawConfig() {
 
-	if (!itemsMap.size())
+	if (not itemsMap.size())
 		return;
 
 	cout << "Elements and Groups mapping:" << endl;
