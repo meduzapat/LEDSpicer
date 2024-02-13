@@ -42,6 +42,8 @@ public:
 		const Color& defaultColor
 	) : name(name), defaultColor(defaultColor) {}
 
+	virtual ~Group() = default;
+
 	/**
 	 * Structure to handle groups with properties.
 	 */
@@ -77,8 +79,6 @@ public:
 				e->setColor(*color, filter);
 		}
 	};
-
-	virtual ~Group() = default;
 
 	void drawElements();
 
