@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -74,7 +74,13 @@ public:
 	 * @param pin
 	 * @param defaultColor
 	 */
-	Element(const string& name, uint8_t* pin, const Color& defaultColor, uint timeOn = 0);
+	Element(
+		const string& name,
+		uint8_t* pin,
+		const Color& defaultColor,
+		uint timeOn,
+		uint8_t brightness
+	);
 
 	/**
 	 * Creates a new RGB Element.
@@ -84,7 +90,14 @@ public:
 	 * @param pinB
 	 * @param defaultColor
 	 */
-	Element(const string& name, uint8_t* pinR, uint8_t* pinG, uint8_t* pinB, const Color& defaultColor);
+	Element(
+		const string& name,
+		uint8_t* pinR,
+		uint8_t* pinG,
+		uint8_t* pinB,
+		const Color& defaultColor,
+		uint8_t brightness
+	);
 
 	/**
 	 * Copy from other Element.
@@ -143,7 +156,7 @@ public:
 	void setColor(const Color& color, const Color::Filters& filter, uint8_t percent = 50);
 
 	/**
-	 * Covert the pin values into color.
+	 * Convert the pin values into color.
 	 * @return
 	 */
 	Color getColor();
@@ -206,7 +219,7 @@ public:
 	bool isTimed();
 
 	/**
-	 * check if the time is over and turn the element off.
+	 * Check if the time is over and turn the element off.
 	 */
 	void checkTime();
 
@@ -217,7 +230,7 @@ public:
 
 protected:
 
-	/// keeps the element name.
+	/// Keeps the element name.
 	string name;
 
 	/// Array of pointers to the original pins.
@@ -229,6 +242,10 @@ protected:
 	/// If bigger than zero, the pin will go OFF after that time (in ms)
 	uint16_t timeOn = 0;
 
+	/// Custom Brightness 1 to 99.
+	uint8_t brightness;
+
+	/// A pint in time to know when the timeOn is completed.
 	system_clock::time_point clockTime;
 };
 

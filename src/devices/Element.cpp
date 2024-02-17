@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,43 +24,55 @@
 
 using namespace LEDSpicer::Devices;
 
-Element::Element(const string& name, uint8_t* pin, const Color& defaultColor, uint timeOn) :
+Element::Element(
+	const string& name,
+	uint8_t* pin,
+	const Color& defaultColor,
+	uint timeOn,
+	uint8_t brightness
+) :
 	name(name),
 	pins{pin},
 	defaultColor(defaultColor),
-	timeOn(timeOn)
+	timeOn(timeOn),
+	// Only calculate brightness of not 0 or 100.
+	brightness(brightness)
 {
 	pins.shrink_to_fit();
 }
 
 Element::Element(
-		const string& name,
-		uint8_t* pinR,
-		uint8_t* pinG,
-		uint8_t* pinB,
-		const Color& defaultColor
-	) :
-		name(name),
-		pins{pinR, pinG, pinB},
-		defaultColor(defaultColor)
+	const string& name,
+	uint8_t* pinR,
+	uint8_t* pinG,
+	uint8_t* pinB,
+	const Color& defaultColor,
+	uint8_t brightness
+) :
+	name(name),
+	pins{pinR, pinG, pinB},
+	defaultColor(defaultColor),
+	// Only calculate brightness of not 0 or 100.
+	brightness(brightness)
 {
 	pins.shrink_to_fit();
 }
 
-Element::Element(Element* other) : name(other->name), defaultColor(other->defaultColor) {
+Element::Element(Element* other) : name(other->name), defaultColor(other->defaultColor), brightness(other->brightness) {
 	for (auto p : other->pins)
 		pins.push_back(nullptr);
 	pins.shrink_to_fit();
 }
 
 void Element::setColor(const Color& color) {
+	Color newColor = brightness ? color.fade(brightness) : color;
 	if (pins.size() == 3) {
-		*pins[Color::Channels::Red]   = color.getR();
-		*pins[Color::Channels::Green] = color.getG();
-		*pins[Color::Channels::Blue]  = color.getB();
+		*pins[Color::Channels::Red]   = newColor.getR();
+		*pins[Color::Channels::Green] = newColor.getG();
+		*pins[Color::Channels::Blue]  = newColor.getB();
 	}
 	else if (timeOn) {
-		if (color == Color::Off) {
+		if (newColor == Color::Off) {
 			*pins[SINGLE_PIN] = 0;
 		}
 		else if (not *pins[SINGLE_PIN]) {
@@ -69,11 +81,12 @@ void Element::setColor(const Color& color) {
 		}
 	}
 	else {
-		*pins[SINGLE_PIN] = color.getMonochrome();
+		*pins[SINGLE_PIN] = newColor.getMonochrome();
 	}
 }
 
 void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
+	Color newColor = brightness ? color.fade(brightness) : color;
 	if (filter == Color::Filters::Normal)
 		setColor(color);
 	else
@@ -137,10 +150,19 @@ void Element::checkTime() {
 }
 
 void Element::draw() {
-	cout << std::left << std::setfill(' ') << std::setw(15) << name <<
-		" Pin" << (pins.size() == 1 ? " " : "s") <<  ": ";
-	for (auto pin : pins) {
-		cout << std::setw(2) << to_string(*pin) << " ";
-	}
-	cout << (timeOn ? "*Timed (" + to_string(timeOn) + "ms)" : "") <<endl;
+	cout <<
+		std::left << std::setfill(' ') << std::setw(20) << name <<
+		" Pin" << (pins.size() == 1 ? (timeOn ? "*" : " ") : "s") << ": ";
+	for (auto pin : pins)
+		cout << std::right << std::setw(2) << to_string(*pin) << " ";
+
+	if (timeOn)
+		cout << std::left << std::setw(6) << (to_string(timeOn) + "ms");
+
+	cout <<
+		" Default Color: " << std::left << std::setw(15) << defaultColor.getName() <<
+		(brightness ? " Brightness:" + to_string(brightness) + "%" : "") << endl;
+
+	if (timeOn)
+		cout << "  * Timed pins like solenoids" << endl;
 }

@@ -26,28 +26,41 @@
 using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::transfer() const {
-	// Ada Serial devices assumes RGB LEDs
-	uint8_t t = LEDs.size() / 3;
+
+	// Ada Serial devices assumes RGB LEDs, cannot address individual pins.
+	uint16_t
+		numPins = LEDs.size(),
+		numLeds = (numPins / 3) - 1;
+	/*
+	ADAlight header.
+	hi = (numLeds << 8) & 0xFF;
+	lo = numLeds & 0xFF;
+	checksum = hi ^ lo ^ 0x55
+	*/
 	vector<uint8_t> serialData {
 		// Magic word
 		'A', 'd', 'a',
 		// LED count high byte
-		0,
+		(numLeds << 8) & 0xFF,
 		// LED count low byte
-		static_cast<uint8_t>(t - 1),
+		static_cast<uint8_t>(numLeds & 0xFF)
 	};
 	// Checksum
-	serialData.push_back(static_cast<uint8_t>(serialData[4] ^ 0x55));
-
-	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
+	serialData.push_back(static_cast<uint8_t>(serialData[3] ^ serialData[4] ^ 0x55));
+	for (uint16_t l = 0; l < numPins; ++l)
 		serialData.push_back(LEDs[l]);
 
 	transferToConnection(serialData);
+	/* for testing:
+	auto data(transferFromConnection(512));
+	string dataStr(data.begin(), data.end());
+	LogInfo("R: " + dataStr);
+	*/
 }
 
 void Adalight::drawHardwarePinMap() {
 	std::cout
-		<< getFullName() << " Pins " << LEDs.size() << std::endl
+		<< getFullName() << " Pins " << LEDs.size() << " (" << LEDs.size() / 3 << " RGB LEDs)" << std::endl
 		<< "Hardware pin map:" << std::endl << "0  2 G  +5v" << std::endl;
 	for (uint8_t r = 0; r < LEDs.size(); r += 3) {
 		LEDs[r] = r + 1;

@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -42,6 +42,8 @@ public:
 		const Color& defaultColor
 	) : name(name), defaultColor(defaultColor) {}
 
+	virtual ~Group() = default;
+
 	/**
 	 * Structure to handle groups with properties.
 	 */
@@ -77,8 +79,6 @@ public:
 				e->setColor(*color, filter);
 		}
 	};
-
-	virtual ~Group() = default;
 
 	void drawElements();
 

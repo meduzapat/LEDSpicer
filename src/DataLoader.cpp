@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -158,14 +158,25 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
+		int brightness = tempAttr.count(PARAM_BRIGHTNESS) ?
+			Utility::parseNumber(
+				tempAttr[PARAM_BRIGHTNESS],
+				invalidValueFor(PARAM_BRIGHTNESS) " in " + device->getFullName() + " element " + tempAttr[PARAM_NAME]
+			) : 0;
+		if (not Utility::verifyValue(brightness, 1, 99, false)) {
+			brightness = 0;
+		}
+
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
 			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
+
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				pin,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
-				0
+				0,
+				brightness
 			);
 			pinCheck[pin] = true;
 		}
@@ -176,7 +187,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 				tempAttr[PARAM_NAME],
 				pin,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
-				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID
+				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID,
+				0
 			);
 			pinCheck[pin] = true;
 		}
@@ -190,7 +202,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				r, g , b,
-				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR)
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
+				brightness
 			);
 			pinCheck[r] = true;
 			pinCheck[g] = true;
@@ -293,13 +306,13 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	// startTrasition only exist to keep retro-compatibility.
+	/// @deprecated startTrasition only exist to keep retro-compatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
 		auto a = createAnimation(tempAttr);
 		startTransitions.push_back(a);
-		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 			if (a->acceptCycles())
 				a->setEndCycles(DEFAULT_ENDCYCLES);
 			else
@@ -307,13 +320,13 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	// endTrasition only exist to keep retrocompatibility.
+	/// @deprecated endTrasition only exist to keep retrocompatibility.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
 		auto a = createAnimation(tempAttr);
 		endTransitions.push_back(a);
-		if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 			if (a->acceptCycles())
 				a->setEndCycles(DEFAULT_ENDCYCLES);
 			else
@@ -329,7 +342,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_START_TRANSITIONS " inside profile " + name);
 			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
-				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
 					else
@@ -348,7 +361,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_END_TRANSITIONS " inside profile " + name);
 			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
-				if (!tempAttr.count("cycles") and !tempAttr.count("endTime")) {
+				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
 					else

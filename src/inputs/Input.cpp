@@ -4,7 +4,7 @@
  * @since     May 8, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -38,7 +38,7 @@ void Input::setInputControllers(umap<string, Items*>* controlledElements) {
 
 void Input::drawConfig() {
 
-	if (!itemsMap.size())
+	if (not itemsMap.size())
 		return;
 
 	cout << "Elements and Groups mapping:" << endl;

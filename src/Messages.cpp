@@ -5,7 +5,7 @@
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ bool Messages::read() {
 		if (buffer.empty())
 			return false;
 		Message msg;
-		vector<string> chunks = Utility::explode(buffer, DELIMITER);
+		vector<string> chunks = Utility::explode(buffer, RECORD_SEPARATOR);
 		if (not chunks.size()) {
 			LogNotice("Malformed message received");
 			return false;

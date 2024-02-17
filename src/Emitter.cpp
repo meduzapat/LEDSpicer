@@ -4,7 +4,7 @@
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
 		// Check request.
 		vector<string> data = msg.getData();
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
-			// param 1 is rom, param 2 is system.
+			// parameter 1 is ROM, parameter 2 is system.
 			if (data.size() < 2) {
 				LogError("Error: Invalid request");
 				return EXIT_FAILURE;
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 			// Arcades (mame and others).
 			if (data[1] == ARCADE_SYSTEM) {
 
-				// Set data source.
+				// Set data source, default to file.
 				if (configValues.count(PARAM_DATA_SOURCE))
 					dataSource = Utility::explode(configValues[PARAM_DATA_SOURCE], ',');
 				else
@@ -213,13 +213,18 @@ int main(int argc, char **argv) {
 				}
 				if (useColors)
 					decorateWithColorsIni(data[0], gd);
+
+				// Craft Profile mode
 				if (craftProfile) {
 					msg.setType(Message::Types::CraftProfile);
 					for (string& s : gd.toString())
 						msg.addData(s);
 				}
+				// Legacy profile mode.
 				else {
+					// Create a message that sends player + buttons information.
 					msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
+					// Create a message that sends controller + buttons information.
 					msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
 				}
 
@@ -263,7 +268,7 @@ GameRecord parseMameDataFile(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
 
 	LogDebug("Game data: " + output);
 
@@ -294,7 +299,7 @@ GameRecord parseMame(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
@@ -375,24 +380,26 @@ GameRecord parseControlsIni(const string& rom) {
 	}
 	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
 	if (not ps)
-		throw Error("Game " + rom + " not found.");
+		throw Error("Game " + rom + " no player data found.");
+
+	if (not mirror and controls.size() != ps)
+		throw Error("Game " + rom + " with " + to_string(ps) + " players, invalid mirrored value or missing players information");
 
 	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
 		string player = to_string(pIx + 1);
 		PlayerData& pd = tempData.playersData[player];
+		pd.player  = player;
 		if (mirror) {
 			controlIniController2ledspicer(controls[0], pd);
-			pd.player  = player;
 			pd.buttons = buttons[0];
 		}
 		else {
 			controlIniController2ledspicer(controls[pIx], pd);
-			pd.player  = player;
 			pd.buttons = buttons[pIx];
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
-
+	LogDebug("Controller data for game " + rom + " found.");
 	return tempData;
 }
 
@@ -456,6 +463,7 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 			pd.controllers.push_back(JOYSTICK);
 		}
 	}
+	LogDebug("Controller data for game " + rom + " found.");
 	return tempData;
 }
 
@@ -632,9 +640,9 @@ vector<string> GameRecord::toString() {
 	pd.clear();
 
 	for (uint8_t c = 1; c <= Utility::parseNumber(players, ""); ++c)
-		pd += "PLAYER" + to_string(c) + ",";
+		pd += "PLAYER" + to_string(c) + FIELD_SEPARATOR;
 
-	result.push_back(pd + (coins.empty() ? "" : coins + "_COINS,") + players + "_PLAYERS");
+	result.push_back(pd + (coins.empty() ? "" : coins + "_COINS") + FIELD_SEPARATOR + players + "_PLAYERS");
 	return result;
 }
 
@@ -668,8 +676,8 @@ string PlayerData::toString() {
 		con += to_string(cIx);
 		p += con;
 		if (controlColors.count(con))
-			p += ":" + controlColors[con];
-		p += ",";
+			p += GROUP_SEPARATOR + controlColors[con];
+		p += FIELD_SEPARATOR;
 	}
 
 	uint8_t bTo = Utility::parseNumber(buttons, "");
@@ -677,18 +685,18 @@ string PlayerData::toString() {
 		string but = "P" + player + "_BUTTON" + to_string(c + 1);
 		p += but;
 		if (buttonColors.count(but))
-			p += ":" + buttonColors[but];
-		p += ",";
+			p += GROUP_SEPARATOR + buttonColors[but];
+		p += FIELD_SEPARATOR;
 	}
 
 	// Extra colors detected:
 	for (auto& c : controlColors)
 		if (p.find(c.first) == string::npos)
-			p += c.first + ":" + c.second + ",";
+			p += c.first + GROUP_SEPARATOR + c.second + FIELD_SEPARATOR;
 
 	for (auto& c : buttonColors)
 		if (p.find(c.first) == string::npos)
-			p += c.first + ":" + c.second + ",";
+			p += c.first + GROUP_SEPARATOR + c.second + FIELD_SEPARATOR;
 
 	return p;
 }

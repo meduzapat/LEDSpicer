@@ -4,7 +4,7 @@
  * @since     Nov 18, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,7 +27,7 @@ using namespace LEDSpicer;
 string Message::toString() {
 	string ret;
 	for (auto& s : data)
-		ret.append(s).push_back(DELIMITER);
+		ret.append(s).push_back(RECORD_SEPARATOR);
 	ret.append(to_string(static_cast<uint8_t>(type))).push_back('\0');
 	return ret;
 }

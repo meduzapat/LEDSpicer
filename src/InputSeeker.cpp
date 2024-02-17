@@ -4,7 +4,7 @@
  * @since     Jun 22, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 	closedir(dir);
 
 
-	if (!isatty(STDIN_FILENO)) {
+	if (not isatty(STDIN_FILENO)) {
 		cerr << "Not a terminal" << endl;
 		return EXIT_FAILURE;
 	}

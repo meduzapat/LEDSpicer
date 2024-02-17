@@ -48,8 +48,8 @@ void Network::process() {
 	Log::debug("Message received " + buffer);
 	if (buffer.empty())
 		return;
-	buffer = Utility::extractChars(buffer, '!', '|');
-	for (string& entry : Utility::explode(buffer, DELIMITER)) {
+	buffer = Utility::extractChars(buffer, '!', RECORD_SEPARATOR);
+	for (string& entry : Utility::explode(buffer, RECORD_SEPARATOR)) {
 #ifdef DEVELOP
 		LogDebug("Processing " + entry);
 #endif

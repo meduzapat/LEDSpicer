@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -204,11 +204,17 @@ void Color::loadColors(const umap<string, string>& colorsData, const string& for
 }
 
 void Color::drawColors() {
+	int count = 0;
 	for (auto& c : colors) {
-		cout << std::left << std::setfill(' ') << std::setw(15) << c.first << " = ";
+		cout << std::left << std::setw(15) << std::setfill(' ') << c.first << " = ";
 		c.second.drawHex();
-		cout << endl;
+		if (++count % 4 == 0)
+			cout << endl;
+		else
+			cout << " | ";
 	}
+	if (count % 4 != 0)
+		cout << endl;
 }
 
 void Color::drawColors(vector<const Color*>& colors) {
@@ -222,11 +228,11 @@ void Color::drawColors(vector<const Color*>& colors) {
 
 void Color::drawHex() const {
 	cout << "#" << std::hex << std::uppercase <<
-		std::setfill('0') << std::setw(2)  << (int)getR()    <<
-		std::setfill(' ') << std::setw(15) << std::uppercase <<
-		std::setfill('0') << std::setw(2)  << (int)getG()    <<
-		std::setfill(' ') << std::setw(15) << std::uppercase <<
-		std::setfill('0') << std::setw(2)  << (int)getB();
+		std::setfill('0') << std::setw(2)  << static_cast<int>(getR()) <<
+		std::setfill(' ') << std::setw(15) << std::uppercase           <<
+		std::setfill('0') << std::setw(2)  << static_cast<int>(getG()) <<
+		std::setfill(' ') << std::setw(15) << std::uppercase           <<
+		std::setfill('0') << std::setw(2)  << static_cast<int>(getB());
 	cout << std::dec;
 }
 

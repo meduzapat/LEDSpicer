@@ -4,7 +4,7 @@
  * @since     Jun 24, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -42,7 +42,11 @@ using std::vector;
 #define PERCENT(x , y) ((x) * 100 / (y))
 
 #define SEPARATOR "------------------------------"
-
+#define GROUP_SEPARATOR static_cast<char>(29)
+#define FIELD_SEPARATOR  static_cast<char>(30)
+#define RECORD_SEPARATOR static_cast<char>(31)
+#define ID_SEPARATOR       ','
+#define ID_GROUP_SEPARATOR '|'
 namespace LEDSpicer {
 
 class Utility {

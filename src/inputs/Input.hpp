@@ -4,7 +4,7 @@
  * @since     May 8, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,8 +50,7 @@ public:
 
 	/**
 	 * Sets the controlled elements and groups.
-	 * @param controlledElements
-	 * @param controlledGroups
+	 * @param controlledItems a list of elements and/or groups.
 	 */
 	static void setInputControllers(umap<string, Items*>* controlledItems);
 
@@ -79,7 +78,7 @@ public:
 
 protected:
 
-	/// Output list of mapped items by trigger.
+	/// List of elements that need to be Output, mapped items by trigger.
 	static umap<string, Items*>* controlledItems;
 
 	/// Input specific map. trigger -> Item.
