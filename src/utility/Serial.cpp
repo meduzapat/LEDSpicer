@@ -43,16 +43,20 @@ void Serial::connect() {
 	return;
 #endif
 
-	if (fd) {
+	if (fd > 0) {
 		LogDebug("Connection already open");
 		return;
 	}
 
-	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
+	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
 		throw Error("Can't open port " + port);
+	}
 
 	// Serial port config swiped from RXTX library (rxtx.qbang.org):
-	tcgetattr(fd, &tty);
+	if (tcgetattr(fd, &tty) != 0) {
+		close(fd);
+		throw Error("Error getting serial port settings");
+	}
 	tty.c_iflag     = INPCK;
 	tty.c_lflag     = 0;
 	tty.c_oflag     = 0;
@@ -61,7 +65,21 @@ void Serial::connect() {
 	tty.c_cc[VTIME] = 0;
 	cfsetispeed(&tty, B115200);
 	cfsetospeed(&tty, B115200);
-	tcsetattr(fd, TCSANOW, &tty);
+	if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+		close(fd);
+		throw Error("Error setting serial port attributes");
+	}
+	// Set DTR
+	int status;
+	if (ioctl(fd, TIOCMGET, &status) == -1) {
+		close(fd);
+		throw Error("Error getting modem status");
+	}
+	status |= TIOCM_DTR;
+	if (ioctl(fd, TIOCMSET, &status) == -1) {
+		close(fd);
+		throw Error("Error setting DTR");
+	}
 }
 
 void Serial::disconnect() {
@@ -70,7 +88,28 @@ void Serial::disconnect() {
 	LogDebug("No disconnect - DRY RUN");
 	return;
 #endif
-	close(fd);
+
+	// Clear DTR
+	int status;
+	if (ioctl(fd, TIOCMGET, &status) == -1) {
+		close(fd);
+		throw Error("Error getting modem status");
+	}
+	status &= ~TIOCM_DTR;
+	if (ioctl(fd, TIOCMSET, &status) == -1) {
+		close(fd);
+		throw Error("Error clearing DTR");
+	}
+
+	struct termios tty;
+	if (tcgetattr(fd, &tty) != 0) {
+		close(fd);
+		throw Error("Error getting serial port settings");
+	}
+	// Close the serial port
+	if (close(fd) < 0) {
+		throw Error("Error closing serial port");
+	}
 }
 
 void Serial::transferToConnection(vector<uint8_t>& data) const {

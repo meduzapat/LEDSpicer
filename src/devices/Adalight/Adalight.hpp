@@ -26,7 +26,8 @@
 #ifndef ADALIGHT_HPP_
 #define ADALIGHT_HPP_ 1
 
-#define ADALIGHT_NAME "Adalight"
+#define ADALIGHT_NAME  "Adalight"
+#define ADALIGHT_MAGIC "Ada"
 
 namespace LEDSpicer::Devices::Adalight {
 
@@ -51,6 +52,9 @@ public:
 
 	virtual void transfer() const;
 
+protected:
+
+	void detectPort() override;
 };
 
 } /* namespace */

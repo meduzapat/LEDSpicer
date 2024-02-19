@@ -30,3 +30,7 @@
 
 /// WolfWare Tech USB vendor code.
 #define WOLFWARETECH_VENDOR 0x03EB
+
+/// A Custom Arcade codes
+/// BOARD_USB_VID=0x0838 BOARD_USB_PID=0x8918
+/// BOARD_USB_VID=0x2e8a BOARD_USB_PID=0x1075

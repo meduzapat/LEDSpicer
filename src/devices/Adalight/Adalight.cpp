@@ -25,12 +25,39 @@
 
 using namespace LEDSpicer::Devices::Adalight;
 
+void Adalight::detectPort() {
+	for (uint8_t c = 0; c < MAX_SERIAL_PORTS_TO_SCAN; ++c) {
+		for (auto port : DEFAULT_SERIAL_PORTS) {
+			(this->port = string(port)).push_back(c + '0');
+			try {
+				openHardware();
+			}
+			catch(...) {
+				continue;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			auto data(transferFromConnection(128));
+			string dataStr(data.begin(), data.end());
+			LogDebug("Answer: " + dataStr);
+			if (dataStr.find(ADALIGHT_MAGIC) != string::npos) {
+				LogDebug("Adalight protocol device found at " + this->port);
+				return;
+			}
+			try {
+				closeHardware();
+			}
+			catch(...) {}
+		}
+	}
+	throw Error("Unable to autodetect the serial port.");
+}
+
 void Adalight::transfer() const {
 
 	// Ada Serial devices assumes RGB LEDs, cannot address individual pins.
 	uint16_t
-		numPins = LEDs.size(),
-		numLeds = (numPins / 3) - 1;
+		numPins(LEDs.size()),
+		numLeds((numPins / 3) - 1);
 	/*
 	ADAlight header.
 	hi = (numLeds << 8) & 0xFF;
@@ -41,7 +68,7 @@ void Adalight::transfer() const {
 		// Magic word
 		'A', 'd', 'a',
 		// LED count high byte
-		(numLeds << 8) & 0xFF,
+		static_cast<uint8_t>((numLeds << 8) & 0xFF),
 		// LED count low byte
 		static_cast<uint8_t>(numLeds & 0xFF)
 	};
