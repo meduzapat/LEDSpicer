@@ -21,8 +21,6 @@
  */
 
 #include "RestrictorSerial.hpp"
-#include <chrono>
-#include <thread>
 
 #ifndef RESTRICTORS_TOS428_HPP_
 #define RESTRICTORS_TOS428_HPP_ 1

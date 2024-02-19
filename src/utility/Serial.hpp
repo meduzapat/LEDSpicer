@@ -23,14 +23,20 @@
 // To handle terminal.
 #include <termios.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <cstring> // For strerror
 #include "Connection.hpp"
+// To be used when connection need to wait.
+#include <chrono>
+#include <thread>
 
 #ifndef LSSERIAL_HPP_
 #define LSSERIAL_HPP_ 1
 
-#define DEFAULT_SERIAL_PORT "/dev/ttyUSB0"
+/// Ports to scan: ignoring old or unrelated like /dev/ttyS
+#define DEFAULT_SERIAL_PORTS {"/dev/ttyUSB", "/dev/ttyACM"}
+#define MAX_SERIAL_PORTS_TO_SCAN 10
 
 namespace LEDSpicer {
 
