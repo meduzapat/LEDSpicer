@@ -4,7 +4,7 @@
  * @since     Nov 2, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -49,8 +49,14 @@ public:
 	 */
 	const Color* getCurrentColor();
 
+	/**
+	 * Reset to the 1st color.
+	 */
+	void reset();
+
 protected:
 
+	/// Current color index from the list of colors.
 	uint8_t currentColor = 0;
 
 };

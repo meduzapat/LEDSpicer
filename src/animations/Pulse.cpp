@@ -66,3 +66,7 @@ Pulse::Modes Pulse::str2mode(const string& mode) {
 		return Modes::Exponential;
 	throw Error("Invalid mode " + mode);
 }
+
+void Pulse::restart() {
+	reset();
+}

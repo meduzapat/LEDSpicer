@@ -54,6 +54,8 @@ public:
 
 	Modes str2mode(const string& type);
 
+	void restart() override;
+
 protected:
 
 	void calculateElements();

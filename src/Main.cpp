@@ -230,7 +230,7 @@ void Main::terminate() {
 }
 
 void Main::terminateCurrentProfile() {
-	// Deactivate overwrites.
+	// Deactivate forced elements and groups so the end transition is rendered without interference.
 	alwaysOnGroups.clear();
 	alwaysOnElements.clear();
 	DataLoader::controlledItems.clear();
