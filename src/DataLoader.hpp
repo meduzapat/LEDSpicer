@@ -146,7 +146,7 @@ public:
 	/**
 	 * Reads a profile file form disk or cache.
 	 * @param name
-	 * @param extra, if set will use it to differentiate from other profiles with the same name.
+	 * @param extra, if set will use it to differentiate from other profiles with the same name, only used while crafting profiles.
 	 */
 	static Profile* processProfile(const string& name, const string& extra = "");
 
@@ -154,7 +154,7 @@ public:
 	 * Reads an animation file.
 	 * @param file
 	 */
-	static vector<Actor*> processAnimation(const string& file);
+	static vector<Actor*> processAnimation(const string& file, const string& extra = "");
 
 	/**
 	 * Reads an input file.
@@ -197,6 +197,9 @@ public:
 
 	/// Keeps references to profiles.
 	static umap<string, Profile*> profilesCache;
+
+	/// Keeps references to actors.
+	static umap<string, vector<Actor*>> animationCache;
 
 	/// Port number to use for listening.
 	static string portNumber;

@@ -32,6 +32,7 @@ umap<string, Group> DataLoader::layout;
 Profile* DataLoader::defaultProfile;
 string DataLoader::defaultProfileName;
 umap<string, Profile*> DataLoader::profilesCache;
+umap<string, vector<Actor*>> DataLoader::animationCache;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
@@ -295,8 +296,10 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
 	// Check cache.
-	if (profilesCache.count(name + extra))
+	if (profilesCache.count(name + extra)) {
+		LogDebug("Profile from cache.");
 		return profilesCache.at(name + extra);
+	}
 
 	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
@@ -306,7 +309,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	/// @deprecated startTrasition only exist to keep retro-compatibility.
+	/// @deprecated startTrasition only exist to keep backward compatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
@@ -320,7 +323,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	/// @deprecated endTrasition only exist to keep retrocompatibility.
+	/// @deprecated endTrasition only exist to keep backward compatibility.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
@@ -341,7 +344,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_START_TRANSITIONS " inside profile " + name);
-			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+			for (auto a : processAnimation(tempAttr[PARAM_NAME], NODE_START_TRANSITIONS)) {
 				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
@@ -360,7 +363,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_END_TRANSITIONS " inside profile " + name);
-			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+			for (auto a : processAnimation(tempAttr[PARAM_NAME], NODE_START_TRANSITIONS)) {
 				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
@@ -449,7 +452,14 @@ Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 	return deviceHandlers[deviceName]->createDevice(deviceData);
 }
 
-vector<Actor*> DataLoader::processAnimation(const string& file) {
+vector<Actor*> DataLoader::processAnimation(const string& file, const string& extra) {
+
+	// Check cache.
+	if (animationCache.count(file + extra)) {
+		LogDebug("Animation from cache.");
+		vector<Actor*> actors(animationCache.at(file + extra).begin(), animationCache.at(file + extra).end());
+		return actors;
+	}
 
 	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
 
@@ -464,7 +474,8 @@ vector<Actor*> DataLoader::processAnimation(const string& file) {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + file);
 		actors.push_back(createAnimation(actorData));
 	}
-
+	vector<Actor*> actorsCopy(actors.begin(), actors.end());
+	animationCache.emplace(file + extra, actorsCopy);
 	return actors;
 }
 

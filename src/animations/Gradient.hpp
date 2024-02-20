@@ -26,7 +26,7 @@
 #ifndef GRADIENT_HPP_
 #define GRADIENT_HPP_ 1
 
-#define DEFAULT_TONES 5
+#define DEFAULT_TONES 10
 
 #define REQUIRED_PARAM_ACTOR_GRADIENT {"speed", "direction", "colors", "mode"}
 
@@ -39,7 +39,11 @@ class Gradient: public StepActor, public Colors {
 
 public:
 
-	enum class Modes : uint8_t {All, Sequential, Cyclic};
+	/**
+	 * All: will gradient every element with the same color.
+	 * Cyclic: Will create a smooth gradient over the elements in the group.
+	 */
+	enum class Modes : uint8_t {All, Cyclic};
 
 	Gradient(umap<string, string>& parameters, Group* const layout);
 

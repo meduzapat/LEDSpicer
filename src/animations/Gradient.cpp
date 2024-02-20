@@ -27,53 +27,34 @@ using namespace LEDSpicer::Animations;
 Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
 	Colors(parameters["colors"]),
-	mode(str2mode(parameters["mode"]))
+	mode(str2mode(parameters["mode"])),
+	tones(parameters.count("tones") ? Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number") : DEFAULT_TONES)
 {
+	// Add the first color to the end so the gradient ends in the same color that started.
+	colors.push_back(colors.front());
 
-	// Number of tones between two colors.
-	if (parameters.count("tones"))
-		tones = Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number");
-	if (not tones)
-		tones = DEFAULT_TONES;
-
-	if (totalStepFrames > 2)
-		setTotalStepFrames(totalStepFrames / 2);
+	// Calculate speed and tones base on speed.
+	tones *= static_cast<float>(speed) + 1;
+	// More speed less tones.
+	setTotalStepFrames(static_cast<float>(speed));
 
 	float
-		percent = 0,
-		increment;
-
-	switch (mode) {
-
-	case Modes::All:
-	case Modes::Sequential:
+		percent   = 0,
 		increment = 100.0 / tones;
-		break;
 
-	case Modes::Cyclic:
-		increment = 100.0 / (group->size() / static_cast<float>(colors.size()));
-		break;
-	}
-
-	uint8_t
-		lastColor = colors.size() - 1,
-		color     = 0,
-		nextColor = nextOf(Directions::Forward, color, Directions::Forward, lastColor);
-	for (size_t c = 0; c <= lastColor;) {
-		precalc.push_back(
-			colors[color]->transition(
-				*colors[nextColor],
-				percent
-			)
-		);
-		percent += increment;
-		if (percent > 99) {
-			percent   = 0;
-			color     = nextColor;
-			nextColor = nextOf(Directions::Forward, color, Directions::Forward, lastColor);
-			++c;
+	// Pre-calculate colors.
+	uint8_t lastColor = colors.size() - 1, nextColor;
+	for (size_t color = 0; color < lastColor; ++color) {
+		nextColor = color + 1;
+		percent = 0;
+		for (uint8_t tone = 0; tone < tones; ++tone) {
+			precalc.push_back(colors[color]->transition(*colors[nextColor], percent));
+			percent += increment;
 		}
+
 	}
+	// Return the colors to its normal shape, colors are only necessary for Draws().
+	colors.pop_back();
 	precalc.shrink_to_fit();
 	totalFrames = precalc.size() - 1;
 }
@@ -81,14 +62,13 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 void Gradient::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Gradient: " << DrawDirection(cDirection) << " F: " << static_cast<int>(getCurrentStep()) << endl;
+	cout << "Gradient: " << DrawDirection(cDirection) << " Frame " << static_cast<uint>(currentFrame) << endl;
 #endif
 
 	switch (mode) {
 	case Modes::All:
 		calculateSingle();
 		break;
-	case Modes::Sequential:
 	case Modes::Cyclic:
 		calculateMultiple();
 		break;
@@ -97,8 +77,9 @@ void Gradient::calculateElements() {
 
 void Gradient::drawConfig() {
 	cout <<
-		"Type: Gradient" <<  endl <<
-		"Mode: " << mode2str(mode) << endl;
+		"Type: Gradient"                     << endl <<
+		"Mode: "  << mode2str(mode)          << endl <<
+		"Tones: " << static_cast<int>(tones) << endl;
 	StepActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
@@ -108,8 +89,6 @@ void Gradient::drawConfig() {
 Gradient::Modes Gradient::str2mode(const string& mode) {
 	if (mode == "All")
 		return Modes::All;
-	if (mode == "Sequential")
-		return Modes::Sequential;
 	if (mode == "Cyclic")
 		return Modes::Cyclic;
 	LogError("Invalid mode " + mode + " assuming All");
@@ -120,8 +99,6 @@ string Gradient::mode2str(Modes mode) {
 	switch (mode) {
 	case Modes::All:
 		return "All";
-	case Modes::Sequential:
-		return "Sequential";
 	case Modes::Cyclic:
 		return "Cyclic";
 	}
@@ -129,31 +106,20 @@ string Gradient::mode2str(Modes mode) {
 }
 
 void Gradient::calculateSingle() {
-	if (speed != Speeds::VeryFast) {
-		uint8_t t = nextOf(getOppositeDirection(), currentFrame, cDirection, totalFrames);
-		changeElementsColor(precalc[currentFrame].transition(precalc[t], stepPercent * currentStepFrame), filter);
-	}
-	else {
-		changeElementsColor(precalc[currentFrame], filter);
+	// Paint all elements with the same color.
+	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
+		changeElementColor(c, precalc[currentFrame], filter);
 	}
 }
 
 void Gradient::calculateMultiple() {
-
-	uint8_t
-		frameT    = currentFrame,
-		preframeT = 0;
-
+	uint8_t frameT = currentFrame;
+	// Paint each element with a tone.
 	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
-		if (speed != Speeds::VeryFast) {
-			preframeT = nextOf(getOppositeDirection(), frameT, cDirection, precalc.size() - 1);
-			changeElementColor(c, precalc[frameT].transition(precalc[preframeT], stepPercent * currentStepFrame), filter);
-		}
-		else {
-			changeElementColor(c, precalc[frameT], filter);
-		}
-		frameT++;
-		if (frameT == precalc.size())
+		changeElementColor(c, precalc[frameT], filter);
+		if (frameT == totalFrames)
 			frameT = 0;
+		else
+			frameT++;
 	}
 }

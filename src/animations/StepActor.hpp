@@ -29,6 +29,8 @@ namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::StepActor
+ *
+ * Step actors will move from frame to frame in steps.
  */
 class StepActor: public DirectionActor {
 
