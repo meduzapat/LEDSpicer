@@ -191,7 +191,7 @@ void AudioActor::vuMeters() {
 				if (direction == Directions::Forward)
 					tintFn(val, 0, false);
 				else
-					tintFn(val, totalElements, true);
+					tintFn(val, totalElements -1, true);
 			}
 		}
 	}
@@ -207,7 +207,7 @@ void AudioActor::vuMeters() {
 				if (direction == Directions::Forward)
 					tintFn(val, getNumberOfElements() - 1, true);
 				else
-					tintFn(val, totalElements, false);
+					tintFn(val, totalElements - 1, false);
 			}
 		}
 	}

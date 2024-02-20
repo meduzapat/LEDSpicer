@@ -4,7 +4,7 @@
  * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -91,25 +91,17 @@ void Serial::disconnect() {
 
 	// Clear DTR
 	int status;
-	if (ioctl(fd, TIOCMGET, &status) == -1) {
-		close(fd);
-		throw Error("Error getting modem status");
-	}
+	ioctl(fd, TIOCMGET, &status);
 	status &= ~TIOCM_DTR;
-	if (ioctl(fd, TIOCMSET, &status) == -1) {
-		close(fd);
-		throw Error("Error clearing DTR");
-	}
-
+	ioctl(fd, TIOCMSET, &status);
 	struct termios tty;
-	if (tcgetattr(fd, &tty) != 0) {
-		close(fd);
-		throw Error("Error getting serial port settings");
-	}
+	tcgetattr(fd, &tty);
 	// Close the serial port
 	if (close(fd) < 0) {
+		fd = 0;
 		throw Error("Error closing serial port");
 	}
+	fd = 0;
 }
 
 void Serial::transferToConnection(vector<uint8_t>& data) const {
