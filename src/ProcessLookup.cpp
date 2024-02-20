@@ -36,11 +36,12 @@ Map* currentMap = nullptr;
 umap<string, Map> maps;
 
 void callEmitter(const string& rom, const string& system = "") {
+	string parameters(currentConfigFile != CONFIG_FILE ? "-c \"" + currentConfigFile + "\"" : "");
 	string command;
 	if (rom.empty())
-		command = "emitter FinishLastProfile";
+		command = "emitter FinishLastProfile " + parameters;
 	else
-		command = "emitter LoadProfileByEmulator " + rom + " " + system;
+		command = "emitter LoadProfileByEmulator " + rom + " " + system + " " + parameters;
 	LogDebug("Running: " + command);
 	if (std::system(command.c_str()) != EXIT_SUCCESS) {
 		LogWarning("Failed to execute " + command);
@@ -316,6 +317,8 @@ int main(int argc, char **argv) {
 
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
+
+	currentConfigFile = configFile;
 
 	try {
 

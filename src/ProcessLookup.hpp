@@ -64,6 +64,8 @@ namespace LEDSpicer {
 
 bool running = true;
 
+string currentConfigFile;
+
 int main(int argc, char **argv);
 
 #endif /* PROCESSLOOKUP_HPP_ */

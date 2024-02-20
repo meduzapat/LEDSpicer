@@ -96,7 +96,7 @@ struct PlayerData {
 	string toString();
 
 	/**
-	 * Rotates the restrictors if any.
+	 * @return the rotate code for this player
 	 */
 	string rotate();
 };
@@ -116,8 +116,9 @@ struct GameRecord {
 
 	/**
 	 * Call Rotate on every player.
+	 * @param extraParameters
 	 */
-	void rotate();
+	void rotate(const string& extraParameters);
 };
 
 /**

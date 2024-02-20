@@ -32,11 +32,15 @@ void Adalight::detectPort() {
 			try {
 				openHardware();
 			}
-			catch(...) {
+			catch(Error& e) {
+				LogDebug(e.getMessage());
 				continue;
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			auto data(transferFromConnection(128));
+			catch(...) {
+				LogDebug("Failed");
+			}
+//			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			auto data(transferFromConnection(1024));
 			string dataStr(data.begin(), data.end());
 			LogDebug("Answer: " + dataStr);
 			if (dataStr.find(ADALIGHT_MAGIC) != string::npos) {
@@ -44,6 +48,7 @@ void Adalight::detectPort() {
 				return;
 			}
 			try {
+				LogDebug("Magic not found.");
 				closeHardware();
 			}
 			catch(...) {}
