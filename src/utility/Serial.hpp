@@ -26,17 +26,19 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cstring> // For strerror
-#include "Connection.hpp"
+// to search ports
+#include <fstream>
 // To be used when connection need to wait.
 #include <chrono>
 #include <thread>
+#include "Connection.hpp"
 
 #ifndef LSSERIAL_HPP_
 #define LSSERIAL_HPP_ 1
 
 /// Ports to scan: ignoring old or unrelated like /dev/ttyS
-#define DEFAULT_SERIAL_PORTS {"/dev/ttyUSB", "/dev/ttyACM"}
-#define MAX_SERIAL_PORTS_TO_SCAN 10
+#define DEFAULT_SERIAL_PORTS {"ttyUSB", "ttyACM"}
+#define MAX_SERIAL_PORTS_TO_SCAN 5
 
 namespace LEDSpicer {
 
@@ -92,6 +94,13 @@ protected:
 	 * Sends the payload.
 	 */
 	virtual vector<uint8_t> transferFromConnection(uint size) const;
+
+	/**
+	 *
+	 * @param vendor
+	 * @return
+	 */
+	static string findPortByUsbId(const string& vendor);
 };
 
 } /* namespace */

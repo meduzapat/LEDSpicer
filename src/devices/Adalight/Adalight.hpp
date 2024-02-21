@@ -26,8 +26,9 @@
 #ifndef ADALIGHT_HPP_
 #define ADALIGHT_HPP_ 1
 
-#define ADALIGHT_NAME  "Adalight"
-#define ADALIGHT_MAGIC "Ada"
+#define ADALIGHT_NAME        "Adalight"
+#define ADALIGHT_MAGIC       "Ada"
+#define ADALIGHT_PRODUCT_IDS {"2E8A/1075", "838/8918"}
 
 namespace LEDSpicer::Devices::Adalight {
 

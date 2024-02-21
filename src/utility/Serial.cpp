@@ -143,3 +143,22 @@ vector<uint8_t> Serial::transferFromConnection(uint size) const {
 	return response;
 #endif
 }
+
+string Serial::findPortByUsbId(const string& id) {
+	for (uint8_t c = 0; c < MAX_SERIAL_PORTS_TO_SCAN; ++c) {
+		for (const string& name : DEFAULT_SERIAL_PORTS) {
+			string search(name + to_string(c));
+			std::ifstream file("/sys/class/tty/" + search + "/device/uevent");
+			if (not file.is_open())
+				continue;
+			std::string line;
+			while (std::getline(file, line)) {
+				if (line.find(id) != std::string::npos) {
+					LogDebug("Port found at " + search);
+					return "/dev/" + search;
+				}
+			}
+		}
+	}
+	return "";
+}

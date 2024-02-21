@@ -25,13 +25,13 @@
 #ifndef RESTRICTORS_TOS428_HPP_
 #define RESTRICTORS_TOS428_HPP_ 1
 
-#define TOS428_NAME     "TOS428"
-#define TOS428_FULLNAME "GRS TOS Restrictor"
-#define TOS428_MAX_ID   4
-#define TOS428_PORT     "/dev/ttyACM"
-#define TOS428_MAX_PORT 10
-#define TOS428_FLAG     "tos428"
-
+#define TOS428_NAME       "TOS428"
+#define TOS428_FULLNAME   "GRS TOS Restrictor"
+#define TOS428_MAX_ID     4
+#define TOS428_PORT       "/dev/ttyACM"
+#define TOS428_MAX_PORT   10
+#define TOS428_FLAG       "tos428"
+#define TOS428_PRODUCT_ID "2341/8036"
 #define TOS428_DATA(player, ways) {'s', 'e', 't', 'w', 'a', 'y', ',', player, ',', ways}
 
 namespace LEDSpicer::Restrictors {
@@ -62,9 +62,6 @@ protected:
 	virtual void detectPort();
 
 	void createPackage(Ways way, uint8_t target);
-
-	bool sendGreetings();
-
 };
 
 } /* namespace */

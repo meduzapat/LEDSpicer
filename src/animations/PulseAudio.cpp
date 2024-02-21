@@ -108,8 +108,8 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 	case PA_CONTEXT_CONNECTING:
 #ifdef DEVELOP
 		LogDebug("Connecting context.");
-		break;
 #endif
+		break;
 	case PA_CONTEXT_AUTHORIZING:
 	case PA_CONTEXT_SETTING_NAME:
 		break;
@@ -128,8 +128,12 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 			context,
 			[] (pa_context* context, pa_subscription_event_type_t type, uint32_t idx, void* userdata) {
 				if (type == PA_SUBSCRIPTION_EVENT_CHANGE) {
+#ifdef DEVELOP
 					LogDebug("context event changed");
+#endif
+					// reset top value.
 					top = TOP;
+					onSinkInfo(context, nullptr, 0, userdata);
 				}
 			},
 			nullptr
@@ -296,12 +300,17 @@ void PulseAudio::calcPeak() {
 void PulseAudio::calcPeaks() {
 
 	uint16_t v;
-	for (size_t c = 0; c < rawData.size();) {
+	// read 2 by 2
+	auto size(rawData.size());
+	if (not size)
+		return;
+	for (size_t c = 0; c < size;) {
 		Values value;
+		// read left
 		v = abs(rawData[c++]);
 		if (v > top)
 			top = v;
-		v = TO_PERC(v);
+		v = v ? TO_PERC(v) : 0;
 		if (v > value.r) {
 			value.r = v;
 		}
