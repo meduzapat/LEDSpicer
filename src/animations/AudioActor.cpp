@@ -95,9 +95,9 @@ void AudioActor::resetPeaks() {
 	if (frame == lastFs) {
 		return;
 	}
-	calcPeaks();
 	lastFs = frame;
 	values.clear();
+	calcPeaks();
 }
 
 #ifdef DEVELOP
@@ -216,6 +216,9 @@ void AudioActor::vuMeters() {
 void AudioActor::levels() {
 
 	resetPeaks();
+
+	if (not values.size())
+		return;
 
 	uint8_t e = userPref.channel == Channels::Both ? totalElements : 0;
 	for (uint8_t c = 0, c2 = 0; c < totalElements; ++c, ++c2) {

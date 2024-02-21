@@ -22,6 +22,9 @@
 
 /// This header file defines the USB Vendor code for several brands used by the devices supported by LEDSpicer.
 
+#ifndef BRANDS_HPP_
+#define BRANDS_HPP_ 1
+
 /// Ultimarc USB vendor code.
 #define ULTIMARC_VENDOR 0xD209
 
@@ -31,6 +34,4 @@
 /// WolfWare Tech USB vendor code.
 #define WOLFWARETECH_VENDOR 0x03EB
 
-/// A Custom Arcade codes
-/// BOARD_USB_VID=0x0838 BOARD_USB_PID=0x8918
-/// BOARD_USB_VID=0x2e8a BOARD_USB_PID=0x1075
+#endif /* BRANDS_HPP_ */

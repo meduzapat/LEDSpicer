@@ -26,32 +26,10 @@
 using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::detectPort() {
-	for (uint8_t c = 0; c < MAX_SERIAL_PORTS_TO_SCAN; ++c) {
-		for (auto port : DEFAULT_SERIAL_PORTS) {
-			(this->port = string(port)).push_back(c + '0');
-			try {
-				openHardware();
-			}
-			catch(Error& e) {
-				LogDebug(e.getMessage());
-				continue;
-			}
-			catch(...) {
-				LogDebug("Failed");
-			}
-//			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-			auto data(transferFromConnection(1024));
-			string dataStr(data.begin(), data.end());
-			LogDebug("Answer: " + dataStr);
-			if (dataStr.find(ADALIGHT_MAGIC) != string::npos) {
-				LogDebug("Adalight protocol device found at " + this->port);
-				return;
-			}
-			try {
-				LogDebug("Magic not found.");
-				closeHardware();
-			}
-			catch(...) {}
+	for (const string& adaID : ADALIGHT_PRODUCT_IDS) {
+		port = findPortByUsbId("PRODUCT=" + adaID);
+		if (not port.empty()) {
+			return;
 		}
 	}
 	throw Error("Unable to autodetect the serial port.");
