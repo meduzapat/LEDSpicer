@@ -27,7 +27,7 @@ using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::detectPort() {
 	for (const string& adaID : ADALIGHT_PRODUCT_IDS) {
-		port = findPortByUsbId("PRODUCT=" + adaID);
+		port = findPortByUsbId(adaID);
 		if (not port.empty()) {
 			return;
 		}
