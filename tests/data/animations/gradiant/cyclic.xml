@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="Cyclic"
+		speed="VerySlow"
+		filter="Combine"
+		direction="Forward"
+	/>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="Cyclic"
+		speed="Normal"
+		filter="Combine"
+		direction="ForwardBouncing"
+	/>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="Cyclic"
+		speed="Fast"
+		filter="Combine"
+		direction="BackwardBouncing"
+	/>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="Cyclic"
+		speed="VeryFast"
+		filter="Combine"
+		direction="Backward"
+	/>
+</LEDSpicer>

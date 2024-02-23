@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="Pulse"
+		group="All"
+		color="Magenta"
+		speed="VerySlow"
+		filter="Combine"
+		direction="Forward"
+		mode="Linear"
+	/>
+	<actor
+		type="Pulse"
+		group="All"
+		color="Yellow"
+		speed="VerySlow"
+		filter="Combine"
+		direction="Backward"
+		mode="Linear"
+	/>
+	<actor
+		type="Pulse"
+		group="All"
+		colors="Red, Green, Blue"
+		speed="VerySlow"
+		filter="Combine"
+		direction="ForwardBouncing"
+		mode="Linear"
+	/>
+	<actor
+		type="Pulse"
+		group="All"
+		speed="VeryFast"
+		filter="Combine"
+		direction="BackwardBouncing"
+		mode="Linear"
+	/>
+</LEDSpicer>

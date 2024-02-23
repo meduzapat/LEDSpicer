@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Profile"
+	backgroundColor="LightBlue"
+>
+	<animations>
+		<animation name="test/serpentine/serpentineForwardNoTail" />
+		<animation name="test/serpentine/serpentineFBNoTail" />
+		<animation name="test/serpentine/serpentineFBTail" />
+		<animation name="test/serpentine/serpentineForwardTail" />
+		<animation name="test/serpentine/serpentineBackwardNoTail" />
+		<animation name="test/serpentine/serpentineBBNoTail" />
+		<animation name="test/serpentine/serpentineBBTail" />
+		<animation name="test/serpentine/serpentineBackwardTail" />
+	</animations>
+</LEDSpicer>

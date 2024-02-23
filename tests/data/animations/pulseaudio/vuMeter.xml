@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="PulseAudio"
+		group="All"
+		filter="Combine"
+		direction="Forward"
+		mode="VuMeter"
+		off="Black"
+		low="AlmostBlack"
+		mid="DimGray"
+		high="White"
+		channel="Both"
+	/>
+	<actor
+		type="PulseAudio"
+		group="All"
+		filter="Combine"
+		direction="Forward"
+		mode="VuMeter"
+		off="Black"
+		low="Green"
+		mid="Yellow"
+		high="Red"
+		channel="Right"
+	/>
+	<actor
+		type="PulseAudio"
+		group="All"
+		filter="Combine"
+		direction="Backward"
+		mode="VuMeter"
+		off="Black"
+		low="Green"
+		mid="Yellow"
+		high="Red"
+		channel="Left"
+	/>
+	<actor
+		type="PulseAudio"
+		group="All"
+		filter="Combine"
+		direction="Forward"
+		mode="VuMeter"
+		off="Black"
+		low="VeryDarkYellow"
+		mid="Yellow"
+		high="LightYellow"
+		channel="Mono"
+	/>
+</LEDSpicer>

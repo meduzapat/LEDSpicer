@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="All"
+		speed="VerySlow"
+		filter="Combine"
+		direction="Forward"
+		tones="1"
+	/>
+	<actor
+		type="Gradient"
+		group="All"
+		colors="Red,Green,Blue"
+		mode="All"
+		speed="VeryFast"
+		filter="Combine"
+		direction="Backward"
+		tones="3"
+	/>
+</LEDSpicer>

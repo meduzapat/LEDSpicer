@@ -28,7 +28,7 @@
 
 #define ADALIGHT_NAME        "Adalight"
 #define ADALIGHT_MAGIC       "Ada"
-#define ADALIGHT_PRODUCT_IDS {"2E8A/1075", "838/8918", "ch341-uart"}
+#define ADALIGHT_PRODUCT_IDS {"2e8a/1075", "838/8918", "ch341-uart"}
 
 namespace LEDSpicer::Devices::Adalight {
 

@@ -129,7 +129,7 @@ void Serpentine::drawConfig() {
 	tailColor.drawColor();
 	cout <<
 		", Length: " << static_cast<int>(tailData.size()) <<
-		", Intensity: " << (tailData.front().percent + tailData.back().percent) <<
+		", Intensity: " << (tailData.front().percent + 0) <<
 		"%" << endl
 		<< SEPARATOR << endl;
 }
