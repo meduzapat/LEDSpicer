@@ -110,6 +110,14 @@ public:
 	);
 
 	/**
+	 * Merge an array into a string using a delimiter.
+	 * @param values
+	 * @param delimiter
+	 * @return
+	 */
+	static string implode(const vector<string>& values, const char& delimiter);
+
+	/**
 	 * Verify that a number is between two vales
 	 * @param val subject
 	 * @param min minimum

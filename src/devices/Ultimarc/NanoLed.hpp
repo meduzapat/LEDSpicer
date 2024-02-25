@@ -6,10 +6,10 @@
  * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  */
 
+#include "FF00SharedCode.hpp"
+
 #ifndef NANOLED_HPP_
 #define NANOLED_HPP_ 1
-
-#include "FF00SharedCode.hpp"
 
 #define NANO_LED_NAME       "Ultimarc NanoLed"
 #define NANO_LED_PRODUCT    0x1481

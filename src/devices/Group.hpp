@@ -53,8 +53,8 @@ public:
 
 		Item() = default;
 
-		Item(Group* group, const Color* color, Color::Filters filter) :
-			Items(color, filter),
+		Item(Group* group, const Color* color, Color::Filters filter, uint pos = 0) :
+			Items(color, filter, pos),
 			group(group) {}
 
 		Item(const Item& item) : Items(item), group(item.group) {}
@@ -62,9 +62,10 @@ public:
 		Item(Item&& item) : Items(item), group(std::move(item.group)) {}
 
 		Item& operator=(const Item& item) {
-			group     = item.group;
-			color     = item.color;
-			filter    = item.filter;
+			group  = item.group;
+			color  = item.color;
+			filter = item.filter;
+			pos    = item.pos;
 			return *this;
 		}
 

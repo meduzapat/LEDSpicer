@@ -272,11 +272,22 @@ protected:
 	static Actor* createAnimation(umap<string, string>& actorData);
 
 	/**
-	 * Extracts input map data.
-	 * @param inputNode
-	 * @param input
+	 * Extract a list of input sources (listen events in the kernel)
+	 * @param inputName current input file
+	 * @param inputNode the input node
+	 * @return an array with the sources.
+	 * @throws exception if not found or is not valid.
 	 */
-	static umap<string, Items*> processInputMap(tinyxml2::XMLElement* inputNode);
+	static vector<string> processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode);
+
+	/**
+	 * Decorates input map data.
+	 * @param inputNode XML node from where the maps will be extracted
+	 * @param inputMap where the new maps will be stored.
+	 * @param id only used to differentiate sources.
+	 * @return
+	 */
+	static void processInputMap(tinyxml2::XMLElement* inputNode, umap<string, Items*>& inputMaps, const string& id = "");
 
 	/**
 	 * Prepares the filenames.

@@ -288,7 +288,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 dnl Dump the build configuration for the developer
-AC_MSG_RESULT([\n--------- build environment -----------
+AC_MSG_RESULT([--------- build environment -----------
 Program      : $PACKAGE_NAME
 Version      : $PACKAGE_VERSION
 WebSite      : $PACKAGE_URL

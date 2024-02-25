@@ -53,21 +53,33 @@ public:
 
 protected:
 
-	/// poll of events.
-	static vector<input_event> events;
+	struct ListenEventData {
+		int     rCode;
+		uint8_t index;
+	};
+
+	struct ReadData {
+		string trigger;
+		uint16_t type;
+		int value;
+	};
+
+	/// Detailed poll of events.
+	static vector<ReadData> events;
 
 	/// The first plugin will handle the reads.
 	static Input* readController;
 
 	/**
-	 * list of input device and their resource.
+	 * list of input device with their resource and index.
 	 */
-	static umap<string, int> listenEvents;
+	static umap<string, ListenEventData> listenEvents;
 
 	/**
 	 * Reads all the events.
 	 */
 	void readAll();
+
 };
 
 } /* namespace */
