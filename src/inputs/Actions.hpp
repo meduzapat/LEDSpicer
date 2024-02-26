@@ -20,11 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACTIONS_HPP_
-#define ACTIONS_HPP_ 1
-
 #include "utility/Speed.hpp"
 #include "Reader.hpp"
+
+#ifndef ACTIONS_HPP_
+#define ACTIONS_HPP_ 1
 
 namespace LEDSpicer::Inputs {
 
@@ -65,7 +65,7 @@ protected:
 
 		Record() = default;
 
-		Record(uint16_t map, bool active, Items* item, Record* next) :
+		Record(string map, bool active, Items* item, Record* next) :
 			map(map),
 			active(active),
 			item(item),
@@ -77,15 +77,16 @@ protected:
 			item(other.item),
 			next(other.next) {}
 
-		/// Key Map value.
-		uint16_t map = 0;
+		/// trigger map value.
+		string map = 0;
 
 		/// If true, the item is active.
 		bool active = false;
-		/// Element to turn on when called.
+
+		/// Element or Group to turn on when called.
 		Items* item = nullptr;
 
-		/// Next element on the list.
+		/// Next element or Group on the list.
 		Record* next = nullptr;
 	};
 
@@ -100,13 +101,13 @@ protected:
 	vector<vector<Record>> groupsMaps;
 
 	/// Small lookup table to avoid a loop every time we need to seek a value.
-	umap<uint16_t, LookupMap> groupMapLookup;
+	umap<string, LookupMap> groupMapLookup;
 
-	/// list of 1st elements for groups.
-	vector<uint16_t> firstItems;
+	/// list of the trigger of the first elements of each group.
+	vector<string> firstItems;
 
 	/// Elements or Groups blinking.
-	umap<uint16_t, Items*> blinkingItems;
+	umap<string, Items*> blinkingItems;
 
 	void blink();
 

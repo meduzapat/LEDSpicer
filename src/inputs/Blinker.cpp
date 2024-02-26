@@ -43,14 +43,13 @@ void Blinker::process() {
 		if (not event.value)
 			continue;
 
-		string codeName = std::to_string(event.code);
-		if (itemsMap.count(codeName)) {
-			LogDebug("key: " + codeName + " adds: " + to_string(times) + " times to element: " + itemsMap[codeName]->getName());
+		if (itemsMap.count(event.trigger)) {
+			LogDebug("key: " + event.trigger + " adds: " + to_string(times) + " times to element: " + itemsMap[event.trigger]->getName());
 			// switch
-			if (blinkingItems.count(event.code))
-				blinkingItems[event.code].times = 0;
+			if (blinkingItems.count(event.trigger))
+				blinkingItems[event.trigger].times = 0;
 			else
-				blinkingItems.emplace(event.code, Times{itemsMap[codeName], 0});
+				blinkingItems.emplace(event.trigger, Times{itemsMap[event.trigger], 0});
 		}
 	}
 }
@@ -71,18 +70,17 @@ void Blinker::blink() {
 	if (frames == cframe) {
 		cframe = 0;
 		for (auto& i : blinkingItems) {
-			string name = std::to_string(i.first);
 			// deactivate after time passed.
 			if (i.second.times == times) {
-				controlledItems->erase(name);
+				controlledItems->erase(i.first);
 				itemsToClean.push_back(i.first);
 				continue;
 			}
 			if (on) {
-				controlledItems->erase(name);
+				controlledItems->erase(i.first);
 			}
 			else {
-				controlledItems->emplace(name, i.second.item);
+				controlledItems->emplace(i.first, i.second.item);
 				++i.second.times;
 			}
 		}
