@@ -25,12 +25,22 @@
 
 using namespace LEDSpicer::Devices::Adalight;
 
+void Adalight::detectPort() {
+	for (const string& adaID : ADALIGHT_PRODUCT_IDS) {
+		port = findPortByUsbId(adaID);
+		if (not port.empty()) {
+			return;
+		}
+	}
+	throw Error("Unable to autodetect the serial port.");
+}
+
 void Adalight::transfer() const {
 
 	// Ada Serial devices assumes RGB LEDs, cannot address individual pins.
 	uint16_t
-		numPins = LEDs.size(),
-		numLeds = (numPins / 3) - 1;
+		numPins(LEDs.size()),
+		numLeds((numPins / 3) - 1);
 	/*
 	ADAlight header.
 	hi = (numLeds << 8) & 0xFF;
@@ -41,7 +51,7 @@ void Adalight::transfer() const {
 		// Magic word
 		'A', 'd', 'a',
 		// LED count high byte
-		(numLeds << 8) & 0xFF,
+		static_cast<uint8_t>((numLeds << 8) & 0xFF),
 		// LED count low byte
 		static_cast<uint8_t>(numLeds & 0xFF)
 	};

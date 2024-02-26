@@ -93,6 +93,17 @@ vector<string> Utility::explode(const string& text, const char delimiter, const 
 	return temp;
 }
 
+string Utility::implode(const vector<string>& values, const char& delimiter) {
+	string r;
+	if (values.empty())
+		return r;
+	for (const string& s : values) {
+		r += s + delimiter;
+	}
+	r.resize(r.size() - 1);
+	return r;
+}
+
 string Utility::hex2str(int number) {
 	std::stringstream stream;
 	stream << std::hex << std::showbase << number;

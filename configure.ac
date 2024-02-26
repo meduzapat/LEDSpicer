@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.5.8],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.5.9],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
 AC_COPYRIGHT([Copyright © 2018 - 2024 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
@@ -288,7 +288,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 dnl Dump the build configuration for the developer
-AC_MSG_RESULT([\n--------- build environment -----------
+AC_MSG_RESULT([--------- build environment -----------
 Program      : $PACKAGE_NAME
 Version      : $PACKAGE_VERSION
 WebSite      : $PACKAGE_URL

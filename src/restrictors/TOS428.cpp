@@ -4,7 +4,7 @@
  * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -54,13 +54,9 @@ void TOS428::rotate(const umap<string, Ways>& playersData) {
 }
 
 void TOS428::detectPort() {
-	for (uint8_t c = 0; c < TOS428_MAX_PORT; ++c) {
-		(port = string(TOS428_PORT)).push_back(c + '0');
-		RestrictorSerial::openHardware();
-		if (sendGreetings())
-			break;
-		RestrictorSerial::closeHardware();
-	}
+	port = findPortByUsbId("PRODUCT=" TOS428_PRODUCT_ID);
+	if (port.empty())
+		throw Error("Unable to autodetect the serial port.");
 }
 
 void TOS428::createPackage(Ways way, uint8_t target) {
@@ -78,17 +74,4 @@ void TOS428::createPackage(Ways way, uint8_t target) {
 	vector<uint8_t> data TOS428_DATA(static_cast<uint8_t>(target + '0'), w);
 	transferToConnection(data);
 	std::this_thread::sleep_for(std::chrono::microseconds(1000));
-}
-
-bool TOS428::sendGreetings() {
-	LogDebug("Sending greetings");
-	vector<uint8_t> data {'g', 'e', 't', 'w', 'e', 'l', 'c', 'o', 'm', 'e'};
-	transferToConnection(data);
-	// Have to add some delay or the message gets cut.
-	std::this_thread::sleep_for(std::chrono::microseconds(2000));
-	data = transferFromConnection(128);
-	string dataStr(data.begin(), data.end());
-	std::this_thread::sleep_for(std::chrono::microseconds(1000));
-	LogDebug("Answer: " + dataStr);
-	return (dataStr.find(TOS428_FLAG) != string::npos);
 }

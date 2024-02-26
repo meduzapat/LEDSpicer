@@ -36,28 +36,40 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 		return;
 
 	uint groupIdx = 0;
-	// This is a list of linked maps separated by ID_GROUP_SEPARATOR ex 1,2,3|4,5,6|etc..
-	for (auto& l : Utility::explode(linkedTriggers, ID_GROUP_SEPARATOR)) {
-		// This is a list of two or more triggers, separated by ID_SEPARATOR ex: 1,2,3.
-		auto group = Utility::explode(l, ID_SEPARATOR);
-		if (group.size() < 2) {
+	// This is a list of linked maps (position) separated by ID_GROUP_SEPARATOR ex: 1,2,3|4,5,6|etc..
+	for (auto& linkGroup : Utility::explode(linkedTriggers, ID_GROUP_SEPARATOR)) {
+		// This is a list of two or more positions, separated by ID_SEPARATOR ex: 1,2,3.
+		auto groupMapIDs = Utility::explode(linkGroup, ID_SEPARATOR);
+		if (groupMapIDs.size() < 2) {
 			LogWarning("Ignoring group with less than two items.");
 			continue;
 		}
 		// Extract group info.
 		vector<Record> tempRecord;
-		uint mapIdx = 0;
+		uint mapIdx    = 0;
 		bool firstItem = true;
-		for (auto& link : group) {
-			Utility::trim(link);
-			uint16_t map = Utility::parseNumber(link, "Unable to parse number");
-			tempRecord.emplace_back(std::move(Record(map, firstItem, itemsMap[link], nullptr)));
+		for (auto& mapId : groupMapIDs) {
+			Utility::trim(mapId);
+			// Convert mapId to trigger.
+			uint16_t mapCode = Utility::parseNumber(mapId, "Unable to parse map ID, is not a number");
+			string trigger;
+			for (const auto& pair : itemsMap) {
+				if (pair.second->pos == mapCode) {
+					trigger = pair.first;
+					break;
+				}
+			}
+			if (trigger.empty()) {
+				throw Error("Ignoring invalid map ID " + mapId);
+				continue;
+			}
+			tempRecord.emplace_back(std::move(Record{trigger, firstItem, itemsMap[trigger], nullptr}));
 			if (firstItem) {
-				firstItems.push_back(map);
+				firstItems.push_back(trigger);
 				firstItem = false;
 			}
 			// Update lookup table.
-			groupMapLookup.emplace(map, LookupMap{groupIdx, mapIdx++});
+			groupMapLookup.emplace(trigger, LookupMap{groupIdx, mapIdx++});
 		}
 		// Link last element to 1st element.
 		tempRecord.back().next = &tempRecord[0];
@@ -84,42 +96,41 @@ void Actions::process() {
 		if (not event.value)
 			continue;
 
-		string eventCodeStr = to_string(event.code);
-		if (not itemsMap.count(eventCodeStr))
+		if (not itemsMap.count(event.trigger))
 			continue;
 
-		if (controlledItems->count(eventCodeStr))
-			controlledItems->erase(eventCodeStr);
+		if (controlledItems->count(event.trigger))
+			controlledItems->erase(event.trigger);
 
 		// Non Grouped elements.
-		if (not groupMapLookup.count(event.code)) {
-			if (blinkingItems.count(event.code)) {
-				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " stop blinking");
-				blinkingItems.erase(event.code);
+		if (not groupMapLookup.count(event.trigger)) {
+			if (blinkingItems.count(event.trigger)) {
+				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " stop blinking");
+				blinkingItems.erase(event.trigger);
 			}
 			else {
-				LogDebug("key: " + eventCodeStr + " for " + itemsMap[eventCodeStr]->getName() + " start blinking");
-				blinkingItems.emplace(event.code, itemsMap[eventCodeStr]);
+				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " start blinking");
+				blinkingItems.emplace(event.trigger, itemsMap[event.trigger]);
 			}
 			continue;
 		}
 
 		// grouped elements.
-		Record& groupMap = groupsMaps[groupMapLookup[event.code].groupIdx][groupMapLookup[event.code].mapIdx];
+		Record& groupMap = groupsMaps[groupMapLookup[event.trigger].groupIdx][groupMapLookup[event.trigger].mapIdx];
 		if (groupMap.active) {
 			groupMap.active = false;
-			blinkingItems.erase(event.code);
+			blinkingItems.erase(event.trigger);
 			blinkingItems.emplace(groupMap.next->map, groupMap.next->item);
 			groupMap.next->active = true;
-			LogDebug("key: " + eventCodeStr + " for " + groupMap.item->getName() + " switches to: " + groupMap.next->item->getName());
+			LogDebug("key: " + event.trigger + " for " + groupMap.item->getName() + " switches to: " + groupMap.next->item->getName());
 		}
 	}
 }
 
 void Actions::activate() {
-	for (uint16_t map : firstItems) {
-		Record& groupMap = groupsMaps[groupMapLookup[map].groupIdx][groupMapLookup[map].mapIdx];
-		blinkingItems.emplace(map, groupMap.item);
+	for (auto& trigger : firstItems) {
+		Record& groupMap = groupsMaps[groupMapLookup[trigger].groupIdx][groupMapLookup[trigger].mapIdx];
+		blinkingItems.emplace(trigger, groupMap.item);
 		groupMap.active = true;
 	}
 	Reader::activate();
@@ -150,17 +161,17 @@ void Actions::drawConfig() {
 void Actions::blink() {
 	if (not doBlink) {
 		for (auto& e : blinkingItems)
-			if (not controlledItems->count(std::to_string(e.first)))
-				controlledItems->emplace(std::to_string(e.first), e.second);
+			if (not controlledItems->count(e.first))
+				controlledItems->emplace(e.first, e.second);
 		return;
 	}
 	if (frames == cframe) {
 		cframe = 0;
 		for (auto& e : blinkingItems) {
 			if (on)
-				controlledItems->erase(std::to_string(e.first));
+				controlledItems->erase(e.first);
 			else
-				controlledItems->emplace(std::to_string(e.first), e.second);
+				controlledItems->emplace(e.first, e.second);
 		}
 		on = not on;
 	}

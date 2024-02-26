@@ -30,7 +30,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	tailColor(Color::getColor(parameters["tailColor"]))
 {
 
-	// tail cannot be larger than the array, serpentine will overlap.
+	// Tail cannot be larger than the array, serpentine will overlap.
 	uint8_t tailLength = Utility::parseNumber(
 		parameters["tailLength"],
 		"Invalid tailLength, enter a number 0 - " + to_string(totalFrames)
@@ -42,22 +42,21 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	if (not tailLength)
 		return;
 
-	tailData.resize(tailLength);
-	tailData.shrink_to_fit();
-
 	uint8_t tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
 	if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
 		throw Error("Invalid tailIntensity, enter a number 0-100");
 
-	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1);
-	Directions tailDirection = getOppositeDirection();
-	uint8_t firstTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
-	for (uint8_t c = 0; c < tailData.size(); c++) {
-		tailData[c].percent  = tailweight * (tailData.size() - c);
-		if (tailDirection == Directions::Forward)
-			tailData[c].position = firstTail + c;
+	tailData.resize(tailLength);
+	tailData.shrink_to_fit();
+
+	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1), intensity = 0;
+	for (auto& tail : tailData) {
+		tail.percent = tailIntensity - intensity;
+		if (direction == Directions::Forward)
+			tail.position = 0;
 		else
-			tailData[c].position = firstTail - c;
+			tail.position = group->size() - 1;
+		intensity += tailweight;
 	}
 }
 
@@ -67,22 +66,19 @@ void Serpentine::calculateElements() {
 	cout << "Serpentine: " << DrawDirection(cDirection) << " Pos: " << static_cast<int>(currentFrame + 1) << " ";
 #endif
 
+	// For very fast, a much simple algorithm can be used.
 	if (not tailData.size()) {
 		if (speed == Speeds::VeryFast)
 			changeElementColor(currentFrame, *this, filter);
 		else
 			changeFrameElement(*this, true, direction);
-#ifdef DEVELOP
-	cout << endl;
-#endif
 		return;
 	}
 
-	if (speed == Speeds::VeryFast)
-		changeElementColor(currentFrame, *this, filter);
-	else
-		changeFrameElement(tailColor, *this, direction);
 	calculateTailPosition();
+#ifdef DEVELOP
+	cout << "Tail: ";
+#endif
 	for (auto& data : tailData) {
 		switch (filter) {
 		case Color::Filters::Mask:
@@ -97,17 +93,20 @@ void Serpentine::calculateElements() {
 			);
 		}
 #ifdef DEVELOP
-		cout << static_cast<int>(data.position + 1) << " ";
+		cout << static_cast<int>(data.position + 1) << "=" << static_cast<int>(data.percent) << "% ";
 #endif
 	}
-#ifdef DEVELOP
-	cout << endl;
-#endif
+
+	// For very fast, a much simple algorithm can be used.
+	if (speed == Speeds::VeryFast)
+		changeElementColor(currentFrame, *this, filter);
+	else
+		changeFrameElement(tailColor, *this, direction);
 }
 
 void Serpentine::calculateTailPosition() {
 	Directions tailDirection = getOppositeDirection();
-	uint8_t lastTail = calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
+	uint8_t lastTail = currentFrame; //calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
 	// Avoid changing the tail when doing the same frame.
 	if (tailData[0].position == lastTail)
 		return;
@@ -130,7 +129,7 @@ void Serpentine::drawConfig() {
 	tailColor.drawColor();
 	cout <<
 		", Length: " << static_cast<int>(tailData.size()) <<
-		", Intensity: " << (tailData.front().percent + tailData.back().percent) <<
+		", Intensity: " << (tailData.front().percent + 0) <<
 		"%" << endl
 		<< SEPARATOR << endl;
 }

@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
 
 	bool
 		craftProfile = false,
+		replace      = false,
 		rotate       = true,
 		useColors    = false;
 
@@ -55,27 +56,28 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::LoadProfileByEmulator) <<
 				" rom platform  Attempts to load a profile based on the platform and the ROM name.\n" <<
 				Message::type2str(Message::Types::FinishLastProfile) <<
-				"                           Terminates the current profile (doens't affect the default).\n" <<
+				"                           Terminates the current profile (doesn't affect the default).\n" <<
 				Message::type2str(Message::Types::FinishAllProfiles) <<
-				"                           Removes every profile (doens't affect the default).\n" <<
+				"                           Removes every profile (doesn't affect the default).\n" <<
 				Message::type2str(Message::Types::SetElement) <<
 				" elementName color filter         Changes an element's background color until the profile ends.\n" <<
 				Message::type2str(Message::Types::ClearElement) <<
 				" elementName                    Removes an element's background color.\n" <<
 				Message::type2str(Message::Types::ClearAllElements) <<
-				"                            Removes all element's background color.\n" <<
+				"                            Removes all elements' background color.\n" <<
 				Message::type2str(Message::Types::SetGroup) <<
 				" groupName color filter             Changes a group's background color until the profile ends.\n" <<
 				Message::type2str(Message::Types::ClearGroup) <<
 				" groupName                        Removes a group's background color.\n" <<
 				Message::type2str(Message::Types::ClearAllGroups) <<
-				"                              Removes all group's background color.\n" <<
+				"                              Removes all groups' background color.\n" <<
 				"options:\n"
-				"-c <conf> or --config <conf> Use an alternative configuration file\n"
-				"-n or --no-rotate            Avoid trigger rotators(only used when LoadProfileByEmulator)\n"
-				"-v or --version              Display version information\n"
+				"-c <conf> or --config <conf> Use an alternative configuration file.\n"
+				"-n or --no-rotate            Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
+				"-r or --replace              Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator).\n"
+				"-v or --version              Display version information.\n"
 				"-h or --help                 Display this help screen.\n"
-				"If -c or --config is not provided emitter will use " CONFIG_FILE
+				"If -c or --config is not provided, emitter will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -97,6 +99,12 @@ int main(int argc, char **argv) {
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
 			configFile = argv[++i];
+			continue;
+		}
+
+		// Replace.
+		if (commandline == "-r" or commandline == "--replace") {
+			replace = true;
 			continue;
 		}
 
@@ -160,7 +168,7 @@ int main(int argc, char **argv) {
 			rotate = (xmlElement and xmlElement->FirstChildElement("restrictor"));
 		}
 
-		// Check request.
+		// Check request
 		vector<string> data = msg.getData();
 		if (msg.getType() == Message::Types::LoadProfileByEmulator) {
 			// parameter 1 is ROM, parameter 2 is system.
@@ -230,7 +238,8 @@ int main(int argc, char **argv) {
 
 				// Rotate restrictors.
 				if (rotate) {
-					gd.rotate();
+					string parameters(configFile != CONFIG_FILE ? "-c \"" + configFile + "\"" : "");
+					gd.rotate(parameters);
 				}
 				else {
 					LogDebug("No restrictors found");
@@ -241,7 +250,14 @@ int main(int argc, char **argv) {
 
 		// Open connection and send message.
 		Socks sock(LOCALHOST, port);
-		bool r = sock.send(msg.toString());
+		bool r;
+		if (replace and (msg.getType() == Message::Types::LoadProfile or msg.getType() == Message::Types::LoadProfileByEmulator)) {
+			LogDebug("replacing profile");
+			Message msgRotate{Message::Types::FinishLastProfile};
+			r = sock.send(msgRotate.toString());
+			LogDebug("Replacing Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
+		}
+		r = sock.send(msg.toString());
 		LogDebug("Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
 	}
 	catch(Error& e) {
@@ -483,8 +499,6 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
 
 		string tmp = buffer.data();
-
-
 		if (not found and tmp.find("[" + rom + "]") != string::npos) {
 			found = true;
 			continue;
@@ -498,11 +512,9 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 
 		Utility::trim(tmp);
 
-
 		auto parts = Utility::explode(tmp, '=');
 		if (parts.size() != 2)
 			continue;
-
 
 		auto pair = Utility::explode(parts[0], '_');
 			if (pair.size() != 2)
@@ -513,7 +525,6 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 		PlayerData& pd = gr.playersData[player];
 		if (pd.player.empty())
 			pd.player = player;
-
 		/*
 		 * Looks like the color file does not provide
 		 * information on the controller number, all games are one
@@ -577,24 +588,23 @@ void controlIniController2ledspicer(const string& controller, PlayerData& pd) {
 
 	if (controller.find("joy2way") != string::npos) {
 		pd.controllers.push_back(JOYSTICK);
-		pd.ways.push_back("2");
+		pd.ways    = {"2"};
 		return;
 	}
 
 	if (controller.find("doublejoy4way") != string::npos) {
 		pd.controllers.push_back(JOYSTICK);
 		pd.controllers.push_back(JOYSTICK);
-		pd.ways.push_back("4");
-		pd.ways.push_back("4");
+		pd.ways    = {"4", "4"};
 		return;
 	}
 
 	if (controller.find("joy4way") != string::npos) {
 		pd.controllers.push_back(JOYSTICK);
 		if (controller.find("Diagonal") != string::npos)
-			pd.ways.push_back("4x");
+			pd.ways    = {"4x"};
 		else
-			pd.ways.push_back("4");
+			pd.ways    = {"4"};
 		return;
 	}
 
@@ -602,15 +612,12 @@ void controlIniController2ledspicer(const string& controller, PlayerData& pd) {
 		pd.controllers.push_back(JOYSTICK);
 		pd.controllers.push_back(JOYSTICK);
 		pd.ways    = {"8", "8"};
-		pd.ways.push_back("8");
-		pd.ways.push_back("8");
 		return;
 	}
 
 	if (controller.find("joy8way") != string::npos) {
 		pd.controllers.push_back(JOYSTICK);
 		pd.ways    = {"8"};
-		pd.ways.push_back("8");
 		return;
 	}
 
@@ -646,8 +653,8 @@ vector<string> GameRecord::toString() {
 	return result;
 }
 
-void GameRecord::rotate() {
-	string command = "rotator ";
+void GameRecord::rotate(const string& extraParameters) {
+	string command("rotator " + extraParameters + " ");
 	for (auto& pd : playersData)
 		command += pd.second.rotate();
 	if (command == "rotator ") {

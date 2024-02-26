@@ -32,6 +32,7 @@ umap<string, Group> DataLoader::layout;
 Profile* DataLoader::defaultProfile;
 string DataLoader::defaultProfileName;
 umap<string, Profile*> DataLoader::profilesCache;
+umap<string, vector<Actor*>> DataLoader::animationCache;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
@@ -295,8 +296,10 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
 	// Check cache.
-	if (profilesCache.count(name + extra))
+	if (profilesCache.count(name + extra)) {
+		LogDebug("Profile from cache.");
 		return profilesCache.at(name + extra);
+	}
 
 	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
@@ -306,7 +309,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	/// @deprecated startTrasition only exist to keep retro-compatibility.
+	/// @deprecated startTrasition only exist to keep backward compatibility.
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
@@ -320,7 +323,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	/// @deprecated endTrasition only exist to keep retrocompatibility.
+	/// @deprecated endTrasition only exist to keep backward compatibility.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
 	if (xmlElement) {
 		umap<string, string> tempAttr = processNode(xmlElement);
@@ -341,7 +344,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_START_TRANSITIONS " inside profile " + name);
-			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+			for (auto a : processAnimation(tempAttr[PARAM_NAME], NODE_START_TRANSITIONS)) {
 				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
@@ -360,7 +363,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
 			tempAttr = processNode(xmlElement);
 			Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "animations for " NODE_END_TRANSITIONS " inside profile " + name);
-			for (auto a : processAnimation(tempAttr[PARAM_NAME])) {
+			for (auto a : processAnimation(tempAttr[PARAM_NAME], NODE_START_TRANSITIONS)) {
 				if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
 					if (a->acceptCycles())
 						a->setEndCycles(DEFAULT_ENDCYCLES);
@@ -449,7 +452,14 @@ Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 	return deviceHandlers[deviceName]->createDevice(deviceData);
 }
 
-vector<Actor*> DataLoader::processAnimation(const string& file) {
+vector<Actor*> DataLoader::processAnimation(const string& file, const string& extra) {
+
+	// Check cache.
+	if (animationCache.count(file + extra)) {
+		LogDebug("Animation from cache.");
+		vector<Actor*> actors(animationCache.at(file + extra).begin(), animationCache.at(file + extra).end());
+		return actors;
+	}
 
 	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
 
@@ -464,7 +474,8 @@ vector<Actor*> DataLoader::processAnimation(const string& file) {
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + file);
 		actors.push_back(createAnimation(actorData));
 	}
-
+	vector<Actor*> actorsCopy(actors.begin(), actors.end());
+	animationCache.emplace(file + extra, actorsCopy);
 	return actors;
 }
 
@@ -484,18 +495,57 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 
 void DataLoader::processInput(Profile* profile, const string& file) {
 	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
-	umap<string, string> elementAttr = processNode(inputFile.getRoot());
-	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, elementAttr, file);
-	string inputName = elementAttr[PARAM_NAME];
+	umap<string, string> inputAttr = processNode(inputFile.getRoot());
+	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, inputAttr, file);
+	string inputName = inputAttr[PARAM_NAME];
+	// If plugin is not loaded, load it.
 	if (not inputHandlers.count(inputName))
 		inputHandlers.emplace(inputName, new InputHandler(inputName));
-	umap<string, Items*> inputMapTmp = processInputMap(inputFile.getRoot());
-	profile->addInput(inputHandlers[inputName]->createInput(file, elementAttr, inputMapTmp));
+	umap<string, Items*> inputMapTmp;
+	try {
+		// Check for multiple source inputs
+		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
+		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);
+		tinyxml2::XMLElement* mapsNode = inputFile.getRoot()->FirstChildElement("maps");
+		uint count = 0;
+		for (size_t c = 0; c < listenEvents.size(); ++c) {
+			// Check for listenEvents, at this point everything is sanitized.
+			for (; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps")) {
+				umap<string, string> mapsNodeAttr = processNode(mapsNode);
+				Utility::checkAttributes({"source"}, mapsNodeAttr, listenEvents[c]);
+				if (mapsNodeAttr["source"] == listenEvents[c]) {
+					processInputMap(mapsNode, inputMapTmp, to_string(c));
+					break;
+				}
+			}
+		}
+	}
+	catch (...) {
+		// single source or malformed.
+		processInputMap(inputFile.getRoot(), inputMapTmp);
+	}
+	profile->addInput(inputHandlers[inputName]->createInput(file, inputAttr, inputMapTmp));
 }
 
-umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode) {
+vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode) {
+	// Check for listenEvents.
+	tinyxml2::XMLElement* listenEventsNode = inputNode->FirstChildElement("listenEvents");
+	if (not listenEventsNode) {
+		throw;
+	}
+	vector<string> listenEvents;
+	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
+	for (; listenEventsNode; listenEventsNode = listenEventsNode->NextSiblingElement("listenEvent")) {
+		umap<string, string> listenEventsAttr = processNode(listenEventsNode);
+		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, listenEventsAttr, inputName);
+		listenEvents.push_back(listenEventsAttr[PARAM_NAME]);
+	}
+	if (listenEvents.empty())
+		throw;
+	return listenEvents;
+}
 
-	umap<string, Items*> itemsMap;
+void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, umap<string, Items*>& inputMaps, const string& id) {
 
 	tinyxml2::XMLElement* maps = inputNode->FirstChildElement("map");
 	for (; maps; maps = maps->NextSiblingElement("map")) {
@@ -507,15 +557,17 @@ umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode
 				throw LEDError("Unknown Element " + elementAttr["target"] + " on map file");
 
 			// Check dupes and add
-			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
+			if (inputMaps.count(elementAttr["trigger"]) and inputMaps[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated element map for " + elementAttr["target"] + " map " + elementAttr["value"]);
 
-			auto& e = allElements[elementAttr["target"]];
-			itemsMap.emplace(elementAttr["trigger"], new Element::Item(
+			auto e = allElements[elementAttr["target"]];
+			inputMaps.emplace(id + elementAttr["trigger"], new Element::Item(
 				e,
 				elementAttr.count(PARAM_COLOR) ? &Color::getColor(elementAttr[PARAM_COLOR]) : &e->getDefaultColor(),
-				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal")
+				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal"),
+				inputMaps.size()
 			));
+			continue;
 		}
 
 		if (elementAttr["type"] == "Group") {
@@ -523,18 +575,18 @@ umap<string, Items*> DataLoader::processInputMap(tinyxml2::XMLElement* inputNode
 				throw LEDError("Unknown Group " + elementAttr["target"] + " on map file");
 
 			// Check dupes and add
-			if (itemsMap.count(elementAttr["trigger"]) and itemsMap[elementAttr["trigger"]]->getName() == elementAttr["target"])
+			if (inputMaps.count(elementAttr["trigger"]) and inputMaps[elementAttr["trigger"]]->getName() == elementAttr["target"])
 				throw LEDError("Duplicated group map for " + elementAttr["target"] + " map " + elementAttr["trigger"]);
 
 			auto& g = layout.at(elementAttr["target"]);
-			itemsMap.emplace(elementAttr["trigger"], new Group::Item(
+			inputMaps.emplace(id + elementAttr["trigger"], new Group::Item(
 				&g,
 				elementAttr.count(PARAM_COLOR) ? &Color::getColor(elementAttr[PARAM_COLOR]) : &g.getDefaultColor(),
-				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal")
+				Color::str2filter(elementAttr.count(PARAM_FILTER) ? elementAttr["filter"] : "Normal"),
+				inputMaps.size()
 			));
 		}
 	}
-	return itemsMap;
 }
 
 string DataLoader::createFilename(const string& name) {

@@ -4,7 +4,7 @@
  * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,16 +43,20 @@ void Serial::connect() {
 	return;
 #endif
 
-	if (fd) {
+	if (fd > 0) {
 		LogDebug("Connection already open");
 		return;
 	}
 
-	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
+	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
 		throw Error("Can't open port " + port);
+	}
 
 	// Serial port config swiped from RXTX library (rxtx.qbang.org):
-	tcgetattr(fd, &tty);
+	if (tcgetattr(fd, &tty) != 0) {
+		close(fd);
+		throw Error("Error getting serial port settings");
+	}
 	tty.c_iflag     = INPCK;
 	tty.c_lflag     = 0;
 	tty.c_oflag     = 0;
@@ -61,7 +65,21 @@ void Serial::connect() {
 	tty.c_cc[VTIME] = 0;
 	cfsetispeed(&tty, B115200);
 	cfsetospeed(&tty, B115200);
-	tcsetattr(fd, TCSANOW, &tty);
+	if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+		close(fd);
+		throw Error("Error setting serial port attributes");
+	}
+	// Set DTR
+	int status;
+	if (ioctl(fd, TIOCMGET, &status) == -1) {
+		close(fd);
+		throw Error("Error getting modem status");
+	}
+	status |= TIOCM_DTR;
+	if (ioctl(fd, TIOCMSET, &status) == -1) {
+		close(fd);
+		throw Error("Error setting DTR");
+	}
 }
 
 void Serial::disconnect() {
@@ -70,7 +88,20 @@ void Serial::disconnect() {
 	LogDebug("No disconnect - DRY RUN");
 	return;
 #endif
-	close(fd);
+
+	// Clear DTR
+	int status;
+	ioctl(fd, TIOCMGET, &status);
+	status &= ~TIOCM_DTR;
+	ioctl(fd, TIOCMSET, &status);
+	struct termios tty;
+	tcgetattr(fd, &tty);
+	// Close the serial port
+	if (close(fd) < 0) {
+		fd = 0;
+		throw Error("Error closing serial port");
+	}
+	fd = 0;
 }
 
 void Serial::transferToConnection(vector<uint8_t>& data) const {
@@ -111,4 +142,23 @@ vector<uint8_t> Serial::transferFromConnection(uint size) const {
 	}
 	return response;
 #endif
+}
+
+string Serial::findPortByUsbId(const string& id) {
+	for (uint8_t c = 0; c < MAX_SERIAL_PORTS_TO_SCAN; ++c) {
+		for (const string& name : DEFAULT_SERIAL_PORTS) {
+			string search(name + to_string(c));
+			std::ifstream file("/sys/class/tty/" + search + "/device/uevent");
+			if (not file.is_open())
+				continue;
+			std::string line;
+			while (std::getline(file, line)) {
+				if (line.find(id) != std::string::npos) {
+					LogDebug("Port found at " + search);
+					return "/dev/" + search;
+				}
+			}
+		}
+	}
+	return "";
 }

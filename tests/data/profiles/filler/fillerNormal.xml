@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Profile"
+	backgroundColor="Black"
+>
+	<animations>
+		<animation name="tests/filler/fillerNormalF" />
+		<animation name="tests/filler/fillerNormalBouncer" />
+	</animations>
+</LEDSpicer>

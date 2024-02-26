@@ -46,7 +46,7 @@ void Pulse::drawConfig() {
 	DirectionActor::drawConfig();
 	cout << "Colors: ";
 	this->drawColors();
-	cout << endl << SEPARATOR << endl;
+	cout << endl << "Mode: " << mode2str(mode) << endl << SEPARATOR << endl;
 }
 
 string Pulse::mode2str(Modes mode) {
@@ -65,4 +65,8 @@ Pulse::Modes Pulse::str2mode(const string& mode) {
 	if (mode == "Exponential")
 		return Modes::Exponential;
 	throw Error("Invalid mode " + mode);
+}
+
+void Pulse::restart() {
+	reset();
 }

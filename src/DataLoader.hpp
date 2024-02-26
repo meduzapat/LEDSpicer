@@ -146,7 +146,7 @@ public:
 	/**
 	 * Reads a profile file form disk or cache.
 	 * @param name
-	 * @param extra, if set will use it to differentiate from other profiles with the same name.
+	 * @param extra, if set will use it to differentiate from other profiles with the same name, only used while crafting profiles.
 	 */
 	static Profile* processProfile(const string& name, const string& extra = "");
 
@@ -154,7 +154,7 @@ public:
 	 * Reads an animation file.
 	 * @param file
 	 */
-	static vector<Actor*> processAnimation(const string& file);
+	static vector<Actor*> processAnimation(const string& file, const string& extra = "");
 
 	/**
 	 * Reads an input file.
@@ -197,6 +197,9 @@ public:
 
 	/// Keeps references to profiles.
 	static umap<string, Profile*> profilesCache;
+
+	/// Keeps references to actors.
+	static umap<string, vector<Actor*>> animationCache;
 
 	/// Port number to use for listening.
 	static string portNumber;
@@ -269,11 +272,22 @@ protected:
 	static Actor* createAnimation(umap<string, string>& actorData);
 
 	/**
-	 * Extracts input map data.
-	 * @param inputNode
-	 * @param input
+	 * Extract a list of input sources (listen events in the kernel)
+	 * @param inputName current input file
+	 * @param inputNode the input node
+	 * @return an array with the sources.
+	 * @throws exception if not found or is not valid.
 	 */
-	static umap<string, Items*> processInputMap(tinyxml2::XMLElement* inputNode);
+	static vector<string> processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode);
+
+	/**
+	 * Decorates input map data.
+	 * @param inputNode XML node from where the maps will be extracted
+	 * @param inputMap where the new maps will be stored.
+	 * @param id only used to differentiate sources.
+	 * @return
+	 */
+	static void processInputMap(tinyxml2::XMLElement* inputNode, umap<string, Items*>& inputMaps, const string& id = "");
 
 	/**
 	 * Prepares the filenames.

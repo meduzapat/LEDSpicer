@@ -45,14 +45,19 @@ namespace LEDSpicer::Devices {
  */
 struct Items {
 
+	/// Stores the position in a list if necessary.
+	uint pos = 0;
+
+	/// Stores the desired color.
 	const Color* color = nullptr;
 
+	/// Stores the filter to be used when applying the color.
 	Color::Filters filter = Color::Filters::Normal;
 
 	Items() = default;
-	Items(const Color* color, Color::Filters filter) : color(color), filter(filter) {}
-	Items(const Items& item)  : color(item.color), filter(item.filter) {}
-	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)) {}
+	Items(const Color* color, Color::Filters filter, uint pos) : color(color), filter(filter), pos(pos) {}
+	Items(const Items& item)  : color(item.color), filter(item.filter), pos(item.pos) {}
+	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)), pos(std::move(item.pos)) {}
 
 	virtual ~Items() = default;
 
@@ -114,16 +119,17 @@ public:
 
 		Item() = default;
 
-		Item(Element* element, const Color* color, Color::Filters filter) :
-			Items(color, filter),
+		Item(Element* element, const Color* color, Color::Filters filter, uint pos = 0) :
+			Items(color, filter, pos),
 			element(element) {}
 
 		Item(const Item& item) : Items(item), element(item.element) {}
 
 		Item& operator=(const Item& item) {
-			element   = item.element;
-			color     = item.color;
-			filter    = item.filter;
+			element = item.element;
+			color   = item.color;
+			filter  = item.filter;
+			pos     = item.pos;
 			return *this;
 		}
 

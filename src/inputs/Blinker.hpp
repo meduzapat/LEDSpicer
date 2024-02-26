@@ -20,11 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Reader.hpp"
+#include "utility/Speed.hpp"
+
 #ifndef BLINKER_HPP_
 #define BLINKER_HPP_ 1
 
-#include "Reader.hpp"
-#include "utility/Speed.hpp"
+#define DEFAULT_BLINKS "5"
 
 namespace LEDSpicer::Inputs {
 
@@ -39,7 +41,7 @@ public:
 		Reader(parameters, inputMaps),
 		Speed(parameters.count("speed") ? parameters["speed"] : ""),
 		frames(static_cast<uint8_t>(speed) * 3),
-		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : "", "Invalid numeric value ")) {}
+		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : DEFAULT_BLINKS, "Invalid numeric value ")) {}
 
 	virtual ~Blinker() = default;
 
@@ -63,9 +65,9 @@ protected:
 		uint8_t times = 0;
 	};
 
-	umap<uint16_t, Times> blinkingItems;
+	umap<string, Times> blinkingItems;
 
-	vector<uint16_t> itemsToClean;
+	vector<string> itemsToClean;
 
 	void blink();
 

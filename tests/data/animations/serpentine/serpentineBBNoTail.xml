@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+	version="1.0"
+	type="Animation"
+>
+	<actor
+		type="Serpentine"
+		group="All"
+		color="Blue"
+		speed="VerySlow"
+		filter="Combine"
+		direction="BackwardBouncing"
+		tailLength="0"
+		tailColor="Purple"
+		tailIntensity="75"
+	/>
+	<actor
+		type="Serpentine"
+		group="All"
+		color="Red"
+		speed="VeryFast"
+		filter="Combine"
+		direction="BackwardBouncing"
+		tailLength="0"
+		tailColor="Purple"
+		tailIntensity="75"
+	/>
+</LEDSpicer>

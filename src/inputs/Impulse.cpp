@@ -37,16 +37,15 @@ void Impulse::process() {
 		return;
 
 	for (auto& event : events) {
-		string codeName = std::to_string(event.code);
-		if (itemsMap.count(codeName)) {
-			if (controlledItems->count(codeName)) {
+		if (itemsMap.count(event.trigger)) {
+			if (controlledItems->count(event.trigger)) {
 				// released
 				if (not event.value)
-					controlledItems->erase(codeName);
+					controlledItems->erase(event.trigger);
 			}
 			else
 				// activated
-				controlledItems->emplace(codeName, itemsMap[codeName]);
+				controlledItems->emplace(event.trigger, itemsMap[event.trigger]);
 		}
 	}
 }

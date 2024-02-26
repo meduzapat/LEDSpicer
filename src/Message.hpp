@@ -50,6 +50,10 @@ struct Message {
 		CraftProfile
 	};
 
+	Message() = default;
+
+	Message(Types type) : type(type) {}
+
 	string toString();
 
 	static string type2str(Types type);

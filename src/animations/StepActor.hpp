@@ -20,15 +20,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DirectionActor.hpp"
+
 #ifndef STEPACTOR_HPP_
 #define STEPACTOR_HPP_ 1
-
-#include "DirectionActor.hpp"
 
 namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::StepActor
+ *
+ * Step actors will move from frame to frame in steps.
  */
 class StepActor: public DirectionActor {
 

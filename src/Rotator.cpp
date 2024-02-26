@@ -4,7 +4,7 @@
  * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2020 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
 	Log::initialize(true);
 
-	umap<string, Restrictor::Ways> playersData;
+	umap<string, Restrictor::Ways> playersData, availablePlayersData;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -71,12 +71,12 @@ int main(int argc, char **argv) {
 				"rotator 1 1 4\n"
 				"Rotate player 1 joystick 1 into 4 ways and player 2 joystick 1 into 4 ways:\n"
 				"rotator 1 1 4 2 1 4\n"
-				"Rotate player 1 joystick 1 into 2 ways and player 1 joystick 2 into 2 ways vertical:\n"
+				"Rotate player 1 joystick 1 into 2 ways and player 1 joystick 2 into 2 ways vertically:\n"
 				"rotator 1 1 2 1 2 vertical2\n"
 				"Options:\n"
-				"-r <ways> or --reset <ways>  Reset all the restrictors to way\n"
-				"-c <conf> or --config <conf> Use an alternative configuration file\n"
-				"-v or --version              Display version information\n"
+				"-r <ways> or --reset <ways>  Reset all the restrictors to way.\n"
+				"-c <conf> or --config <conf> Use an alternative configuration file.\n"
+				"-v or --version              Display version information.\n"
 				"-h or --help                 Display this help screen.\n"
 				"If -c or --config is not provided rotator will use " CONFIG_FILE
 				<< endl;
@@ -172,20 +172,23 @@ int main(int argc, char **argv) {
 				LogError("Unknown hardware type " + restrictorAttr["name"]);
 				continue;
 			}
-			for (const auto& pd : playersData) {
-				if (not playerData.count(pd.first)) {
-					throw Error(pd.first + " does not match any restrictor map. ");
-				}
-			}
+
 			if (playerData.size() > restrictor->getMaxIds()) {
 				throw Error(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
+			}
+
+			for (const auto& pd : playerData) {
+				if (playersData.count(pd.first))
+					availablePlayersData.emplace(pd.first, playersData.at(pd.first));
+				else
+					LogDebug("This hardware type " + restrictorAttr["name"] + " does not support " + pd.first);
 			}
 
 			restrictor->initialize();
 
 			if (resetWays.empty())
 				// Run Rotations.
-				restrictor->rotate(playersData);
+				restrictor->rotate(availablePlayersData);
 			else
 				// Reset all.
 				restrictor->rotate(Restrictor::str2ways(resetWays));

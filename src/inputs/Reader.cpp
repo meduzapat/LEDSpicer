@@ -24,28 +24,29 @@
 
 using namespace LEDSpicer::Inputs;
 
-vector<input_event> Reader::events;
-umap<string, int> Reader::listenEvents;
+vector<Reader::ReadData> Reader::events;
+umap<string, Reader::ListenEventData> Reader::listenEvents;
 Input* Reader::readController = nullptr;
 
 Reader::Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps) : Input(parameters, inputMaps) {
-	if (parameters.count("listenEvents"))
-		for (auto& e : Utility::explode(parameters["listenEvents"], ID_GROUP_SEPARATOR)) {
+	if (parameters.count("listenEvents")) {
+		for (auto& e : Utility::explode(parameters["listenEvents"], FIELD_SEPARATOR)) {
 			Utility::trim(e);
 			if (not listenEvents.count(e))
-				listenEvents.emplace(e, -1);
+				listenEvents.emplace(e, ListenEventData{-1, static_cast<uint8_t>(listenEvents.size())});
 		}
+	}
 }
 
 void Reader::activate() {
 	readController = nullptr;
 	for (auto& l : listenEvents) {
 		// Ignore already connected elements.
-		if (l.second >= 0)
+		if (l.second.rCode >= 0)
 			continue;
 		LogInfo("Opening device " + l.first);
-		l.second = open((DEV_INPUT + l.first).c_str(), O_RDONLY | O_NONBLOCK);
-		if (l.second < 0) {
+		l.second.rCode = open((DEV_INPUT + l.first).c_str(), O_RDONLY | O_NONBLOCK);
+		if (l.second.rCode < 0) {
 			LogWarning("Unable to open " DEV_INPUT + l.first);
 		}
 	}
@@ -53,11 +54,11 @@ void Reader::activate() {
 
 void Reader::deactivate() {
 	for (auto& l : listenEvents) {
-		if (l.second < 0)
+		if (l.second.rCode < 0)
 			continue;
 		LogInfo("Closing device " DEV_INPUT + l.first);
-		close(l.second);
-		l.second = -1;
+		close(l.second.rCode);
+		l.second.rCode = -1;
 	}
 }
 
@@ -79,19 +80,20 @@ void Reader::readAll() {
 
 	events.clear();
 	for (auto& l : listenEvents) {
-		if (l.second < 0)
+		if (l.second.rCode < 0)
 			continue;
 
 		input_event event;
 		char buffer[sizeof(event)];
 		while (true) {
-			ssize_t r = read(l.second, reinterpret_cast<void*>(&event), sizeof(event));
+			ssize_t r = read(l.second.rCode, reinterpret_cast<void*>(&event), sizeof(event));
 			if (r < 1)
 				break;
 			if (event.type != EV_KEY) // and event.type != EV_REL))
 				continue;
-			LogDebug(l.first + " - Type: " + (event.type == 1 ? "Key" : "Other") + " code: " + std::to_string(event.code) + string(event.value ? " ON" : " OFF"));
-			events.push_back(event);
+			string code(std::to_string(event.code));
+			LogDebug(l.first + " - Type: " + (event.type == 1 ? "Key" : "Other") + " code: " + code + string(event.value ? " ON" : " OFF"));
+			events.push_back({std::to_string(l.second.index) + code, event.type, event.value});
 		}
 	}
 }
