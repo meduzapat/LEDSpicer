@@ -74,7 +74,10 @@ Header comments should include the following information:
 ### Example
 ```cpp
 namespace LEDSpicer {}
-// or for nesting
+```
+Or for nesting
+
+```cpp
 namespace LEDSpicer::Devices::Adalight {}
 ```
 
