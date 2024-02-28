@@ -73,9 +73,9 @@ Header comments should include the following information:
 
 ### Example
 ```cpp
-namespace LEDSpicer {
+namespace LEDSpicer {}
 // or for nesting
-namespace LEDSpicer::Devices::Adalight {
+namespace LEDSpicer::Devices::Adalight {}
 ```
 
 ## Class Declaration
@@ -94,7 +94,7 @@ namespace LEDSpicer::Devices::Adalight {
  *
  * Class full description here.
  */
-class ClassName : public OtherClassName {
+class ClassName : public OtherClassName {}
 
 ```
 
@@ -145,7 +145,7 @@ protected:
 	 */
 	void claimInterface();
 
-/**
+	/**
 	 * Extract a list of input sources
 	 *
 	 * Will process the input sources node and extract all details and save it for latter, will also call any
@@ -260,7 +260,7 @@ using namespace LEDSpicer::Devices::Adalight;
 		if (condition) {
 			// Indented code block
 		}
-}
+	}
 ```
 
 ## Function Documentation
