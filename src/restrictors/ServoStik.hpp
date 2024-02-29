@@ -55,9 +55,11 @@ public:
 
 	virtual void rotate(const umap<string, Ways>& playersData);
 
-	virtual uint16_t getVendor() const;
+	uint16_t getVendor() const override;
 
-	virtual uint16_t getProduct() const;
+	uint16_t getProduct() const override;
+
+	uint8_t getMaxIds() const override;
 
 };
 

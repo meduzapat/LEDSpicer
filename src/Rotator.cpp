@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 			}
 
 			if (playerData.size() > restrictor->getMaxIds()) {
-				throw Error(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
+				LogDebug(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
 			}
 
 			for (const auto& pd : playerData) {
