@@ -15,7 +15,6 @@
 		high="LightRed"
 		channel="Both"
 	/>
-<!--
 	<actor
 		type="PulseAudio"
 		group="All"
@@ -52,5 +51,4 @@
 		high="LightYellow"
 		channel="Mono"
 	/>
-	-->
 </LEDSpicer>
