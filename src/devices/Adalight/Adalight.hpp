@@ -49,9 +49,9 @@ public:
 
 	virtual ~Adalight() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	virtual void transfer() const;
+	void transfer() const override;
 
 protected:
 

@@ -49,7 +49,7 @@ public:
 
 	virtual ~Gradient() = default;
 
-	void drawConfig();
+	void drawConfig() override;
 
 	static Modes str2mode(const string& mode);
 
@@ -63,7 +63,7 @@ protected:
 
 	vector<Color> precalc;
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -73,8 +73,8 @@ private:
 
 };
 
-} /* namespace */
+actorFactory(Gradient)
 
-actorFactory(LEDSpicer::Animations::Gradient)
+} /* namespace */
 
 #endif /* GRADIENT_HPP_ */

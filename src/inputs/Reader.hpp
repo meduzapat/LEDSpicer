@@ -45,11 +45,11 @@ public:
 
 	virtual ~Reader() = default;
 
-	virtual void activate();
+	void activate() override;
 
-	virtual void deactivate();
+	void deactivate() override;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
 protected:
 

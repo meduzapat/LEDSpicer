@@ -56,21 +56,21 @@ public:
 
 	virtual ~PacDrive() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	void transfer() const;
+	void transfer() const override;
 
-	uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 protected:
 
-	virtual void connect();
+	void connect() override;
 
-	virtual void afterConnect() {}
+	void afterConnect() override {}
 };
 
-} /* namespace */
+deviceFactory(PacDrive)
 
-deviceFactory(LEDSpicer::Devices::Ultimarc::PacDrive)
+} /* namespace */
 
 #endif /* PACDRIVE_HPP_ */

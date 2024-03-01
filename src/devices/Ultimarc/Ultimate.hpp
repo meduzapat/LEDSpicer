@@ -63,22 +63,22 @@ public:
 
 	virtual ~Ultimate() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	void transfer() const;
+	void transfer() const override;
 
-	uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
-	virtual void resetLeds();
+	void resetLeds() override;
 
 protected:
 
-	virtual void afterConnect();
+	void afterConnect() override;
 
 };
 
-} /* namespace */
+deviceFactory(Ultimate)
 
-deviceFactory(LEDSpicer::Devices::Ultimarc::Ultimate)
+} /* namespace */
 
 #endif /* ULTIMATE_HPP_ */

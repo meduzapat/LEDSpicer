@@ -38,13 +38,13 @@ public:
 
 	virtual ~Impulse() = default;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
-	virtual void process();
+	void process() override;
 };
 
-} /* namespace */
+inputFactory(Impulse)
 
-inputFactory(LEDSpicer::Inputs::Impulse)
+} /* namespace */
 
 #endif /* IMPULSE_HPP_ */

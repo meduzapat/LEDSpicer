@@ -43,13 +43,13 @@ public:
 
 	virtual ~FF00SharedCode() = default;
 
-	virtual void resetLeds();
+	void resetLeds() override;
 
-	void transfer() const;
+	void transfer() const override;
 
 protected:
 
-	virtual void afterConnect() {}
+	void afterConnect() override {}
 };
 
 } /* namespace */

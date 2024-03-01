@@ -63,20 +63,20 @@ public:
 
 	virtual ~Howler() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	void transfer() const;
+	void transfer() const override;
 
-	uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 protected:
 
-	virtual int send(vector<uint8_t>& data) const;
+	int send(vector<uint8_t>& data) const override;
 
 };
 
-} /* namespace */
+deviceFactory(Howler)
 
-deviceFactory(LEDSpicer::Devices::WolfWareTech::Howler)
+} /* namespace */
 
 #endif /* HOWLER_HPP_ */

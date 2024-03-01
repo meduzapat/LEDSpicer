@@ -46,7 +46,7 @@ public:
 	/**
 	 * @see Actor::drawConfig()
 	 */
-	virtual void drawConfig();
+	void drawConfig() override;
 
 	/**
 	 * @return true if the current frame is the first frame.
@@ -61,13 +61,13 @@ public:
 	/**
 	 * @see Actor::draw()
 	 */
-	virtual void draw();
+	void draw() override;
 
-	virtual void restart();
+	void restart() override;
 
-	virtual bool isRunning();
+	bool isRunning() override;
 
-	virtual bool acceptCycles() {
+	bool acceptCycles() override {
 		return true;
 	}
 

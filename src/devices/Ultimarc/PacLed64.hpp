@@ -40,14 +40,14 @@ public:
 
 	virtual ~PacLed64() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 };
 
-} /* namespace */
+deviceFactory(PacLed64)
 
-deviceFactory(LEDSpicer::Devices::Ultimarc::PacLed64)
+} /* namespace */
 
 #endif /* PACLED64_HPP_ */

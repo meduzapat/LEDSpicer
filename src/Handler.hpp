@@ -34,6 +34,11 @@ namespace LEDSpicer {
 
 /**
  * LEDSpicer::Handler
+ *
+ * Plugins handler.
+ *
+ * This library handles runtime loadable plugins.
+ *
  */
 class Handler {
 

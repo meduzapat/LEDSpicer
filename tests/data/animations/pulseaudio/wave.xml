@@ -11,10 +11,11 @@
 		mode="Wave"
 		off="Black"
 		low="AlmostBlack"
-		mid="DimGray"
-		high="White"
+		mid="LightBlue"
+		high="LightRed"
 		channel="Both"
 	/>
+<!--
 	<actor
 		type="PulseAudio"
 		group="All"
@@ -51,4 +52,5 @@
 		high="LightYellow"
 		channel="Mono"
 	/>
+	-->
 </LEDSpicer>

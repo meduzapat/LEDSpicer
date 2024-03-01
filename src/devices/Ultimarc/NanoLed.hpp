@@ -41,14 +41,14 @@ public:
 
 	virtual ~NanoLed() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 };
 
-} /* namespace */
+deviceFactory(NanoLed)
 
-deviceFactory(LEDSpicer::Devices::Ultimarc::NanoLed)
+} /* namespace */
 
 #endif /* NANOLED_HPP_ */

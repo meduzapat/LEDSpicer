@@ -53,13 +53,13 @@ public:
 	/**
 	 * @return the device name with Id.
 	 */
-	virtual string getFullName() const;
+	string getFullName() const override;
 
 protected:
 
-	virtual void openHardware();
+	void openHardware() override;
 
-	virtual void closeHardware();
+	void closeHardware() override;
 
 };
 

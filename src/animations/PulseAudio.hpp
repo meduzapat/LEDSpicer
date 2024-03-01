@@ -109,9 +109,9 @@ protected:
 
 };
 
-} /* namespace */
+actorFactory(PulseAudio)
 
-actorFactory(LEDSpicer::Animations::PulseAudio)
+} /* namespace */
 
 #endif /* PULSEAUDIO_HPP_ */
 

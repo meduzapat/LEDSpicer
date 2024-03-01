@@ -43,13 +43,13 @@ public:
 
 	virtual ~Filler() = default;
 
-	void drawConfig();
+	void drawConfig() override;
 
 	string mode2str(Modes mode);
 
 	Modes str2mode(const string& mode);
 
-	virtual void restart();
+	void restart() override;
 
 protected:
 
@@ -60,7 +60,7 @@ protected:
 		Directions dir;
 	};
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -94,8 +94,8 @@ private:
 
 };
 
-} /* namespace */
+actorFactory(Filler)
 
-actorFactory(LEDSpicer::Animations::Filler)
+} /* namespace */
 
 #endif /* FILLER_HPP_ */

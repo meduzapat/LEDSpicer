@@ -46,25 +46,25 @@ public:
 
 	virtual ~RaspberryPi() = default;
 
-	virtual void resetLeds();
+	void resetLeds() override;
 
-	virtual string getFullName() const;
+	string getFullName() const override;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	virtual void transfer() const;
+	void transfer() const override;
 
 protected:
 
 	/// Rpi can be initialized only once.
 	static bool initialized;
 
-	virtual void openHardware();
-
-	virtual void closeHardware();
-
 	/// Keeps track of only used LEDs to be send.
 	vector<uint8_t> usedleds;
+
+	void openHardware() override;
+
+	void closeHardware() override;
 };
 
 } /* namespace */

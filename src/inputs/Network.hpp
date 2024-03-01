@@ -37,24 +37,24 @@ class Network: public Input {
 
 public:
 
-	Network(umap<string, string>& parameters, umap<string, Items*>& inputMaps):
+	Network(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 		Input(parameters, inputMaps) {}
 
 	virtual ~Network() = default;
 
-	virtual void activate();
+	void activate() override;
 
-	virtual void deactivate();
+	void deactivate() override;
 
-	virtual void process();
+	void process() override;
 
 protected:
 
 	static Socks sock;
 };
 
-} /* namespace */
+inputFactory(Network)
 
-inputFactory(LEDSpicer::Inputs::Network)
+} /* namespace */
 
 #endif /* INPUTSNETWORK_HPP_ */
