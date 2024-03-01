@@ -672,7 +672,7 @@ string PlayerData::toString() {
 
 	for (uint8_t c = 0; c < controllers.size(); ++c) {
 		uint8_t cIx = 1;
-		string con = "P" + player + "_" + controllers[c];
+		string con("P" + player + "_" + controllers[c]);
 		while (true) {
 			if (p.find(con + to_string(cIx)) != string::npos)
 				++cIx;
@@ -684,7 +684,8 @@ string PlayerData::toString() {
 		p += con;
 		if (controlColors.count(con))
 			p += GROUP_SEPARATOR + controlColors[con];
-		p += FIELD_SEPARATOR;
+		// Rotator information
+		p += FIELD_SEPARATOR + con + "_" + ways[c] + "WAYS" + FIELD_SEPARATOR;
 	}
 
 	uint8_t bTo = Utility::parseNumber(buttons, "");
