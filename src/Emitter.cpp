@@ -330,7 +330,7 @@ GameRecord parseMame(const string& rom) {
 
 GameRecord parseControlsIni(const string& rom) {
 
-	string cmd = "sed -n '/"+ rom +"/,$p' " CONTROLINI_FILE;
+	string cmd = "sed -n '/" + rom + "/,/\\[/p' " CONTROLINI_FILE;
 
 	LogDebug("Running: " + cmd);
 
@@ -485,7 +485,7 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 
 void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 
-	string cmd = "sed -n '/"+ rom +"/,$p' " COLORINI_FILE;
+	string cmd = "sed -n '/" + rom + "/,/\\[/p' " COLORINI_FILE;
 
 	LogDebug("Reading color profile: " + cmd);
 
@@ -684,8 +684,11 @@ string PlayerData::toString() {
 		p += con;
 		if (controlColors.count(con))
 			p += GROUP_SEPARATOR + controlColors[con];
+		p += FIELD_SEPARATOR;
 		// Rotator information
-		p += FIELD_SEPARATOR + con + "_" + ways[c] + "WAYS" + FIELD_SEPARATOR;
+		if (ways.size() > c) {
+			p += con + "_" + ways[c] + "WAYS" + FIELD_SEPARATOR;
+		}
 	}
 
 	uint8_t bTo = Utility::parseNumber(buttons, "");
