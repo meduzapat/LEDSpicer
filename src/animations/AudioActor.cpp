@@ -341,6 +341,7 @@ LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
 void AudioActor::restart() {
 	value.l = value.r = 0;
 	values.clear();
+	Actor::restart();
 }
 
 void AudioActor::drawConfig() {
