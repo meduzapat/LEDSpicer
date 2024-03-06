@@ -33,6 +33,7 @@ Profile* DataLoader::defaultProfile;
 string DataLoader::defaultProfileName;
 umap<string, Profile*> DataLoader::profilesCache;
 umap<string, vector<Actor*>> DataLoader::animationCache;
+umap<string, Input*> DataLoader::inputCache;
 string DataLoader::portNumber;
 umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
@@ -40,6 +41,7 @@ umap<string, InputHandler*> DataLoader::inputHandlers;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
 umap<string, Items*> DataLoader::controlledItems;
 milliseconds DataLoader::waitTime;
+uint8_t DataLoader::flags = 0;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -50,6 +52,9 @@ void DataLoader::setMode(Modes mode) {
 }
 
 void DataLoader::readConfiguration() {
+
+	// Profiles needs flags to disable features.
+	Devices::Profile::setGlobalFlags(&flags);
 
 	// Input need to be linked with the main program items.
 	Input::setInputControllers(&controlledItems);
@@ -145,6 +150,7 @@ void DataLoader::processDevices() {
 
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
+	// Only used to report unused pins.
 	vector<bool> pinCheck(device->getNumberOfLeds(), false);
 
 	tinyxml2::XMLElement* xmlElement = deviceNode->FirstChildElement(NODE_ELEMENT);
@@ -214,8 +220,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	}
 
 	LogInfo(
-		device->getFullName() + " with " +
-		to_string(pinCheck.size()) + " LEDs divided into " +
+		device->getFullName()                    + " with "              +
+		to_string(pinCheck.size())               + " LEDs divided into " +
 		to_string(device->getNumberOfElements()) + " elements"
 	);
 	// Checks orphan Pins.
@@ -293,13 +299,21 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 	group.shrinkToFit();
 }
 
-Profile* DataLoader::processProfile(const string& name, const string& extra) {
+Profile* DataLoader::getProfileFromCache(const string& name) {
+	if (not profilesCache.count(name))
+		return nullptr;
 
-	// Check cache.
-	if (profilesCache.count(name + extra)) {
+	auto profile(profilesCache.at(name));
+	if (not (flags & FLAG_FORCE_RELOAD)) {
 		LogDebug("Profile from cache.");
-		return profilesCache.at(name + extra);
+		return profile;
 	}
+	LogDebug("Ignoring cache, reloading profile.");
+	delete profile;
+	return nullptr;
+}
+
+Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
 	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
 	umap<string, string> tempAttr = processNode(profile.getRoot());
@@ -438,9 +452,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	// Save Cache.
-	profilesCache.emplace(name + extra, profilePtr);
-
+	// Save Cache, replace previous value if any.
+	profilesCache[name + extra] = profilePtr;
 	return profilePtr;
 }
 
@@ -454,11 +467,11 @@ Device* DataLoader::createDevice(umap<string, string>& deviceData) {
 
 vector<Actor*> DataLoader::processAnimation(const string& file, const string& extra) {
 
+	string name(file + extra);
 	// Check cache.
-	if (animationCache.count(file + extra)) {
+	if (not (flags & FLAG_FORCE_RELOAD) and animationCache.count(name)) {
 		LogDebug("Animation from cache.");
-		vector<Actor*> actors(animationCache.at(file + extra).begin(), animationCache.at(file + extra).end());
-		return actors;
+		return animationCache.at(name);
 	}
 
 	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
@@ -474,9 +487,10 @@ vector<Actor*> DataLoader::processAnimation(const string& file, const string& ex
 		Utility::checkAttributes(REQUIRED_PARAM_ACTOR, actorData, "actor for animation " + file);
 		actors.push_back(createAnimation(actorData));
 	}
-	vector<Actor*> actorsCopy(actors.begin(), actors.end());
-	animationCache.emplace(file + extra, actorsCopy);
-	return actors;
+
+	// Save Cache, replace previous value if any.
+	animationCache[name] = std::move(actors);
+	return animationCache.at(name);
 }
 
 Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
@@ -494,6 +508,14 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 }
 
 void DataLoader::processInput(Profile* profile, const string& file) {
+
+	// Check cache.
+	if (not (flags & FLAG_FORCE_RELOAD) and inputCache.count(file)) {
+		LogDebug("Input from cache.");
+		profile->addInput(inputCache.at(file));
+		return;
+	}
+
 	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
 	umap<string, string> inputAttr = processNode(inputFile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, inputAttr, file);
@@ -524,7 +546,11 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 		// single source or malformed.
 		processInputMap(inputFile.getRoot(), inputMapTmp);
 	}
-	profile->addInput(inputHandlers[inputName]->createInput(file, inputAttr, inputMapTmp));
+	auto input(inputHandlers[inputName]->createInput(file, inputAttr, inputMapTmp));
+	profile->addInput(input);
+
+	// Save Cache, replace previous value if any.
+	inputCache[file] = input;
 }
 
 vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode) {
@@ -629,3 +655,11 @@ void DataLoader::setInterval(uint8_t waitTime) {
 	LogInfo("Set interval to " + to_string(DataLoader::waitTime.count()) + "ms");
 }
 
+void DataLoader::destroyCache() {
+	for (auto p : profilesCache) {
+#ifdef DEVELOP
+		LogDebug("Profile " + p.first + " instance deleted");
+#endif
+		delete p.second;
+	}
+}

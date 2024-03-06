@@ -226,12 +226,13 @@ private:
 		/// Times repeated.
 		repeated  = 0;
 
-};
-
 // The functions to create and destroy actors.
 #define actorFactory(plugin) \
-	extern "C" LEDSpicer::Animations::Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
-	extern "C" void destroyActor(LEDSpicer::Animations::Actor* instance) { delete instance; }
+	extern "C" Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
+	extern "C" void destroyActor(Actor* instance) { delete instance; }
+
+};
+
 
 } /* namespace */
 

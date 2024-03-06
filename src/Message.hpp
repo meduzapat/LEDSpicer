@@ -56,9 +56,15 @@ struct Message {
 
 	string toString();
 
+	string toHumanString();
+
 	static string type2str(Types type);
 
 	static Types str2type(const string& type);
+
+	static string flag2str(uint8_t flags);
+
+	static void str2flag(uint8_t& currentFlags, const string& flags);
 
 	const vector<string>& getData() const;
 
@@ -70,11 +76,17 @@ struct Message {
 
 	void setType(Types type);
 
+	const uint8_t getFlags() const;
+
+	void setFlags(const uint8_t flags);
+
 	void reset();
 
 protected:
 
 	Types type = Types::Invalid;
+
+	uint8_t flags = 0;
 
 	vector<string> data;
 };

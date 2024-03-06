@@ -94,8 +94,8 @@ protected:
 
 // The functions to create and destroy inputs.
 #define inputFactory(plugin) \
-	extern "C" LEDSpicer::Inputs::Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
-	extern "C" void destroyInput(LEDSpicer::Inputs::Input* instance) {delete instance;}
+	extern "C" Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
+	extern "C" void destroyInput(Input* instance) {delete instance;}
 
 } /* namespace */
 

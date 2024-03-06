@@ -175,8 +175,8 @@ protected:
 
 // The functions to create and destroy devices.
 #define deviceFactory(plugin) \
-	extern "C" LEDSpicer::Devices::Device* createDevice(umap<string, string>& options) { return new plugin(options); } \
-	extern "C" void destroyDevice(LEDSpicer::Devices::Device* instance) { delete instance; }
+	extern "C" Device* createDevice(umap<string, string>& options) { return new plugin(options); } \
+	extern "C" void destroyDevice(Device* instance) { delete instance; }
 
 } /* namespace */
 

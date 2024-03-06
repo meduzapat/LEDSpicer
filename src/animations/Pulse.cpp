@@ -68,5 +68,6 @@ Pulse::Modes Pulse::str2mode(const string& mode) {
 }
 
 void Pulse::restart() {
-	reset();
+	Colorful::reset();
+	DirectionActor::restart();
 }

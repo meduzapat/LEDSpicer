@@ -38,20 +38,15 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	// More speed less tones.
 	setTotalStepFrames(static_cast<float>(speed));
 
-	float
-		percent   = 0,
-		increment = 100.0 / tones;
+	float increment = (100.0 / tones) - 0.01;
 
 	// Pre-calculate colors.
-	uint8_t lastColor = colors.size() - 1, nextColor;
+	uint8_t lastColor = colors.size() -1, nextColor;
 	for (size_t color = 0; color < lastColor; ++color) {
 		nextColor = color + 1;
-		percent = 0;
-		for (uint8_t tone = 0; tone < tones; ++tone) {
+		for (float percent = increment; percent < 100; percent += increment) {
 			precalc.push_back(colors[color]->transition(*colors[nextColor], percent));
-			percent += increment;
 		}
-
 	}
 	// Return the colors to its normal shape, colors are only necessary for Draws().
 	colors.pop_back();
@@ -91,8 +86,8 @@ Gradient::Modes Gradient::str2mode(const string& mode) {
 		return Modes::All;
 	if (mode == "Cyclic")
 		return Modes::Cyclic;
-	LogError("Invalid mode " + mode + " assuming All");
-	return Modes::All;
+	LogError("Invalid mode " + mode + " assuming Cyclic");
+	return Modes::Cyclic;
 }
 
 string Gradient::mode2str(Modes mode) {
