@@ -26,8 +26,6 @@
  */
 
 #include "MainBase.hpp"
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
 
 #ifndef MAIN_HPP_
 #define MAIN_HPP_ 1
@@ -60,16 +58,6 @@ public:
 	 */
 	static void terminate();
 
-	/**
-	 * terminates the current profile and reset everything.
-	 */
-	void terminateCurrentProfile();
-
-protected:
-
-	static high_resolution_clock::time_point start;
-
-	void sendData();
 };
 
 /**

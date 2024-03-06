@@ -49,7 +49,7 @@ void Actor::draw() {
 		frame = 0;
 	affectAllElements();
 	calculateElements();
-	if (not affectedElements.empty())
+	if (not affectedElements.empty()) {
 		switch (filter) {
 		case Color::Filters::Mask: {
 			const Color& black = Color::getColor("Black");
@@ -60,6 +60,7 @@ void Actor::draw() {
 				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
 			}
 		}}
+	}
 }
 
 void Actor::drawConfig() {

@@ -29,7 +29,8 @@ int main(int argc, char **argv) {
 	string
 		commandline,
 		configFile = "",
-		port;
+		port,
+		flagsStr;
 
 	Message msg;
 
@@ -37,9 +38,10 @@ int main(int argc, char **argv) {
 
 	bool
 		craftProfile = false,
-		replace      = false,
 		rotate       = true,
 		useColors    = false;
+
+	uint8_t flags = 0;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -72,11 +74,23 @@ int main(int argc, char **argv) {
 				Message::type2str(Message::Types::ClearAllGroups) <<
 				"                              Removes all groups' background color.\n" <<
 				"options:\n"
-				"-c <conf> or --config <conf> Use an alternative configuration file.\n"
-				"-n or --no-rotate            Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
-				"-r or --replace              Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator).\n"
-				"-v or --version              Display version information.\n"
-				"-h or --help                 Display this help screen.\n"
+				"-v or --version               Display version information.\n"
+				"-h or --help                  Display this help screen.\n"
+				"-c <conf> or --config <conf>  Use an alternative configuration file.\n"
+				"-n or --no-rotate             Avoid trigger rotators (only used when LoadProfileByEmulator). will raise FLAG_NO_ROTATOR flag\n"
+				"-r or --replace               Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator) same as FLAG_REPLACE flag.\n"
+				"-f <flags> or --flags <flags> Send extra flags to LEDSPicer, pipe separated surrounded by quotes.\n"
+				"  Available Flags:\n"
+				"  * NO_ANIMATIONS        The animations of the profile will be ignored.\n"
+				"  * NO_INPUTS            The inputs of the profile will be ignored.\n"
+				"  * NO_START_TRANSITIONS The stating animations of the profile will be ignored.\n"
+				"  * NO_END_TRANSITIONS   The ending animations of the current profile will be ignored.\n"
+				"  * NO_TRANSITIONS       Same as NO_START_TRANSITIONS and NO_END_TRANSITIONS together.\n"
+				"  * SHOW_ROTATOR         Only necessary to override the -n.\n"
+				"  * NO_ROTATOR           Do not display rotator information.\n"
+				"  * FORCE_RELOAD         The profile will be load from the file instead of using cache.\n"
+				"  * REPLACE              The current running profile will be replaced with the new one, will process the ending transition if any.\n"
+				"  example: -f \"NO_ANIMATIONS|NO_INPUTS|FORCE_RELOAD\"\n"
 				"If -c or --config is not provided, emitter will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
@@ -98,19 +112,38 @@ int main(int argc, char **argv) {
 
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
-			configFile = argv[++i];
+			try {
+				configFile = getNext(++i, argc, argv);
+			}
+			catch (Error& e) {
+				LogError(e.getMessage());
+				return EXIT_FAILURE;
+			}
 			continue;
 		}
 
 		// Replace.
 		if (commandline == "-r" or commandline == "--replace") {
-			replace = true;
+			flags |= FLAG_REPLACE;
 			continue;
 		}
 
 		// No Rotate.
 		if (commandline == "-n" or commandline == "--no-rotate") {
+			flags |= FLAG_NO_ROTATOR;
 			rotate = false;
+			continue;
+		}
+
+		// Flags.
+		if (commandline == "-f" or commandline == "--flags") {
+			try {
+				flagsStr = getNext(++i, argc, argv);
+			}
+			catch (Error& e) {
+				LogError(e.getMessage());
+				return EXIT_FAILURE;
+			}
 			continue;
 		}
 
@@ -128,6 +161,10 @@ int main(int argc, char **argv) {
 			msg.addData(commandline);
 		}
 	}
+
+	// Convert flag string into flags.
+	Message::str2flag(flags, flagsStr);
+	msg.setFlags(flags);
 
 	if (msg.getType() == Message::Types::Invalid) {
 		LogError("Nothing to do");
@@ -250,15 +287,8 @@ int main(int argc, char **argv) {
 
 		// Open connection and send message.
 		Socks sock(LOCALHOST, port);
-		bool r;
-		if (replace and (msg.getType() == Message::Types::LoadProfile or msg.getType() == Message::Types::LoadProfileByEmulator)) {
-			LogDebug("replacing profile");
-			Message msgRotate{Message::Types::FinishLastProfile};
-			r = sock.send(msgRotate.toString());
-			LogDebug("Replacing Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
-		}
-		r = sock.send(msg.toString());
-		LogDebug("Message " + string(r ? "sent successfully: " : "failed to send: ") + msg.toString());
+		bool r = sock.send(msg.toString());
+		LogDebug("Message " + string(r ? "sent successfully" : "failed to send") + " Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
 	}
 	catch(Error& e) {
 		LogError("Error: " + e.getMessage());
@@ -266,6 +296,12 @@ int main(int argc, char **argv) {
 	}
 
 	return EXIT_SUCCESS;
+}
+
+string getNext(int index, int total, char **argv) {
+	if (index == total)
+		throw Error("Invalid number of parameters");
+	return argv[index];
 }
 
 GameRecord parseMameDataFile(const string& rom) {
@@ -687,7 +723,7 @@ string PlayerData::toString() {
 		p += FIELD_SEPARATOR;
 		// Rotator information
 		if (ways.size() > c) {
-			p += con + "_" + ways[c] + "WAYS" + FIELD_SEPARATOR;
+			p += con + "_" + ways[c] + WAYS_INDICATOR + FIELD_SEPARATOR;
 		}
 	}
 

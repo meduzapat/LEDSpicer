@@ -29,8 +29,6 @@
 
 using namespace LEDSpicer;
 
-high_resolution_clock::time_point Main::start;
-
 void signalHandler(int sig) {
 
 	switch (sig) {
@@ -68,158 +66,153 @@ void Main::run() {
 
 	while (running) {
 
+		// Frame begins.
 		start = high_resolution_clock::now();
 
-		if (messages.read()) {
-			Message msg = messages.getMessage();
-			LogDebug("Received message: task: " + Message::type2str(msg.getType()) + ", data: " + msg.toString());
-			switch (msg.getType()) {
-
-			case Message::Types::LoadProfile:
-				if (not tryProfiles(msg.getData())) {
-					LogInfo("All requested profiles failed");
-				}
-				break;
-
-			case Message::Types::FinishLastProfile:
-				if (not profiles.size()) {
-#ifdef DEVELOP
-					LogDebug("Cannot terminate the default profile.");
-#endif
-					break;
-				}
-
-				LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
-				terminateCurrentProfile();
-				break;
-
-			case Message::Types::FinishAllProfiles:
-				if (profiles.size()) {
-					terminateCurrentProfile();
-					profiles.clear();
-					currentProfile = DataLoader::defaultProfile;
-					currentProfile->reset();
-				}
-				break;
-
-			case Message::Types::SetElement: {
-				if (msg.getData().size() < 1 or not DataLoader::allElements.count(msg.getData()[0])) {
-					LogNotice("Invalid message for " + Message::type2str(msg.getType()));
-					break;
-				}
-
-				if (msg.getData().size() == 1)
-					msg.addData(DataLoader::allElements.at(msg.getData()[0])->getDefaultColor().getName());
-
-				if (msg.getData().size() == 2)
-					msg.addData("Normal");
-
-				try {
-					alwaysOnElements[msg.getData()[0]] = Element::Item{
-						DataLoader::allElements.at(msg.getData()[0]),
-						&Color::getColor(msg.getData()[1]),
-						Color::str2filter(msg.getData()[2])
-					};
-				}
-				catch (Error& e) {
-					LogNotice(e.getMessage());
-				}
-				break;
-			}
-
-			case Message::Types::ClearElement:
-				if (msg.getData().size() != 1 or not alwaysOnElements.count(msg.getData()[0])) {
-					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
-					break;
-				}
-				alwaysOnElements.erase(msg.getData()[0]);
-				break;
-
-			case Message::Types::ClearAllElements:
-				alwaysOnElements.clear();
-				break;
-
-			case Message::Types::SetGroup:
-				if (msg.getData().size() < 1 or not DataLoader::layout.count(msg.getData()[0])) {
-					LogNotice("Missing/Invalid group for " + Message::type2str(Message::Types::SetGroup));
-					break;
-				}
-
-				if (msg.getData().size() == 1)
-					msg.addData(DataLoader::layout.at(msg.getData()[0]).getDefaultColor().getName());
-
-				if (msg.getData().size() == 2)
-					msg.addData("Normal");
-
-				try {
-					alwaysOnGroups[msg.getData()[0]] = Group::Item{
-						&DataLoader::layout.at(msg.getData()[0]),
-						&Color::getColor(msg.getData()[1]),
-						Color::str2filter(msg.getData()[2])
-					};
-				}
-				catch (Error& e) {
-					LogNotice(e.getMessage());
-				}
-				break;
-
-			case Message::Types::ClearGroup:
-				if (msg.getData().size() != 1 or not alwaysOnGroups.count(msg.getData()[0])) {
-					LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
-					break;
-				}
-				alwaysOnGroups.erase(msg.getData()[0]);
-				break;
-
-			case Message::Types::ClearAllGroups:
-				alwaysOnGroups.clear();
-				break;
-
-			case Message::Types::CraftProfile: {
-				/*
-				 * 0 target name
-				 * 1 elements
-				 * 2 groups
-				 * 3 system
-				 */
-				if (msg.getData().size() != 4) {
-					LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
-					break;
-				}
-				// Try game profile.
-				if (tryProfiles({msg.getData()[0]}))
-					break;
-
-				// Craft profile.
-				Profile* profile = craftProfile(msg.getData()[3], msg.getData()[1], msg.getData()[2]);
-				if (profile) {
-					// Deactivate any overwrite.
-					alwaysOnGroups.clear();
-					alwaysOnElements.clear();
-					DataLoader::controlledItems.clear();
-					profiles.push_back(profile);
-					currentProfile = profile;
-					profile->restart();
-					break;
-				}
-#ifdef DEVELOP
-				else {
-					LogDebug("Failed to craft profile with " + msg.getData()[3]);
-				}
-#endif
-				// Load system.
-				if (not tryProfiles({msg.getData()[3]})) {
-					LogInfo("All requested profiles failed");
-				}
-				break;
-			}
-
-			// Other request that are not handled yet by ledspicerd.
-			default:
-				break;
-			}
+		if (not messages.read()) {
+			runCurrentProfile();
+			continue;
 		}
-		runCurrentProfile();
+
+		Message msg(messages.getMessage());
+		LogDebug("Received message: Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
+		// Set global flags.
+		DataLoader::flags = msg.getFlags();
+
+		switch (msg.getType()) {
+
+		case Message::Types::LoadProfile:
+			if (not tryProfiles(msg.getData())) {
+				LogInfo("All requested profiles failed");
+			}
+			break;
+
+		case Message::Types::FinishLastProfile:
+			if (not profiles.size()) {
+#ifdef DEVELOP
+				LogDebug("Cannot terminate the default profile.");
+#endif
+				break;
+			}
+
+			LogInfo("Profile " + currentProfile->getName() + " changed state to finishing.");
+			terminateCurrentProfile();
+			break;
+
+		case Message::Types::FinishAllProfiles:
+			if (profiles.size()) {
+				terminateCurrentProfile();
+				profiles.clear();
+				currentProfile = DataLoader::defaultProfile;
+				currentProfile->reset();
+			}
+			else {
+#ifdef DEVELOP
+				LogDebug("Cannot terminate the default profile.");
+#endif
+			}
+			break;
+
+		case Message::Types::SetElement: {
+			if (msg.getData().size() < 1 or not DataLoader::allElements.count(msg.getData()[0])) {
+				LogNotice("Invalid message for " + Message::type2str(msg.getType()));
+				break;
+			}
+
+			if (msg.getData().size() == 1)
+				msg.addData(DataLoader::allElements.at(msg.getData()[0])->getDefaultColor().getName());
+
+			if (msg.getData().size() == 2)
+				msg.addData("Normal");
+
+			try {
+				alwaysOnElements[msg.getData()[0]] = Element::Item{
+					DataLoader::allElements.at(msg.getData()[0]),
+					&Color::getColor(msg.getData()[1]),
+					Color::str2filter(msg.getData()[2])
+				};
+			}
+			catch (Error& e) {
+				LogNotice(e.getMessage());
+			}
+			break;
+		}
+
+		case Message::Types::ClearElement:
+			if (msg.getData().size() != 1 or not alwaysOnElements.count(msg.getData()[0])) {
+				LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
+				break;
+			}
+			alwaysOnElements.erase(msg.getData()[0]);
+			break;
+
+		case Message::Types::ClearAllElements:
+			alwaysOnElements.clear();
+			break;
+
+		case Message::Types::SetGroup:
+			if (msg.getData().size() < 1 or not DataLoader::layout.count(msg.getData()[0])) {
+				LogNotice("Missing/Invalid group for " + Message::type2str(Message::Types::SetGroup));
+				break;
+			}
+
+			if (msg.getData().size() == 1)
+				msg.addData(DataLoader::layout.at(msg.getData()[0]).getDefaultColor().getName());
+
+			if (msg.getData().size() == 2)
+				msg.addData("Normal");
+
+			try {
+				alwaysOnGroups[msg.getData()[0]] = Group::Item{
+					&DataLoader::layout.at(msg.getData()[0]),
+					&Color::getColor(msg.getData()[1]),
+					Color::str2filter(msg.getData()[2])
+				};
+			}
+			catch (Error& e) {
+				LogNotice(e.getMessage());
+			}
+			break;
+
+		case Message::Types::ClearGroup:
+			if (msg.getData().size() != 1 or not alwaysOnGroups.count(msg.getData()[0])) {
+				LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
+				break;
+			}
+			alwaysOnGroups.erase(msg.getData()[0]);
+			break;
+
+		case Message::Types::ClearAllGroups:
+			alwaysOnGroups.clear();
+			break;
+
+		case Message::Types::CraftProfile: {
+			/*
+			 * 0 target name
+			 * 1 elements
+			 * 2 groups
+			 * 3 system
+			 */
+			if (msg.getData().size() != 4) {
+				LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
+				break;
+			}
+			Profile* profile = tryProfiles({msg.getData()[0]});
+			if (not profile) {
+				// Craft profile.
+				profile = craftProfile(msg.getData()[3], msg.getData()[1], msg.getData()[2]);
+				if (not profile) {
+					// Try platform profile.
+					profile = tryProfiles({msg.getData()[3]});
+				}
+			}
+			break;
+		}
+
+		// Other request that are not handled yet by ledspicerd.
+		default:
+			break;
+		}
 	}
 	currentProfile = DataLoader::defaultProfile;
 	terminateCurrentProfile();
@@ -227,21 +220,6 @@ void Main::run() {
 
 void Main::terminate() {
 	running = false;
-}
-
-void Main::terminateCurrentProfile() {
-	// Deactivate forced elements and groups so the end transition is rendered without interference.
-	alwaysOnGroups.clear();
-	alwaysOnElements.clear();
-	DataLoader::controlledItems.clear();
-	currentProfile->terminate();
-
-	// Wait for termination.
-	while (currentProfile->isRunning()) {
-		start = high_resolution_clock::now();
-		currentProfile->runFrame();
-		sendData();
-	}
 }
 
 int main(int argc, char **argv) {
@@ -392,11 +370,7 @@ int main(int argc, char **argv) {
 void Main::runCurrentProfile() {
 
 	if (not currentProfile->isRunning()) {
-		// Profiles are cached and reused when not running,
-		// discard the current profile, pick and reset the previous.
-#ifdef DEVELOP
-		LogDebug("Profile " + currentProfile->getName() + " instance deleted");
-#endif
+		// Discard the current profile, pick and reset the previous.
 		profiles.pop_back();
 		currentProfile = profiles.size() ? profiles.back() : DataLoader::defaultProfile;
 
@@ -413,37 +387,37 @@ void Main::runCurrentProfile() {
 			eD.second->setColor(currentProfile->getBackgroundColor());
 	}
 
-	// Set always on groups from profile.
-	for (auto& gE : currentProfile->getAlwaysOnGroups())
-		gE.process();
-
-	// Set always on elements from profile.
-	for (auto& eE : currentProfile->getAlwaysOnElements())
-		eE.process();
-
 	currentProfile->runFrame();
 
-	// Set always on groups from config.
-	for (auto& gE : alwaysOnGroups)
-		gE.second.process();
+	// Do not display elements and groups while the profile is transitioning.
+	if (not currentProfile->isTransiting()) {
+		// Set always on groups from profile.
+		for (auto& gE : currentProfile->getAlwaysOnGroups()) {
+			gE.process();
+		}
 
-	// Set always on elements from config.
-	for (auto& eE : alwaysOnElements)
-		eE.second.process();
+		// Set always on elements from profile.
+		for (auto& eE : currentProfile->getAlwaysOnElements()) {
+			// Ignore ways if the flag is set.
+			if ((DataLoader::flags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
+				continue;
+			eE.process();
+		}
 
-	// Set controlled items from input plugins.
-	for (auto& item : DataLoader::controlledItems)
-		item.second->process();
+		// Set always on groups from temporary requests.
+		for (auto& gE : alwaysOnGroups) {
+			gE.second.process();
+		}
 
+		// Set always on elements from temporary requests.
+		for (auto& eE : alwaysOnElements) {
+			eE.second.process();
+		}
+
+		// Set controlled items from input plugins.
+		for (auto& item : DataLoader::controlledItems) {
+			item.second->process();
+		}
+	}
 	sendData();
-}
-
-void Main::sendData() {
-	// Send data.
-	// TODO: need to test speed: single thread or running one thread per device.
-	for (auto device : DataLoader::devices)
-		device->packData();
-
-	// Wait...
-	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
 }

@@ -58,8 +58,9 @@ protected:
 	void detectPort() override;
 };
 
+deviceFactory(Adalight)
+
 } /* namespace */
 
-deviceFactory(LEDSpicer::Devices::Adalight::Adalight)
 
 #endif /* ADALIGHT_HPP_ */

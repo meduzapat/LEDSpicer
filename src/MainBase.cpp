@@ -29,6 +29,7 @@ Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
 umap<string, Element::Item> MainBase::alwaysOnElements;
 umap<string, Group::Item> MainBase::alwaysOnGroups;
+high_resolution_clock::time_point MainBase::start;
 
 MainBase::MainBase() :
 	messages(
@@ -81,12 +82,7 @@ MainBase::~MainBase() {
 #endif
 	}
 
-	for (auto p : DataLoader::profilesCache) {
-#ifdef DEVELOP
-		LogDebug("Profile " + p.first + " instance deleted");
-#endif
-		delete p.second;
-	}
+	DataLoader::destroyCache();
 
 	USB::closeSession();
 }
@@ -235,22 +231,34 @@ void MainBase::wait(milliseconds wasted) {
 		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
 	}
 	else {
-		LogWarning("Frame took longer time to render (" + to_string(wasted.count()) + "ms) that the minimal wait time (" + to_string(DataLoader::waitTime.count()) + "ms), to fix this decrease the number of FPS in the configuration");
+		LogInfo("The frame took " + to_string(wasted.count()) + "ms longer to render than the minimal wait time of " + to_string(DataLoader::waitTime.count()) + "ms.");
 	}
 }
 
 Profile* MainBase::tryProfiles(const vector<string>& data) {
 	Profile* profile = nullptr;
+	bool replace(profiles.size() and (DataLoader::flags & FLAG_REPLACE));
 	for (auto& profileName : data) {
-		LogInfo("changing profile to " + profileName);
+		LogInfo((replace ? "Replacing current profile with " : "Changing to profile ") + profileName);
 		try {
-			profile = DataLoader::processProfile(profileName);
-			// Deactivate any overwrite.
-			alwaysOnElements.clear();
-			alwaysOnGroups.clear();
-			DataLoader::controlledItems.clear();
+			// Check cache.
+			profile = DataLoader::getProfileFromCache(profileName);
+			if (not profile) {
+				profile = DataLoader::processProfile(profileName);
+			}
+			if (replace) {
+				terminateCurrentProfile();
+				profiles.pop_back();
+			}
+			else {
+				// Deactivate any overwrite.
+				alwaysOnElements.clear();
+				alwaysOnGroups.clear();
+				DataLoader::controlledItems.clear();
+			}
 			profiles.push_back(profile);
 			currentProfile = profile;
+			// A profile need to be restarted in order to work or will be rejected and replaced.
 			profile->restart();
 			break;
 		}
@@ -264,73 +272,120 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 
 Profile* MainBase::craftProfile(const string& name, const string& elements, const string& groups) {
 
-	// Create profile.
-	if (DataLoader::profilesCache.count(EMPTY_PROFILE + name + elements + groups)) {
-		LogDebug("Reusing profile " EMPTY_PROFILE + name);
-		return DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
-	}
+	Profile* profile = nullptr;
+	bool replace(profiles.size() and (DataLoader::flags & FLAG_REPLACE));
+	string profileName(name + elements + groups);
+	try {
+		// Check cache.
+		profile = DataLoader::getProfileFromCache(profileName);
+		if (not profile) {
+			LogDebug("Creating profile with " EMPTY_PROFILE + name);
+			profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
+			// Add elements.
+			LogDebug("Adding elements");
+			for (string& n : Utility::explode(elements, FIELD_SEPARATOR)) {
+				const Color* col = nullptr;
+				auto parts = Utility::explode(n, GROUP_SEPARATOR);
+				n = parts[0];
+				if (not DataLoader::allElements.count(n)) {
+					LogDebug("Unknown element " + n);
+					continue;
+				}
+				if (parts.size() == 2 and Color::hasColor(parts[1]))
+					col = &Color::getColor(parts[1]);
+				else
+					col = &DataLoader::allElements.at(n)->getDefaultColor();
 
-	LogDebug("Creating profile with " EMPTY_PROFILE + name);
-	Profile* profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
-	// Add elements.
-	LogDebug("Adding elements");
-	for (string& n : Utility::explode(elements, FIELD_SEPARATOR)) {
-		const Color* col = nullptr;
-		auto parts = Utility::explode(n, GROUP_SEPARATOR);
-		n = parts[0];
-		if (not DataLoader::allElements.count(n)) {
-			LogDebug("Unknown element " + n);
-			continue;
+				LogDebug("Using element " + n + " color " + col->getName());
+				profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col);
+			}
+
+			// Add Groups.
+			/*
+			LogDebug("Adding groups");
+			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
+				LogDebug("Using group " + n);
+				if (DataLoader::layout.count(n)) {
+					profile->addAlwaysOnGroup(
+						&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor()
+					);
+				}
+				else {
+					LogDebug(n + " not found");
+				}
+			}
+			*/
+
+			// Add Animations.
+			LogDebug("Adding Animations");
+			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
+				LogDebug("Loading animation " + n);
+				try {
+					profile->addAnimation(DataLoader::processAnimation(n));
+				}
+				catch (...) {
+					LogDebug(n + " not found");
+					continue;
+				}
+			}
+
+			// Add Inputs.
+			LogDebug("Adding Inputs");
+			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
+				LogDebug("Loading input " + n);
+				try {
+					DataLoader::processInput(profile, n);
+				}
+				catch (...) {
+					LogDebug(n + " not found");
+					continue;
+				}
+			}
 		}
-		if (parts.size() == 2 and Color::hasColor(parts[1]))
-			col = &Color::getColor(parts[1]);
-		else
-			col = &DataLoader::allElements.at(n)->getDefaultColor();
-
-		LogDebug("Using element " + n + " color " + col->getName());
-		profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col);
-
-	}
-
-	// Add Groups.
-/*	LogDebug("Adding groups");
-	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-		LogDebug("Using group " + n);
-		if (DataLoader::layout.count(n)) {
-			profile->addAlwaysOnGroup(
-				&DataLoader::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor()
-			);
+		if (replace) {
+			terminateCurrentProfile();
+			profiles.pop_back();
 		}
 		else {
-			LogDebug(n + " not found");
+			// Deactivate any overwrite.
+			alwaysOnElements.clear();
+			alwaysOnGroups.clear();
+			DataLoader::controlledItems.clear();
 		}
-	}*/
-
-	// Add Animations.
-	LogDebug("Adding Animations");
-	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-		LogDebug("Loading animation " + n);
-		try {
-			profile->addAnimation(DataLoader::processAnimation(n));
-		}
-		catch (...) {
-			LogDebug(n + " not found");
-			continue;
-		}
+		profiles.push_back(profile);
+		currentProfile = profile;
+		profile->restart();
 	}
-
-	// Add Inputs.
-	LogDebug("Adding Inputs");
-	for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-		LogDebug("Loading input " + n);
-		try {
-			DataLoader::processInput(profile, n);
-		}
-		catch (...) {
-			LogDebug(n + " not found");
-			continue;
-		}
+	catch (Error& e) {
+		LogNotice(e.getMessage());
 	}
-
 	return profile;
 }
+
+void MainBase::terminateCurrentProfile() {
+	// Deactivate forced elements and groups so the end transition is rendered without interference.
+	alwaysOnGroups.clear();
+	alwaysOnElements.clear();
+	DataLoader::controlledItems.clear();
+	currentProfile->terminate();
+
+	// Wait for termination.
+	while (currentProfile->isRunning()) {
+		// Reset micro-frame.
+		start = high_resolution_clock::now();
+		// Frame begins.
+		currentProfile->runFrame();
+		sendData();
+	}
+}
+
+void MainBase::sendData() {
+	// Send data.
+	// TODO: need to test speed: single thread or running one thread per device.
+	for (auto device : DataLoader::devices)
+		device->packData();
+
+	// Wait...
+	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
+}
+

@@ -72,8 +72,9 @@ protected:
 	void afterClaimInterface() override;
 };
 
+deviceFactory(LedWiz32)
+
 } /* namespace */
 
-deviceFactory(LEDSpicer::Devices::GroovyGameGear::LedWiz32)
 
 #endif /* LEDWIZ32_HPP_ */
