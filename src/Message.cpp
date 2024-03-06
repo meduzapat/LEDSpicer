@@ -34,7 +34,10 @@ string Message::toString() {
 }
 
 string Message::toHumanString() {
-	return Utility::implode(data, ID_GROUP_SEPARATOR);
+	string ret(Utility::implode(data, ID_GROUP_SEPARATOR));
+	std::replace(ret.begin(), ret.end(), FIELD_SEPARATOR, ID_SEPARATOR);
+	std::replace(ret.begin(), ret.end(), GROUP_SEPARATOR, ':');
+	return ret;
 }
 
 string Message::type2str(Types type) {
