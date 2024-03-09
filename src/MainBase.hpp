@@ -24,7 +24,6 @@
 #include <csignal>
 using std::signal;
 
-#include "Messages.hpp"
 #include "DataLoader.hpp"
 #include "devices/DeviceUSB.hpp"
 
@@ -32,6 +31,10 @@ using std::signal;
 #define MAINBASE_HPP_ 1
 
 namespace LEDSpicer {
+
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+
 
 /**
  * LEDSpicer::MainBase
@@ -92,6 +95,9 @@ protected:
 	/// Keeps a list of always on groups for the current profile.
 	static umap<string, Group::Item> alwaysOnGroups;
 
+	/// Starting point for the frame.
+	static high_resolution_clock::time_point start;
+
 	/**
 	 * Functionality for test programs.
 	 * @return
@@ -112,6 +118,15 @@ protected:
 	 */
 	Profile* craftProfile(const string& name, const string& elements, const string& groups);
 
+	/**
+	 * Terminates the current profile and reset everything.
+	 */
+	void terminateCurrentProfile();
+
+	/**
+	 * Send data to all devices.
+	 */
+	void sendData();
 };
 
 } /* namespace LEDSpicer */

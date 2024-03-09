@@ -45,13 +45,13 @@ public:
 
 	virtual ~DeviceSerial() = default;
 
-	virtual string getFullName() const;
+	string getFullName() const override;
 
 protected:
 
-	virtual void openHardware();
+	void openHardware() override;
 
-	virtual void closeHardware();
+	void closeHardware() override;
 };
 
 } /* namespace */

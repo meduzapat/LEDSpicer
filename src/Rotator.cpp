@@ -174,7 +174,14 @@ int main(int argc, char **argv) {
 			}
 
 			if (playerData.size() > restrictor->getMaxIds()) {
-				throw Error(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
+				LogDebug(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
+			}
+
+			for (const auto& pd : playerData) {
+				if (playersData.count(pd.first))
+					availablePlayersData.emplace(pd.first, playersData.at(pd.first));
+				else
+					LogDebug("This hardware type " + restrictorAttr["name"] + " does not support " + pd.first);
 			}
 
 			for (const auto& pd : playerData) {

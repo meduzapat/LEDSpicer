@@ -42,7 +42,7 @@ public:
 
 protected:
 
-	virtual void afterClaimInterface() {}
+	void afterClaimInterface() override {}
 
 };
 

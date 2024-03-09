@@ -50,7 +50,7 @@ public:
 	/**
 	 * Draws the actor configuration.
 	 */
-	virtual void drawConfig();
+	void drawConfig() override;
 
 	/**
 	 * @return true if the animation is on the bouncing period.
@@ -65,12 +65,12 @@ public:
 	/**
 	 * @return true if the current frame is the first frame.
 	 */
-	virtual bool isFirstFrame() const;
+	bool isFirstFrame() const override;
 
 	/**
 	 * @return true if the current frame is the last frame,
 	 */
-	virtual bool isLastFrame() const;
+	bool isLastFrame() const override;
 
 	/**
 	 * @return true if the direction is forward or forward with bouncing.
@@ -90,7 +90,7 @@ public:
 	/**
 	 * @see Actor::restart()
 	 */
-	virtual void restart();
+	void restart() override;
 
 	/**
 	 * Will calculate the next index for a group of items, based on the direction and the current position.
@@ -117,9 +117,9 @@ protected:
 	Directions cDirection;
 
 	/**
-	 * Moves the frame to the next one.
+	 * Moves the frame to the next one (forward or backward).
 	 */
-	virtual void advanceFrame();
+	void advanceFrame() override;
 
 };
 

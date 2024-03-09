@@ -109,12 +109,14 @@ protected:
 
 	/**
 	 * Prepares the data and send it to the connection function.
+	 *
 	 * @param data
 	 */
 	virtual void transferToConnection(vector<uint8_t>& data) const;
 
 	/**
 	 * Read from connection.
+	 *
 	 * @param size
 	 * @return
 	 */
@@ -132,8 +134,10 @@ protected:
 
 	/**
 	 * Sends the data to the USB device.
-	 * This functions can be overrided to send data in a different way.
-	 * Some devices needs a different transmition way.
+	 *
+	 * This function can be overridden to send data in a different way.
+	 * Some devices need a different transmission method.
+	 *
 	 * @param data
 	 * @return result code.
 	 */

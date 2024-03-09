@@ -23,13 +23,13 @@
 // To handle daemonization and uid/gid.
 #include <unistd.h>
 
-#include <algorithm>
-
 #include <chrono>
 using std::chrono::milliseconds;
 #include <thread>
 
 #include "config.h"
+
+#include "Messages.hpp"
 #include "utility/XMLHelper.hpp"
 #include "utility/Color.hpp"
 #include "devices/Profile.hpp"
@@ -144,6 +144,15 @@ public:
 	void readConfiguration();
 
 	/**
+	 * Check if a profile exists in the cache.
+	 *
+	 * Does cache clean up when a reload is forced.
+	 * @param name
+	 * @return the profile or nullptr
+	 */
+	static Profile* getProfileFromCache(const string& name);
+
+	/**
 	 * Reads a profile file form disk or cache.
 	 * @param name
 	 * @param extra, if set will use it to differentiate from other profiles with the same name, only used while crafting profiles.
@@ -152,7 +161,10 @@ public:
 
 	/**
 	 * Reads an animation file.
-	 * @param file
+	 *
+	 * @param file the file name to load
+	 * @param extra used to differentiate between normal animations and modified animations like transitions.
+	 * @return
 	 */
 	static vector<Actor*> processAnimation(const string& file, const string& extra = "");
 
@@ -181,6 +193,11 @@ public:
 	 */
 	static void setInterval(uint8_t waitTime);
 
+	/**
+	 * Deletes all cached objects.
+	 */
+	static void destroyCache();
+
 /* Storage */
 
 	/// list with all elements by name.
@@ -194,12 +211,6 @@ public:
 
 	/// Stores the default profile name.
 	static Profile* defaultProfile;
-
-	/// Keeps references to profiles.
-	static umap<string, Profile*> profilesCache;
-
-	/// Keeps references to actors.
-	static umap<string, vector<Actor*>> animationCache;
 
 	/// Port number to use for listening.
 	static string portNumber;
@@ -222,9 +233,21 @@ public:
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
 
+	/// Current active flags.
+	static uint8_t flags;
+
 protected:
 
 	static Modes mode;
+
+	/// Keeps references to profiles.
+	static umap<string, Profile*> profilesCache;
+
+	/// Keeps references to actors (handled in actor handlers).
+	static umap<string, vector<Actor*>> animationCache;
+
+	/// Keeps references to inputs (handled in input handlers).
+	static umap<string, Input*> inputCache;
 
 	/**
 	 * Loads the color File

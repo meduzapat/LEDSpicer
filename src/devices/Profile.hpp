@@ -20,8 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Element.hpp"
-#include "Group.hpp"
 #include "animations/FrameActor.hpp"
 #include "utility/Color.hpp"
 #include "inputs/Input.hpp"
@@ -112,11 +110,6 @@ public:
 	const Color& getBackgroundColor() const;
 
 	/**
-	 * @return the number of animations.
-	 */
-	uint8_t getAnimationsCount() const;
-
-	/**
 	 * @return the Profile name.
 	 */
 	const string& getName() const;
@@ -133,24 +126,33 @@ public:
 	 */
 	void addInput(Input* input);
 
+	/**
+	 * Sets the global flags pointer.
+	 * @param flags
+	 */
+	static void setGlobalFlags(uint8_t* flags);
+
 protected:
 
-	/// Color to use when cleaning up.
-	Color backgroundColor;
+	/// Current global flags.
+	static uint8_t* globalFlags;
 
 	/// Keeps the profile name.
 	string name;
 
+	/// Color to use when cleaning up.
+	Color backgroundColor;
+
 	/// What the profile is doing.
 	vector<Actor*>* currentActors;
 
-	/// List of animations by group to run.
+	/// List of animations to run.
 	vector<Actor*> animations;
 
-	/// List of animations by group to run at start.
+	/// List of animations to run at start.
 	vector<Actor*> startTransitions;
 
-	/// List of animations by group to run at end.
+	/// List of animations to run at end.
 	vector<Actor*> endTransitions;
 
 	/// Keeps a list of always on elements.

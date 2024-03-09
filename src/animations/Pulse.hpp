@@ -48,7 +48,7 @@ public:
 
 	virtual ~Pulse() = default;
 
-	void drawConfig();
+	void drawConfig() override;
 
 	string mode2str(Modes type);
 
@@ -58,7 +58,7 @@ public:
 
 protected:
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -66,8 +66,8 @@ private:
 
 };
 
-} /* namespace */
+actorFactory(Pulse)
 
-actorFactory(LEDSpicer::Animations::Pulse)
+} /* namespace */
 
 #endif /* PULSE_HPP_ */

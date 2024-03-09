@@ -43,7 +43,7 @@ public:
 
 protected:
 
-	virtual void afterConnect() {}
+	void afterConnect() override {}
 
 };
 

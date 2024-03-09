@@ -341,16 +341,17 @@ LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
 void AudioActor::restart() {
 	value.l = value.r = 0;
 	values.clear();
+	Actor::restart();
 }
 
 void AudioActor::drawConfig() {
 	cout <<
-		"mode: "        << mode2str(userPref.mode) << endl <<
+		"mode: "        << mode2str(userPref.mode)       << endl <<
 		"channel: "     << channel2str(userPref.channel) << endl <<
-		"Colors: Off: " << userPref.off.getName() <<
-		", Low: "       << userPref.c00.getName() <<
-		", Mid: "       << userPref.c50.getName() <<
-		", High: "      << userPref.c75.getName() << endl;
+		"Colors: Off: " << userPref.off.getName()        <<
+		", Low: "       << userPref.c00.getName()        <<
+		", Mid: "       << userPref.c50.getName()        <<
+		", High: "      << userPref.c75.getName()        << endl;
 	Actor::drawConfig();
 	Direction::drawConfig();
 	cout << SEPARATOR << endl;

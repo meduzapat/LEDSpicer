@@ -26,6 +26,7 @@ using namespace LEDSpicer::Restrictors;
 
 void ServoStik::rotate(const umap<string, Ways>& playersData) {
 
+	// ServoStik can move two restrictors to the same ways, pick the first and ignore the rest.
 	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)
 		return;
@@ -53,3 +54,6 @@ uint16_t ServoStik::getProduct() const {
 	return (SERVOSTIK_PRODUCT + getId() - 1);
 }
 
+uint8_t ServoStik::getMaxIds() const {
+	return 2;
+}

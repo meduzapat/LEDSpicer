@@ -43,9 +43,9 @@ public:
 
 protected:
 
-	virtual void afterConnect() {}
+	void afterConnect() override {}
 
-	virtual void afterClaimInterface() {}
+	void afterClaimInterface() override {}
 };
 
 } /* namespace */

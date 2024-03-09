@@ -45,7 +45,7 @@ public:
 
 	virtual ~AlsaAudio();
 
-	void drawConfig();
+	void drawConfig() override;
 
 protected:
 
@@ -53,14 +53,14 @@ protected:
 
 	static snd_pcm_t* pcm;
 
-	virtual void calcPeak();
+	void calcPeak() override;
 
-	virtual void calcPeaks();
+	void calcPeaks() override;
 
 };
 
-} /* namespace */
+actorFactory(AlsaAudio)
 
-actorFactory(LEDSpicer::Animations::AlsaAudio)
+} /* namespace */
 
 #endif /* ALSAAUDIO_HPP_ */

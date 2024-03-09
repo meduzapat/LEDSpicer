@@ -42,11 +42,11 @@ public:
 
 	virtual ~Serpentine() = default;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
 protected:
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -62,8 +62,8 @@ private:
 	void calculateTailPosition();
 };
 
-} /* namespace */
+actorFactory(Serpentine)
 
-actorFactory(LEDSpicer::Animations::Serpentine)
+} /* namespace */
 
 #endif /* SERPENTINE_HPP_ */

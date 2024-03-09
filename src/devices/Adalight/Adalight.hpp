@@ -49,17 +49,18 @@ public:
 
 	virtual ~Adalight() = default;
 
-	virtual void drawHardwarePinMap();
+	void drawHardwarePinMap() override;
 
-	virtual void transfer() const;
+	void transfer() const override;
 
 protected:
 
 	void detectPort() override;
 };
 
+deviceFactory(Adalight)
+
 } /* namespace */
 
-deviceFactory(LEDSpicer::Devices::Adalight::Adalight)
 
 #endif /* ADALIGHT_HPP_ */

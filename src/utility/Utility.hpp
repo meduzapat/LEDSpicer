@@ -21,7 +21,7 @@
  */
 
 #include <cstdint>
-
+#include <algorithm>
 // To handle unordered map.
 #include <unordered_map>
 #ifndef umap
@@ -47,6 +47,28 @@ using std::vector;
 #define RECORD_SEPARATOR static_cast<char>(31)
 #define ID_SEPARATOR       ','
 #define ID_GROUP_SEPARATOR '|'
+#define WAYS_INDICATOR     "WAYS"
+
+/**
+ * Flags
+ * @{
+ */
+/// Flag indicating the absence of animations.
+#define FLAG_NO_ANIMATIONS        1
+/// Flag indicating the absence of inputs.
+#define FLAG_NO_INPUTS            2
+/// Flag indicating the absence of start transitions.
+#define FLAG_NO_START_TRANSITIONS 4
+/// Flag indicating the absence of end transitions.
+#define FLAG_NO_END_TRANSITIONS   8
+/// Flag indicating the absence of a rotator.
+#define FLAG_NO_ROTATOR           16
+/// Flag indicating a force reload.
+#define FLAG_FORCE_RELOAD         32
+/// Flag indicating a replacement.
+#define FLAG_REPLACE              64
+/// @}
+
 namespace LEDSpicer {
 
 class Utility {

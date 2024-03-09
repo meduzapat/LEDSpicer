@@ -44,11 +44,11 @@ public:
 	/**
 	 * @see Actor::drawConfig()
 	 */
-	void drawConfig();
+	void drawConfig() override;
 
 protected:
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -63,8 +63,8 @@ private:
 	void generateNewColors();
 };
 
-} /* namespace */
+actorFactory(Random)
 
-actorFactory(LEDSpicer::Animations::Random)
+} /* namespace */
 
 #endif /* RANDOM_HPP_ */

@@ -51,7 +51,7 @@ public:
 
 	virtual ~AudioActor() = default;
 
-	void drawConfig();
+	void drawConfig() override;
 
 	static Modes str2mode(const string& mode);
 
@@ -61,7 +61,7 @@ public:
 
 	static string channel2str(Channels channel);
 
-	virtual void restart();
+	void restart() override;
 
 protected:
 
@@ -110,10 +110,16 @@ protected:
 	 */
 	Color detectColor(uint8_t percent, bool gradient = true);
 
-	virtual void calculateElements();
+	void calculateElements() override;
 
+	/**
+	 * Delete the peak information.
+	 */
 	void resetPeak();
 
+	/**
+	 * Delete the peaks information.
+	 */
 	void resetPeaks();
 
 	/**
@@ -122,6 +128,10 @@ protected:
 	 */
 	virtual void calcPeak() = 0;
 
+	/**
+	 * Calculates and returns the peaks per channel out of raw data.
+	 * @return
+	 */
 	virtual void calcPeaks() = 0;
 
 #ifdef DEVELOP

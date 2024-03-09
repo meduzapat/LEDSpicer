@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Devices;
 
+uint8_t* Profile::globalFlags = nullptr;
+
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
@@ -83,37 +85,51 @@ void Profile::runFrame() {
 
 	Actor::newFrame();
 
-	for (Input* i : inputs)
-		i->process();
-
+	if (not (*globalFlags & FLAG_NO_INPUTS)) {
+		for (Input* i : inputs)
+			i->process();
+	}
+	// To differentiate between transitions and normal animation..
 	bool running = false;
+
 	if (currentActors) {
 		for (auto actor : *currentActors) {
+			// If the actor is running draw.
 			if (actor->isRunning()) {
 				running = true;
 				actor->draw();
 			}
 		}
 
+		// The current animation set finished.
 		if (not running) {
+			// Stating animation ended.
 			if (isStarting()) {
 				reset();
 			}
-			else if (isTerminating())
+			else if (isTerminating()) {
+				// Ending animation ended.
 				currentActors = nullptr;
+			}
 		}
 	}
 }
 
 void Profile::reset() {
-	currentActors = &animations;
-	restartActors();
-	for (Input* i : inputs)
-		i->activate();
+	if (not (*globalFlags & FLAG_NO_ANIMATIONS)) {
+		LogDebug("Running animations");
+		currentActors = &animations;
+		restartActors();
+	}
+	if (not (*globalFlags & FLAG_NO_INPUTS)) {
+		for (Input* i : inputs)
+			i->activate();
+	}
 }
 
 void Profile::restart() {
-	if (startTransitions.size()) {
+	if (startTransitions.size() and not (*globalFlags & FLAG_NO_START_TRANSITIONS)) {
+		LogDebug("Running starting transitions");
 		currentActors = &startTransitions;
 		restartActors();
 		return;
@@ -122,14 +138,18 @@ void Profile::restart() {
 }
 
 void Profile::terminate() {
-	for (Input* i : inputs)
-		i->deactivate();
+	if (not (*globalFlags & FLAG_NO_INPUTS)) {
+		for (Input* i : inputs)
+			i->deactivate();
+	}
 
-	if (endTransitions.size()) {
+	if (endTransitions.size() and not (*globalFlags & FLAG_NO_END_TRANSITIONS)) {
+		LogDebug("Running ending transitions");
 		currentActors = &endTransitions;
 		restartActors();
 		return;
 	}
+	// This will provoke that the current profile get replaced.
 	currentActors = nullptr;
 }
 
@@ -158,10 +178,6 @@ const LEDSpicer::Color& Profile::getBackgroundColor() const {
 	return backgroundColor;
 }
 
-uint8_t Profile::getAnimationsCount() const {
-	return animations.size();
-}
-
 const string& Profile::getName() const {
 	return name;
 }
@@ -184,4 +200,8 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color) {
 
 void Profile::addInput(Input* input) {
 	inputs.push_back(input);
+}
+
+void Profile::setGlobalFlags(uint8_t* flags) {
+	globalFlags = flags;
 }

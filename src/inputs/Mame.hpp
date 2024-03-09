@@ -43,13 +43,13 @@ public:
 
 	virtual ~Mame() = default;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
-	virtual void process();
+	void process() override;
 
-	virtual void activate();
+	void activate() override;
 
-	virtual void deactivate();
+	void deactivate() override;
 
 protected:
 
@@ -58,8 +58,8 @@ protected:
 	bool active = true;
 };
 
-} /* namespace */
+inputFactory(Mame)
 
-inputFactory(LEDSpicer::Inputs::Mame)
+} /* namespace */
 
 #endif /* MAME_HPP_ */

@@ -45,11 +45,11 @@ public:
 
 	virtual ~Blinker() = default;
 
-	virtual void process();
+	void process() override;
 
-	virtual void deactivate();
+	void deactivate() override;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
 protected:
 
@@ -73,8 +73,8 @@ protected:
 
 };
 
-} /* namespace */
+inputFactory(Blinker)
 
-inputFactory(LEDSpicer::Inputs::Blinker)
+} /* namespace */
 
 #endif /* BLINKER_HPP_ */

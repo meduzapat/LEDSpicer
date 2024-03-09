@@ -11,8 +11,8 @@
 		mode="Wave"
 		off="Black"
 		low="AlmostBlack"
-		mid="DimGray"
-		high="White"
+		mid="LightBlue"
+		high="LightRed"
 		channel="Both"
 	/>
 	<actor

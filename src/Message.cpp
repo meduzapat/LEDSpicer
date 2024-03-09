@@ -28,10 +28,17 @@ string Message::toString() {
 	string ret;
 	for (auto& s : data)
 		ret.append(s).push_back(RECORD_SEPARATOR);
+	ret.append(to_string(flags)).push_back(RECORD_SEPARATOR);
 	ret.append(to_string(static_cast<uint8_t>(type))).push_back('\0');
 	return ret;
 }
 
+string Message::toHumanString() {
+	string ret(Utility::implode(data, ID_GROUP_SEPARATOR));
+	std::replace(ret.begin(), ret.end(), FIELD_SEPARATOR, ID_SEPARATOR);
+	std::replace(ret.begin(), ret.end(), GROUP_SEPARATOR, ':');
+	return ret;
+}
 
 string Message::type2str(Types type) {
 	switch (type) {
@@ -87,6 +94,52 @@ Message::Types Message::str2type(const string& type) {
 	throw Error("Invalid type " + type);
 }
 
+string Message::flag2str(uint8_t flags) {
+	vector<string> result;
+	if (flags & FLAG_NO_ANIMATIONS)
+		result.push_back("NO_ANIMATIONS");
+	if (flags & FLAG_NO_INPUTS)
+		result.push_back("NO_INPUTS");
+	if (flags & FLAG_NO_START_TRANSITIONS)
+		result.push_back("NO_START_TRANSITIONS");
+	if (flags & FLAG_NO_END_TRANSITIONS)
+		result.push_back("NO_END_TRANSITIONS");
+	if (flags & FLAG_NO_ROTATOR)
+		result.push_back("NO_ROTATOR");
+	if (flags & FLAG_FORCE_RELOAD)
+		result.push_back("FORCE_RELOAD");
+	if (flags & FLAG_REPLACE)
+		result.push_back("REPLACE");
+	return Utility::implode(result, ' ');
+}
+
+void Message::str2flag(uint8_t& currentFlags, const string& flags) {
+	auto parts = Utility::explode(flags, '|');
+	bool rotator = false;
+	for (auto& flag : parts) {
+		if (flag == "NO_ANIMATIONS")
+			currentFlags |= FLAG_NO_ANIMATIONS;
+		else if (flag == "NO_INPUTS")
+			currentFlags |= FLAG_NO_INPUTS;
+		else if (flag == "NO_START_TRANSITIONS")
+			currentFlags |= FLAG_NO_START_TRANSITIONS;
+		else if (flag == "NO_END_TRANSITIONS")
+			currentFlags |= FLAG_NO_END_TRANSITIONS;
+		else if (flag == "NO_TRANSITIONS")
+			currentFlags |= FLAG_NO_START_TRANSITIONS | FLAG_NO_END_TRANSITIONS;
+		else if (flag == "NO_ROTATOR")
+			currentFlags |= FLAG_NO_ROTATOR;
+		else if (flag == "SHOW_ROTATOR")
+			rotator = true;
+		else if (flag == "FORCE_RELOAD")
+			currentFlags |= FLAG_FORCE_RELOAD;
+		else if (flag == "REPLACE")
+			currentFlags |= FLAG_REPLACE;
+	}
+	if (rotator)
+		currentFlags &= ~FLAG_NO_ROTATOR;
+}
+
 const vector<string>& LEDSpicer::Message::getData() const {
 	return data;
 }
@@ -105,6 +158,14 @@ Message::Types Message::getType() const {
 
 void Message::setType(Types type) {
 	this->type = type;
+}
+
+const uint8_t Message::getFlags() const {
+	return flags;
+}
+
+void Message::setFlags(const uint8_t flags) {
+	this->flags = flags;
 }
 
 void Message::reset() {

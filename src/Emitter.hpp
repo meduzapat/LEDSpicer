@@ -131,6 +131,13 @@ struct GameRecord {
  */
 int main(int argc, char **argv);
 
+/**
+ * Return the next parameter.
+ * @param argv
+ * @return
+ */
+string getNext(int index, int total, char **argv);
+
 GameRecord parseMameDataFile(const string& rom);
 GameRecord parseMame(const string& rom);
 GameRecord parseControlsIni(const string& rom);

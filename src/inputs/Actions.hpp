@@ -41,13 +41,13 @@ public:
 
 	virtual ~Actions() = default;
 
-	virtual void process();
+	void process() override;
 
-	virtual void activate();
+	void activate() override;
 
-	virtual void deactivate();
+	void deactivate() override;
 
-	virtual void drawConfig();
+	void drawConfig() override;
 
 protected:
 
@@ -113,8 +113,8 @@ protected:
 
 };
 
-} /* namespace */
+inputFactory(Actions)
 
-inputFactory(LEDSpicer::Inputs::Actions)
+} /* namespace */
 
 #endif /* ACTIONS_HPP_ */

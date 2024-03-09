@@ -42,7 +42,7 @@ public:
 
 	virtual ~FileReader() {}
 
-	void drawConfig();
+	void drawConfig() override;
 
 	string Format2str(Formats format);
 
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-	void calculateElements();
+	void calculateElements() override;
 
 private:
 
@@ -68,8 +68,8 @@ private:
 
 };
 
-} /* namespace */
+actorFactory(FileReader)
 
-actorFactory(LEDSpicer::Animations::FileReader)
+} /* namespace */
 
 #endif /* FILEREADER_HPP_ */
