@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Devices;
 
-uint8_t* Profile::globalFlags = nullptr;
-
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
@@ -85,7 +83,7 @@ void Profile::runFrame() {
 
 	Actor::newFrame();
 
-	if (not (*globalFlags & FLAG_NO_INPUTS)) {
+	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) {
 		for (Input* i : inputs)
 			i->process();
 	}
@@ -116,19 +114,19 @@ void Profile::runFrame() {
 }
 
 void Profile::reset() {
-	if (not (*globalFlags & FLAG_NO_ANIMATIONS)) {
+	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS)) {
 		LogDebug("Running animations");
 		currentActors = &animations;
 		restartActors();
 	}
-	if (not (*globalFlags & FLAG_NO_INPUTS)) {
+	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) {
 		for (Input* i : inputs)
 			i->activate();
 	}
 }
 
 void Profile::restart() {
-	if (startTransitions.size() and not (*globalFlags & FLAG_NO_START_TRANSITIONS)) {
+	if (startTransitions.size() and not (Utility::globalFlags & FLAG_NO_START_TRANSITIONS)) {
 		LogDebug("Running starting transitions");
 		currentActors = &startTransitions;
 		restartActors();
@@ -137,13 +135,14 @@ void Profile::restart() {
 	reset();
 }
 
-void Profile::terminate() {
-	if (not (*globalFlags & FLAG_NO_INPUTS)) {
-		for (Input* i : inputs)
-			i->deactivate();
-	}
+void Profile::stop() {
+	for (Input* i : inputs)
+		i->deactivate();
+}
 
-	if (endTransitions.size() and not (*globalFlags & FLAG_NO_END_TRANSITIONS)) {
+void Profile::terminate() {
+	stop();
+	if (endTransitions.size() and not (Utility::globalFlags & FLAG_NO_END_TRANSITIONS)) {
 		LogDebug("Running ending transitions");
 		currentActors = &endTransitions;
 		restartActors();
@@ -200,8 +199,4 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color) {
 
 void Profile::addInput(Input* input) {
 	inputs.push_back(input);
-}
-
-void Profile::setGlobalFlags(uint8_t* flags) {
-	globalFlags = flags;
 }

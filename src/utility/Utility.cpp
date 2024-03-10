@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer;
 
+uint8_t Utility::globalFlags = 0;
+
 int Utility::parseNumber(const string& number, const string& errorMessage) {
 	try {
 		return std::stoi(number);

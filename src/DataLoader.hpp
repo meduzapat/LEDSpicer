@@ -233,9 +233,6 @@ public:
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
 
-	/// Current active flags.
-	static uint8_t flags;
-
 protected:
 
 	static Modes mode;

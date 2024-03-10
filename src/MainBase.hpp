@@ -127,6 +127,11 @@ protected:
 	 * Send data to all devices.
 	 */
 	void sendData();
+
+	/**
+	 * Clears always on Elements and Groups and the Input states.
+	 */
+	void clearOverrides();
 };
 
 } /* namespace LEDSpicer */

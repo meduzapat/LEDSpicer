@@ -75,6 +75,9 @@ class Utility {
 
 public:
 
+	/// Current global flags.
+	static uint8_t globalFlags;
+
 	/**
 	 * Attempts to extract a number from a string.
 	 * @param number A string representing a number.

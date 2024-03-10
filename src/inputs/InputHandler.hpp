@@ -54,12 +54,12 @@ public:
 	 * @param maps
 	 * @return the newly created input plugin.
 	 */
-	Input* createInput(const string& name, umap<string, string>& parameters, umap<string, Items*>& maps);
+	Input* createInput(umap<string, string>& parameters, umap<string, Items*>& maps);
 
 protected:
 
 	/// Keep copy of input plugin instance.
-	umap<string, Input*> instances;
+	vector<Input*> instances;
 
 	/**
 	 * Pointer to the plugin's creation function.
