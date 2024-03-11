@@ -253,33 +253,34 @@ int main(int argc, char **argv) {
 					LogDebug("got " + gd.players + " players data from " + ds);
 				}
 				if (gd.players == "0") {
-					LogError("No player data detected");
-					return EXIT_SUCCESS;
-				}
-				if (useColors)
-					decorateWithColorsIni(data[0], gd);
-
-				// Craft Profile mode
-				if (craftProfile) {
-					msg.setType(Message::Types::CraftProfile);
-					for (string& s : gd.toString())
-						msg.addData(s);
-				}
-				// Legacy profile mode.
-				else {
-					// Create a message that sends player + buttons information.
-					msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
-					// Create a message that sends controller + buttons information.
-					msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
-				}
-
-				// Rotate restrictors.
-				if (rotate) {
-					string parameters(configFile != CONFIG_FILE ? "-c \"" + configFile + "\"" : "");
-					gd.rotate(parameters);
+					LogNotice("No player data detected");
 				}
 				else {
-					LogDebug("No restrictors found");
+					if (useColors)
+						decorateWithColorsIni(data[0], gd);
+
+					// Craft Profile mode
+					if (craftProfile) {
+						msg.setType(Message::Types::CraftProfile);
+						for (string& s : gd.toString())
+							msg.addData(s);
+					}
+					// Legacy profile mode.
+					else {
+						// Create a message that sends player + buttons information.
+						msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
+						// Create a message that sends controller + buttons information.
+						msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
+					}
+
+					// Rotate restrictors.
+					if (rotate) {
+						string parameters(configFile != CONFIG_FILE ? "-c \"" + configFile + "\"" : "");
+						gd.rotate(parameters);
+					}
+					else {
+						LogDebug("No restrictors found");
+					}
 				}
 			}
 			msg.addData(data[1]);
