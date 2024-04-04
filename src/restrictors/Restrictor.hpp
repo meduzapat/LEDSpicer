@@ -84,6 +84,20 @@ public:
 	static string ways2str(Ways ways);
 
 	/**
+	 * Convert a string representation of a ways into ways.
+	 * @param strWays
+	 * @return
+	 */
+	static Ways strWaysToWays(const std::string& strWays);
+
+	/**
+	 * Converts ways into its string representation.
+	 * @param ways
+	 * @return
+	 */
+	static string waysToStrWays(Ways ways);
+
+	/**
 	 * @param ways
 	 * @return Returns true if the hardware is rotary, false if is restrictor.
 	 */

@@ -33,6 +33,7 @@ using std::vector;
 
 // to handle special formats.
 #include <sstream>
+#include <unistd.h> // for setenv
 
 #include "Error.hpp"
 
@@ -194,6 +195,16 @@ public:
 	 * @return
 	 */
 	static string extractChars(const string& str, char from, char to);
+
+	/**
+	 * @return the current user home without the ending /.
+	 */
+	static const string getHomeDir();
+
+	/**
+	 * @return the current user program config dir without the ending /.
+	 */
+	static const string getConfigDir();
 };
 
 } // namespace
