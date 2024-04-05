@@ -105,6 +105,23 @@ string Restrictor::ways2str(Ways ways) {
 	return "";
 }
 
+Restrictor::Ways Restrictor::strWaysToWays(const std::string& strWays) {
+	try {
+		int intValue(std::stoi(strWays));
+		if (intValue >= static_cast<int>(Ways::invalid) && intValue <= static_cast<int>(Ways::rotary12)) {
+			return static_cast<Ways>(intValue);
+		}
+		throw;
+	}
+	catch (...) {
+		return Ways::invalid;
+	}
+}
+
+string Restrictor::waysToStrWays(Ways ways) {
+	return to_string(static_cast<int>(ways));
+}
+
 bool Restrictor::isRotary(const Ways& ways) {
 	return (ways == Ways::rotary8 or ways == Ways::rotary12);
 }
