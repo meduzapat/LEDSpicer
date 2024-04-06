@@ -520,8 +520,9 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 	if (not inputHandlers.count(inputName))
 		inputHandlers.emplace(inputName, new InputHandler(inputName));
 	umap<string, Items*> inputMapTmp;
-	try {
-		// Check for multiple source inputs
+
+	if (inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
+		// Multiple source inputs
 		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
 		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);
 		tinyxml2::XMLElement* mapsNode = inputFile.getRoot()->FirstChildElement("maps");
@@ -538,8 +539,8 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 			}
 		}
 	}
-	catch (...) {
-		// single source or malformed.
+	else {
+		// Single source or malformed.
 		processInputMap(inputFile.getRoot(), inputMapTmp);
 	}
 	auto input(inputHandlers[inputName]->createInput(inputAttr, inputMapTmp));
@@ -553,7 +554,7 @@ vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2
 	// Check for listenEvents.
 	tinyxml2::XMLElement* listenEventsNode = inputNode->FirstChildElement("listenEvents");
 	if (not listenEventsNode) {
-		throw;
+		throw LEDError("Missing listenEvents for " + inputName);
 	}
 	vector<string> listenEvents;
 	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
@@ -563,7 +564,7 @@ vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2
 		listenEvents.push_back(listenEventsAttr[PARAM_NAME]);
 	}
 	if (listenEvents.empty())
-		throw;
+		throw LEDError("No listenEvents found for " + inputName);
 	return listenEvents;
 }
 
