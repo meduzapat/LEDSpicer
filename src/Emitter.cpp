@@ -77,8 +77,8 @@ int main(int argc, char **argv) {
 				"-v or --version               Display version information.\n"
 				"-h or --help                  Display this help screen.\n"
 				"-c <conf> or --config <conf>  Use an alternative configuration file.\n"
-				"-n or --no-rotate             Avoid trigger rotators (only used when LoadProfileByEmulator). will raise FLAG_NO_ROTATOR flag\n"
-				"-r or --replace               Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator) same as FLAG_REPLACE flag.\n"
+				"-n or --no-rotate             Avoid trigger rotators (only used when LoadProfileByEmulator). will raise NO_ROTATOR flag\n"
+				"-r or --replace               Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator) same as REPLACE flag.\n"
 				"-f <flags> or --flags <flags> Send extra flags to LEDSPicer, pipe separated surrounded by quotes.\n"
 				"  Available Flags:\n"
 				"  * NO_ANIMATIONS        The animations of the profile will be ignored.\n"
@@ -253,33 +253,34 @@ int main(int argc, char **argv) {
 					LogDebug("got " + gd.players + " players data from " + ds);
 				}
 				if (gd.players == "0") {
-					LogError("No player data detected");
-					return EXIT_SUCCESS;
-				}
-				if (useColors)
-					decorateWithColorsIni(data[0], gd);
-
-				// Craft Profile mode
-				if (craftProfile) {
-					msg.setType(Message::Types::CraftProfile);
-					for (string& s : gd.toString())
-						msg.addData(s);
-				}
-				// Legacy profile mode.
-				else {
-					// Create a message that sends player + buttons information.
-					msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
-					// Create a message that sends controller + buttons information.
-					msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
-				}
-
-				// Rotate restrictors.
-				if (rotate) {
-					string parameters(configFile != CONFIG_FILE ? "-c \"" + configFile + "\"" : "");
-					gd.rotate(parameters);
+					LogNotice("No player data detected");
 				}
 				else {
-					LogDebug("No restrictors found");
+					if (useColors)
+						decorateWithColorsIni(data[0], gd);
+
+					// Craft Profile mode
+					if (craftProfile) {
+						msg.setType(Message::Types::CraftProfile);
+						for (string& s : gd.toString())
+							msg.addData(s);
+					}
+					// Legacy profile mode.
+					else {
+						// Create a message that sends player + buttons information.
+						msg.addData("P" + gd.players + "_B" + gd.playersData.begin()->second.buttons);
+						// Create a message that sends controller + buttons information.
+						msg.addData(gd.playersData.begin()->second.controllers.front() + gd.players + "_B" + gd.playersData.begin()->second.buttons);
+					}
+
+					// Rotate restrictors.
+					if (rotate) {
+						string parameters(configFile != CONFIG_FILE ? "-c \"" + configFile + "\"" : "");
+						gd.rotate(parameters);
+					}
+					else {
+						LogDebug("No restrictors found");
+					}
 				}
 			}
 			msg.addData(data[1]);

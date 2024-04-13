@@ -34,20 +34,17 @@ InputHandler::InputHandler(const string& inputName) :
 }
 
 InputHandler::~InputHandler() {
-	for (auto& i : instances) {
+	for (Input* i : instances) {
 #ifdef DEVELOP
-		LogDebug("Input instance " + i.first + " deleted");
+		LogDebug("Input instance deleted");
 #endif
-		destroyFunction(i.second);
+		destroyFunction(i);
 	}
 }
 
-Input* InputHandler::createInput(const string& name, umap<string, string>& parameters, umap<string, Items*>& maps) {
-
-	if (instances.count(name))
-		return instances[name];
+Input* InputHandler::createInput(umap<string, string>& parameters, umap<string, Items*>& maps) {
 
 	Input* instance = createFunction(parameters, maps);
-	instances.emplace(name, instance);
+	instances.push_back(instance);
 	return instance;
 }

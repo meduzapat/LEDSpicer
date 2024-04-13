@@ -237,7 +237,7 @@ void MainBase::wait(milliseconds wasted) {
 
 Profile* MainBase::tryProfiles(const vector<string>& data) {
 	Profile* profile = nullptr;
-	bool replace(profiles.size() and (DataLoader::flags & FLAG_REPLACE));
+	bool replace(profiles.size() and (Utility::globalFlags & FLAG_REPLACE));
 	for (auto& profileName : data) {
 		LogInfo((replace ? "Replacing current profile with " : "Changing to profile ") + profileName);
 		try {
@@ -252,9 +252,8 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 			}
 			else {
 				// Deactivate any overwrite.
-				alwaysOnElements.clear();
-				alwaysOnGroups.clear();
-				DataLoader::controlledItems.clear();
+				clearOverrides();
+				currentProfile->stop();
 			}
 			profiles.push_back(profile);
 			currentProfile = profile;
@@ -273,7 +272,7 @@ Profile* MainBase::tryProfiles(const vector<string>& data) {
 Profile* MainBase::craftProfile(const string& name, const string& elements, const string& groups) {
 
 	Profile* profile = nullptr;
-	bool replace(profiles.size() and (DataLoader::flags & FLAG_REPLACE));
+	bool replace(profiles.size() and (Utility::globalFlags & FLAG_REPLACE));
 	string profileName(name + elements + groups);
 	try {
 		// Check cache.
@@ -348,9 +347,8 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 		}
 		else {
 			// Deactivate any overwrite.
-			alwaysOnElements.clear();
-			alwaysOnGroups.clear();
-			DataLoader::controlledItems.clear();
+			clearOverrides();
+			currentProfile->stop();
 		}
 		profiles.push_back(profile);
 		currentProfile = profile;
@@ -364,9 +362,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 
 void MainBase::terminateCurrentProfile() {
 	// Deactivate forced elements and groups so the end transition is rendered without interference.
-	alwaysOnGroups.clear();
-	alwaysOnElements.clear();
-	DataLoader::controlledItems.clear();
+	clearOverrides();
 	currentProfile->terminate();
 
 	// Wait for termination.
@@ -389,3 +385,8 @@ void MainBase::sendData() {
 	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
 }
 
+void MainBase::clearOverrides() {
+	alwaysOnGroups.clear();
+	alwaysOnElements.clear();
+	DataLoader::controlledItems.clear();
+}

@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer;
 
+uint8_t Utility::globalFlags = 0;
+
 int Utility::parseNumber(const string& number, const string& errorMessage) {
 	try {
 		return std::stoi(number);
@@ -125,5 +127,17 @@ string Utility::extractChars(const string& str, char from, char to) {
 			if (c >= from and c <= to)
 				result.push_back(c);
 	return result;
+}
+
+const string Utility::getHomeDir() {
+	const char* homeDir = getenv("HOME");
+	if (homeDir) {
+		return string(homeDir);
+	}
+	return "/root";
+}
+
+const string Utility::getConfigDir() {
+	return string(getHomeDir() + "/.local/share/" PACKAGE_NAME);
 }
 

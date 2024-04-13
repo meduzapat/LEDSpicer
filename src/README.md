@@ -214,7 +214,7 @@ These directives allow for selectively including or excluding certain sections o
 
 In addition to the previously mentioned rules, the following guidelines should be followed:
 
-- Use tabs for indentation and spaces after.
+- Tabs are used for initial indentation of lines, with one tab used per indentation level. Spaces are used for other alignment within a line.
 - Use `/** */` for documenting methods and functions.
 - Use `///` for documenting variables and properties.
 - Follow Doxygen rules for documenting parameters and all other documentation.

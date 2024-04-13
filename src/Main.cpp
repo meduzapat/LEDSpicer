@@ -77,7 +77,7 @@ void Main::run() {
 		Message msg(messages.getMessage());
 		LogDebug("Received message: Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
 		// Set global flags.
-		DataLoader::flags = msg.getFlags();
+		Utility::globalFlags = msg.getFlags();
 
 		switch (msg.getType()) {
 
@@ -399,7 +399,7 @@ void Main::runCurrentProfile() {
 		// Set always on elements from profile.
 		for (auto& eE : currentProfile->getAlwaysOnElements()) {
 			// Ignore ways if the flag is set.
-			if ((DataLoader::flags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
+			if ((Utility::globalFlags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
 				continue;
 			eE.process();
 		}

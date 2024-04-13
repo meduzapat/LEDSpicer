@@ -80,6 +80,11 @@ public:
 	void restart();
 
 	/**
+	 * Stop the the current profile (no end sequence).
+	 */
+	void stop();
+
+	/**
 	 * Initialize the ending sequence.
 	 */
 	void terminate();
@@ -133,9 +138,6 @@ public:
 	static void setGlobalFlags(uint8_t* flags);
 
 protected:
-
-	/// Current global flags.
-	static uint8_t* globalFlags;
 
 	/// Keeps the profile name.
 	string name;

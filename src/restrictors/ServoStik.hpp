@@ -21,6 +21,8 @@
  */
 
 #include "RestrictorUSB.hpp"
+#include <fstream>  // to store and read files.
+#include <sys/stat.h>
 
 #ifndef RESTRICTORS_SERVOSTIK_HPP_
 #define RESTRICTORS_SERVOSTIK_HPP_ 1
@@ -31,6 +33,7 @@
 #define SERVOSTIK_INTERFACE  0
 #define SERVOSTIK_WVALUE     0x0200
 #define SERVOSTIK_MAX_BOARDS 4
+#define SERVOSTIK_DATA(name) "/servostik_" + name + ".dat"
 
 namespace LEDSpicer::Restrictors {
 
@@ -60,6 +63,12 @@ public:
 	uint16_t getProduct() const override;
 
 	uint8_t getMaxIds() const override;
+
+protected:
+
+	void storeWays(const string& profile, const string& ways) const;
+
+	const string retrieveWays(const string& profile) const;
 
 };
 

@@ -41,7 +41,6 @@ umap<string, InputHandler*> DataLoader::inputHandlers;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
 umap<string, Items*> DataLoader::controlledItems;
 milliseconds DataLoader::waitTime;
-uint8_t DataLoader::flags = 0;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -52,9 +51,6 @@ void DataLoader::setMode(Modes mode) {
 }
 
 void DataLoader::readConfiguration() {
-
-	// Profiles needs flags to disable features.
-	Devices::Profile::setGlobalFlags(&flags);
 
 	// Input need to be linked with the main program items.
 	Input::setInputControllers(&controlledItems);
@@ -304,7 +300,7 @@ Profile* DataLoader::getProfileFromCache(const string& name) {
 		return nullptr;
 
 	auto profile(profilesCache.at(name));
-	if (not (flags & FLAG_FORCE_RELOAD)) {
+	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD)) {
 		LogDebug("Profile from cache.");
 		return profile;
 	}
@@ -469,7 +465,7 @@ vector<Actor*> DataLoader::processAnimation(const string& file, const string& ex
 
 	string name(file + extra);
 	// Check cache.
-	if (not (flags & FLAG_FORCE_RELOAD) and animationCache.count(name)) {
+	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD) and animationCache.count(name)) {
 		LogDebug("Animation from cache.");
 		return animationCache.at(name);
 	}
@@ -510,7 +506,7 @@ Actor* DataLoader::createAnimation(umap<string, string>& actorData) {
 void DataLoader::processInput(Profile* profile, const string& file) {
 
 	// Check cache.
-	if (not (flags & FLAG_FORCE_RELOAD) and inputCache.count(file)) {
+	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD) and inputCache.count(file)) {
 		LogDebug("Input from cache.");
 		profile->addInput(inputCache.at(file));
 		return;
@@ -524,8 +520,9 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 	if (not inputHandlers.count(inputName))
 		inputHandlers.emplace(inputName, new InputHandler(inputName));
 	umap<string, Items*> inputMapTmp;
-	try {
-		// Check for multiple source inputs
+
+	if (inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
+		// Multiple source inputs
 		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
 		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);
 		tinyxml2::XMLElement* mapsNode = inputFile.getRoot()->FirstChildElement("maps");
@@ -542,11 +539,11 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 			}
 		}
 	}
-	catch (...) {
-		// single source or malformed.
+	else {
+		// Single source or malformed.
 		processInputMap(inputFile.getRoot(), inputMapTmp);
 	}
-	auto input(inputHandlers[inputName]->createInput(file, inputAttr, inputMapTmp));
+	auto input(inputHandlers[inputName]->createInput(inputAttr, inputMapTmp));
 	profile->addInput(input);
 
 	// Save Cache, replace previous value if any.
@@ -557,7 +554,7 @@ vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2
 	// Check for listenEvents.
 	tinyxml2::XMLElement* listenEventsNode = inputNode->FirstChildElement("listenEvents");
 	if (not listenEventsNode) {
-		throw;
+		throw LEDError("Missing listenEvents for " + inputName);
 	}
 	vector<string> listenEvents;
 	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
@@ -567,7 +564,7 @@ vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2
 		listenEvents.push_back(listenEventsAttr[PARAM_NAME]);
 	}
 	if (listenEvents.empty())
-		throw;
+		throw LEDError("No listenEvents found for " + inputName);
 	return listenEvents;
 }
 
