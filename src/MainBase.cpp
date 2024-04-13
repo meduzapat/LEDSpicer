@@ -27,8 +27,6 @@ using namespace LEDSpicer;
 bool MainBase::running = false;
 Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
-umap<string, Element::Item> MainBase::alwaysOnElements;
-umap<string, Group::Item> MainBase::alwaysOnGroups;
 high_resolution_clock::time_point MainBase::start;
 
 MainBase::MainBase() :
@@ -310,7 +308,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 					);
 				}
 				else {
-					LogDebug(n + " not found");
+					LogDebug(n + " failed");
 				}
 			}
 			*/
@@ -323,7 +321,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 					profile->addAnimation(DataLoader::processAnimation(n));
 				}
 				catch (...) {
-					LogDebug(n + " not found");
+					LogDebug(n + " failed");
 					continue;
 				}
 			}
@@ -336,7 +334,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 					DataLoader::processInput(profile, n);
 				}
 				catch (...) {
-					LogDebug(n + " not found");
+					LogDebug(n + " failed");
 					continue;
 				}
 			}
@@ -386,7 +384,7 @@ void MainBase::sendData() {
 }
 
 void MainBase::clearOverrides() {
-	alwaysOnGroups.clear();
-	alwaysOnElements.clear();
-	DataLoader::controlledItems.clear();
+	Profile::removeTemporaryAlwaysOnGroups();
+	Profile::removeTemporaryAlwaysOnElements();
+	Input::clearControlledInputs();
 }

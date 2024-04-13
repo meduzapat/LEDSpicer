@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Filler)
+
 Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
 	Colorful(parameters.count("color") ? parameters["color"] : (parameters.count("colors") ? parameters["colors"] : "")),
@@ -150,10 +152,9 @@ void Filler::drawConfig() {
 	cout <<
 		"Type: Filler" << endl <<
 		"Mode: " << mode2str(mode) << endl;
-	StepActor::drawConfig();
 	cout << "Colors: ";
 	this->drawColors();
-	cout << endl << SEPARATOR << endl;
+	StepActor::drawConfig();
 }
 
 string Filler::mode2str(Modes mode) {

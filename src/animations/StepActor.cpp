@@ -52,17 +52,8 @@ StepActor::StepActor(
 }
 
 void StepActor::drawConfig() {
+	cout << "Steps: " << static_cast<uint>(totalStepFrames) << endl;
 	DirectionActor::drawConfig();
-	cout <<
-		"Steps: " << static_cast<uint>(totalStepFrames) << endl <<
-		"Full Frames: " << static_cast<uint>(getTotalSteps()) <<
-		" (" << static_cast<float>(getTotalSteps()) / FPS << " sec)" << endl;
-}
-
-uint16_t StepActor::getTotalSteps() const {
-	if (totalStepFrames)
-		return totalStepFrames * totalFrames;
-	return totalFrames;
 }
 
 uint16_t StepActor::getCurrentStep() const {
@@ -150,4 +141,10 @@ void StepActor::changeFrameElement(const Color& color, const Color& colorNext, D
 void StepActor::setTotalStepFrames(uint8_t totalStepFrames) {
 	this->totalStepFrames = totalStepFrames;
 	stepPercent = totalStepFrames ? PERCENT(1.0, totalStepFrames) : 0;
+}
+
+const uint16_t StepActor::getFullFrames() const {
+	if (totalStepFrames)
+		return totalStepFrames * totalFrames * (1 + isBouncer());
+	return (totalFrames * (1 + isBouncer()));
 }

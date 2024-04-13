@@ -78,6 +78,8 @@ using std::endl;
 
 #define COLORINI_FILE PACKAGE_DATA_DIR "colors.ini"
 
+bool ignoreMissingColors = false;
+
 struct PlayerData {
 
 	string

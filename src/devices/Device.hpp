@@ -32,7 +32,6 @@ namespace LEDSpicer::Devices {
 /**
  * LEDSpicer::Devices::Device
  * Generic Device settings and functionality.
- * TODO: For devices that send individual values per transmition, only send, used LEDs.
  * check XXX_TRANSFER definitions, 0 all, 1 individual, 2 batches.
  * Right now only raspberry pi uses this feature.
  */

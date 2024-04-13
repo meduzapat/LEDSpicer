@@ -75,9 +75,9 @@ public:
 			return group->getName();
 		}
 
-		void process() const {
+		void process(uint8_t percent) const {
 			for (auto& e : group->getElements())
-				e->setColor(*color, filter);
+				e->setColor(*color, filter, percent);
 		}
 	};
 

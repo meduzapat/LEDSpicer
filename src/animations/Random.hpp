@@ -63,8 +63,6 @@ private:
 	void generateNewColors();
 };
 
-actorFactory(Random)
-
 } /* namespace */
 
 #endif /* RANDOM_HPP_ */
