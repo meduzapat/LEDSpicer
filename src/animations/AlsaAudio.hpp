@@ -59,8 +59,6 @@ protected:
 
 };
 
-actorFactory(AlsaAudio)
-
 } /* namespace */
 
 #endif /* ALSAAUDIO_HPP_ */

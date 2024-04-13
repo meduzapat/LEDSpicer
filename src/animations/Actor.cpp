@@ -73,6 +73,11 @@ void Actor::drawConfig() {
 		cout << "Stop After: " << secondsToEnd << " sec" << endl;
 	if (repeat)
 		cout << "Will repeat for: " << repeat << " times" << endl;
+	if (acceptCycles()) {
+		cout << "Frames: " << getFullFrames() << " (" << getFullFrames() / FPS << " sec)" << endl;
+	}
+	cout << "Total running time: " << (getRunTime() ? to_string(getRunTime()) : "∞") << " sec" << endl
+		 << SEPARATOR << endl;
 }
 
 void Actor::restart() {

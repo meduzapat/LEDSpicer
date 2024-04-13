@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(AlsaAudio)
+
 snd_pcm_t* AlsaAudio::pcm    = nullptr;
 uint8_t AlsaAudio::instances = 0;
 
