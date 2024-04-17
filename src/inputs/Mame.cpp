@@ -80,11 +80,11 @@ void Mame::process() {
 	for (auto& message : messages) {
 		LogDebug("Sending: " + message.first + " " + (message.second ? "on" : "off"));
 		if (message.second) {
-			if (not controlledItems->count(message.first))
-				controlledItems->emplace(message.first, itemsMap[message.first]);
+			if (not controlledItems.count(message.first))
+				controlledItems.emplace(message.first, itemsMap[message.first]);
 		}
 		else
-			controlledItems->erase(message.first);
+			controlledItems.erase(message.first);
 	}
 }
 

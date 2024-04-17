@@ -52,7 +52,6 @@ void FileReader::drawConfig() {
 		<< "Type: FileReader " << endl
 		<< "File: " << frames->first << endl;
 	DirectionActor::drawConfig();
-	cout << SEPARATOR << endl;
 }
 
 string FileReader::Format2str(Formats format) {

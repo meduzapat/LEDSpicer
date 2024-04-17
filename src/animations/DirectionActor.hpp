@@ -92,6 +92,8 @@ public:
 	 */
 	void restart() override;
 
+	const uint16_t getFullFrames() const override;
+
 	/**
 	 * Will calculate the next index for a group of items, based on the direction and the current position.
 	 * @param [out] currentDirection will be updated with the new direction.

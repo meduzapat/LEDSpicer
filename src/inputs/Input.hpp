@@ -49,10 +49,15 @@ public:
 	virtual ~Input();
 
 	/**
-	 * Sets the controlled elements and groups.
-	 * @param controlledItems a list of elements and/or groups.
+	 * Returns a list of controlled items.
+	 * @return
 	 */
-	static void setInputControllers(umap<string, Items*>* controlledItems);
+	static const umap<string, Items*>& getControlledInputs();
+
+	/**
+	 * Removes all input registered inputs.
+	 */
+	static void clearControlledInputs();
 
 	/**
 	 * Draws the input configuration.
@@ -79,7 +84,7 @@ public:
 protected:
 
 	/// List of elements that need to be Output, mapped items by trigger.
-	static umap<string, Items*>* controlledItems;
+	static umap<string, Items*> controlledItems;
 
 	/// Input specific map. trigger -> Item.
 	umap<string, Items*> itemsMap;

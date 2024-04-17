@@ -131,7 +131,6 @@ int main(int argc, char **argv) {
 		// No Rotate.
 		if (commandline == "-n" or commandline == "--no-rotate") {
 			flags |= FLAG_NO_ROTATOR;
-			rotate = false;
 			continue;
 		}
 
@@ -164,6 +163,9 @@ int main(int argc, char **argv) {
 
 	// Convert flag string into flags.
 	Message::str2flag(flags, flagsStr);
+	if (flags & FLAG_NO_ROTATOR) {
+		rotate = false;
+	}
 	msg.setFlags(flags);
 
 	if (msg.getType() == Message::Types::Invalid) {
@@ -190,8 +192,11 @@ int main(int argc, char **argv) {
 			craftProfile = configValues["craftProfile"] == "true";
 
 		// Set use colors file.
-		if (configValues.count("colorsFile"))
-			useColors = configValues["colorsFile"] == "true";
+		if (configValues.count("colorsFile")) {
+			ignoreMissingColors = configValues["colorsFile"] == "strict";
+			useColors = ignoreMissingColors or configValues["colorsFile"] == "true";
+			LogDebug(ignoreMissingColors ? "ignoreMissingColors active" : "ignoreMissingColors inactive");
+		}
 
 		// Port.
 		if (configValues.count("port"))
@@ -570,9 +575,10 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 		 */
 		if (pair[1] != "COIN" and pair[1] != "START" and pair[1].find("BUTTON") == string::npos) {
 			uint8_t jIdx = 1;
-			for (auto& c : pd.controlColors)
+			for (auto& c : pd.controlColors) {
 				if (c.first.find(JOYSTICK) != string::npos)
 					++jIdx;
+			}
 			if (pair[1] == "STICK")
 				parts[0] = "P" + player + "_" + JOYSTICK;
 			parts[0] +=  to_string(jIdx);
@@ -707,6 +713,7 @@ string PlayerData::toString() {
 
 	string p;
 
+	// Process controllers.
 	for (uint8_t c = 0; c < controllers.size(); ++c) {
 		uint8_t cIx = 1;
 		string con("P" + player + "_" + controllers[c]);
@@ -718,23 +725,30 @@ string PlayerData::toString() {
 
 		}
 		con += to_string(cIx);
-		p += con;
-		if (controlColors.count(con))
-			p += GROUP_SEPARATOR + controlColors[con];
-		p += FIELD_SEPARATOR;
+
+		if (controlColors.count(con)) {
+			p += con + GROUP_SEPARATOR + controlColors[con] + FIELD_SEPARATOR;
+		}
+		else if (not ignoreMissingColors) {
+			p += con + FIELD_SEPARATOR;
+		}
+
 		// Rotator information
 		if (ways.size() > c) {
 			p += con + "_" + ways[c] + WAYS_INDICATOR + FIELD_SEPARATOR;
 		}
 	}
 
+	// Process buttons.
 	uint8_t bTo = Utility::parseNumber(buttons, "");
 	for (uint8_t c = 0; c < bTo; ++c) {
 		string but = "P" + player + "_BUTTON" + to_string(c + 1);
-		p += but;
-		if (buttonColors.count(but))
-			p += GROUP_SEPARATOR + buttonColors[but];
-		p += FIELD_SEPARATOR;
+		if (buttonColors.count(but)) {
+			p += but + GROUP_SEPARATOR + buttonColors[but] + FIELD_SEPARATOR;
+		}
+		else if (not ignoreMissingColors) {
+			p += but + FIELD_SEPARATOR;
+		}
 	}
 
 	// Extra colors detected:

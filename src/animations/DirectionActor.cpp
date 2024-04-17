@@ -164,3 +164,7 @@ uint8_t DirectionActor::nextOf(Directions currentDirection, uint8_t index, Direc
 void DirectionActor::advanceFrame() {
 	currentFrame = calculateNextOf(cDirection, currentFrame, direction, totalFrames);
 }
+
+const uint16_t DirectionActor::getFullFrames() const {
+	return (totalFrames * (1 + isBouncer()));
+}

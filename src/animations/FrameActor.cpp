@@ -57,7 +57,6 @@ FrameActor::FrameActor(
 
 void FrameActor::drawConfig() {
 	Speed::drawConfig();
-	cout << "Frames: " << static_cast<uint>(totalFrames) << " (" << static_cast<float>(totalFrames) / FPS << " sec)" << endl;
 	if (cycles)
 		cout << "Cycles: " << to_string(cycles) << endl;
 	if (startAt)
@@ -100,7 +99,7 @@ bool FrameActor::isRunning() {
 
 		if (cycle == cycles) {
 #ifdef DEVELOP
-			LogDebug("Ending Actor after " + to_string(cycles) + " cycles.");
+			LogDebug("Actor completed after " + to_string(cycles) + " cycles.");
 #endif
 			++cycle;
 			return checkRepeats();
@@ -126,4 +125,18 @@ void FrameActor::advanceFrame() {
 		return ;
 	}
 	++currentFrame;
+}
+
+const uint16_t FrameActor::getFullFrames() const {
+	return totalFrames;
+}
+
+const float FrameActor::getRunTime() const {
+	// TODO convert startAt to time and add it
+	// TODO add seconds to start
+	if (cycles)
+		return (static_cast<float>(getFullFrames() * cycles) / FPS);
+	else if (secondsToEnd)
+		return secondsToEnd;
+	return 0;
 }

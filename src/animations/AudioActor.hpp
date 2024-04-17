@@ -38,6 +38,8 @@ namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::Inputs::AudioActor
+ * Audio plugins uses the direction to know in what direction the effect need to draw,
+ * only forward and backward is used.
  */
 class AudioActor: public Actor, public Direction {
 
@@ -62,6 +64,10 @@ public:
 	static string channel2str(Channels channel);
 
 	void restart() override;
+
+	const uint16_t getFullFrames() const override;
+
+	const float getRunTime() const override;
 
 protected:
 

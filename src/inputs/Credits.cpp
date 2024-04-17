@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Actions.cpp
- * @since     May 23, 2019
+ * @file      Credits.cpp
+ * @since     Apr 15, 2024
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
@@ -20,20 +20,21 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Actions.hpp"
+#include "Credits.hpp"
 
 using namespace LEDSpicer::Inputs;
 
-Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 	Reader(parameters, inputMaps),
 	Speed(parameters.count("speed") ? parameters["speed"] : ""),
 	frames(static_cast<uint8_t>(speed) * 3),
-	doBlink(parameters.count("blink") ? (parameters["blink"] == "true") : true)
+	coinsPerCredit(parameters.count("coinsPerCredit") ? parameters["coinsPerCredit"] : ""),
+	mode(parameters.count("mode") ? parameters["mode"] : "")
 {
 	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
 	// process list
 	if (linkedTriggers.empty())
-		return;
+		throw Error("Missing linked triggers");
 
 	uint groupIdx = 0;
 	// This is a list of linked maps (position) separated by ID_GROUP_SEPARATOR ex: 1,2,3|4,5,6|etc..
@@ -79,103 +80,5 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 
 		groupsMaps.emplace_back(std::move(tempRecord));
 		++groupIdx;
-	}
-}
-
-void Actions::process() {
-
-	readAll();
-
-	blink();
-
-	if (not events.size())
-		return;
-
-	for (auto& event : events) {
-
-		if (not event.value)
-			continue;
-
-		if (not itemsMap.count(event.trigger))
-			continue;
-
-		if (controlledItems.count(event.trigger))
-			controlledItems.erase(event.trigger);
-
-		// Non Grouped elements.
-		if (not groupMapLookup.count(event.trigger)) {
-			if (blinkingItems.count(event.trigger)) {
-				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " stop blinking");
-				blinkingItems.erase(event.trigger);
-			}
-			else {
-				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " start blinking");
-				blinkingItems.emplace(event.trigger, itemsMap[event.trigger]);
-			}
-			continue;
-		}
-
-		// grouped elements.
-		Record& groupMap = groupsMaps[groupMapLookup[event.trigger].groupIdx][groupMapLookup[event.trigger].mapIdx];
-		if (groupMap.active) {
-			groupMap.active = false;
-			blinkingItems.erase(event.trigger);
-			blinkingItems.emplace(groupMap.next->map, groupMap.next->item);
-			groupMap.next->active = true;
-			LogDebug("key: " + event.trigger + " for " + groupMap.item->getName() + " switches to: " + groupMap.next->item->getName());
-		}
-	}
-}
-
-void Actions::activate() {
-	for (auto& trigger : firstItems) {
-		Record& groupMap = groupsMaps[groupMapLookup[trigger].groupIdx][groupMapLookup[trigger].mapIdx];
-		blinkingItems.emplace(trigger, groupMap.item);
-		groupMap.active = true;
-	}
-	Reader::activate();
-}
-
-void Actions::deactivate() {
-	for (auto& g : groupsMaps)
-		for (auto& i : g)
-			i.active = false;
-	blinkingItems.clear();
-	Reader::deactivate();
-}
-
-void Actions::drawConfig() {
-	cout << SEPARATOR << endl << "Type: Actions" << endl;
-	Reader::drawConfig();
-	if (groupsMaps.size()) {
-		cout << "Linked Items: " << endl;
-		for (auto& g : groupsMaps) {
-			for (auto& i : g)
-				cout << i.item->getName() << " → ";
-			cout << "«" << endl;
-		}
-	}
-	Speed::drawConfig();
-}
-
-void Actions::blink() {
-	if (not doBlink) {
-		for (auto& e : blinkingItems)
-			if (not controlledItems.count(e.first))
-				controlledItems.emplace(e.first, e.second);
-		return;
-	}
-	if (frames == cframe) {
-		cframe = 0;
-		for (auto& e : blinkingItems) {
-			if (on)
-				controlledItems.erase(e.first);
-			else
-				controlledItems.emplace(e.first, e.second);
-		}
-		on = not on;
-	}
-	else {
-		++cframe;
 	}
 }

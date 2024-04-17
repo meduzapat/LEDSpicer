@@ -89,12 +89,6 @@ protected:
 	 */
 	static vector<Profile*> profiles;
 
-	/// Keeps a list of always on elements for the current profile.
-	static umap<string, Element::Item> alwaysOnElements;
-
-	/// Keeps a list of always on groups for the current profile.
-	static umap<string, Group::Item> alwaysOnGroups;
-
 	/// Starting point for the frame.
 	static high_resolution_clock::time_point start;
 

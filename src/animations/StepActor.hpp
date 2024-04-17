@@ -50,11 +50,6 @@ public:
 	virtual void drawConfig();
 
 	/**
-	 * @return The number of steps for the whole animation.
-	 */
-	uint16_t getTotalSteps() const;
-
-	/**
 	 * @return The current relative step.
 	 */
 	uint16_t getCurrentStep() const;
@@ -79,6 +74,8 @@ public:
 	 * @param totalStepFrames
 	 */
 	void setTotalStepFrames(uint8_t totalStepFrames);
+
+	const uint16_t getFullFrames() const override;
 
 protected:
 

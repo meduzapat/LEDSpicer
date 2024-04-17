@@ -24,6 +24,46 @@
 
 using namespace LEDSpicer::Devices;
 
+umap<string, Element::Item> Profile::temporaryAlwaysOnElements;
+umap<string, Group::Item>   Profile::temporaryAlwaysOnGroups;
+
+Profile::Profile(
+	const string& name,
+	const Color& backgroundColor,
+	const vector<Actor*>& startTransitions,
+	const vector<Actor*>& endTransitions,
+	const milliseconds startTransitionElementsOnAt,
+	const milliseconds endTransitionElementsOffAt
+):
+	name(name),
+	backgroundColor(backgroundColor),
+	startTransitions(startTransitions),
+	endTransitions(endTransitions),
+	currentActors(startTransitions.size() ? &this->startTransitions : &animations),
+	startTransitionElementsOnAt(startTransitionElementsOnAt),
+	endTransitionElementsOffAt(endTransitionElementsOffAt)
+{
+
+	if (startTransitions.empty())
+		return;
+	// Find the most time consuming actor.
+	float maxTime = 0;
+	for (auto st : this->startTransitions) {
+		if (st->getRunTime() > maxTime) {
+			maxTime = st->getRunTime();
+		}
+	}
+
+	// Calculate the time for the elements transition.
+	float time = maxTime - (this->startTransitionElementsOnAt.count() / 1000.0f);
+	if (time < 1) {
+		this->startTransitionElementsOnAt = milliseconds(0);
+		return;
+	}
+	// Calculate the step progress.
+	stepProgress = 100.0f / (time * Actor::getFPS());
+}
+
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
@@ -33,16 +73,20 @@ void Profile::drawConfig() {
 	cout << "* Background color: " << backgroundColor.getName() << endl;
 
 	if (startTransitions.size()) {
-		cout << endl << "* Start transitions:" << endl;
+		cout << endl << "* Start transitions:" << endl <<
+				"Show elements after: " << startTransitionElementsOnAt.count() << "ms" << endl;
 		for (auto a : startTransitions)
 			a->drawConfig();
 	}
 
+
 	if (endTransitions.size()) {
-		cout << endl << "* Ending transition:" << endl;
-		for (auto a : startTransitions)
+		cout << endl << "* Ending transition:" << endl <<
+				"Hide elements after: " << endTransitionElementsOffAt.count() << "ms" << endl;
+		for (auto a : endTransitions)
 			a->drawConfig();
 	}
+
 
 	if (alwaysOnGroups.size()) {
 		cout << endl << "* Groups Overwrite Color: " << endl;
@@ -92,7 +136,7 @@ void Profile::runFrame() {
 
 	if (currentActors) {
 		for (auto actor : *currentActors) {
-			// If the actor is running draw.
+			// If the actor is running so draw it.
 			if (actor->isRunning()) {
 				running = true;
 				actor->draw();
@@ -101,19 +145,59 @@ void Profile::runFrame() {
 
 		// The current animation set finished.
 		if (not running) {
-			// Stating animation ended.
+			// Starting animation ended.
 			if (isStarting()) {
+				if (transitionEndTime) {
+					delete transitionEndTime;
+					transitionEndTime = nullptr;
+					elementProgress = 100;
+				}
 				reset();
 			}
 			else if (isTerminating()) {
 				// Ending animation ended.
+				if (transitionEndTime) {
+					delete transitionEndTime;
+					transitionEndTime = nullptr;
+					elementProgress = 100;
+				}
 				currentActors = nullptr;
 			}
+		}
+		else {
+			runAlwaysOnElements(false);
+		}
+	}
+
+	// Do not display elements and groups while the profile is transitioning.
+	if (not isTransiting()) {
+		// Set always on groups from profile.
+		for (auto& gE : alwaysOnGroups) {
+			gE.process(50);
+		}
+
+		// Set always on elements from profile.
+		runAlwaysOnElements(true);
+
+		// Set always on groups from temporary requests.
+		for (auto& gE : temporaryAlwaysOnGroups) {
+			gE.second.process(50);
+		}
+
+		// Set always on elements from temporary requests.
+		for (auto& eE : temporaryAlwaysOnElements) {
+			eE.second.process(50);
+		}
+
+		// Set controlled items from input plugins.
+		for (auto& item : Input::getControlledInputs()) {
+			item.second->process(50);
 		}
 	}
 }
 
 void Profile::reset() {
+
 	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS)) {
 		LogDebug("Running animations");
 		currentActors = &animations;
@@ -127,6 +211,9 @@ void Profile::reset() {
 
 void Profile::restart() {
 	if (startTransitions.size() and not (Utility::globalFlags & FLAG_NO_START_TRANSITIONS)) {
+		if (startTransitionElementsOnAt > std::chrono::milliseconds(0)) {
+			transitionEndTime = new time_point<std::chrono::system_clock>(std::chrono::system_clock::now() + startTransitionElementsOnAt);
+		}
 		LogDebug("Running starting transitions");
 		currentActors = &startTransitions;
 		restartActors();
@@ -158,6 +245,9 @@ void Profile::restartActors() {
 }
 
 bool Profile::isTransiting() const {
+	if (Utility::globalFlags & FLAG_NO_START_TRANSITIONS and Utility::globalFlags & FLAG_NO_END_TRANSITIONS) {
+		return false;
+	}
 	return  (currentActors != &animations and (currentActors == &startTransitions or currentActors == &endTransitions));
 }
 
@@ -181,22 +271,63 @@ const string& Profile::getName() const {
 	return name;
 }
 
-const vector<Element::Item>& Profile::getAlwaysOnElements() const {
-	return alwaysOnElements;
-}
-
 void Profile::addAlwaysOnElement(Element* element, const Color& color) {
 	alwaysOnElements.emplace_back(element, &color, Color::Filters::Normal);
-}
-
-const vector<Group::Item> & Profile::getAlwaysOnGroups() const {
-	return alwaysOnGroups;
 }
 
 void Profile::addAlwaysOnGroup(Group* group, const Color& color) {
 	alwaysOnGroups.emplace_back(group, &color, Color::Filters::Normal);
 }
 
+void Profile::addTemporaryAlwaysOnElement(const string name, const Element::Item item) {
+	temporaryAlwaysOnElements.emplace(name, item);
+}
+
+void Profile::removeTemporaryAlwaysOnElement(const string name) {
+	if (temporaryAlwaysOnElements.count(name))
+			temporaryAlwaysOnElements.erase(name);
+}
+
+void Profile::removeTemporaryAlwaysOnElements() {
+	temporaryAlwaysOnElements.clear();
+}
+
+void Profile::addTemporaryAlwaysOnGroup(const string name, const Group::Item item) {
+	temporaryAlwaysOnGroups.emplace(name, item);
+}
+
+void Profile::removeTemporaryAlwaysOnGroup(const string name) {
+	if (temporaryAlwaysOnGroups.count(name))
+			temporaryAlwaysOnGroups.erase(name);
+}
+
+void Profile::removeTemporaryAlwaysOnGroups() {
+	temporaryAlwaysOnGroups.clear();
+}
+
 void Profile::addInput(Input* input) {
 	inputs.push_back(input);
+}
+
+void Profile::runAlwaysOnElements(bool force) {
+	Color::Filters filter(Color::Filters::Normal);
+	if (not force) {
+		if (not transitionEndTime)
+			return;
+		if (isStarting() and std::chrono::system_clock::now() < *transitionEndTime)
+			return;
+		if (isTerminating() and std::chrono::system_clock::now() >= *transitionEndTime)
+			return;
+		filter = Color::Filters::Combine;
+		elementProgress += stepProgress;
+	}
+
+	// Set always on elements from profile.
+	for (auto& eE : alwaysOnElements) {
+		// Ignore ways if the flag is set.
+		if ((Utility::globalFlags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
+			continue;
+		eE.filter = filter;
+		eE.process(force ? 50 : elementProgress);
+	}
 }

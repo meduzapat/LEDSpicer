@@ -227,9 +227,6 @@ public:
 	/// Keeps references to inputs handlers by input name.
 	static umap<string, InputHandler*> inputHandlers;
 
-	/// Keeps a list of global elements and groups that can be turn on/off by input plugins.
-	static umap<string, Items*> controlledItems;
-
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
 

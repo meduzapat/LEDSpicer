@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../Device.hpp"
+#include "devices/Device.hpp"
 #include <pigpio.h>
 
 #ifndef RASPBERRYPI_HPP_
@@ -36,7 +36,7 @@ namespace LEDSpicer::Devices::RaspberryPi {
  * LEDSpicer::Devices::RaspberryPi::RaspberryPi
  *
  * Raspberry Pi GPIO ports.
- * This is a connectionless device.
+ * This is a connection-less device.
  */
 class RaspberryPi : public Device {
 
@@ -67,8 +67,9 @@ protected:
 	void closeHardware() override;
 };
 
+deviceFactory(RaspberryPi)
+
 } /* namespace */
 
-deviceFactory(LEDSpicer::Devices::RaspberryPi::RaspberryPi)
 
 #endif /* RASPBERRYPI_HPP_ */

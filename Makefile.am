@@ -669,15 +669,6 @@ Network_la_LIBADD = \
 Network_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
 
-##############
-# games data #
-##############
-
-gamesdatadir=$(pkgdatadir)
-gamesdata_DATA =         \
-	data/gameData.xml    \
-	data/basicColors.xml
-
 ######################
 # Ultrastik 360 maps #
 ######################
@@ -721,8 +712,6 @@ examples_DATA =             \
 	data/21-ledspicer.rules \
 	data/ledspicerd.service \
 	data/ledspicer.conf     \
-	data/webColors.xml      \
-	data/singleColor.xml    \
 	data/animations/animation-skeleton.xml \
 	data/profiles/profile-skeleton.xml     \
 	data/profiles/profile_empty.xml        \
@@ -778,10 +767,6 @@ EXTRA_DIST +=                       \
 	src/ProcessLookup.hpp \
 	src/InputSeeker.hpp   \
 	data/ledspicer.conf        \
-	data/singleColor.xml       \
-	data/basicColors.xml       \
-	data/webColors.xml         \
-	data/gameData.xml          \
 	data/animations/readme.txt \
 	data/profiles/readme.txt   \
 	data/inputs/readme.txt     \
