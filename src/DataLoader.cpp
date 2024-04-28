@@ -315,7 +315,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	int startTransitionElementTime;
+	int startTransitionElementTime = 0;
 	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS);
 	if (xmlElement) {
 		// Check for show element timer.
@@ -340,9 +340,11 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	int endTransitionElementTime;
+	int endTransitionElementTime = 0;
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITIONS);
 	if (xmlElement) {
+		// Check for show element timer.
+		tempAttr = processNode(xmlElement);
 		if (tempAttr.count("hideElementTimer")) {
 			endTransitionElementTime = Utility::parseNumber(tempAttr.at("hideElementTimer"), "Invalid number of ms for end transition hideElementTimer");
 		}

@@ -44,24 +44,38 @@ Profile::Profile(
 	endTransitionElementsOffAt(endTransitionElementsOffAt)
 {
 
-	if (startTransitions.empty())
-		return;
-	// Find the most time consuming actor.
-	float maxTime = 0;
-	for (auto st : this->startTransitions) {
-		if (st->getRunTime() > maxTime) {
-			maxTime = st->getRunTime();
+	float
+		maxTime = 0,
+		time;
+	if (this->startTransitionElementsOnAt.count()) {
+		// Find the most time consuming actor.
+		for (auto st : this->startTransitions) {
+			if (st->getRunTime() > maxTime)
+				maxTime = st->getRunTime();
 		}
+
+		// Calculate the time for the elements transition.
+		time = maxTime - (this->startTransitionElementsOnAt.count() / 1000.0f);
+		if (time < 1)
+			time = maxTime / 2;
+		// Calculate the step progress.
+		startStepProgress = 100.0f / (time * Actor::getFPS());
 	}
 
-	// Calculate the time for the elements transition.
-	float time = maxTime - (this->startTransitionElementsOnAt.count() / 1000.0f);
-	if (time < 1) {
-		this->startTransitionElementsOnAt = milliseconds(0);
-		return;
+	maxTime = 0;
+	if (this->endTransitionElementsOffAt.count()) {
+		for (auto st : this->endTransitions) {
+			if (st->getRunTime() > maxTime)
+				maxTime = st->getRunTime();
+		}
+
+		// Calculate the time for the elements transition.
+		time = this->endTransitionElementsOffAt.count() / 1000.0f;
+		if (time > maxTime)
+			time = maxTime;
+		// Calculate the step progress.
+		endStepProgress = 100.0f / (time * Actor::getFPS());
 	}
-	// Calculate the step progress.
-	stepProgress = 100.0f / (time * Actor::getFPS());
 }
 
 void Profile::addAnimation(const vector<Actor*>& animation) {
@@ -73,16 +87,18 @@ void Profile::drawConfig() {
 	cout << "* Background color: " << backgroundColor.getName() << endl;
 
 	if (startTransitions.size()) {
-		cout << endl << "* Start transitions:" << endl <<
-				"Show elements after: " << startTransitionElementsOnAt.count() << "ms" << endl;
+		cout << endl << "* Start transitions:" << endl;
+		if (startTransitionElementsOnAt.count())
+			cout << "Show elements after: " << startTransitionElementsOnAt.count() << "ms" << endl;
 		for (auto a : startTransitions)
 			a->drawConfig();
 	}
 
 
 	if (endTransitions.size()) {
-		cout << endl << "* Ending transition:" << endl <<
-				"Hide elements after: " << endTransitionElementsOffAt.count() << "ms" << endl;
+		cout << endl << "* Ending transition:" << endl;
+		if (endTransitionElementsOffAt.count())
+			cout << "Hide elements after: " << endTransitionElementsOffAt.count() << "ms" << endl;
 		for (auto a : endTransitions)
 			a->drawConfig();
 	}
@@ -131,7 +147,7 @@ void Profile::runFrame() {
 		for (Input* i : inputs)
 			i->process();
 	}
-	// To differentiate between transitions and normal animation..
+	// Keeps track of the currect batch of actors (start, normal, or ending).
 	bool running = false;
 
 	if (currentActors) {
@@ -159,7 +175,7 @@ void Profile::runFrame() {
 				if (transitionEndTime) {
 					delete transitionEndTime;
 					transitionEndTime = nullptr;
-					elementProgress = 100;
+					elementProgress = 0;
 				}
 				currentActors = nullptr;
 			}
@@ -170,7 +186,7 @@ void Profile::runFrame() {
 	}
 
 	// Do not display elements and groups while the profile is transitioning.
-	if (not isTransiting()) {
+	if (not isTransiting() and currentActors) {
 		// Set always on groups from profile.
 		for (auto& gE : alwaysOnGroups) {
 			gE.process(50);
@@ -213,6 +229,7 @@ void Profile::restart() {
 	if (startTransitions.size() and not (Utility::globalFlags & FLAG_NO_START_TRANSITIONS)) {
 		if (startTransitionElementsOnAt > std::chrono::milliseconds(0)) {
 			transitionEndTime = new time_point<std::chrono::system_clock>(std::chrono::system_clock::now() + startTransitionElementsOnAt);
+			elementProgress = 0;
 		}
 		LogDebug("Running starting transitions");
 		currentActors = &startTransitions;
@@ -230,6 +247,10 @@ void Profile::stop() {
 void Profile::terminate() {
 	stop();
 	if (endTransitions.size() and not (Utility::globalFlags & FLAG_NO_END_TRANSITIONS)) {
+		if (endTransitionElementsOffAt > std::chrono::milliseconds(0)) {
+			transitionEndTime = new time_point<std::chrono::system_clock>(std::chrono::system_clock::now() + endTransitionElementsOffAt);
+			elementProgress = 100;
+		}
 		LogDebug("Running ending transitions");
 		currentActors = &endTransitions;
 		restartActors();
@@ -314,12 +335,21 @@ void Profile::runAlwaysOnElements(bool force) {
 	if (not force) {
 		if (not transitionEndTime)
 			return;
-		if (isStarting() and std::chrono::system_clock::now() < *transitionEndTime)
-			return;
-		if (isTerminating() and std::chrono::system_clock::now() >= *transitionEndTime)
-			return;
+		if (isStarting()) {
+			if (std::chrono::system_clock::now() < *transitionEndTime)
+				return;
+			elementProgress += startStepProgress;
+			elementProgress = elementProgress > 100 ? 100 : elementProgress;
+			LogDebug(to_string(elementProgress) + " / 100");
+		}
+		if (isTerminating()) {
+			if (std::chrono::system_clock::now() >= *transitionEndTime)
+				return;
+			elementProgress -= endStepProgress;
+			elementProgress = elementProgress < 0 ? 0 : elementProgress;
+			LogDebug(to_string(elementProgress) + " / 0");
+		}
 		filter = Color::Filters::Combine;
-		elementProgress += stepProgress;
 	}
 
 	// Set always on elements from profile.

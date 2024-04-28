@@ -195,8 +195,9 @@ private:
 
 	/// To be used when there is a start or end transition and the elements needs to show up.
 	float
-		elementProgress = 0,
-		stepProgress    = 0;
+		elementProgress   = 0,
+		startStepProgress = 0,
+		endStepProgress   = 0;
 
 	/**
 	 * Restarts the profile actors.
