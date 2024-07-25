@@ -42,9 +42,6 @@ public:
 
 	void process() override;
 };
-
-inputFactory(Impulse)
-
 } /* namespace */
 
 #endif /* IMPULSE_HPP_ */

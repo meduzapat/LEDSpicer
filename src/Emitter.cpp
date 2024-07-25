@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer;
 
+using pclose_type = int (*)(FILE*);
+
 int main(int argc, char **argv) {
 
 	string
@@ -317,7 +319,7 @@ GameRecord parseMameDataFile(const string& rom) {
 		cmd = "grep -w '" + rom + "' " + CONTROLLERS_FILE;
 	LogDebug("running: " + cmd);
 
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, pclose_type> pipe(popen(cmd.c_str(), "r"), pclose);
 	if (not pipe)
 		throw Error("Failed to read games data file");
 
@@ -348,7 +350,7 @@ GameRecord parseMame(const string& rom) {
 		cmd = "mame -lx '" + rom + "'";
 	LogDebug("running: " + cmd);
 
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, pclose_type> pipe(popen(cmd.c_str(), "r"), pclose);
 	if (not pipe)
 		throw Error("Failed to gather MAME data");
 
@@ -376,7 +378,7 @@ GameRecord parseControlsIni(const string& rom) {
 
 	LogDebug("Running: " + cmd);
 
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, pclose_type> pipe(popen(cmd.c_str(), "r"), pclose);
 	if (not pipe)
 		throw Error("Failed to gather MAME data");
 
@@ -531,7 +533,7 @@ void decorateWithColorsIni(const string& rom, GameRecord& gr) {
 
 	LogDebug("Reading color profile: " + cmd);
 
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, pclose_type> pipe(popen(cmd.c_str(), "r"), pclose);
 	if (not pipe)
 		throw Error("Failed to gather color data");
 

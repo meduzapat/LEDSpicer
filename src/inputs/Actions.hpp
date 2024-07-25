@@ -51,16 +51,6 @@ public:
 
 protected:
 
-	uint8_t
-		frames,
-		cframe = 0;
-
-	/// Keeps the ON/OFF flag.
-	bool on = false;
-
-	/// Flag to know if the effect is blink or just stay on.
-	bool doBlink = true;
-
 	struct Record {
 
 		Record() = default;
@@ -78,7 +68,7 @@ protected:
 			next(other.next) {}
 
 		/// trigger map value.
-		string map = 0;
+		string map;
 
 		/// If true, the item is active.
 		bool active = false;
@@ -97,14 +87,21 @@ protected:
 			mapIdx   = 0;
 	};
 
+	uint8_t
+		frames,
+		cframe = 0;
+
+	/// Keeps the ON/OFF flag.
+	bool on = false;
+
+	/// Flag to know if the effect is blink or just stay on.
+	bool doBlink = true;
+
 	/// Keeps a list of key to handle a record.
 	vector<vector<Record>> groupsMaps;
 
-	/// Small lookup table to avoid a loop every time we need to seek a value.
+	/// Small lookup table by trigger, to avoid a loop every time we need to seek an item.
 	umap<string, LookupMap> groupMapLookup;
-
-	/// list of the trigger of the first elements of each group.
-	vector<string> firstItems;
 
 	/// Elements or Groups blinking.
 	umap<string, Items*> blinkingItems;
@@ -112,8 +109,6 @@ protected:
 	void blink();
 
 };
-
-inputFactory(Actions)
 
 } /* namespace */
 

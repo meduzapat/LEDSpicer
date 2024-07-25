@@ -57,9 +57,6 @@ protected:
 
 	bool active = true;
 };
-
-inputFactory(Mame)
-
 } /* namespace */
 
 #endif /* MAME_HPP_ */

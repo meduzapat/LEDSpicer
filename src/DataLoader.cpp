@@ -503,7 +503,7 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 		inputHandlers.emplace(inputName, new InputHandler(inputName));
 	umap<string, Items*> inputMapTmp;
 
-	if (inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
+	if (inputName == "Credits" or inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
 		// Multiple source inputs
 		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
 		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);

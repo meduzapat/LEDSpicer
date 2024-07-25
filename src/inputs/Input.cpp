@@ -62,3 +62,10 @@ string Input::findItemMapByName(string& name) {
 	throw Error("Unable to find item named " + name);
 }
 
+bool Input::removeControlledItemByTrigger(const string& trigger) {
+	if (controlledItems.count(trigger)) {
+		controlledItems.erase(trigger);
+		return true;
+	}
+	return false;
+}

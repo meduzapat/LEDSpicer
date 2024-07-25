@@ -21,10 +21,13 @@
  */
 
 #include "utility/Speed.hpp"
-#include "Actions.hpp"
+#include "Reader.hpp"
 
 #ifndef CREDITS_HPP_
 #define CREDITS_HPP_ 1
+
+#define DEFAULT_COINS "1"
+#define DEFAULT_MODE  "Multi"
 
 namespace LEDSpicer::Inputs {
 
@@ -33,19 +36,24 @@ namespace LEDSpicer::Inputs {
  *
  * Credit -> start interaction input plugin.
  */
-class Credits: public Actions {
+class Credits: public Reader, public Speed {
 
 public:
 
 	enum class Modes : uint8_t {
-		/// Will jump from credit to start and start over.
-		Cyclic,
-		/// Will jump from credit to start but credit will always be blinking.
-		AlwaysOn,
-		/// Will jump from credit to start and stop any blinking.
-		Once,
-		/// Will jump from credit to start, credit will be OFF, but if you press COIN again Credit and next Credit will blink again.
-		TwinSpark
+		/**
+		 * Credits will blink the next available START.
+		 * if alwaysOn is not set, Coin will go off.
+		 * More Credits will turn more STARTs.
+		 * If an active START is pressed, COIN will start blinking (if once is not set)
+		 */
+		Single,
+		/**
+		 * Credits will blink the STARTs one by one, until all are blinking.
+		 * if alwaysOn is not set, Coin will go off.
+		 * If an active START is pressed, COIN will start blinking (if once is not set)
+		 */
+		Multi
 	};
 
 	Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
@@ -66,37 +74,61 @@ protected:
 
 		Record() = default;
 
-		Record(string coinMap, bool active, Items* item, Record* next) :
-			coinMap(coinMap),
+		Record(string map, bool active, Items* item) :
+			map(map),
 			active(active),
-			item(item),
-			next(next) {}
+			item(item) {}
 
 		Record(const Record& other) :
 			map(other.map),
 			active(other.active),
-			item(other.item),
-			next(other.next) {}
+			item(other.item) {}
 
-		/// trigger map value for coin.
-		string coinMap = 0;
+		/// trigger map value.
+		string map;
 
 		/// If true, the item is active.
 		bool active = false;
 
 		/// Element or Group to turn on when called.
 		Items* item = nullptr;
-
-		/// Next element or Group on the list.
-		Record* next = nullptr;
 	};
 
-	Modes mode;
+	/// Lookup table to avoid search.
+	struct LookupMap {
+		uint
+			groupIdx = 0,
+			mapIdx   = 0;
+	};
 
-	uint8_t coinsPerCredit;
+	bool
+		once     = false,
+		alwaysOn = false,
+		/// Keeps the ON/OFF flag.
+		on       = false;
+
+	uint8_t
+		frames,
+		cframe = 0,
+		coinsPerCredit;
+
+	Modes mode = Modes::Multi;
+
+	/// Keep the number of coins inserted by groupId.
+	vector<uint8_t> coinCount;
+
+	/// Keeps a list of key to handle a record.
+	vector<vector<Record>> groupsMaps;
+
+	/// Small lookup table by trigger, to avoid a loop every time we need to seek an item.
+	umap<string, LookupMap> groupMapLookup;
+
+	/// Elements or Groups blinking.
+	umap<string, Items*> blinkingItems;
+
+	void blink();
 
 };
-
 } /* namespace */
 
 #endif /* CREDITS_HPP_ */

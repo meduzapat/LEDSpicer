@@ -602,6 +602,7 @@ inputs_LTLIBRARIES = \
 	Impulse.la       \
 	Actions.la       \
 	Blinker.la       \
+	Credits.la       \
 	Network.la
 
 ########
@@ -654,6 +655,19 @@ Blinker_la_LIBADD = \
 	libledspicer1.la
 
 Blinker_la_LDFLAGS = \
+	$(plugins_LDFLAGS)
+
+###########
+# Credits #
+###########
+
+Credits_la_SOURCES = \
+	src/inputs/Credits.cpp
+
+Credits_la_LIBADD = \
+	libledspicer1.la
+
+Credits_la_LDFLAGS = \
 	$(plugins_LDFLAGS)
 
 ###########
@@ -759,6 +773,7 @@ EXTRA_DIST +=                       \
 	src/inputs/Impulse.hpp        \
 	src/inputs/Actions.hpp        \
 	src/inputs/Blinker.hpp        \
+	src/inputs/Credits.hpp        \
 	src/inputs/Network.hpp        \
 	src/MainBase.hpp      \
 	src/Main.hpp          \

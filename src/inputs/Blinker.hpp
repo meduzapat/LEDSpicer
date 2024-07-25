@@ -72,9 +72,6 @@ protected:
 	void blink();
 
 };
-
-inputFactory(Blinker)
-
 } /* namespace */
 
 #endif /* BLINKER_HPP_ */

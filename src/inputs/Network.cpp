@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Inputs;
 
+inputFactory(Network)
+
 LEDSpicer::Socks Network::sock;
 
 void Network::activate() {
@@ -54,9 +56,8 @@ void Network::process() {
 		LogDebug("Processing " + entry);
 #endif
 		if (itemsMap.count(entry)) {
-			if (controlledItems.count(entry)) {
+			if (removeControlledItemByTrigger(entry)) {
 				LogDebug("map " + entry +" Off");
-				controlledItems.erase(entry);
 			}
 			else {
 				LogDebug("map " + entry +" On");

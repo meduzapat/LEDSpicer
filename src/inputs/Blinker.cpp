@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Inputs;
 
+inputFactory(Blinker)
+
 void Blinker::process() {
 
 	readAll();

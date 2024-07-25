@@ -24,17 +24,23 @@
 
 using namespace LEDSpicer::Inputs;
 
+inputFactory(Credits)
+
 Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 	Reader(parameters, inputMaps),
 	Speed(parameters.count("speed") ? parameters["speed"] : ""),
 	frames(static_cast<uint8_t>(speed) * 3),
-	coinsPerCredit(parameters.count("coinsPerCredit") ? parameters["coinsPerCredit"] : ""),
-	mode(parameters.count("mode") ? parameters["mode"] : "")
+	coinsPerCredit(Utility::parseNumber(parameters.count("coinsPerCredit") ? parameters["coinsPerCredit"] : DEFAULT_COINS, "Invalid numeric value ")),
+	mode((parameters.count("mode") ? parameters["mode"] : DEFAULT_MODE) == DEFAULT_MODE ? Modes::Multi : Modes::Single),
+	once(parameters.count("once") ? parameters["once"] == "True" : false),
+	alwaysOn(parameters.count("alwaysOn") ? parameters["alwaysOn"] == "True": false)
 {
+
 	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
-	// process list
+
+	// Process list.
 	if (linkedTriggers.empty())
-		throw Error("Missing linked triggers");
+		throw Error("Credits needs at least one group of 2 or more elements");
 
 	uint groupIdx = 0;
 	// This is a list of linked maps (position) separated by ID_GROUP_SEPARATOR ex: 1,2,3|4,5,6|etc..
@@ -45,15 +51,16 @@ Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMa
 			LogWarning("Ignoring group with less than two items.");
 			continue;
 		}
+
 		// Extract group info.
 		vector<Record> tempRecord;
-		uint mapIdx    = 0;
-		bool firstItem = true;
+		uint mapIdx = 0;
 		for (auto& mapId : groupMapIDs) {
 			Utility::trim(mapId);
 			// Convert mapId to trigger.
 			uint16_t mapCode = Utility::parseNumber(mapId, "Unable to parse map ID, is not a number");
 			string trigger;
+			// Find trigger by position from items map.
 			for (const auto& pair : itemsMap) {
 				if (pair.second->pos == mapCode) {
 					trigger = pair.first;
@@ -61,24 +68,161 @@ Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMa
 				}
 			}
 			if (trigger.empty()) {
-				throw Error("Ignoring invalid map ID " + mapId);
+				LogWarning("Ignoring invalid map ID " + mapId);
 				continue;
 			}
-			tempRecord.emplace_back(std::move(Record{trigger, firstItem, itemsMap[trigger], nullptr}));
-			if (firstItem) {
-				firstItems.push_back(trigger);
-				firstItem = false;
-			}
+			tempRecord.emplace_back(std::move(Record{trigger, mapIdx == 0, itemsMap[trigger]}));
 			// Update lookup table.
 			groupMapLookup.emplace(trigger, LookupMap{groupIdx, mapIdx++});
 		}
-		// Link last element to 1st element.
-		tempRecord.back().next = &tempRecord[0];
-		// Link rest of the table.
-		for (uint c = 0; c < tempRecord.size() - 1; ++c)
-			tempRecord[c].next = &tempRecord[c + 1];
 
 		groupsMaps.emplace_back(std::move(tempRecord));
 		++groupIdx;
+	}
+
+	coinCount.assign(groupsMaps.size(), 0);
+}
+
+void Credits::process() {
+
+	readAll();
+
+	blink();
+
+	if (not events.size())
+		return;
+
+	for (auto &event : events) {
+
+		if (not event.value)
+			continue;
+
+		if (not itemsMap.count(event.trigger))
+			continue;
+
+		// Lookup Trigger.
+		auto& lookupMap(groupMapLookup[event.trigger]);
+		// Pick record data.
+		Record& groupMap = groupsMaps[lookupMap.groupIdx][lookupMap.mapIdx];
+		// Not active, done.
+		if (not groupMap.active)
+			continue;
+
+		bool isCoin = lookupMap.mapIdx == 0;
+
+		// Coin inserted
+		if (isCoin) {
+			LogDebug("Coin inserted by " + groupMap.item->getName());
+			++coinCount[lookupMap.groupIdx];
+			// Check number of coins.
+			if (coinCount[lookupMap.groupIdx] < coinsPerCredit) {
+				continue;
+			}
+			// Credit issued, reset coin count.
+			LogDebug("Credit issued by " + groupMap.item->getName());
+			coinCount[lookupMap.groupIdx] = 0;
+			// Find next Start.
+			Record* record = nullptr;
+			bool allOn     = false;
+			size_t t       = groupsMaps[lookupMap.groupIdx].size();
+			for (size_t c = 1; c < t; ++c) {
+				if (not groupsMaps[lookupMap.groupIdx][c].active) {
+					record = &groupsMaps[lookupMap.groupIdx][c];
+					allOn = c == t-1;
+					break;
+				}
+			}
+
+			if (not record)
+				continue;
+
+			if (not alwaysOn and ((allOn and mode == Modes::Multi) or mode == Modes::Single)) {
+				// Stop Coin Blinking.
+				LogDebug("Stop Coin for " + groupMap.item->getName());
+				removeControlledItemByTrigger(event.trigger);
+				blinkingItems.erase(event.trigger);
+				if (mode == Modes::Multi or allOn)
+					groupMap.active = false;
+			}
+			// Set next Start on
+			record->active = true;
+			blinkingItems.emplace(record->map, record->item);
+			LogDebug("Start: " + record->item->getName() + " Active");
+		}
+		else {
+			removeControlledItemByTrigger(event.trigger);
+			groupMap.active = false;
+			blinkingItems.erase(event.trigger);
+
+			if (not once and not alwaysOn) {
+				// Set start back on.
+				Record& coin = groupsMaps[lookupMap.groupIdx][0];
+				coin.active = true;
+				if (not blinkingItems.count(coin.map)) {
+					blinkingItems.emplace(coin.map, coin.item);
+					LogDebug("Credit: " + coin.item->getName() + " Active");
+				}
+			}
+		}
+	}
+}
+
+void Credits::activate() {
+	for (auto& group : groupsMaps) {
+		for (size_t c = 0; c < group.size(); ++c) {
+			if (c == 0) {
+				blinkingItems.emplace(group[c].map, group[c].item);
+				group[c].active = true;
+			}
+			else {
+				group[c].active = false;
+			}
+		}
+	}
+	Reader::activate();
+}
+
+void Credits::deactivate() {
+	for (auto& g : groupsMaps)
+		for (auto& i : g)
+			i.active = false;
+	blinkingItems.clear();
+	Reader::deactivate();
+}
+
+void Credits::drawConfig() {
+	cout << SEPARATOR << endl << "Type: Credits" << endl;
+	Reader::drawConfig();
+	cout << "Linked Items: " << endl;
+	for (auto& g : groupsMaps) {
+		for (size_t i = 0; i < g.size(); ++i) {
+			if (i)
+				cout << " Start: " << g[i].item->getName();
+			else
+				cout << "Coin: " << g[i].item->getName() << " For:";
+		}
+		cout << endl;
+	}
+	Speed::drawConfig();
+	cout << "Mode: " << (mode == Modes::Single ? "Single" : "Multi") << endl
+	     << "Coins Per Credit: " << static_cast<int>(coinsPerCredit)             << endl
+	     << "Once: "             << (once ? "True" : "False")                    << endl
+	     << "Always On: "        << (alwaysOn ? "True" : "False")                << endl;
+}
+
+
+void Credits::blink() {
+	if (frames == cframe) {
+		cframe = 0;
+		for (auto& e : blinkingItems) {
+			if (on)
+				controlledItems.erase(e.first);
+			else
+				controlledItems.emplace(e.first, e.second);
+		}
+		on = not on;
+	}
+	else {
+		++cframe;
 	}
 }
