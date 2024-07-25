@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Inputs;
 
+inputFactory(Blinker)
+
 void Blinker::process() {
 
 	readAll();
@@ -72,15 +74,15 @@ void Blinker::blink() {
 		for (auto& i : blinkingItems) {
 			// deactivate after time passed.
 			if (i.second.times == times) {
-				controlledItems->erase(i.first);
+				controlledItems.erase(i.first);
 				itemsToClean.push_back(i.first);
 				continue;
 			}
 			if (on) {
-				controlledItems->erase(i.first);
+				controlledItems.erase(i.first);
 			}
 			else {
-				controlledItems->emplace(i.first, i.second.item);
+				controlledItems.emplace(i.first, i.second.item);
 				++i.second.times;
 			}
 		}

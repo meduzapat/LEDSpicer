@@ -3,7 +3,6 @@
 	version="1.0"
 	type="Input"
 	name=""
-	speed=""
 >
 	<map
 		type="Element"
@@ -19,11 +18,4 @@
 		color=""
 		filter="Normal"
 	/>
-    <map
-        type="Element"
-        target=""
-        trigger=""
-        color=""
-        filter="Normal"
-    />
 </LEDSpicer>

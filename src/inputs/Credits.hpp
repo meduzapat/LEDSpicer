@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Actions.hpp
- * @since     May 23, 2019
+ * @file      Credits.hpp
+ * @since     Apr 15, 2024
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
@@ -23,23 +23,42 @@
 #include "utility/Speed.hpp"
 #include "Reader.hpp"
 
-#ifndef ACTIONS_HPP_
-#define ACTIONS_HPP_ 1
+#ifndef CREDITS_HPP_
+#define CREDITS_HPP_ 1
+
+#define DEFAULT_COINS "1"
+#define DEFAULT_MODE  "Multi"
 
 namespace LEDSpicer::Inputs {
 
 /**
- * LEDSpicer::Inputs::Actions
+ * LEDSpicer::Inputs::Credits
  *
- * This plugin will map actions to buttons to recreate an interaction with the controls
+ * Credit -> start interaction input plugin.
  */
-class Actions: public Reader, public Speed {
+class Credits: public Reader, public Speed {
 
 public:
 
-	Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+	enum class Modes : uint8_t {
+		/**
+		 * Credits will blink the next available START.
+		 * if alwaysOn is not set, Coin will go off.
+		 * More Credits will turn more STARTs.
+		 * If an active START is pressed, COIN will start blinking (if once is not set)
+		 */
+		Single,
+		/**
+		 * Credits will blink the STARTs one by one, until all are blinking.
+		 * if alwaysOn is not set, Coin will go off.
+		 * If an active START is pressed, COIN will start blinking (if once is not set)
+		 */
+		Multi
+	};
 
-	virtual ~Actions() = default;
+	Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+
+	virtual ~Credits() = default;
 
 	void process() override;
 
@@ -55,17 +74,15 @@ protected:
 
 		Record() = default;
 
-		Record(string map, bool active, Items* item, Record* next) :
+		Record(string map, bool active, Items* item) :
 			map(map),
 			active(active),
-			item(item),
-			next(next) {}
+			item(item) {}
 
 		Record(const Record& other) :
 			map(other.map),
 			active(other.active),
-			item(other.item),
-			next(other.next) {}
+			item(other.item) {}
 
 		/// trigger map value.
 		string map;
@@ -75,9 +92,6 @@ protected:
 
 		/// Element or Group to turn on when called.
 		Items* item = nullptr;
-
-		/// Next element or Group on the list.
-		Record* next = nullptr;
 	};
 
 	/// Lookup table to avoid search.
@@ -87,15 +101,21 @@ protected:
 			mapIdx   = 0;
 	};
 
+	bool
+		once     = false,
+		alwaysOn = false,
+		/// Keeps the ON/OFF flag.
+		on       = false;
+
 	uint8_t
 		frames,
-		cframe = 0;
+		cframe = 0,
+		coinsPerCredit;
 
-	/// Keeps the ON/OFF flag.
-	bool on = false;
+	Modes mode = Modes::Multi;
 
-	/// Flag to know if the effect is blink or just stay on.
-	bool doBlink = true;
+	/// Keep the number of coins inserted by groupId.
+	vector<uint8_t> coinCount;
 
 	/// Keeps a list of key to handle a record.
 	vector<vector<Record>> groupsMaps;
@@ -109,7 +129,6 @@ protected:
 	void blink();
 
 };
-
 } /* namespace */
 
-#endif /* ACTIONS_HPP_ */
+#endif /* CREDITS_HPP_ */

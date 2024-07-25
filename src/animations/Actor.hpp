@@ -140,6 +140,17 @@ public:
 	 */
 	static void newFrame();
 
+	/**
+	 * Returns the total calculated amount of frames.
+	 * @return
+	 */
+	virtual const uint16_t getFullFrames() const = 0;
+
+	/**
+	 * @return Returns the amount of time to finish (or 0 if never finishes)
+	 */
+	virtual const float getRunTime() const = 0;
+
 protected:
 
 	/// How the color information will be draw back.

@@ -75,10 +75,9 @@ void Gradient::drawConfig() {
 		"Type: Gradient"                     << endl <<
 		"Mode: "  << mode2str(mode)          << endl <<
 		"Tones: " << static_cast<int>(tones) << endl;
-	StepActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << endl << SEPARATOR << endl;
+	StepActor::drawConfig();
 }
 
 Gradient::Modes Gradient::str2mode(const string& mode) {

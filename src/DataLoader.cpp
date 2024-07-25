@@ -39,7 +39,6 @@ umap<string, DeviceHandler*> DataLoader::deviceHandlers;
 umap<string, ActorHandler*> DataLoader::actorHandlers;
 umap<string, InputHandler*> DataLoader::inputHandlers;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
-umap<string, Items*> DataLoader::controlledItems;
 milliseconds DataLoader::waitTime;
 
 DataLoader::Modes DataLoader::getMode() {
@@ -51,9 +50,6 @@ void DataLoader::setMode(Modes mode) {
 }
 
 void DataLoader::readConfiguration() {
-
-	// Input need to be linked with the main program items.
-	Input::setInputControllers(&controlledItems);
 
 	// Process Root.
 	umap<string, string> tempAttr = processNode(root);
@@ -199,9 +195,9 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr[PARAM_NAME]);
 			uint8_t
-				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor("red pin") " in " + device->getFullName()) - 1,
+				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor(  "red pin")   " in " + device->getFullName()) - 1,
 				g = Utility::parseNumber(tempAttr[PARAM_GREEN], invalidValueFor("green pin") " in " + device->getFullName()) - 1,
-				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor("blue pin") " in " + device->getFullName()) - 1;
+				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor( "blue pin")  " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				r, g , b,
@@ -319,36 +315,14 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		startTransitions,
 		endTransitions;
 
-	/// @deprecated startTrasition only exist to keep backward compatibility.
-	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITION);
+	int startTransitionElementTime = 0;
+	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS);
 	if (xmlElement) {
-		umap<string, string> tempAttr = processNode(xmlElement);
-		auto a = createAnimation(tempAttr);
-		startTransitions.push_back(a);
-		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
-			if (a->acceptCycles())
-				a->setEndCycles(DEFAULT_ENDCYCLES);
-			else
-				a->setEndTime(DEFAULT_ENDTIME);
+		// Check for show element timer.
+		tempAttr = processNode(xmlElement);
+		if (tempAttr.count("showElementTimer")) {
+			startTransitionElementTime = Utility::parseNumber(tempAttr.at("showElementTimer"), "Invalid number of ms for start transition showElementTimer");
 		}
-	}
-
-	/// @deprecated endTrasition only exist to keep backward compatibility.
-	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITION);
-	if (xmlElement) {
-		umap<string, string> tempAttr = processNode(xmlElement);
-		auto a = createAnimation(tempAttr);
-		endTransitions.push_back(a);
-		if (not tempAttr.count("cycles") and not tempAttr.count("endTime")) {
-			if (a->acceptCycles())
-				a->setEndCycles(DEFAULT_ENDCYCLES);
-			else
-				a->setEndTime(DEFAULT_ENDTIME);
-		}
-	}
-
-	xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS);
-	if (xmlElement) {
 		// Check for animations.
 		xmlElement = xmlElement->FirstChildElement(NODE_ANIMATION);
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
@@ -366,8 +340,14 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
+	int endTransitionElementTime = 0;
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_END_TRANSITIONS);
 	if (xmlElement) {
+		// Check for show element timer.
+		tempAttr = processNode(xmlElement);
+		if (tempAttr.count("hideElementTimer")) {
+			endTransitionElementTime = Utility::parseNumber(tempAttr.at("hideElementTimer"), "Invalid number of ms for end transition hideElementTimer");
+		}
 		// Check for animations.
 		xmlElement = xmlElement->FirstChildElement(NODE_ANIMATION);
 		for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ANIMATION)) {
@@ -389,7 +369,9 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		name,
 		Color(tempAttr["backgroundColor"]),
 		startTransitions,
-		endTransitions
+		endTransitions,
+		milliseconds(startTransitionElementTime),
+		milliseconds(endTransitionElementTime)
 	);
 
 	// Check for animations.
@@ -521,7 +503,7 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 		inputHandlers.emplace(inputName, new InputHandler(inputName));
 	umap<string, Items*> inputMapTmp;
 
-	if (inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
+	if (inputName == "Credits" or inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
 		// Multiple source inputs
 		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
 		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);

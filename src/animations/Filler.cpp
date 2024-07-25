@@ -150,10 +150,9 @@ void Filler::drawConfig() {
 	cout <<
 		"Type: Filler" << endl <<
 		"Mode: " << mode2str(mode) << endl;
-	StepActor::drawConfig();
 	cout << "Colors: ";
 	this->drawColors();
-	cout << endl << SEPARATOR << endl;
+	StepActor::drawConfig();
 }
 
 string Filler::mode2str(Modes mode) {

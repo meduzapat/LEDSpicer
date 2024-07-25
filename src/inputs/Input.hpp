@@ -32,6 +32,11 @@ using LEDSpicer::Devices::Group;
 #ifndef INPUT_HPP_
 #define INPUT_HPP_ 1
 
+// The functions to create and destroy inputs.
+#define inputFactory(plugin) \
+	extern "C" Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
+	extern "C" void destroyInput(Input* instance) {delete instance;}
+
 namespace LEDSpicer::Inputs {
 
 /**
@@ -49,10 +54,15 @@ public:
 	virtual ~Input();
 
 	/**
-	 * Sets the controlled elements and groups.
-	 * @param controlledItems a list of elements and/or groups.
+	 * Returns a list of controlled items.
+	 * @return
 	 */
-	static void setInputControllers(umap<string, Items*>* controlledItems);
+	static const umap<string, Items*>& getControlledInputs();
+
+	/**
+	 * Removes all input registered inputs.
+	 */
+	static void clearControlledInputs();
 
 	/**
 	 * Draws the input configuration.
@@ -79,7 +89,7 @@ public:
 protected:
 
 	/// List of elements that need to be Output, mapped items by trigger.
-	static umap<string, Items*>* controlledItems;
+	static umap<string, Items*> controlledItems;
 
 	/// Input specific map. trigger -> Item.
 	umap<string, Items*> itemsMap;
@@ -90,13 +100,14 @@ protected:
 	 */
 	string findItemMapByName(string& name);
 
+	/**
+	 * Attempts to remove an item by its trigger.
+	 * @param trigger trigger to remove
+	 * @return true if the item was removed, false instead.
+	 */
+	static bool removeControlledItemByTrigger(const string& trigger);
+
 };
-
-// The functions to create and destroy inputs.
-#define inputFactory(plugin) \
-	extern "C" Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
-	extern "C" void destroyInput(Input* instance) {delete instance;}
-
 } /* namespace */
 
 #endif /* INPUT_HPP_ */
