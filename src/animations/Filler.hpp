@@ -94,8 +94,6 @@ private:
 
 };
 
-actorFactory(Filler)
-
 } /* namespace */
 
 #endif /* FILLER_HPP_ */

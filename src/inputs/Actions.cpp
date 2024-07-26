@@ -28,9 +28,9 @@ inputFactory(Actions)
 
 Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 	Reader(parameters, inputMaps),
-	Speed(parameters.count("speed") ? parameters["speed"] : ""),
+	Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
 	frames(static_cast<uint8_t>(speed) * 3),
-	doBlink(parameters.count("blink") ? (parameters["blink"] == "true") : true)
+	doBlink(parameters.count("blink") ? (parameters["blink"] == "True") : true)
 {
 	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
 
@@ -158,6 +158,7 @@ void Actions::drawConfig() {
 			cout << "«" << endl;
 		}
 	}
+	cout << "Blink: " << (doBlink ? "True" : "False") << endl;
 	Speed::drawConfig();
 }
 

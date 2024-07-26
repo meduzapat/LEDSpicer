@@ -26,13 +26,15 @@ You can get the program installed using the [PPA](https://launchpad.net/~meduzap
 Or In the [project wiki](https://github.com/meduzapat/LEDSpicer/wiki/) you will find 
 all the information you need to compile and install the program yourself.
 
-## Comments are welcome.
+## Contacts, Content and Media.
 
-[![Patricio Rossi](https://img.shields.io/badge/Patricio%20Rossi-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
+[![Email me to Patricio Rossi](https://img.shields.io/badge/Patricio%20Rossi-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
 
-[![Facebook Page](https://img.shields.io/badge/Visit%20the-Facebook%20page-blue?logo=facebook)](https://www.facebook.com/LEDSpicer-2393969390678210)
+[![News and Content in our Facebook Page](https://img.shields.io/badge/Visit%20the-Facebook%20page-blue?logo=facebook)](https://www.facebook.com/LEDSpicer-2393969390678210)
 
-[![Youtube channel](https://img.shields.io/badge/Visit%20the-Youtube%20Channel-red?logo=youtube)](https://www.youtube.com/playlist?list=PLKqGl2gHvQPSnCl0zcyKkzd4-E6xux-Zi)
+[![Watch Demos and Tutorials in out Youtube Channel](https://img.shields.io/badge/Visit%20the-Youtube%20Channel-red?logo=youtube)](https://www.youtube.com/playlist?list=PLKqGl2gHvQPSnCl0zcyKkzd4-E6xux-Zi)
+
+![Discord](https://img.shields.io/discord/1187485303313809528?logo=discord&logoColor=%235865F2&label=Chat%20in%20our%20Discord%20Channel)
 
 ## Some sample videos
 

@@ -26,6 +26,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(FileReader)
+
 umap<string, vector<vector<LEDSpicer::Color>>> FileReader::fileData;
 
 FileReader::FileReader(umap<string, string>& parameters, Group* const group) :

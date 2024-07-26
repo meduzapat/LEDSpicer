@@ -39,6 +39,11 @@ using std::vector;
 
 namespace LEDSpicer::Animations {
 
+// The functions to create and destroy actors.
+#define actorFactory(plugin) \
+	extern "C" Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
+	extern "C" void destroyActor(Actor* instance) { delete instance; }
+
 using Devices::Group;
 using Devices::Element;
 
@@ -236,14 +241,7 @@ private:
 		repeat    = 0,
 		/// Times repeated.
 		repeated  = 0;
-
-// The functions to create and destroy actors.
-#define actorFactory(plugin) \
-	extern "C" Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
-	extern "C" void destroyActor(Actor* instance) { delete instance; }
-
 };
-
 
 } /* namespace */
 

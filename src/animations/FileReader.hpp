@@ -68,8 +68,6 @@ private:
 
 };
 
-actorFactory(FileReader)
-
 } /* namespace */
 
 #endif /* FILEREADER_HPP_ */

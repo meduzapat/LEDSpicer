@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Filler)
+
 Filler::Filler(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_FILLER),
 	Colorful(parameters.count("color") ? parameters["color"] : (parameters.count("colors") ? parameters["colors"] : "")),

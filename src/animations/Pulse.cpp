@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Pulse)
+
 void Pulse::calculateElements() {
 	const Color* color = colors[currentColor];
 	float c;

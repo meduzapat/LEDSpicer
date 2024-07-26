@@ -62,8 +62,6 @@ private:
 	void calculateTailPosition();
 };
 
-actorFactory(Serpentine)
-
 } /* namespace */
 
 #endif /* SERPENTINE_HPP_ */

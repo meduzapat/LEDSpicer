@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Gradient)
+
 Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
 	Colors(parameters["colors"]),

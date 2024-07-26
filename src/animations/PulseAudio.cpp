@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(PulseAudio)
+
 pa_threaded_mainloop* PulseAudio::tml = nullptr;
 pa_context* PulseAudio::context       = nullptr;
 pa_stream* PulseAudio::stream         = nullptr;
