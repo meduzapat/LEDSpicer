@@ -123,20 +123,25 @@ void Credits::process() {
 			coinCount[lookupMap.groupIdx] = 0;
 			// Find next Start.
 			Record* record = nullptr;
-			bool allOn     = false;
-			size_t t       = groupsMaps[lookupMap.groupIdx].size();
-			for (size_t c = 1; c < t; ++c) {
+			size_t total   = groupsMaps[lookupMap.groupIdx].size();
+			size_t active  = 0;
+			// Find first OFF start and check if all Starts are on.
+			for (size_t c = 1; c < total; ++c) {
 				if (not groupsMaps[lookupMap.groupIdx][c].active) {
-					record = &groupsMaps[lookupMap.groupIdx][c];
-					allOn = c == t-1;
-					break;
+					if (not record) {
+						record = &groupsMaps[lookupMap.groupIdx][c];
+						LogDebug("Start OFF detected " + record->item->getName());
+						++active;
+					}
+				}
+				else {
+					++active;
 				}
 			}
 
-			if (not record)
-				continue;
+			bool allOn = active == total - 1;
 
-			if (not alwaysOn and ((allOn and mode == Modes::Multi) or mode == Modes::Single)) {
+			if (groupMap.active and not alwaysOn and ((allOn and mode == Modes::Multi) or mode == Modes::Single)) {
 				// Stop Coin Blinking.
 				LogDebug("Stop Coin for " + groupMap.item->getName());
 				removeControlledItemByTrigger(event.trigger);
@@ -144,6 +149,10 @@ void Credits::process() {
 				if (mode == Modes::Multi or allOn)
 					groupMap.active = false;
 			}
+
+			if (not record)
+				continue;
+
 			// Set next Start on
 			record->active = true;
 			blinkingItems.emplace(record->map, record->item);
