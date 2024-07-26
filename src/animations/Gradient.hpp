@@ -73,8 +73,6 @@ private:
 
 };
 
-actorFactory(Gradient)
-
 } /* namespace */
 
 #endif /* GRADIENT_HPP_ */

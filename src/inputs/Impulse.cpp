@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Inputs;
 
+inputFactory(Impulse)
+
 void Impulse::drawConfig() {
 	cout << SEPARATOR << endl << "Type: Impulse" << endl;
 	Reader::drawConfig();
@@ -38,14 +40,14 @@ void Impulse::process() {
 
 	for (auto& event : events) {
 		if (itemsMap.count(event.trigger)) {
-			if (controlledItems->count(event.trigger)) {
+			if (controlledItems.count(event.trigger)) {
 				// released
 				if (not event.value)
-					controlledItems->erase(event.trigger);
+					controlledItems.erase(event.trigger);
 			}
 			else
 				// activated
-				controlledItems->emplace(event.trigger, itemsMap[event.trigger]);
+				controlledItems.emplace(event.trigger, itemsMap[event.trigger]);
 		}
 	}
 }

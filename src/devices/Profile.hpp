@@ -20,6 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
+using std::chrono::milliseconds;
+using std::chrono::time_point;
 #include "animations/FrameActor.hpp"
 #include "utility/Color.hpp"
 #include "inputs/Input.hpp"
@@ -46,14 +49,10 @@ public:
 		const string& name,
 		const Color& backgroundColor,
 		const vector<Actor*>& startTransitions,
-		const vector<Actor*>& endTransitions
-	):
-		name(name),
-		backgroundColor(backgroundColor),
-		startTransitions(startTransitions),
-		endTransitions(endTransitions),
-		currentActors(startTransitions.size() ? &this->startTransitions : &animations)
-	{}
+		const vector<Actor*>& endTransitions,
+		const milliseconds startTransitionElementsOnAt,
+		const milliseconds endTransitionElementsOffAt
+	);
 
 	virtual ~Profile() = default;
 
@@ -110,6 +109,12 @@ public:
 	bool isRunning() const;
 
 	/**
+	 * Whatever the always
+	 * @return
+	 */
+	bool displayElements() const;
+
+	/**
 	 * @return a read only reference to the background color.
 	 */
 	const Color& getBackgroundColor() const;
@@ -119,11 +124,16 @@ public:
 	 */
 	const string& getName() const;
 
-	const vector<Element::Item>& getAlwaysOnElements() const;
-	const vector<Group::Item>& getAlwaysOnGroups() const;
-
 	void addAlwaysOnElement(Element* element, const Color& color);
 	void addAlwaysOnGroup(Group* group, const Color& color);
+
+	static void addTemporaryAlwaysOnElement(const string name, const Element::Item item);
+	static void removeTemporaryAlwaysOnElement(const string name);
+	static void removeTemporaryAlwaysOnElements();
+
+	static void addTemporaryAlwaysOnGroup(const string name, const Group::Item item);
+	static void removeTemporaryAlwaysOnGroup(const string name);
+	static void removeTemporaryAlwaysOnGroups();
 
 	/**
 	 * Adds an input plugin to this profile.
@@ -154,8 +164,14 @@ protected:
 	/// List of animations to run at start.
 	vector<Actor*> startTransitions;
 
+	/// Start transition time when always on elements are displayed.
+	milliseconds startTransitionElementsOnAt;
+
 	/// List of animations to run at end.
 	vector<Actor*> endTransitions;
+
+	/// End transition time when always on elements get hidden.
+	milliseconds endTransitionElementsOffAt;
 
 	/// Keeps a list of always on elements.
 	vector<Element::Item> alwaysOnElements;
@@ -166,12 +182,29 @@ protected:
 	/// Input plugins
 	vector<Input*> inputs;
 
+	/// Keeps the ending time milliseconds.
+	time_point<std::chrono::system_clock>* transitionEndTime = nullptr;
+
+	/// Keeps a list of temporary activated always on elements.
+	static umap<string, Element::Item> temporaryAlwaysOnElements;
+
+	/// Keeps a list of temporary activated always on groups.
+	static umap<string, Group::Item> temporaryAlwaysOnGroups;
+
 private:
+
+	/// To be used when there is a start or end transition and the elements needs to show up.
+	float
+		elementProgress   = 0,
+		startStepProgress = 0,
+		endStepProgress   = 0;
 
 	/**
 	 * Restarts the profile actors.
 	 */
 	void restartActors();
+
+	void runAlwaysOnElements(bool force);
 };
 
 } /* namespace */

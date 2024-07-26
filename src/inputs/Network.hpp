@@ -52,9 +52,6 @@ protected:
 
 	static Socks sock;
 };
-
-inputFactory(Network)
-
 } /* namespace */
 
 #endif /* INPUTSNETWORK_HPP_ */

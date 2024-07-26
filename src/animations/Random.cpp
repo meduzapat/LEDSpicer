@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Random)
+
 Random::Random(umap<string, string>& parameters, Group* const group) :
 	FrameActor(parameters, group, REQUIRED_PARAM_ACTOR_RANDOM),
 	Colors(parameters["colors"])
@@ -67,9 +69,8 @@ void Random::generateNewColors() {
 
 void Random::drawConfig() {
 	cout << "Type: Random " << endl;
-	FrameActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	cout << endl << SEPARATOR << endl;
+	FrameActor::drawConfig();
 }
 

@@ -62,7 +62,7 @@ struct Items {
 	virtual ~Items() = default;
 
 	virtual string getName() const = 0;
-	virtual void process() const   = 0;
+	virtual void process(uint8_t percent) const = 0;
 };
 
 /**
@@ -141,8 +141,8 @@ public:
 			return element->getName();
 		}
 
-		void process() const  {
-			element->setColor(*color, filter);
+		void process(uint8_t percent) const  {
+			element->setColor(*color, filter, percent);
 		}
 	};
 

@@ -351,10 +351,9 @@ void AudioActor::drawConfig() {
 		"Colors: Off: " << userPref.off.getName()        <<
 		", Low: "       << userPref.c00.getName()        <<
 		", Mid: "       << userPref.c50.getName()        <<
-		", High: "      << userPref.c75.getName()        << endl;
+		", High: "      << userPref.c75.getName()        << endl <<
+		"Direction: "   << (direction == Direction::Directions::Forward ? "Inward" : "Outward") << endl;
 	Actor::drawConfig();
-	Direction::drawConfig();
-	cout << SEPARATOR << endl;
 }
 
 AudioActor::Modes AudioActor::str2mode(const string& mode) {
@@ -409,4 +408,15 @@ string AudioActor::channel2str(Channels channel) {
 		return "Mono";
 	}
 	return "";
+}
+
+const uint16_t AudioActor::getFullFrames() const {
+	return 0;
+}
+
+const float AudioActor::getRunTime() const {
+	if (secondsToEnd) {
+		return secondsToEnd;
+	}
+	return 0;
 }

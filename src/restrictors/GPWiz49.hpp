@@ -51,7 +51,7 @@ public:
 		GPWIZ49_MAX_BOARDS,
 		GPWIZ49_FULLNAME
 	),
-	williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "true" : false) {}
+	williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "True" : false) {}
 
 	virtual ~GPWiz49() = default;
 

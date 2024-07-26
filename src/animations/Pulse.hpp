@@ -66,8 +66,6 @@ private:
 
 };
 
-actorFactory(Pulse)
-
 } /* namespace */
 
 #endif /* PULSE_HPP_ */

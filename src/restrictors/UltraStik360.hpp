@@ -63,8 +63,8 @@ public:
 		ULTRASTIK_MAX_BOARDS,
 		ULTRASTIK_FULLNAME
 	),
-	handleRestrictor(options.count("hasRestrictor") ? options["hasRestrictor"] == "true" : false),
-	handleMouse(options.count("handleMouse") ? options["handleMouse"] == "true" : false) {}
+	handleRestrictor(options.count("hasRestrictor") ? options["hasRestrictor"] == "True" : false),
+	handleMouse(options.count("handleMouse") ? options["handleMouse"] == "True" : false) {}
 
 	virtual ~UltraStik360() = default;
 

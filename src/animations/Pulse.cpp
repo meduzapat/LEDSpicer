@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Pulse)
+
 void Pulse::calculateElements() {
 	const Color* color = colors[currentColor];
 	float c;
@@ -43,10 +45,10 @@ void Pulse::calculateElements() {
 
 void Pulse::drawConfig() {
 	cout << "Type: Pulse " << endl;
-	DirectionActor::drawConfig();
 	cout << "Colors: ";
 	this->drawColors();
-	cout << endl << "Mode: " << mode2str(mode) << endl << SEPARATOR << endl;
+	cout << endl << "Mode: " << mode2str(mode) << endl;
+	DirectionActor::drawConfig();
 }
 
 string Pulse::mode2str(Modes mode) {

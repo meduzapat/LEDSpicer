@@ -39,7 +39,7 @@ public:
 
 	Blinker(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 		Reader(parameters, inputMaps),
-		Speed(parameters.count("speed") ? parameters["speed"] : ""),
+		Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
 		frames(static_cast<uint8_t>(speed) * 3),
 		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : DEFAULT_BLINKS, "Invalid numeric value ")) {}
 
@@ -72,9 +72,6 @@ protected:
 	void blink();
 
 };
-
-inputFactory(Blinker)
-
 } /* namespace */
 
 #endif /* BLINKER_HPP_ */

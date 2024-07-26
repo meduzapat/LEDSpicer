@@ -24,7 +24,7 @@
 
 using namespace LEDSpicer::Inputs;
 
-umap<string, LEDSpicer::Devices::Items*>* Input::controlledItems = nullptr;
+umap<string, LEDSpicer::Devices::Items*> Input::controlledItems;
 
 Input::~Input() {
 	LogDebug("Releasing input maps...");
@@ -32,8 +32,12 @@ Input::~Input() {
 		delete p.second;
 }
 
-void Input::setInputControllers(umap<string, Items*>* controlledElements) {
-	Input::controlledItems = controlledElements;
+const umap<string, Items*>& Input::getControlledInputs() {
+	return Input::controlledItems;
+}
+
+void Input::clearControlledInputs() {
+	Input::controlledItems.clear();
 }
 
 void Input::drawConfig() {
@@ -58,3 +62,10 @@ string Input::findItemMapByName(string& name) {
 	throw Error("Unable to find item named " + name);
 }
 
+bool Input::removeControlledItemByTrigger(const string& trigger) {
+	if (controlledItems.count(trigger)) {
+		controlledItems.erase(trigger);
+		return true;
+	}
+	return false;
+}

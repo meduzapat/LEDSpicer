@@ -109,8 +109,6 @@ protected:
 
 };
 
-actorFactory(PulseAudio)
-
 } /* namespace */
 
 #endif /* PULSEAUDIO_HPP_ */

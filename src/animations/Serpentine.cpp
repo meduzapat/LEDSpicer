@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Animations;
 
+actorFactory(Serpentine)
+
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	Color(parameters["color"]),
@@ -117,19 +119,19 @@ void Serpentine::calculateTailPosition() {
 
 void Serpentine::drawConfig() {
 	cout << "Type: Serpentine " << endl;
-	StepActor::drawConfig();
 	cout << "Color: ";
 	drawColor();
 	cout << endl << "Tail: ";
 	if (not tailData.size()) {
-		cout << "No Tail" << endl << SEPARATOR << endl;
-		return;
+		cout << "No Tail" << endl;
 	}
-	cout << " Color: ";
-	tailColor.drawColor();
-	cout <<
-		", Length: " << static_cast<int>(tailData.size()) <<
-		", Intensity: " << (tailData.front().percent + 0) <<
-		"%" << endl
-		<< SEPARATOR << endl;
+	else {
+		cout << " Color: ";
+		tailColor.drawColor();
+		cout <<
+			", Length: " << static_cast<int>(tailData.size()) <<
+			", Intensity: " << (tailData.front().percent + 0) <<
+			"%" << endl;
+	}
+	StepActor::drawConfig();
 }

@@ -77,7 +77,9 @@ void Main::run() {
 		Message msg(messages.getMessage());
 		LogDebug("Received message: Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
 		// Set global flags.
-		Utility::globalFlags = msg.getFlags();
+		if (msg.getType() == Message::Types::CraftProfile or msg.getType() == Message::Types::LoadProfile) {
+			Utility::globalFlags = msg.getFlags();
+		}
 
 		switch (msg.getType()) {
 
@@ -126,11 +128,13 @@ void Main::run() {
 				msg.addData("Normal");
 
 			try {
-				alwaysOnElements[msg.getData()[0]] = Element::Item{
-					DataLoader::allElements.at(msg.getData()[0]),
-					&Color::getColor(msg.getData()[1]),
-					Color::str2filter(msg.getData()[2])
-				};
+				Profile::addTemporaryAlwaysOnElement(
+					msg.getData()[0], Element::Item{
+						DataLoader::allElements.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					}
+				);
 			}
 			catch (Error& e) {
 				LogNotice(e.getMessage());
@@ -139,15 +143,15 @@ void Main::run() {
 		}
 
 		case Message::Types::ClearElement:
-			if (msg.getData().size() != 1 or not alwaysOnElements.count(msg.getData()[0])) {
-				LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearElement));
+			if (msg.getData().size() != 1) {
+				LogNotice("Invalid element in message for " + Message::type2str(Message::Types::ClearElement));
 				break;
 			}
-			alwaysOnElements.erase(msg.getData()[0]);
+			Profile::removeTemporaryAlwaysOnElement(msg.getData()[0]);
 			break;
 
 		case Message::Types::ClearAllElements:
-			alwaysOnElements.clear();
+			Profile::removeTemporaryAlwaysOnElements();
 			break;
 
 		case Message::Types::SetGroup:
@@ -163,11 +167,13 @@ void Main::run() {
 				msg.addData("Normal");
 
 			try {
-				alwaysOnGroups[msg.getData()[0]] = Group::Item{
-					&DataLoader::layout.at(msg.getData()[0]),
-					&Color::getColor(msg.getData()[1]),
-					Color::str2filter(msg.getData()[2])
-				};
+				Profile::addTemporaryAlwaysOnGroup(
+					msg.getData()[0], Group::Item{
+						&DataLoader::layout.at(msg.getData()[0]),
+						&Color::getColor(msg.getData()[1]),
+						Color::str2filter(msg.getData()[2])
+					}
+				);
 			}
 			catch (Error& e) {
 				LogNotice(e.getMessage());
@@ -175,15 +181,15 @@ void Main::run() {
 			break;
 
 		case Message::Types::ClearGroup:
-			if (msg.getData().size() != 1 or not alwaysOnGroups.count(msg.getData()[0])) {
+			if (msg.getData().size() != 1 or not DataLoader::layout.count(msg.getData()[0])) {
 				LogNotice("Unknown group for " + Message::type2str(Message::Types::ClearGroup));
 				break;
 			}
-			alwaysOnGroups.erase(msg.getData()[0]);
+			Profile::removeTemporaryAlwaysOnGroup(msg.getData()[0]);
 			break;
 
 		case Message::Types::ClearAllGroups:
-			alwaysOnGroups.clear();
+			Profile::removeTemporaryAlwaysOnGroups();
 			break;
 
 		case Message::Types::CraftProfile: {
@@ -389,35 +395,5 @@ void Main::runCurrentProfile() {
 
 	currentProfile->runFrame();
 
-	// Do not display elements and groups while the profile is transitioning.
-	if (not currentProfile->isTransiting()) {
-		// Set always on groups from profile.
-		for (auto& gE : currentProfile->getAlwaysOnGroups()) {
-			gE.process();
-		}
-
-		// Set always on elements from profile.
-		for (auto& eE : currentProfile->getAlwaysOnElements()) {
-			// Ignore ways if the flag is set.
-			if ((Utility::globalFlags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
-				continue;
-			eE.process();
-		}
-
-		// Set always on groups from temporary requests.
-		for (auto& gE : alwaysOnGroups) {
-			gE.second.process();
-		}
-
-		// Set always on elements from temporary requests.
-		for (auto& eE : alwaysOnElements) {
-			eE.second.process();
-		}
-
-		// Set controlled items from input plugins.
-		for (auto& item : DataLoader::controlledItems) {
-			item.second->process();
-		}
-	}
 	sendData();
 }

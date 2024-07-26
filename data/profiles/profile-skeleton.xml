@@ -6,25 +6,21 @@
 	backgroundColor=""
 >
 	<!-- Sample start transition -->
-	<startTransition
-		type="Pulse"
-		color="White"
-		speed="Fast"
-		filter="Combine"
-		direction="ForwardBouncing"
-	/>
+	<startTransitions>
+		<animation name=""/>
+	</startTransitions>
 	<!-- Sample end transition -->
-	<endTransition
-		type="Pulse"
-		color="White"
-		speed="Fast"
-		filter="Combine"
-		direction="ForwardBouncing"
-	/>
+	<endTransitions>
+		<animation name=""/>
+	</endTransitions>
 	<!-- Define one or more animation files to run -->
 	<animations>
 		<animation name="" />
 	</animations>
+	<!-- Define one or more input files to read or proces -->
+	<inputs>
+		<input name="" />
+	</inputs>
 	<!-- Defines overwrites for elements background, always on color -->
 	<alwaysOnElements>
 		<element name="" color="" />

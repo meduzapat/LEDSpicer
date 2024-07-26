@@ -83,6 +83,10 @@ public:
 	 */
 	virtual void setEndCycles(uint8_t seconds);
 
+	const uint16_t getFullFrames() const override;
+
+	const float getRunTime() const override;
+
 protected:
 
 	uint8_t

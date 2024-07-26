@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
-![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?color=blue)
+![GitHub License](https://img.shields.io/github/license/meduzapat/ledspicer?logo=opensourceinitiative&logoColor=%233DA639&color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 [![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
 [![Static Badge](https://img.shields.io/badge/OH-rgb(90%2C%2042%2C%20130)?label=Project%20Summary&labelColor=gray)](https://openhub.net/p/ledspicer)
@@ -26,13 +26,16 @@ You can get the program installed using the [PPA](https://launchpad.net/~meduzap
 Or In the [project wiki](https://github.com/meduzapat/LEDSpicer/wiki/) you will find 
 all the information you need to compile and install the program yourself.
 
-## Comments are welcome.
+## Contacts, Content and Media.
 
-[![Patricio Rossi](https://img.shields.io/badge/Patricio%20Rossi-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
+[![Project Email](https://img.shields.io/badge/MeduZaPaT-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
 
 [![Facebook Page](https://img.shields.io/badge/Visit%20the-Facebook%20page-blue?logo=facebook)](https://www.facebook.com/LEDSpicer-2393969390678210)
 
-[![Youtube channel](https://img.shields.io/badge/Visit%20the-Youtube%20Channel-red?logo=youtube)](https://www.youtube.com/playlist?list=PLKqGl2gHvQPSnCl0zcyKkzd4-E6xux-Zi)
+[![Youtube Channel](https://img.shields.io/badge/Visit%20the-Youtube%20Channel-red?logo=youtube)](https://www.youtube.com/playlist?list=PLKqGl2gHvQPSnCl0zcyKkzd4-E6xux-Zi)
+
+[![Discord Channel](https://img.shields.io/discord/1187485303313809528?logo=discord&logoColor=%235865F2&label=Discord%20Channel)](https://discord.gg/m4D2QVXqm6
+)
 
 ## Some sample videos
 
