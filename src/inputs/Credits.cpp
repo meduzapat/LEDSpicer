@@ -28,7 +28,7 @@ inputFactory(Credits)
 
 Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
 	Reader(parameters, inputMaps),
-	Speed(parameters.count("speed") ? parameters["speed"] : ""),
+	Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
 	frames(static_cast<uint8_t>(speed) * 3),
 	coinsPerCredit(Utility::parseNumber(parameters.count("coinsPerCredit") ? parameters["coinsPerCredit"] : DEFAULT_COINS, "Invalid numeric value ")),
 	mode((parameters.count("mode") ? parameters["mode"] : DEFAULT_MODE) == DEFAULT_MODE ? Modes::Multi : Modes::Single),
