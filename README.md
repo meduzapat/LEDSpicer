@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
-![GitHub](https://img.shields.io/github/license/meduzapat/LEDSpicer?color=blue)
+![GitHub License](https://img.shields.io/github/license/meduzapat/ledspicer?logo=opensourceinitiative&logoColor=%233DA639&color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 [![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
 [![Static Badge](https://img.shields.io/badge/OH-rgb(90%2C%2042%2C%20130)?label=Project%20Summary&labelColor=gray)](https://openhub.net/p/ledspicer)
