@@ -30,9 +30,9 @@
 #define PULSEAUDIO_HPP_ 1
 
 #define STREAM_NAME "Peek Reader"
-#define SAMPLE_FORMAT PA_SAMPLE_S16LE
-#define RATE 11025
-#define TOP 10
+#define SAMPLE_FORMAT PA_SAMPLE_FLOAT32
+#define RATE 144
+#define TOP 1.77f
 
 namespace LEDSpicer::Animations {
 
@@ -64,9 +64,9 @@ protected:
 	static std::mutex mutex;
 
 	/// Raw peak data.
-	static vector<uint16_t> rawData;
+	static vector<uint8_t> rawData;
 
-	static uint16_t top;
+	static Values top;
 
 	static void disconnect();
 
@@ -101,9 +101,7 @@ protected:
 	 */
 	static void onSinkInfo(pa_context* context, const pa_sink_info* info, int eol, void* userdata);
 
-	virtual void calcPeak();
-
-	virtual void calcPeaks();
+	void calcPeak() override;
 
 	void calculateElements();
 
