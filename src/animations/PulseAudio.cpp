@@ -30,11 +30,11 @@ pa_threaded_mainloop* PulseAudio::tml = nullptr;
 pa_context* PulseAudio::context       = nullptr;
 pa_stream* PulseAudio::stream         = nullptr;
 uint8_t PulseAudio::instances         = 0;
-uint16_t PulseAudio::top              = TOP;
+AudioActor::Values PulseAudio::top    {0, 0};
 string PulseAudio::source;
 std::mutex PulseAudio::mutex;
 
-vector<uint16_t> PulseAudio::rawData;
+vector<uint8_t> PulseAudio::rawData;
 
 PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 	AudioActor(parameters, group)
@@ -134,7 +134,7 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 					LogDebug("context event changed");
 #endif
 					// reset top value.
-					top = TOP;
+					top = {0, 0};
 					onSinkInfo(context, nullptr, 0, userdata);
 				}
 			},
@@ -185,7 +185,7 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 	LogDebug("Sample Size: " + to_string(pa_sample_size(&info->sample_spec)));
 #endif
 
-	pa_sample_spec ss = {SAMPLE_FORMAT, RATE, info->channel_map.channels};
+	pa_sample_spec ss = {SAMPLE_FORMAT, RATE, CHANNELS};
 
 	if (not (stream = pa_stream_new(context, STREAM_NAME, &ss, &info->channel_map))) {
 		LogError("Failed to create stream: " + string(pa_strerror(pa_context_errno(context))));
@@ -214,8 +214,9 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 #endif
 
 	pa_buffer_attr ba;
-	ba.maxlength = UINT32_MAX;
-	ba.fragsize  = UINT32_MAX;
+	ba.maxlength = -1;
+	ba.fragsize  = sizeof(float) * CHANNELS;
+	ba.prebuf    = 0;
 	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0) {
 		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))))
 		throw;
@@ -249,6 +250,7 @@ void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 
 void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) {
 
+	std::lock_guard<std::mutex> lock(mutex);
 	rawData.clear();
 	if (not length)
 		return;
@@ -260,16 +262,22 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 		return;
 	}
 
-	// Hole detected (no idea what a hole is but is on the docs).
-	if (not data and length > 0) {
+	// Hole detected.
+	if (not data and length) {
 		pa_stream_drop(stream);
 		return;
 	}
 
-	// Parse data.
-	std::lock_guard<std::mutex> lock(mutex);
-	const uint16_t* buffer = static_cast<const uint16_t*>(data);
-	rawData.assign(buffer, buffer + (length / sizeof(uint16_t)));
+	// Parse data and convert to %.
+	const float* buffer = static_cast<const float*>(data);
+	for (size_t c = 0; c < length / sizeof(float); ++c) {
+		float v = buffer[c];
+		if (v < 0.0f)
+			v = 0.0f;
+		if (v > 1.0f)
+			v = 1.0f;
+		rawData.push_back(roundf(v * 100.0f));
+	}
 	pa_stream_drop(stream);
 }
 
@@ -278,51 +286,25 @@ void PulseAudio::calculateElements() {
 	AudioActor::calculateElements();
 }
 
-#define TO_PERC(x) round((x) * 100.00 / top)
-
 void PulseAudio::calcPeak() {
-
-	for (size_t c = 0; c < rawData.size(); ++c) {
-		uint16_t v = abs(rawData[c]);
-		if (v > top)
-			top = v;
-		v = v ? TO_PERC(v) : 0;
+	auto size(rawData.size());
+	for (size_t c = 0; c < size; ++c) {
+		uint8_t v = rawData[c];
 		// Even for left, odd for right.
-		if (c % 2) {
+		if (c % CHANNELS) {
+			if (top.r >= TOP and v < top.r - TOP)
+				v = top.r - TOP;
+			top.r = v;
 			if (v > value.r)
 				value.r = v;
 		}
 		else {
+			if (top.l >= TOP and v < top.l - TOP)
+				v = top.l - TOP;
+			top.l = v;
 			if (v > value.l)
 				value.l = v;
 		}
 	}
 }
 
-void PulseAudio::calcPeaks() {
-
-	uint16_t v;
-	// read 2 by 2
-	auto size(rawData.size());
-	if (not size)
-		return;
-	for (size_t c = 0; c < size;) {
-		Values value;
-		// read left
-		v = abs(rawData[c++]);
-		if (v > top)
-			top = v;
-		v = v ? TO_PERC(v) : 0;
-		if (v > value.r) {
-			value.r = v;
-		}
-		v = abs(rawData[c++]);
-		if (v > top)
-			top = v;
-		v = TO_PERC(v);
-		if (v > value.l)
-			value.l = v;
-		values.push_back(value);
-	}
-
-}

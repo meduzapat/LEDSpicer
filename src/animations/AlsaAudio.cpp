@@ -52,11 +52,13 @@ AlsaAudio::AlsaAudio(umap<string, string>& parameters, Group* const group) :
 		SND_PCM_FORMAT_S16_LE,
 		SND_PCM_ACCESS_RW_INTERLEAVED,
 		2,
-		96000,
+		48000,
 		1,
 		0
 	)) < 0)
 		throw Error("Unable to set parameters for " + PCM + ": " + string(snd_strerror(err)));
+
+	LogInfo("ALSA connected");
 }
 
 AlsaAudio::~AlsaAudio() {
@@ -69,12 +71,14 @@ AlsaAudio::~AlsaAudio() {
 }
 
 void AlsaAudio::calcPeak() {
-	int16_t buffer[128];
+	int16_t buffer[PEAKS * 2];
 	if (snd_pcm_readi(pcm, buffer, PEAKS) != PEAKS)
 		return;
 
 	for (uint8_t c = 0; c < 64; ++c) {
-		uint8_t v = (buffer[c] / INT16_MAX) * UINT8_MAX;
+		float v = (buffer[c] / static_cast<float>(INT16_MAX)) * UINT8_MAX;
+		if (v < 0)
+			v *= -1;
 		// Even for left, odd for right.
 		if (c % 2) {
 			if (v > value.r)
@@ -84,30 +88,6 @@ void AlsaAudio::calcPeak() {
 			if (v > value.l)
 				value.l = v;
 		}
-	}
-}
-
-void AlsaAudio::calcPeaks() {
-
-	int16_t buffer[128];
-	if (snd_pcm_readi(pcm, buffer, PEAKS) != PEAKS)
-		return;
-
-	uint8_t
-		v = 0,
-		c = 0;
-	for (size_t c = 0; c < PEAKS; ++c) {
-		Values value;
-		// Even for left, odd for right.
-		v = (buffer[c] / INT16_MAX) * UINT8_MAX;
-		if (v > value.r)
-			value.r = v;
-		++c;
-		v = (buffer[c] / INT16_MAX) * UINT8_MAX;
-		if (v > value.l)
-			value.l = v;
-		++c;
-		values.push_back(value);
 	}
 }
 
