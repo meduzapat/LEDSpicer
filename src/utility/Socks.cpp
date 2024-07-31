@@ -105,8 +105,10 @@ bool Socks::send(const string& message) throw() {
 
 	if (message.empty())
 		return true;
-
-	return (message.length() == ::send(sockFB, message.c_str(), message.length(), 0));
+#ifdef DEVELOP
+	LogDebug("Message sent: [" + message + "]");
+#endif
+	return (message.length() + 1 == ::send(sockFB, (message + '\0').c_str(), message.length() + 1, 0));
 }
 
 bool Socks::recive(string& buffer) {
@@ -135,6 +137,9 @@ bool Socks::recive(string& buffer) {
 	n = recv(sockFB, &bufferp, BUFFER_SIZE, 0);// MSG_DONTWAIT
 	if (n >= 0) {
 		buffer = bufferp;
+#ifdef DEVELOP
+		LogDebug("Message received: [" + buffer + "]");
+#endif
 		return true;
 	}
 	return false;

@@ -53,7 +53,7 @@ public:
 
 		Item() = default;
 
-		Item(Group* group, const Color* color, Color::Filters filter, uint pos = 0) :
+		Item(Group* group, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
 			group(group) {}
 
@@ -86,7 +86,7 @@ public:
 	/**
 	 * @return the number of elements.
 	 */
-	uint8_t size() const;
+	uint16_t size() const;
 
 	/**
 	 * Inserts a new element.
@@ -108,7 +108,7 @@ public:
 	 * @param index
 	 * @return a reference to the internal element.
 	 */
-	Element* getElement(uint8_t index);
+	Element* getElement(uint16_t index);
 
 	/**
 	 * @return the group name.

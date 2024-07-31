@@ -24,13 +24,13 @@
 
 using namespace LEDSpicer::Devices::Ultimarc;
 
-void PacDrive::drawHardwarePinMap() {
-	uint8_t half = PAC_DRIVE_LEDS / 2;
+void PacDrive::drawHardwareLedMap() {
+	uint16_t half = PAC_DRIVE_LEDS / 2;
 	cout
-		<< getFullName() << " Pins " << PAC_DRIVE_LEDS << endl
-		<< "Hardware pin map:" << endl << "L     R"  << endl;
-	for (uint8_t r = 0; r < half; ++r) {
-		uint8_t l = PAC_DRIVE_LEDS - r - 1;
+		<< getFullName() << " LEDs " << PAC_DRIVE_LEDS << endl
+		<< "Hardware connect map:" << endl << "L     R"  << endl;
+	for (uint16_t r = 0; r < half; ++r) {
+		uint16_t l = PAC_DRIVE_LEDS - r - 1;
 		setLed(r, r + 1);
 		setLed(l, l + 1);
 		cout <<
@@ -45,7 +45,7 @@ void PacDrive::transfer() const {
 
 	vector<uint8_t> load {0, 0, 0, 0};
 
-	for (uint8_t led = 0; led < PAC_DRIVE_LEDS; ++led) {
+	for (uint16_t led = 0; led < PAC_DRIVE_LEDS; ++led) {
 		if (LEDs[led] > changePoint) {
 			// two groups of 8 bits.
 			if (led < 8)

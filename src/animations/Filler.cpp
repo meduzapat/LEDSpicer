@@ -41,8 +41,8 @@ Filler::Filler(umap<string, string>& parameters, Group* const group) :
 
 void Filler::generateNextRandom() {
 	// Extract candidates.
-	vector<uint8_t> possibleElements;
-	for (uint8_t e = 0; e <= totalFrames; ++e)
+	vector<uint16_t> possibleElements;
+	for (uint16_t e = 0; e <= totalFrames; ++e)
 		if ((filling and not previousFrameAffectedElements[e]) or (not filling and previousFrameAffectedElements[e]))
 			possibleElements.push_back(e);
 
@@ -117,7 +117,7 @@ void Filler::calculateElements() {
 
 void Filler::fillElementsLinear(const Data& values) {
 	const Color* color = colors[currentColor];
-	for (uint8_t c = values.begin; c <= values.end; ++c)
+	for (uint16_t c = values.begin; c <= values.end; ++c)
 		if ( c != currentFrame) {
 			changeElementColor(c, *color, filter);
 #ifdef DEVELOP
@@ -130,7 +130,7 @@ void Filler::fillElementsLinear(const Data& values) {
 
 void Filler::fillElementsRandom() {
 	const Color* color = colors[currentColor];
-	for (uint8_t e = 0; e <= totalFrames; ++e)
+	for (uint16_t e = 0; e <= totalFrames; ++e)
 		if (previousFrameAffectedElements[e]) {
 			changeElementColor(e, *color, filter);
 #ifdef DEVELOP

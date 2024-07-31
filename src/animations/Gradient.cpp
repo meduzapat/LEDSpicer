@@ -103,7 +103,7 @@ string Gradient::mode2str(Modes mode) {
 
 void Gradient::calculateSingle() {
 	// Paint all elements with the same color.
-	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
+	for (uint16_t c = 0; c < getNumberOfElements(); c++) {
 		changeElementColor(c, precalc[currentFrame], filter);
 	}
 }
@@ -111,7 +111,7 @@ void Gradient::calculateSingle() {
 void Gradient::calculateMultiple() {
 	uint8_t frameT = currentFrame;
 	// Paint each element with a tone.
-	for (uint8_t c = 0; c < getNumberOfElements(); c++) {
+	for (uint16_t c = 0; c < getNumberOfElements(); c++) {
 		changeElementColor(c, precalc[frameT], filter);
 		if (frameT == totalFrames)
 			frameT = 0;

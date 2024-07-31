@@ -89,13 +89,14 @@ public:
 
 protected:
 
-	uint8_t
+	uint16_t
 		/// Total number of frames.
 		totalFrames  = 0,
 		/// The current frame.
 		currentFrame = 0,
 		/// The percent of the animation to start.
-		startAt      = 0,
+		startAt      = 0;
+	uint8_t
 		/// Number of cycles to run.
 		cycles       = 0,
 		/// Current cycles.

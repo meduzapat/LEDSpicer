@@ -74,7 +74,7 @@ public:
 protected:
 
 	struct Values {
-		uint8_t
+		uint16_t
 			l = 0,
 			r = 0;
 	};

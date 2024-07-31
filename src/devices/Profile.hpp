@@ -54,7 +54,7 @@ public:
 		const milliseconds endTransitionElementsOffAt
 	);
 
-	virtual ~Profile() = default;
+	virtual ~Profile();
 
 	void addAnimation(const vector<Actor*>& animation);
 

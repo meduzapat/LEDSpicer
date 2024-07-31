@@ -42,8 +42,8 @@ AudioActor::AudioActor(umap<string, string>& parameters, Group* const group) :
 {
 	if (userPref.channel == Channels::Both)
 		totalElements = {
-			static_cast<uint8_t>(group->size() / CHANNELS),
-			static_cast<uint8_t>((group->size() / CHANNELS) + group->size() % CHANNELS)
+			static_cast<uint16_t>(group->size() / CHANNELS),
+			static_cast<uint16_t>((group->size() / CHANNELS) + group->size() % CHANNELS)
 		};
 	else
 		totalElements = {
@@ -126,7 +126,7 @@ void AudioActor::single() {
 	}
 	// Both or Left follows the same logic.
 	if ((userPref.channel & 5)) {
-		for (uint8_t c = 0; c < totalElements.l; ++c) {
+		for (uint16_t c = 0; c < totalElements.l; ++c) {
 			changeElementColor(
 				direction == Directions::Forward ? c : totalElements.l - c - 1,
 				l,
@@ -135,7 +135,7 @@ void AudioActor::single() {
 		}
 	}
 	if (userPref.channel & Channels::Right) {
-		for (uint8_t c = 0; c < totalElements.r; ++c) {
+		for (uint16_t c = 0; c < totalElements.r; ++c) {
 			changeElementColor(
 				direction == Directions::Forward ? getNumberOfElements() - c - 1 : totalElements.l + c,
 				r,
@@ -149,14 +149,14 @@ void AudioActor::vuMeters() {
 
 	/**
 	 * Function to draw the elements.
-	 * @param uint8_t ele-ms the number of elements to draw.
-	 * @param uint8_t start the starting point.
-	 * @param uint8_t total the total number of elements.
-	 * @param bool reverse if set will draws backward.
+	 * @param elems the number of elements to draw.
+	 * @param start the starting point.
+	 * @param total the total number of elements.
+	 * @param reverse if set will draws backward.
 	 */
-	auto tintFn = [&] (const uint8_t elems, const uint8_t start, const uint8_t total, const bool reverse) {
-		for (uint8_t e = 0; e < elems; ++e) {
-			uint8_t s(reverse ? start - e : start + e);
+	auto tintFn = [&] (const uint16_t elems, const uint16_t start, const uint16_t total, const bool reverse) {
+		for (uint16_t e = 0; e < elems; ++e) {
+			uint16_t s(reverse ? start - e : start + e);
 #ifdef DEVELOP
 			cout << std::setw(3) << to_string(s);
 #endif
@@ -165,7 +165,7 @@ void AudioActor::vuMeters() {
 	};
 
 	refreshPeak();
-	uint8_t val;
+	uint16_t val;
 
 	/*
 	 * Forward / Backward, Start / Total table, for Left, Righ, Mono and Both.
@@ -213,7 +213,7 @@ void AudioActor::vuMeters() {
 		if (val > totalElements.r)
 			val = totalElements.r;
 		if (val) {
-			uint8_t start, total;
+			uint16_t start, total;
 			if (direction == Directions::Forward)
 				tintFn(
 					val,
@@ -234,14 +234,14 @@ void AudioActor::vuMeters() {
 
 void AudioActor::waves() {
 
-	uint8_t
+	uint16_t
 		t = colorData.size() - 1,
 		h = totalElements.l - 1;
 	// single/mono VS stereo
 	if (userPref.channel == Channels::Both) {
 		// outside in
 		if (direction == Directions::Forward) {
-			for (uint8_t c = 0; c < h; c++) {
+			for (uint16_t c = 0; c < h; c++) {
 				colorData[h - c] = colorData[h - c - 1];
 				colorData[h + c + 1] = colorData[h + c + 2];
 			}
@@ -250,7 +250,7 @@ void AudioActor::waves() {
 		}
 		// inside out
 		else {
-			for (uint8_t c = 0; c < h; c++) {
+			for (uint16_t c = 0; c < h; c++) {
 				colorData[c] = colorData[c + 1];
 				colorData[t - c] = colorData[t - c - 1];
 			}
@@ -259,7 +259,7 @@ void AudioActor::waves() {
 		}
 	}
 	else {
-		for (uint8_t c = 0; c < t; c++)
+		for (uint16_t c = 0; c < t; c++)
 			if (direction == Directions::Forward)
 				colorData[t - c] = colorData[t - c - 1];
 			else
@@ -293,7 +293,7 @@ void AudioActor::waves() {
 		break;
 	}
 
-	for (uint8_t c = 0; c < colorData.size(); ++c)
+	for (uint16_t c = 0; c < colorData.size(); ++c)
 		changeElementColor(c, colorData[c], filter);
 }
 
@@ -306,12 +306,12 @@ void AudioActor::disco() {
 	}
 	refreshPeak();
 
-	auto calculateIndex = [&](uint8_t val, uint8_t totalSize, bool isLeft) {
+	auto calculateIndex = [&](uint16_t val, uint16_t totalSize, bool isLeft) {
 		float
 			per = 0,
 			// Individual size.
 			boxSize = 100 / (totalSize - 1);
-		uint8_t
+		uint16_t
 			idx   = val / boxSize,
 			start = idx * boxSize,
 			end   = (idx + 1) * boxSize;
@@ -331,7 +331,7 @@ void AudioActor::disco() {
 			idx = (direction == Directions::Forward ? totalSize - idx : idx);
 			break;
 		case Channels::Both:
-			// Forware outside in, Backward inside out.
+			// Forward: outside in, Backward: inside out.
 			if (isLeft) {
 				idx = (direction == Directions::Forward ? idx : totalElements.l - 1 - idx);
 				break;
@@ -360,7 +360,7 @@ void AudioActor::disco() {
 			calculateIndex(value.r, totalElements.r, false);
 	}
 	// Apply colors to the elements
-	for (uint8_t c = 0; c < getNumberOfElements(); ++c) {
+	for (uint16_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, colorData[c], filter);
 	}
 }

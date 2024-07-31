@@ -41,16 +41,16 @@ void RaspberryPi::openHardware() {
 		throw Error("Failed to initialized " + getFullName());
 	}
 
-	// Only handle used element's pins.
+	// Only handle used element's LEDs.
 	uint8_t* firstled = getLed(0);
 	for (auto& element : *getElements()) {
 		LogDebug("Element " + element.second.getName());
-		for (auto& pin : element.second.getPins()) {
-			// Find the element pin position in the pins array.
-			uint8_t gpiopin = pin - firstled + 1;
-			gpioSetMode(gpiopin, PI_OUTPUT);
-			usedleds.push_back(gpiopin);
-			LogDebug("gpiopin : " + to_string(gpiopin));
+		for (auto& led : element.second.getLeds()) {
+			// Find the element led position in the leds array.
+			uint8_t gpioled = led - firstled + 1;
+			gpioSetMode(gpioled, PI_OUTPUT);
+			usedleds.push_back(gpioled);
+			LogDebug("gpioled : " + to_string(gpioled));
 		}
 	};
 	usedleds.shrink_to_fit();
@@ -67,12 +67,12 @@ string RaspberryPi::getFullName() const {
 	return "Raspberry PI GPIO";
 }
 
-void RaspberryPi::drawHardwarePinMap() {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+void RaspberryPi::drawHardwareLedMap() {
+	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
 		setLed(l, l + 1);
 	cout
-		<< getFullName() << " Pins " << LEDs.size() << endl
-		<< "Hardware pin map:" << endl
+		<< getFullName() << " LEDs " << LEDs.size() << endl
+		<< "Hardware connector map:" << endl
 		<< " +  +" << endl << std::setfill(' ') << std::right
 		<< std::setw(2) << static_cast<int>(*getLed(2))  << "  +" << endl
 		<< std::setw(2) << static_cast<int>(*getLed(3))  << "  G" << endl
@@ -93,7 +93,7 @@ void RaspberryPi::drawHardwarePinMap() {
 		<< std::setw(2) << static_cast<int>(*getLed(19)) << std::setw(3) << static_cast<int>(*getLed(16)) << endl
 		<< std::setw(2) << static_cast<int>(*getLed(26)) << std::setw(3) << static_cast<int>(*getLed(20)) << endl
 		<< " G" << std::setw(3)                             << static_cast<int>(*getLed(21)) << endl << endl;
-	cout << "Note: Only pins with an assigned element will be used" << endl;
+	cout << "Note: Only connectors with an assigned element will be used" << endl;
 }
 
 void RaspberryPi::transfer() const {

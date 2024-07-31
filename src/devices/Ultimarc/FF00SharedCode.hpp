@@ -28,14 +28,14 @@ public:
 	FF00SharedCode(
 		uint16_t wValue,
 		uint8_t  interface,
-		uint8_t  pins,
+		uint16_t  leds,
 		uint8_t  maxBoards,
 		umap<string, string>& options,
 		const string& name
 	) : Ultimarc(
 		wValue,
 		interface,
-		pins,
+		leds,
 		maxBoards,
 		options,
 		name

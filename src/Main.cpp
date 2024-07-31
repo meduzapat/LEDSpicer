@@ -200,7 +200,7 @@ void Main::run() {
 			 * 3 system
 			 */
 			if (msg.getData().size() != 4) {
-				LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
+				LogNotice("Invalid message for " + Message::type2str(Message::Types::CraftProfile));
 				break;
 			}
 			Profile* profile = tryProfiles({msg.getData()[0]});
@@ -328,10 +328,10 @@ int main(int argc, char **argv) {
 		signal(SIGTERM, signalHandler);
 		signal(SIGQUIT, signalHandler);
 		signal(SIGABRT, signalHandler);
-		signal(SIGINT, signalHandler);
+		signal(SIGINT,  signalHandler);
 		signal(SIGCONT, SIG_IGN);
 		signal(SIGSTOP, SIG_IGN);
-		signal(SIGHUP, signalHandler);
+		signal(SIGHUP,  signalHandler);
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);

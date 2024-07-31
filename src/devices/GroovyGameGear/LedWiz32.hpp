@@ -59,15 +59,13 @@ public:
 
 	virtual ~LedWiz32() = default;
 
-	void drawHardwarePinMap() override;
+	void drawHardwareLedMap() override;
 
 	void transfer() const override;
 
 	uint16_t getProduct() const override;
 
 protected:
-
-	static uint8_t dumpFrame;
 
 	void afterClaimInterface() override;
 };

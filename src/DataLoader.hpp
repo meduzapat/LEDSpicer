@@ -146,7 +146,6 @@ public:
 	/**
 	 * Check if a profile exists in the cache.
 	 *
-	 * Does cache clean up when a reload is forced.
 	 * @param name
 	 * @return the profile or nullptr
 	 */
