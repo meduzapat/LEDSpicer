@@ -28,16 +28,19 @@ using namespace LEDSpicer;
 bool Messages::read() {
 	string buffer;
 	if (recive(buffer)) {
+
 		if (buffer.empty())
 			return false;
 		Message msg;
-		vector<string> chunks = Utility::explode(buffer, RECORD_SEPARATOR);
+		vector<string> chunks(Utility::explode(buffer, RECORD_SEPARATOR));
 		if (not chunks.size()) {
 			LogNotice("Malformed message received");
 			return false;
 		}
 
 		try {
+			// Discard tale.
+			chunks.pop_back();
 			msg.setType(static_cast<Message::Types>(std::stoi(chunks.back())));
 			if (msg.getType() == Message::Types::Invalid)
 				throw;

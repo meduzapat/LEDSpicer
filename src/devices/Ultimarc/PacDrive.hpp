@@ -56,7 +56,7 @@ public:
 
 	virtual ~PacDrive() = default;
 
-	void drawHardwarePinMap() override;
+	void drawHardwareLedMap() override;
 
 	void transfer() const override;
 

@@ -36,7 +36,7 @@ using std::chrono::system_clock;
 #ifndef ELEMENT_HPP_
 #define ELEMENT_HPP_ 1
 
-#define SINGLE_PIN 0
+#define SINGLE_LED 0
 
 namespace LEDSpicer::Devices {
 
@@ -46,7 +46,7 @@ namespace LEDSpicer::Devices {
 struct Items {
 
 	/// Stores the position in a list if necessary.
-	uint pos = 0;
+	uint16_t pos = 0;
 
 	/// Stores the desired color.
 	const Color* color = nullptr;
@@ -55,7 +55,7 @@ struct Items {
 	Color::Filters filter = Color::Filters::Normal;
 
 	Items() = default;
-	Items(const Color* color, Color::Filters filter, uint pos) : color(color), filter(filter), pos(pos) {}
+	Items(const Color* color, Color::Filters filter, uint16_t pos) : color(color), filter(filter), pos(pos) {}
 	Items(const Items& item)  : color(item.color), filter(item.filter), pos(item.pos) {}
 	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)), pos(std::move(item.pos)) {}
 
@@ -67,7 +67,8 @@ struct Items {
 
 /**
  * LEDSpicer::Devices::Element
- * Represent an Element that contain pins (LEDs), with functionality to handle them.
+ * Represent an Element that handles leds, single color or RGB, solenoids or motors.
+ * Each leds value is stored into the hardware that owns this element.
  */
 class Element {
 
@@ -75,13 +76,13 @@ public:
 
 	/**
 	 * Creates a new monochrome Element.
-	 * @param name
-	 * @param pin
+	 * @param name Element name.
+	 * @param led pointer to the LED on the hardware.
 	 * @param defaultColor
 	 */
 	Element(
 		const string& name,
-		uint8_t* pin,
+		uint8_t* led,
 		const Color& defaultColor,
 		uint timeOn,
 		uint8_t brightness
@@ -90,16 +91,16 @@ public:
 	/**
 	 * Creates a new RGB Element.
 	 * @param name
-	 * @param pinR
-	 * @param pinG
-	 * @param pinB
+	 * @param ledR pointer for the Red LED
+	 * @param ledG pointer for the Green LED
+	 * @param ledB pointer for the Blue LED
 	 * @param defaultColor
 	 */
 	Element(
 		const string& name,
-		uint8_t* pinR,
-		uint8_t* pinG,
-		uint8_t* pinB,
+		uint8_t* ledR,
+		uint8_t* ledG,
+		uint8_t* ledB,
 		const Color& defaultColor,
 		uint8_t brightness
 	);
@@ -119,7 +120,7 @@ public:
 
 		Item() = default;
 
-		Item(Element* element, const Color* color, Color::Filters filter, uint pos = 0) :
+		Item(Element* element, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
 			element(element) {}
 
@@ -149,60 +150,62 @@ public:
 	virtual ~Element() = default;
 
 	/**
-	 * Replaces the pin values with a new color.
+	 * Replaces the LED values with a new color.
 	 * @param color
 	 */
 	void setColor(const Color& color);
 
 	/**
-	 * Replaces the pin values with a a new color with a filter.
+	 * Replaces the led values with a a new color with a filter.
 	 * @param color
 	 * @param filter
 	 */
 	void setColor(const Color& color, const Color::Filters& filter, uint8_t percent = 50);
 
 	/**
-	 * Convert the pin values into color.
+	 * Convert the LED values into color.
 	 * @return
 	 */
 	Color getColor();
 
 	/**
-	 * Set a single pin value.
-	 * @param pinNumber
+	 * Set a single led value.
+	 * @param led pointer to the led in the hardware.
+	 * @param value
+	 */
+	void setLedValue(uint16_t led, uint8_t value);
+
+	/**
+	 * Links a new led, called from device.
+	 * first led will represent the red, or intensity of a single led or motor,
+	 * second will be green, and third blue.
+	 * The number of tones is also handled by the device.
 	 * @param val
 	 */
-	void setPinValue(uint8_t pinNumber, uint8_t val);
+	void linkLed(uint8_t* val);
 
 	/**
-	 * Links a new pin,
-	 * first will be red (or intensity when is only a single pin),
-	 * second green, and third blue.
-	 * @param val
-	 */
-	void linkPin(uint8_t* val);
-
-	/**
-	 * Return the pin value.
-	 * @param pinNumber
+	 * Return the LED value.
+	 * @param led
 	 * @return
 	 */
-	uint8_t getPinValue(uint8_t pinNumber) const;
-	/**
-	 * Returns a pointer to the pin value.
-	 * @param pinNumber
-	 * @return
-	 */
-	uint8_t* const getPin(uint8_t pinNumber) const;
+	uint8_t getLedValue(uint16_t led) const;
 
 	/**
-	 * Returns a reference to the internal pin(s).
+	 * Returns a pointer to the LED value.
+	 * @param led
 	 * @return
 	 */
-	const vector<uint8_t*>& getPins() const;
+	uint8_t* const getLed(uint16_t led) const;
 
 	/**
-	 * Returns the number of pins.
+	 * Returns a reference to the internal led(s).
+	 * @return a reference to the hardware internal LEDs.
+	 */
+	const vector<uint8_t*>& getLeds() const;
+
+	/**
+	 * Returns the number of LEDs.
 	 * @return
 	 */
 	uint8_t size() const;
@@ -239,19 +242,19 @@ protected:
 	/// Keeps the element name.
 	string name;
 
-	/// Array of pointers to the original pins.
-	vector<uint8_t*> pins;
+	/// Array of pointers to the original LEDs on the hardware.
+	vector<uint8_t*> leds;
 
 	/// Color used for the craft profile elements.
 	const Color& defaultColor;
 
-	/// If bigger than zero, the pin will go OFF after that time (in ms)
+	/// If bigger than zero, the LED will go OFF after that time (in ms)
 	uint16_t timeOn = 0;
 
 	/// Custom Brightness 1 to 99.
 	uint8_t brightness;
 
-	/// A pint in time to know when the timeOn is completed.
+	/// A point in time to know when the timeOn is completed.
 	system_clock::time_point clockTime;
 };
 

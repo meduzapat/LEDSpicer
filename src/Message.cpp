@@ -29,7 +29,7 @@ string Message::toString() {
 	for (auto& s : data)
 		ret.append(s).push_back(RECORD_SEPARATOR);
 	ret.append(to_string(flags)).push_back(RECORD_SEPARATOR);
-	ret.append(to_string(static_cast<uint8_t>(type)));
+	ret.append(to_string(static_cast<uint8_t>(type))).push_back(RECORD_SEPARATOR);
 	return ret;
 }
 

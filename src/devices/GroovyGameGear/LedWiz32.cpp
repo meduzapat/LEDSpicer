@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Devices::GroovyGameGear;
 
-uint8_t LedWiz32::dumpFrame = 0;
-
 void LedWiz32::afterClaimInterface() {
 	LogDebug("Initializing " + getFullName() + " controllers ICs");
 	// This will initialize the 4 controllers and set the pulse to 1.
@@ -33,19 +31,19 @@ void LedWiz32::afterClaimInterface() {
 	transferToConnection(data);
 }
 
-void LedWiz32::drawHardwarePinMap() {
+void LedWiz32::drawHardwareLedMap() {
 
-	uint8_t half = LEDWIZ32_LEDS / 2;
+	uint16_t half = LEDWIZ32_LEDS / 2;
 	cout
-		<< getFullName() << " Pins " << LEDWIZ32_LEDS << endl
-		<< "Hardware pin map:" << endl << "L     R"  << endl;
-	for (uint8_t r = 0; r < half; ++r) {
-		uint8_t l = LEDWIZ32_LEDS - r - 1;
+		<< getFullName() << " LEDs " << LEDWIZ32_LEDS << endl
+		<< "Hardware connector map:" << endl << "L     R"  << endl;
+	for (uint16_t r = 0; r < half; ++r) {
+		uint16_t l = LEDWIZ32_LEDS - r - 1;
 		setLed(r, r + 1);
 		setLed(l, l + 1);
 		cout <<
-			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(r)) << "   " <<
-			std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(l)) << endl;
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<uint16_t>(*getLed(r)) << "   " <<
+			std::left << std::setfill(' ') << std::setw(3) << static_cast<uint16_t>(*getLed(l)) << endl;
 	}
 	cout << endl;
 }
@@ -58,7 +56,7 @@ void LedWiz32::transfer() const {
 	 */
 	vector<uint8_t> load;
 	for (auto l : LEDs) {
-		load.push_back(48 * (l / 255.00));
+		load.push_back(48 * (l / 255.00f));
 		if (load.size() == 8) {
 			transferToConnection(load);
 			std::this_thread::sleep_for(std::chrono::microseconds(LEDWIZ_WAIT));

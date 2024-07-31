@@ -90,7 +90,7 @@ bool StepActor::isLastFrame() const {
 	return DirectionActor::isLastFrame();
 }
 
-void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions direction) {
+void StepActor::changeFrameElement(uint16_t index, const Color& color, Directions direction) {
 
 	float percent = stepPercent * currentStepFrame;
 
@@ -98,7 +98,7 @@ void StepActor::changeFrameElement(uint8_t index, const Color& color, Directions
 		percent = 100 - percent;
 
 #ifdef DEVELOP
-	cout << "Element " << static_cast<uint>(index) << " faded " << percent << "%";
+	cout << "Element " << static_cast<uint16_t>(index) << " faded " << percent << "%";
 #endif
 
 	changeElementColor(index, color.fade(percent), filter);
@@ -111,7 +111,7 @@ void StepActor::changeFrameElement(const Color& color, Directions direction) {
 void StepActor::changeFrameElement(const Color& color, bool fade, Directions direction) {
 
 	float percent = stepPercent * currentStepFrame;
-	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
+	uint16_t next = nextOf(cDirection, currentFrame, direction, totalFrames);
 
 #ifdef DEVELOP
 	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
@@ -128,7 +128,7 @@ void StepActor::changeFrameElement(const Color& color, bool fade, Directions dir
 void StepActor::changeFrameElement(const Color& color, const Color& colorNext, Directions direction) {
 
 	float percent = stepPercent * currentStepFrame;
-	uint8_t next  = nextOf(cDirection, currentFrame, direction, totalFrames);
+	uint16_t next = nextOf(cDirection, currentFrame, direction, totalFrames);
 
 #ifdef DEVELOP
 	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
@@ -138,7 +138,7 @@ void StepActor::changeFrameElement(const Color& color, const Color& colorNext, D
 	changeElementColor(next, colorNext.fade(percent), filter);
 }
 
-void StepActor::setTotalStepFrames(uint8_t totalStepFrames) {
+void StepActor::setTotalStepFrames(uint16_t totalStepFrames) {
 	this->totalStepFrames = totalStepFrames;
 	stepPercent = totalStepFrames ? PERCENT(1.0, totalStepFrames) : 0;
 }

@@ -61,24 +61,24 @@ void Ultimate::afterConnect() {
 	}
 }
 
-void Ultimate::drawHardwarePinMap() {
-	uint8_t
+void Ultimate::drawHardwareLedMap() {
+	uint16_t
 		half    = IPAC_ULTIMATE_LEDS / 2,
 		fillerL = 1,
 		fillerR = half + 1,
 		rLed    = half;
-	cout << getFullName() << " Pins " << IPAC_ULTIMATE_LEDS << endl;
-	cout << "Hardware pin map:"    << endl <<
+	cout << getFullName() << " LEDs " << IPAC_ULTIMATE_LEDS << endl;
+	cout << "Hardware connection map:"    << endl <<
 			"R  G  B     B  G  R"  << endl;
-	for (uint8_t lLed = 0; lLed < half; ++lLed) {
+	for (uint16_t lLed = 0; lLed < half; ++lLed) {
 		setLed(lLed, fillerL++);
 		setLed(fillerR - 1, fillerR);
 		fillerR++;
-		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(lLed));
+		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<uint16_t>(*getLed(lLed));
 		if (not ((lLed + 1) % 3)) {
 			cout << "   ";
-			for (uint8_t c = 0; c < 3; ++c)
-				cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(rLed++));
+			for (uint16_t c = 0; c < 3; ++c)
+				cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<uint16_t>(*getLed(rLed++));
 			cout << endl;
 		}
 	}

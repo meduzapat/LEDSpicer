@@ -41,7 +41,7 @@ public:
 
 	virtual ~NanoLed() = default;
 
-	void drawHardwarePinMap() override;
+	void drawHardwareLedMap() override;
 
 	uint16_t getProduct() const override;
 
