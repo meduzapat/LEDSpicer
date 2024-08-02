@@ -30,14 +30,14 @@
 #ifndef LSCONNECTION_HPP_
 #define LSCONNECTION_HPP_ 1
 
-/// The number of values to display when dumping pins (multiply x 2 to get the actual size).
+/// The number of values to display when dumping LEDs (multiply x 2 to get the actual size).
 #define MAX_DUMP_COLUMNS 40
 
 namespace LEDSpicer {
 
 /**
  * LEDSpicer::Connection
- * Interface to define genertic connection metods.
+ * Interface to define generic connection methods.
  */
 class Connection {
 
@@ -67,7 +67,7 @@ protected:
 
 	/**
 	 * Reads from connection.
-	 * @param size the amout of data to read.
+	 * @param size the amount of data to read.
 	 * @return
 	 */
 	virtual vector<uint8_t> transferFromConnection(uint size) const = 0;

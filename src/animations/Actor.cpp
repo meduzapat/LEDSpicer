@@ -54,7 +54,7 @@ void Actor::draw() {
 		case Color::Filters::Mask: {
 			const Color& black = Color::getColor("Black");
 			// turn off any non affected element.
-			for (uint8_t elIdx = 0; elIdx < group->size(); ++elIdx) {
+			for (uint16_t elIdx = 0; elIdx < group->size(); ++elIdx) {
 				if (affectedElements[elIdx])
 					continue;
 				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
@@ -151,18 +151,18 @@ void Actor::newFrame() {
 	++frame;
 }
 
-uint8_t Actor::getNumberOfElements() const {
+uint16_t Actor::getNumberOfElements() const {
 	return group->getElements().size();
 }
 
-void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
+void Actor::changeElementColor(uint16_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 	affectedElements[index] = true;
 	Element* e = group->getElement(index);
 	e->setColor(color, filter, percent);
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
-	for (uint8_t c = 0; c < group->size(); ++c)
+	for (uint16_t c = 0; c < group->size(); ++c)
 		changeElementColor(c, color, filter, percent);
 }
 
@@ -170,7 +170,7 @@ void Actor::affectAllElements(bool value) {
 	affectedElements.assign(group->size(), value);
 }
 
-bool Actor::isElementAffected(uint8_t index) {
+bool Actor::isElementAffected(uint16_t index) {
 	return affectedElements[index];
 }
 

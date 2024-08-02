@@ -33,12 +33,12 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 {
 
 	// Tail cannot be larger than the array, serpentine will overlap.
-	uint8_t tailLength = Utility::parseNumber(
+	uint16_t tailLength = Utility::parseNumber(
 		parameters["tailLength"],
 		"Invalid tailLength, enter a number 0 - " + to_string(totalFrames)
 	);
 
-	if (not Utility::verifyValue<uint8_t>(tailLength, 0, group->size()))
+	if (not Utility::verifyValue<uint16_t>(tailLength, 0, group->size()))
 		throw Error("Tail cannot be larger than the group: " + to_string(totalFrames));
 
 	if (not tailLength)
@@ -65,7 +65,7 @@ Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Serpentine: " << DrawDirection(cDirection) << " Pos: " << static_cast<int>(currentFrame + 1) << " ";
+	cout << "Serpentine: " << DrawDirection(cDirection) << " Pos: " << static_cast<uint16_t>(currentFrame + 1) << " ";
 #endif
 
 	// For very fast, a much simple algorithm can be used.
@@ -95,7 +95,7 @@ void Serpentine::calculateElements() {
 			);
 		}
 #ifdef DEVELOP
-		cout << static_cast<int>(data.position + 1) << "=" << static_cast<int>(data.percent) << "% ";
+		cout << static_cast<uint16_t>(data.position + 1) << "=" << static_cast<uint16_t>(data.percent) << "% ";
 #endif
 	}
 
@@ -108,11 +108,11 @@ void Serpentine::calculateElements() {
 
 void Serpentine::calculateTailPosition() {
 	Directions tailDirection = getOppositeDirection();
-	uint8_t lastTail = currentFrame; //calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
+	uint16_t lastTail = currentFrame; //calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
 	// Avoid changing the tail when doing the same frame.
 	if (tailData[0].position == lastTail)
 		return;
-	for (uint8_t c = tailData.size() - 1; c > 0; --c)
+	for (uint16_t c = tailData.size() - 1; c > 0; --c)
 		tailData[c].position = tailData[c - 1].position;
 	tailData[0].position = lastTail;
 }

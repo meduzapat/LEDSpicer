@@ -112,11 +112,11 @@ void DirectionActor::restart() {
 	FrameActor::restart();
 }
 
-uint8_t DirectionActor::calculateNextOf(
+uint16_t DirectionActor::calculateNextOf(
 	Directions& currentDirection,
-	uint8_t index,
+	uint16_t index,
 	Directions direction,
-	uint8_t amount)
+	uint16_t amount)
 {
 
 	switch (direction) {
@@ -157,7 +157,7 @@ uint8_t DirectionActor::calculateNextOf(
 	return index;
 }
 
-uint8_t DirectionActor::nextOf(Directions currentDirection, uint8_t index, Directions direction, uint8_t amount) {
+uint16_t DirectionActor::nextOf(Directions currentDirection, uint16_t index, Directions direction, uint16_t amount) {
 	return calculateNextOf(currentDirection, index, direction, amount);
 }
 

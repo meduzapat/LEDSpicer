@@ -93,7 +93,7 @@ struct PlayerData {
 	umap<string, string> buttonColors;
 
 	/**
-	 * @return The dataset as a string.
+	 * @return The data-set as a string.
 	 */
 	string toString();
 
@@ -112,7 +112,7 @@ struct GameRecord {
 	umap<string, PlayerData> playersData;
 
 	/**
-	 * @return The dataset as a string.
+	 * @return The data-set as a string.
 	 */
 	vector<string> toString();
 

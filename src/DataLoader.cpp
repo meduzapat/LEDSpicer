@@ -142,8 +142,8 @@ void DataLoader::processDevices() {
 
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
-	// Only used to report unused pins.
-	vector<bool> pinCheck(device->getNumberOfLeds(), false);
+	// Only used to report unused leds.
+	vector<bool> ledCheck(device->getNumberOfLeds(), false);
 
 	tinyxml2::XMLElement* xmlElement = deviceNode->FirstChildElement(NODE_ELEMENT);
 	if (not xmlElement)
@@ -168,59 +168,58 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
+			uint16_t led = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
 
 			device->registerElement(
 				tempAttr[PARAM_NAME],
-				pin,
+				led,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
 				0,
 				brightness
 			);
-			pinCheck[pin] = true;
+			ledCheck[led] = true;
 		}
 		// Solenoids, Motors, Recoils, any other time sensitive hardware.
 		else if (tempAttr.count(PARAM_TIMED)) {
-			uint8_t pin = Utility::parseNumber(tempAttr[PARAM_TIMED], invalidValueFor(PARAM_TIMED) " in " + device->getFullName()) - 1;
+			uint16_t solenid = Utility::parseNumber(tempAttr[PARAM_TIMED], invalidValueFor(PARAM_TIMED) " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
-				pin,
+				solenid,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
 				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID,
 				0
 			);
-			pinCheck[pin] = true;
+			ledCheck[solenid] = true;
 		}
 		// RGB.
 		else {
 			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr[PARAM_NAME]);
-			uint8_t
-				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor(  "red pin")   " in " + device->getFullName()) - 1,
-				g = Utility::parseNumber(tempAttr[PARAM_GREEN], invalidValueFor("green pin") " in " + device->getFullName()) - 1,
-				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor( "blue pin")  " in " + device->getFullName()) - 1;
+			uint16_t
+				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor(  "red led")   " in " + device->getFullName()) - 1,
+				g = Utility::parseNumber(tempAttr[PARAM_GREEN], invalidValueFor("green led") " in " + device->getFullName()) - 1,
+				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor( "blue led")  " in " + device->getFullName()) - 1;
 			device->registerElement(
 				tempAttr[PARAM_NAME],
 				r, g , b,
 				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
 				brightness
 			);
-			pinCheck[r] = true;
-			pinCheck[g] = true;
-			pinCheck[b] = true;
+			ledCheck[r] = true;
+			ledCheck[g] = true;
+			ledCheck[b] = true;
 		}
 		allElements.emplace(tempAttr[PARAM_NAME], device->getElement(tempAttr[PARAM_NAME]));
 	}
 
 	LogInfo(
 		device->getFullName()                    + " with "              +
-		to_string(pinCheck.size())               + " LEDs divided into " +
+		to_string(ledCheck.size())               + " LEDs divided into " +
 		to_string(device->getNumberOfElements()) + " elements"
 	);
-	// Checks orphan Pins.
-	for (uint8_t pin = 0; pin < pinCheck.size(); ++pin)
-		if (not pinCheck[pin]) {
-			LogInfo("Pin " + to_string(pin + 1) + " is not set for " + device->getFullName());
-		}
+	// Checks orphan Leds.
+	for (uint16_t led = 0; led < ledCheck.size(); ++led)
+		if (not ledCheck[led])
+			LogInfo("LED " + to_string(led + 1) + " is not set for " + device->getFullName());
 }
 
 void DataLoader::processLayout() {
@@ -292,17 +291,14 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 }
 
 Profile* DataLoader::getProfileFromCache(const string& name) {
-	if (not profilesCache.count(name))
+	if (not profilesCache.count(name)) {
+		LogDebug("Profile cache miss.");
 		return nullptr;
+	}
 
 	auto profile(profilesCache.at(name));
-	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD)) {
-		LogDebug("Profile from cache.");
-		return profile;
-	}
-	LogDebug("Ignoring cache, reloading profile.");
-	delete profile;
-	return nullptr;
+	LogDebug("Profile from cache.");
+	return profile;
 }
 
 Profile* DataLoader::processProfile(const string& name, const string& extra) {

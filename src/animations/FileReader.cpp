@@ -128,7 +128,7 @@ void FileReader::calculateElements() {
 #ifdef DEVELOP
 	cout << "FileReader: " << DrawDirection(cDirection) << " F: " << (currentFrame + 1) << endl;
 #endif
-	for (uint8_t c = 0; c < frames->second[currentFrame].size(); ++c) {
+	for (uint16_t c = 0; c < frames->second[currentFrame].size(); ++c) {
 #ifdef DEVELOP
 		cout << "element: " <<  to_string(c)  << " -> ";
 		frames->second[currentFrame].at(c).drawHex();

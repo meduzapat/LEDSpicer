@@ -25,12 +25,12 @@
 using namespace LEDSpicer::Devices;
 
 void Group::drawElements() {
-	cout << (int)elements.size() << " Element(s): " << endl;
+	cout << elements.size() << " Element(s): " << endl;
 	for (auto element : elements)
 		cout << element->getName() << endl;
 }
 
-uint8_t Group::size() const {
+uint16_t Group::size() const {
 	return elements.size();
 }
 
@@ -46,7 +46,7 @@ const vector<Element*>& Group::getElements() const {
 	return elements;
 }
 
-Element* Group::getElement(uint8_t index) {
+Element* Group::getElement(uint16_t index) {
 	return elements.at(index);
 }
 

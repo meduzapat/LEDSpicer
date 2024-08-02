@@ -73,13 +73,13 @@ public:
 	 * Sets the total step frames.
 	 * @param totalStepFrames
 	 */
-	void setTotalStepFrames(uint8_t totalStepFrames);
+	void setTotalStepFrames(uint16_t totalStepFrames);
 
 	const uint16_t getFullFrames() const override;
 
 protected:
 
-	uint8_t
+	uint16_t
 		totalStepFrames  = 0,
 		currentStepFrame = 0;
 
@@ -94,7 +94,7 @@ protected:
 	 * @param color
 	 * @param direction
 	 */
-	void changeFrameElement(uint8_t index, const Color& color, Directions direction);
+	void changeFrameElement(uint16_t index, const Color& color, Directions direction);
 
 	/**
 	 * Fades the current element.

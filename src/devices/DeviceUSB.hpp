@@ -40,12 +40,12 @@ public:
 	DeviceUSB(
 		uint16_t wValue,
 		uint8_t  interface,
-		uint8_t  pins,
+		uint16_t leds,
 		uint8_t  maxBoards,
 		umap<string, string>& options,
 		const string& name
 	) :
-		Device(pins, name),
+		Device(leds, name),
 		USB(wValue, interface, options.count("boardId") ? Utility::parseNumber(options["boardId"], "Device id should be a number") : 1, maxBoards) {}
 
 	virtual ~DeviceUSB() = default;

@@ -37,10 +37,10 @@ void Adalight::detectPort() {
 
 void Adalight::transfer() const {
 
-	// Ada Serial devices assumes RGB LEDs, cannot address individual pins.
+	// Ada Serial devices assumes RGB LEDs, cannot address individual leds.
 	uint16_t
-		numPins(LEDs.size()),
-		numLeds((numPins / 3) - 1);
+		numIndividualLeds(LEDs.size()),
+		numLeds((numIndividualLeds / 3) - 1);
 	/*
 	ADAlight header.
 	hi = (numLeds << 8) & 0xFF;
@@ -57,7 +57,7 @@ void Adalight::transfer() const {
 	};
 	// Checksum
 	serialData.push_back(static_cast<uint8_t>(serialData[3] ^ serialData[4] ^ 0x55));
-	for (uint16_t l = 0; l < numPins; ++l)
+	for (uint16_t l = 0; l < numIndividualLeds; ++l)
 		serialData.push_back(LEDs[l]);
 
 	transferToConnection(serialData);
@@ -68,17 +68,18 @@ void Adalight::transfer() const {
 	*/
 }
 
-void Adalight::drawHardwarePinMap() {
+void Adalight::drawHardwareLedMap() {
 	std::cout
-		<< getFullName() << " Pins " << LEDs.size() << " (" << LEDs.size() / 3 << " RGB LEDs)" << std::endl
-		<< "Hardware pin map:" << std::endl << "0  2 G  +5v" << std::endl;
-	for (uint8_t r = 0; r < LEDs.size(); r += 3) {
+		<< getFullName() << " LEDs " << LEDs.size() << " (" << LEDs.size() / 3 << " RGB LEDs)" << std::endl
+		<< "Hardware LED map:" << std::endl << "0  2 G  +5v" << std::endl;
+	for (uint16_t r = 0; r < LEDs.size(); r += 3) {
 		LEDs[r] = r + 1;
 		LEDs[r + 1] = r + 2;
 		LEDs[r + 2] = r + 3;
-		std::cout <<
-			" --- " << std::endl <<
-			static_cast<int>(*getLed(r)) << " " << static_cast<int>(*getLed(r + 1)) << " " << static_cast<int>(*getLed(r + 2)) << std::endl;
+		std::cout
+				<< " --- " << std::endl << static_cast<uint16_t>(*getLed(r)) <<
+				" " << static_cast<uint16_t>(*getLed(r + 1)) <<
+				" " << static_cast<uint16_t>(*getLed(r + 2)) << std::endl;
 	}
 	std::cout << std::endl;
 }

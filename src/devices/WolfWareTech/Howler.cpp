@@ -24,35 +24,35 @@
 
 using namespace LEDSpicer::Devices::WolfWareTech;
 
-void Howler::drawHardwarePinMap() {
-	for (uint8_t l = 0, t = LEDs.size(); l < t; ++l)
+void Howler::drawHardwareLedMap() {
+	for (uint16_t l = 0, t = LEDs.size(); l < t; ++l)
 		setLed(l, l + 1);
 	const char* const f = "                                          ";
 	cout
-		<< getFullName() << " Pins " << HOWLER_LEDS << endl
-		<< "Hardware pin map:" << endl
-		<< "G + X X X X  " << static_cast<int>(*getLed(2)) << "  " << static_cast<int>(*getLed(1)) << "  " << static_cast<int>(*getLed(0)) << " + +  "
-		<< static_cast<int>(*getLed(3)) << "  " << static_cast<int>(*getLed(4)) << "  " << static_cast<int>(*getLed(5)) << " X X X X + G" << endl;
-	for (uint8_t c = 0, c2 = 1, t = (LEDs.size() / 2) - 9; c < t ; c+=3, ++c2)
+		<< getFullName() << " LEDs " << HOWLER_LEDS << endl
+		<< "Hardware connection map:" << endl
+		<< "G + X X X X  " << static_cast<uint16_t>(*getLed(2)) << "  " << static_cast<uint16_t>(*getLed(1)) << "  " << static_cast<uint16_t>(*getLed(0)) << " + +  "
+		<< static_cast<uint16_t>(*getLed(3)) << "  " << static_cast<uint16_t>(*getLed(4)) << "  " << static_cast<uint16_t>(*getLed(5)) << " X X X X + G" << endl;
+	for (uint16_t c = 0, c2 = 1, t = (LEDs.size() / 2) - 9; c < t ; c+=3, ++c2)
 		cout
 			<< "+" << (not c ? "              J 1          J 2            " : f) << " +" << endl
-			<< static_cast<int>(*getLed(c + 12)) << f << static_cast<int>(*getLed(t + c + 12)) << endl
-			<< static_cast<int>(*getLed(c + 13)) << " B" << static_cast<int>(c2)
+			<< static_cast<uint16_t>(*getLed(c + 12)) << f << static_cast<uint16_t>(*getLed(t + c + 12)) << endl
+			<< static_cast<uint16_t>(*getLed(c + 13)) << " B" << static_cast<uint16_t>(c2)
 			<< (c2 < 10 ? " " : "")
-			<< "                                  B" << static_cast<int>(c2 + 13) << " "
-			<< static_cast<int>(*getLed(t + c + 13)) << endl
-			<< static_cast<int>(*getLed(c + 14)) << f << static_cast<int>(*getLed(t + c + 14)) << endl
+			<< "                                  B" << static_cast<uint16_t>(c2 + 13) << " "
+			<< static_cast<uint16_t>(*getLed(t + c + 13)) << endl
+			<< static_cast<uint16_t>(*getLed(c + 14)) << f << static_cast<uint16_t>(*getLed(t + c + 14)) << endl
 			<< "X" << f << " X" << endl;
 
 	cout
 		<< "+" << f << " +" << endl
-		<< static_cast<int>(*getLed(90)) << f << static_cast<int>(*getLed(93)) << endl
-		<< static_cast<int>(*getLed(91)) << " HP 1                                HP 2 "
-		<< static_cast<int>(*getLed(94)) << endl
-		<< static_cast<int>(*getLed(92)) << f << static_cast<int>(*getLed(95)) << endl
+		<< static_cast<uint16_t>(*getLed(90)) << f << static_cast<uint16_t>(*getLed(93)) << endl
+		<< static_cast<uint16_t>(*getLed(91)) << " HP 1                                HP 2 "
+		<< static_cast<uint16_t>(*getLed(94)) << endl
+		<< static_cast<uint16_t>(*getLed(92)) << f << static_cast<uint16_t>(*getLed(95)) << endl
 		<< "G              J 3         J 4              G" << endl
-		<< "G + X X X X  " << static_cast<int>(*getLed(8)) << "  " << static_cast<int>(*getLed(7)) << "  " << static_cast<int>(*getLed(6)) << " + + "
-		<< static_cast<int>(*getLed(9)) << " " << static_cast<int>(*getLed(10)) << " " << static_cast<int>(*getLed(11)) << " X X X X + G" << endl << endl;
+		<< "G + X X X X  " << static_cast<uint16_t>(*getLed(8)) << "  " << static_cast<uint16_t>(*getLed(7)) << "  " << static_cast<uint16_t>(*getLed(6)) << " + + "
+		<< static_cast<uint16_t>(*getLed(9)) << " " << static_cast<uint16_t>(*getLed(10)) << " " << static_cast<uint16_t>(*getLed(11)) << " X X X X + G" << endl << endl;
 }
 
 void Howler::transfer() const {

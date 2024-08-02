@@ -14,10 +14,10 @@ uint16_t NanoLed::getProduct() const {
 	return NANO_LED_PRODUCT + boardId - 1;
 }
 
-void NanoLed::drawHardwarePinMap() {
+void NanoLed::drawHardwareLedMap() {
 
-	cout << getFullName() << " Pins " << NANO_LED_LEDS << endl << "Hardware pin map:" << endl;
-	for (uint8_t led = 0; led < NANO_LED_LEDS; ++led) {
+	cout << getFullName() << " LEDs " << NANO_LED_LEDS << endl << "Hardware connector map:" << endl;
+	for (uint16_t led = 0; led < NANO_LED_LEDS; ++led) {
 		setLed(led, led + 1);
 		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(led)) << endl;
 	}

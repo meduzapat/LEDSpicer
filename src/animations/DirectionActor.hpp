@@ -102,7 +102,7 @@ public:
 	 * @param amount
 	 * @return the next element.
 	 */
-	static uint8_t calculateNextOf(Directions& currentDirection, uint8_t index, Directions direction, uint8_t amount);
+	static uint16_t calculateNextOf(Directions& currentDirection, uint16_t index, Directions direction, uint16_t amount);
 
 	/**
 	 * @param currentDirection
@@ -111,7 +111,7 @@ public:
 	 * @param totalElements
 	 * @return the next element based on direction and item's position.
 	 */
-	static uint8_t nextOf(Directions currentDirection, uint8_t index, Directions direction, uint8_t amount);
+	static uint16_t nextOf(Directions currentDirection, uint16_t index, Directions direction, uint16_t amount);
 
 protected:
 

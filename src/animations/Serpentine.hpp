@@ -53,8 +53,8 @@ private:
 	const Color& tailColor;
 
 	struct TailData {
-		uint8_t percent;
-		uint8_t position;
+		uint8_t  percent;
+		uint16_t position;
 	};
 
 	vector<TailData> tailData;

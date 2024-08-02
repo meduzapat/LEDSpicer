@@ -30,7 +30,7 @@ void FF00SharedCode::transfer() const {
 	transferToConnection(data);
 
 	// Send pairs.
-	for (uint8_t c = 0; c < LEDs.size(); c+=2) {
+	for (uint16_t c = 0; c < LEDs.size(); c+=2) {
 		data.clear();
 		data.push_back(LEDs[c]);
 		data.push_back(LEDs[c + 1]);

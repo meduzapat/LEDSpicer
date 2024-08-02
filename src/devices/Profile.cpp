@@ -78,6 +78,10 @@ Profile::Profile(
 	}
 }
 
+Profile::~Profile() {
+	stop();
+}
+
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
@@ -266,7 +270,7 @@ void Profile::restartActors() {
 }
 
 bool Profile::isTransiting() const {
-	if (Utility::globalFlags & FLAG_NO_START_TRANSITIONS and Utility::globalFlags & FLAG_NO_END_TRANSITIONS) {
+	if ((Utility::globalFlags & FLAG_NO_START_TRANSITIONS) and (Utility::globalFlags & FLAG_NO_END_TRANSITIONS)) {
 		return false;
 	}
 	return  (currentActors != &animations and (currentActors == &startTransitions or currentActors == &endTransitions));

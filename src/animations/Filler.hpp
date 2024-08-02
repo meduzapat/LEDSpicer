@@ -54,7 +54,7 @@ public:
 protected:
 
 	struct Data {
-		uint8_t
+		uint16_t
 			begin,
 			end;
 		Directions dir;
@@ -68,7 +68,7 @@ private:
 	Modes mode;
 
 	/// Keeps the currently processed random.
-	uint8_t currentRandom;
+	uint16_t currentRandom;
 
 	/// Keeps track if the process is filling / emptying.
 	bool filling = true;
