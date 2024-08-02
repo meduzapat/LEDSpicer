@@ -59,6 +59,9 @@ using std::chrono::milliseconds;
 #define PARAM_RED             "red"
 #define PARAM_GREEN           "green"
 #define PARAM_BLUE            "blue"
+#define PARAM_STRIP           "stripSize"
+#define PARAM_POSITION        "position"
+#define PARAM_COLORFORMAT     "colorFormat"
 #define PARAM_DEFAULT_PROFILE "defaultProfile"
 #define PARAM_USER_ID         "userId"
 #define PARAM_GROUP_ID        "groupId"
@@ -95,6 +98,7 @@ using std::chrono::milliseconds;
 #define DEFAULT_ENDCYCLES 1
 #define DEFAULT_ENDTIME   5
 #define DEFAULT_SOLENOID  50
+#define DEFAULT_ORDER     "rgb"
 
 namespace LEDSpicer {
 
