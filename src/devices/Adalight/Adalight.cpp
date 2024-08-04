@@ -37,7 +37,7 @@ void Adalight::detectPort() {
 
 void Adalight::transfer() const {
 
-	// Ada Serial devices assumes RGB LEDs, cannot address individual leds.
+	// Ada Serial devices assumes RGB LEDs, cannot address individual LEDs.
 	uint16_t
 		numIndividualLeds(LEDs.size()),
 		numLeds((numIndividualLeds / 3) - 1);
@@ -76,10 +76,10 @@ void Adalight::drawHardwareLedMap() {
 		LEDs[r] = r + 1;
 		LEDs[r + 1] = r + 2;
 		LEDs[r + 2] = r + 3;
-		std::cout
-				<< " --- " << std::endl << static_cast<uint16_t>(*getLed(r)) <<
-				" " << static_cast<uint16_t>(*getLed(r + 1)) <<
-				" " << static_cast<uint16_t>(*getLed(r + 2)) << std::endl;
+		std::cout <<
+			" --- " << std::endl << static_cast<uint16_t>(*getLed(r)) <<
+			" " << static_cast<uint16_t>(*getLed(r + 1)) <<
+			" " << static_cast<uint16_t>(*getLed(r + 2)) << std::endl;
 	}
 	std::cout << std::endl;
 }

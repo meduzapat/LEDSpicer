@@ -220,7 +220,7 @@ protected:
 	/**
 	 * @return true if an element got affected (dirty/changed) on this frame.
 	 */
-	bool isElementAffected(uint16_t index);
+	bool isElementAffected(uint16_t index) const;
 
 	/**
 	 * Checks if the actor will repeat.

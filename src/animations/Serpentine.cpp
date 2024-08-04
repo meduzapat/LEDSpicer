@@ -29,12 +29,13 @@ actorFactory(Serpentine)
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	Color(parameters["color"]),
-	tailColor(Color::getColor(parameters["tailColor"]))
+	tailColor(parameters.count("tailColor") ? Color::getColor(parameters.at("tailColor")) : Color::On)
+
 {
 
 	// Tail cannot be larger than the array, serpentine will overlap.
 	uint16_t tailLength = Utility::parseNumber(
-		parameters["tailLength"],
+		parameters.count("tailLength") ? parameters.at("tailLength") : "0",
 		"Invalid tailLength, enter a number 0 - " + to_string(totalFrames)
 	);
 

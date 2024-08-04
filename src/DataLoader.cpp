@@ -142,7 +142,7 @@ void DataLoader::processDevices() {
 
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
-	// Only used to report unused leds.
+	// Only used to report unused LEDs.
 	vector<bool> ledCheck(device->getNumberOfLeds(), false);
 
 	tinyxml2::XMLElement* xmlElement = deviceNode->FirstChildElement(NODE_ELEMENT);
@@ -452,7 +452,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 				throw LEDError("Unknown element [" + tempAttr[PARAM_NAME] + "] for always on element on profile " + name);
 			profilePtr->addAlwaysOnElement(
 				allElements.at(tempAttr[PARAM_NAME]),
-				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : allElements.at(tempAttr[PARAM_NAME])->getDefaultColor()
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : allElements.at(tempAttr[PARAM_NAME])->getDefaultColor(),
+				Color::Filters::Normal
 			);
 		}
 	}
@@ -468,8 +469,9 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 				throw LEDError("Unknown group [" + tempAttr[PARAM_NAME] + "] for always on group on profile " + name);
 			profilePtr->addAlwaysOnGroup(
 				&layout.at(tempAttr[PARAM_NAME]),
-				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : layout.at(tempAttr[PARAM_NAME]).getDefaultColor()
-			 );
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : layout.at(tempAttr[PARAM_NAME]).getDefaultColor(),
+				Color::Filters::Normal
+			);
 		}
 	}
 

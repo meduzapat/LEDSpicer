@@ -46,15 +46,15 @@ namespace LEDSpicer::Devices {
 struct Items {
 
 	/// Stores the position in a list if necessary.
-	uint16_t pos = 0;
+	const uint16_t pos;
 
 	/// Stores the desired color.
-	const Color* color = nullptr;
+	const Color* color;
 
 	/// Stores the filter to be used when applying the color.
-	Color::Filters filter = Color::Filters::Normal;
+	const Color::Filters filter;
 
-	Items() = default;
+	Items() = delete;
 	Items(const Color* color, Color::Filters filter, uint16_t pos) : color(color), filter(filter), pos(pos) {}
 	Items(const Items& item)  : color(item.color), filter(item.filter), pos(item.pos) {}
 	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)), pos(std::move(item.pos)) {}
@@ -62,13 +62,13 @@ struct Items {
 	virtual ~Items() = default;
 
 	virtual string getName() const = 0;
-	virtual void process(uint8_t percent) const = 0;
+	virtual void process(uint8_t percent, Color::Filters* filterOverride) const = 0;
 };
 
 /**
  * LEDSpicer::Devices::Element
- * Represent an Element that handles leds, single color or RGB, solenoids or motors.
- * Each leds value is stored into the hardware that owns this element.
+ * Represent an Element that handles LEDs, single color or RGB, solenoids or motors.
+ * Each LEDs value is stored into the hardware that owns this element.
  */
 class Element {
 
@@ -86,7 +86,14 @@ public:
 		const Color& defaultColor,
 		uint timeOn,
 		uint8_t brightness
-	);
+	) :
+		name(name),
+		leds{led},
+		defaultColor(defaultColor),
+		timeOn(timeOn),
+		// Only calculate brightness of not 0 or 100.
+		brightness(brightness)
+	{}
 
 	/**
 	 * Creates a new RGB Element.
@@ -103,22 +110,33 @@ public:
 		uint8_t* ledB,
 		const Color& defaultColor,
 		uint8_t brightness
-	);
+	) :
+		name(name),
+		leds{ledR, ledG, ledB},
+		defaultColor(defaultColor),
+		// Only calculate brightness of not 0 or 100.
+		brightness(brightness)
+	{}
 
 	/**
 	 * Copy from other Element.
 	 * @param other
 	 */
-	Element(Element* other);
+	Element(Element* other) :
+		name(other->name),
+		leds(other->leds.size(), nullptr),
+		defaultColor(other->defaultColor),
+		brightness(other->brightness)
+	{}
 
 	/**
 	 * Structure for elements with properties.
 	 */
 	struct Item : public Items {
 
-		Element* element = nullptr;
+		Element* const element;
 
-		Item() = default;
+		Item() = delete;
 
 		Item(Element* element, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
@@ -126,24 +144,16 @@ public:
 
 		Item(const Item& item) : Items(item), element(item.element) {}
 
-		Item& operator=(const Item& item) {
-			element = item.element;
-			color   = item.color;
-			filter  = item.filter;
-			pos     = item.pos;
-			return *this;
-		}
-
 		Item(Item&& item) : Items(item), element(std::move(item.element)) {}
 
 		virtual ~Item() = default;
 
-		string getName() const {
+		string getName() const override {
 			return element->getName();
 		}
 
-		void process(uint8_t percent) const  {
-			element->setColor(*color, filter, percent);
+		void process(uint8_t percent, Color::Filters* filterOverride) const override {
+			element->setColor(*color, filterOverride ? *filterOverride : filter, percent);
 		}
 	};
 
@@ -166,7 +176,7 @@ public:
 	 * Convert the LED values into color.
 	 * @return
 	 */
-	Color getColor();
+	Color getColor() const;
 
 	/**
 	 * Set a single led value.
@@ -174,15 +184,6 @@ public:
 	 * @param value
 	 */
 	void setLedValue(uint16_t led, uint8_t value);
-
-	/**
-	 * Links a new led, called from device.
-	 * first led will represent the red, or intensity of a single led or motor,
-	 * second will be green, and third blue.
-	 * The number of tones is also handled by the device.
-	 * @param val
-	 */
-	void linkLed(uint8_t* val);
 
 	/**
 	 * Return the LED value.
@@ -214,18 +215,18 @@ public:
 	 * Returns the element's name.
 	 * @return
 	 */
-	string getName();
+	const string getName() const;
 
 	/**
 	 * Returns the default color for this element.
 	 * @return
 	 */
-	const Color& getDefaultColor();
+	const Color& getDefaultColor() const;
 
 	/**
 	 * @return true if this element turns itself off after several ms.
 	 */
-	bool isTimed();
+	bool isTimed() const;
 
 	/**
 	 * Check if the time is over and turn the element off.
@@ -240,19 +241,19 @@ public:
 protected:
 
 	/// Keeps the element name.
-	string name;
+	const string name;
 
 	/// Array of pointers to the original LEDs on the hardware.
-	vector<uint8_t*> leds;
+	const vector<uint8_t*> leds;
 
 	/// Color used for the craft profile elements.
 	const Color& defaultColor;
 
 	/// If bigger than zero, the LED will go OFF after that time (in ms)
-	uint16_t timeOn = 0;
+	const uint16_t timeOn = 0;
 
 	/// Custom Brightness 1 to 99.
-	uint8_t brightness;
+	const uint8_t brightness;
 
 	/// A point in time to know when the timeOn is completed.
 	system_clock::time_point clockTime;

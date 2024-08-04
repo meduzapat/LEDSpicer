@@ -124,8 +124,8 @@ public:
 	 */
 	const string& getName() const;
 
-	void addAlwaysOnElement(Element* element, const Color& color);
-	void addAlwaysOnGroup(Group* group, const Color& color);
+	void addAlwaysOnElement(Element* element, const Color& color, const Color::Filters& filter);
+	void addAlwaysOnGroup(Group* group, const Color& color, const Color::Filters& filter);
 
 	static void addTemporaryAlwaysOnElement(const string name, const Element::Item item);
 	static void removeTemporaryAlwaysOnElement(const string name);
