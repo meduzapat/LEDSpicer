@@ -40,7 +40,7 @@ class DeviceSerial : public Serial, public Device {
 public:
 
 	DeviceSerial(umap<string, string>& options, const string& name) :
-		Device(Utility::parseNumber(options.count("leds") ? options["leds"] : "", "Invalid Value for number of leds"), name),
+		Device(Utility::parseNumber(options.count("LEDs") ? options["LEDs"] : "", "Invalid Value for number of LEDs"), name),
 		Serial(options.count("port") ? options["port"] : "") {}
 
 	virtual ~DeviceSerial() = default;

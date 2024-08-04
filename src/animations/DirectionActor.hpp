@@ -50,7 +50,7 @@ public:
 	/**
 	 * Draws the actor configuration.
 	 */
-	void drawConfig() override;
+	void drawConfig() const override;
 
 	/**
 	 * @return true if the animation is on the bouncing period.

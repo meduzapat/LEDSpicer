@@ -1,11 +1,15 @@
 # Adalight quickstart guide
 
 # hardware I use:
-- controller: [wemos d1 mini](https://www.wemos.cc/en/latest/d1/d1_mini.html)
-- leds: ws2812 led string, [for example](https://www.aliexpress.com/item/32243084800.html)
+- controller:
+ - [wemos d1 mini](https://www.wemos.cc/en/latest/d1/d1_mini.html)
+ - [Acustomarcade PICOCRT](https://acustomarcade.com/product/ws2812b-rgb-adapter-30-rgb)
+- leds:
+ - WS2812 led string, [for example](https://www.aliexpress.com/item/32243084800.html)
+ - WS2812B 5V LED Strip Lights [like](https://www.amazon.com/gp/product/B0CFTP3S41)
 
 
-## instructions:
+## instructions for the d1 mini or simillar:
 First step is to follow the instructions at [WLED](https://github.com/Aircoookie/WLED)
 you are then left with a wifi + usb controlled led strip.
 

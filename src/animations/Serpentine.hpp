@@ -27,7 +27,7 @@
 #ifndef SERPENTINE_HPP_
 #define SERPENTINE_HPP_ 1
 
-#define REQUIRED_PARAM_ACTOR_SERPENTINE {"speed", "direction", "tailLength", "tailColor", "tailIntensity"}
+#define REQUIRED_PARAM_ACTOR_SERPENTINE {"speed", "direction"}
 
 namespace LEDSpicer::Animations {
 
@@ -42,7 +42,7 @@ public:
 
 	virtual ~Serpentine() = default;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 

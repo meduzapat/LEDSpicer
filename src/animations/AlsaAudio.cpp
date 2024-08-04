@@ -91,7 +91,7 @@ void AlsaAudio::calcPeak() {
 	}
 }
 
-void AlsaAudio::drawConfig() {
+void AlsaAudio::drawConfig() const {
 	cout << "Type: AlsaAudio" << endl;
 	AudioActor::drawConfig();
 }
