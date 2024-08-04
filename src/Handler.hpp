@@ -44,7 +44,7 @@ class Handler {
 
 public:
 
-	Handler() = default;
+	Handler() = delete;
 
 	/**
 	 * Loads a new plugin using its library name.
@@ -60,7 +60,7 @@ public:
 protected:
 
 	/// Pointer to the dynamic linked library.
-	void* handler = nullptr;
+	void* const handler;
 
 };
 

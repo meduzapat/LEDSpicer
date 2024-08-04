@@ -41,7 +41,7 @@ public:
 
 	virtual ~Colors() = default;
 
-	void drawColors();
+	void drawColors() const;
 
 protected:
 

@@ -44,7 +44,7 @@ public:
 	/**
 	 * @see Actor::drawConfig()
 	 */
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 

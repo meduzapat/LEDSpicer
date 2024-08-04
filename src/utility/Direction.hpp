@@ -53,13 +53,13 @@ public:
 
 	virtual ~Direction() = default;
 
-	static string direction2str(Directions direction);
+	static string direction2str(const Directions direction);
 
 	static Directions str2direction(const string& direction);
 
 	static Directions getOppositeDirection(const Directions direction);
 
-	void drawConfig();
+	void drawConfig() const;
 
 protected:
 

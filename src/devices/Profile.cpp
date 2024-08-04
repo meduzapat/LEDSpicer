@@ -86,7 +86,7 @@ void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
 
-void Profile::drawConfig() {
+void Profile::drawConfig() const {
 
 	cout << "* Background color: " << backgroundColor.getName() << endl;
 

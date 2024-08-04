@@ -78,7 +78,7 @@ public:
 	/**
 	 * Draws the actor configuration.
 	 */
-	virtual void drawConfig();
+	virtual void drawConfig() const;
 
 	/**
 	 * Reset the animation back to begin.
@@ -112,7 +112,7 @@ public:
 	/**
 	 * @return true If the actor can be handled by cycles.
 	 */
-	virtual bool acceptCycles() {
+	virtual bool acceptCycles() const {
 		return false;
 	}
 
@@ -236,11 +236,11 @@ private:
 	/// A pointer to the real group of elements.
 	Group* const group;
 
-	uint8_t
+
 		/// If this actor will repeat, default 0, repeat for ever.
-		repeat    = 0,
+	uint8_t	const repeat;
 		/// Times repeated.
-		repeated  = 0;
+	uint8_t	repeated  = 0;
 };
 
 } /* namespace */

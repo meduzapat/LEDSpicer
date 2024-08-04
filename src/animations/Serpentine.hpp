@@ -42,7 +42,7 @@ public:
 
 	virtual ~Serpentine() = default;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 

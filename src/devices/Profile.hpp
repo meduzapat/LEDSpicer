@@ -61,7 +61,7 @@ public:
 	/**
 	 * Displays the internal information.
 	 */
-	void drawConfig();
+	void drawConfig() const;
 
 	/**
 	 * Execute a frame.
@@ -109,12 +109,6 @@ public:
 	bool isRunning() const;
 
 	/**
-	 * Whatever the always
-	 * @return
-	 */
-	bool displayElements() const;
-
-	/**
 	 * @return a read only reference to the background color.
 	 */
 	const Color& getBackgroundColor() const;
@@ -150,10 +144,10 @@ public:
 protected:
 
 	/// Keeps the profile name.
-	string name;
+	const string name;
 
 	/// Color to use when cleaning up.
-	Color backgroundColor;
+	const Color& backgroundColor;
 
 	/// What the profile is doing.
 	vector<Actor*>* currentActors;

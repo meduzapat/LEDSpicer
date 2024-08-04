@@ -63,7 +63,7 @@ void Actor::draw() {
 	}
 }
 
-void Actor::drawConfig() {
+void Actor::drawConfig() const {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
@@ -179,7 +179,7 @@ bool Actor::checkRepeats() {
 	if (not repeat or repeat == 1 or repeated == repeat)
 		return false;
 
-	++repeat;
+	++repeated;
 	restart();
 	return true;
 }

@@ -177,7 +177,7 @@ public:
 	 * @param number
 	 * @return
 	 */
-	static string hex2str(int number);
+	static string hex2str(const int number);
 
 	/**
 	 * Removes characters from string.

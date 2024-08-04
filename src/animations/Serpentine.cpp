@@ -118,7 +118,7 @@ void Serpentine::calculateTailPosition() {
 	tailData[0].position = lastTail;
 }
 
-void Serpentine::drawConfig() {
+void Serpentine::drawConfig() const {
 	cout << "Type: Serpentine " << endl;
 	cout << "Color: ";
 	drawColor();
