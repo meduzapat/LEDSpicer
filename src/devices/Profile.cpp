@@ -78,10 +78,6 @@ Profile::Profile(
 	}
 }
 
-Profile::~Profile() {
-	stop();
-}
-
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }

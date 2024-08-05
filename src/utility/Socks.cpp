@@ -56,7 +56,7 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 		* serverInfo,
 		* result;
 
-	memset((char *)&hints, 0, sizeof(hints));
+	memset(reinterpret_cast<char*>(&hints), 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC; // AF_UNIX
 	hints.ai_socktype = sockType; // SOCK_DGRAM, SOCK_STREAM | SOCK_NONBLOCK;
 	if (bind)
@@ -125,7 +125,7 @@ bool Socks::recive(string& buffer) {
 	FD_ZERO(&readset);
 	FD_SET(sockFB, &readset);
 
-	ioctl(sockFB, FIONBIO, (char*) &on);
+	ioctl(sockFB, FIONBIO, reinterpret_cast<char*>(&on));
 
 	// Check if there is any data to read.
 	n = select(sockFB + 1, NULL, &readset, NULL, NULL);

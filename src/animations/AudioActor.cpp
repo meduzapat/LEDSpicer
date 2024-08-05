@@ -58,7 +58,7 @@ AudioActor::AudioActor(umap<string, string>& parameters, Group* const group) :
 		break;
 	case Modes::Disco:
 	case Modes::Wave:
-		colorData.insert(colorData.begin(), group->size(), Color());
+		colorData.insert(colorData.begin(), group->size(), Color::Off);
 		break;
 	}
 

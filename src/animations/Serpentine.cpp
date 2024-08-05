@@ -28,9 +28,8 @@ actorFactory(Serpentine)
 
 Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
-	Color(parameters["color"]),
-	tailColor(parameters.count("tailColor") ? Color::getColor(parameters.at("tailColor")) : Color::On)
-
+	Color(Color::getColor(parameters["color"])),
+	tailColor(Color::getColor(parameters["tailColor"]))
 {
 
 	// Tail cannot be larger than the array, serpentine will overlap.

@@ -25,7 +25,7 @@
 using namespace LEDSpicer::Devices;
 
 void Element::setColor(const Color& color) {
-	Color newColor = brightness ? color.fade(brightness) : color;
+	const Color& newColor(brightness ? color.fade(brightness) : color);
 	// RGB.
 	if (leds.size() == 3) {
 		*leds[Color::Channels::Red]   = newColor.getR();
@@ -51,7 +51,7 @@ void Element::setColor(const Color& color) {
 }
 
 void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
-	Color newColor = brightness ? color.fade(brightness) : color;
+	const Color& newColor = brightness ? color.fade(brightness) : color;
 	if (filter == Color::Filters::Normal)
 		setColor(color);
 	else

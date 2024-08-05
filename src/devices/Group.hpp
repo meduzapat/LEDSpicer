@@ -100,7 +100,7 @@ public:
 	 * @param index
 	 * @return a reference to the internal element.
 	 */
-	Element* getElement(uint16_t index);
+	Element* const getElement(uint16_t index) const;
 
 	/**
 	 * @return the group name.
@@ -111,7 +111,7 @@ public:
 	 * Returns the default color for this element.
 	 * @return
 	 */
-	const Color& getDefaultColor();
+	const Color& getDefaultColor() const;
 
 protected:
 

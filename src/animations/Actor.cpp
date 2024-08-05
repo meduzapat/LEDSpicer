@@ -52,7 +52,7 @@ void Actor::draw() {
 	if (not affectedElements.empty()) {
 		switch (filter) {
 		case Color::Filters::Mask: {
-			const Color& black = Color::getColor("Black");
+			const Color& black(Color::getColor("Black"));
 			// turn off any non affected element.
 			for (uint16_t elIdx = 0; elIdx < group->size(); ++elIdx) {
 				if (affectedElements[elIdx])

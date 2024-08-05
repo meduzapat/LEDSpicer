@@ -59,7 +59,7 @@ void DataLoader::readConfiguration() {
 	if (mode == Modes::Dump or mode == Modes::Profile) {
 		Device::setDumpMode();
 	}
-	else if (tempAttr.count(PARAM_LOG_LEVEL)) {
+	if (tempAttr.count(PARAM_LOG_LEVEL)) {
 		Log::setLogLevel(Log::str2level(tempAttr[PARAM_LOG_LEVEL]));
 	}
 
@@ -372,7 +372,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		endTransitions;
 
 	int startTransitionElementTime = 0;
-	tinyxml2::XMLElement* xmlElement = profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS);
+	string backgroundColor(tempAttr["backgroundColor"]);
+	tinyxml2::XMLElement* xmlElement(profile.getRoot()->FirstChildElement(NODE_START_TRANSITIONS));
 	if (xmlElement) {
 		// Check for show element timer.
 		tempAttr = processNode(xmlElement);
@@ -421,14 +422,14 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	Profile* profilePtr = new Profile(
+	Profile* profilePtr(new Profile(
 		name,
-		Color(tempAttr["backgroundColor"]),
+		Color::getColor(backgroundColor),
 		startTransitions,
 		endTransitions,
 		milliseconds(startTransitionElementTime),
 		milliseconds(endTransitionElementTime)
-	);
+	));
 
 	// Check for animations.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_ANIMATIONS);

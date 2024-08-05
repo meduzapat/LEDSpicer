@@ -46,7 +46,7 @@ const vector<Element*>& Group::getElements() const {
 	return elements;
 }
 
-Element* Group::getElement(uint16_t index) {
+Element* const Group::getElement(uint16_t index) const {
 	return elements.at(index);
 }
 
@@ -54,6 +54,6 @@ const string& Group::getName() const {
 	return name;
 }
 
-const LEDSpicer::Color& Group::getDefaultColor() {
+const LEDSpicer::Color& Group::getDefaultColor() const {
 	return defaultColor;
 }

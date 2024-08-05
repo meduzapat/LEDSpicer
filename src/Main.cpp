@@ -329,8 +329,8 @@ int main(int argc, char **argv) {
 		signal(SIGQUIT, signalHandler);
 		signal(SIGABRT, signalHandler);
 		signal(SIGINT,  signalHandler);
-		signal(SIGCONT, SIG_IGN);
-		signal(SIGSTOP, SIG_IGN);
+		signal(SIGCONT, reinterpret_cast<__sighandler_t>(1));
+		signal(SIGSTOP, reinterpret_cast<__sighandler_t>(1));
 		signal(SIGHUP,  signalHandler);
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile)
@@ -386,11 +386,12 @@ void Main::runCurrentProfile() {
 	}
 
 	// Reset elements.
+	const Color& color(currentProfile->getBackgroundColor());
 	for (auto& eD : DataLoader::allElements) {
 		if (eD.second->isTimed())
 			eD.second->checkTime();
 		else
-			eD.second->setColor(currentProfile->getBackgroundColor());
+			eD.second->setColor(color);
 	}
 
 	currentProfile->runFrame();
