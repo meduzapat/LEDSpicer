@@ -47,7 +47,7 @@ void Colors::extractColors(string colors) {
 		throw Error("Too many colors (" + to_string(this->colors.size()) + "), the maximum is " + to_string(UINT8_MAX) + " .");
 }
 
-void Colors::drawColors() const {
+void Colors::drawColors() {
 
 	uint8_t count = 0;
 	for (const Color* c : colors) {

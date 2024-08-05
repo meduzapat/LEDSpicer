@@ -55,15 +55,15 @@ public:
 
 	virtual ~AudioActor() = default;
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
 	static Modes str2mode(const string& mode);
 
-	static string mode2str(const Modes mode);
+	static string mode2str(Modes mode);
 
 	static Channels str2channel(const string& channel);
 
-	static string channel2str(const Channels channel);
+	static string channel2str(Channels channel);
 
 	void restart() override;
 

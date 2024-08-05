@@ -38,7 +38,7 @@ public:
 
 	virtual ~Impulse() = default;
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
 	void process() override;
 };

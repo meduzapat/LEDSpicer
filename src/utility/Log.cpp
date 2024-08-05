@@ -29,11 +29,11 @@ int Log::minLevel = LOG_NOTICE;
 
 void (*Log::logFn)(const string&, int) = Log::logIntoStdOut;
 
-void Log::initialize(const bool logToStdOut) {
+void Log::initialize(bool logToStdOut) {
 	logToStdErr(logToStdOut);
 }
 
-void Log::log(const string& message, const int level) {
+void Log::log(const string& message, int level) {
 	logFn(message, level);
 }
 
@@ -57,7 +57,7 @@ void Log::debug(const string& message) {
 	log(message, LOG_DEBUG);
 }
 
-void Log::logToStdErr(const bool option) {
+void Log::logToStdErr(bool option) {
 
 	if (not option and logFn != logIntoSysLog) {
 		openlog(PACKAGE_NAME, LOG_PID|LOG_CONS, LOG_USER);
@@ -71,11 +71,11 @@ void Log::logToStdErr(const bool option) {
 	}
 }
 
-void Log::logIntoSysLog(const string& message, const int level) {
+void Log::logIntoSysLog(const string& message, int level) {
 	syslog(level, "%s", message.c_str());
 }
 
-void Log::logIntoStdOut(const string& message, const int level) {
+void Log::logIntoStdOut(const string& message, int level) {
 
 	if (level > minLevel)
 		return;
@@ -93,21 +93,21 @@ void Log::terminate() {
 	}
 }
 
-void Log::setLogLevel(const int level) {
+void Log::setLogLevel(int level) {
 	minLevel = level;
 	if (logFn == logIntoSysLog)
 		setlogmask(LOG_UPTO(level));
 }
 
-const int Log::getLogLevel() {
+int Log::getLogLevel() {
 	return minLevel;
 }
 
-bool const Log::isLogging(const int level) {
+bool Log::isLogging(int level) {
 	return level <= minLevel;
 }
 
-const int Log::str2level(const string& level) {
+int Log::str2level(const string& level) {
 	if (level == "Error")
 		return LOG_ERR;
 	if (level == "Warning")
@@ -122,7 +122,7 @@ const int Log::str2level(const string& level) {
 	return LOG_INFO;
 }
 
-const string Log::level2str(const int level) {
+string Log::level2str(int level) {
 	switch (level) {
 	case LOG_ERR:
 		return "Error";

@@ -49,9 +49,9 @@ public:
 	 */
 	struct Item : public Items {
 
-		Group* const group;
+		Group* group = nullptr;
 
-		Item() = delete;
+		Item() = default;
 
 		Item(Group* group, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
@@ -61,15 +61,23 @@ public:
 
 		Item(Item&& item) : Items(item), group(std::move(item.group)) {}
 
+		Item& operator=(const Item& item) {
+			group  = item.group;
+			color  = item.color;
+			filter = item.filter;
+			pos    = item.pos;
+			return *this;
+		}
+
 		virtual ~Item() = default;
 
-		string getName() const override {
+		virtual string getName() const {
 			return group->getName();
 		}
 
-		void process(uint8_t percent, Color::Filters* filterOverride) const override {
+		void process(uint8_t percent) const {
 			for (auto& e : group->getElements())
-				e->setColor(*color, filterOverride ? *filterOverride : filter, percent);
+				e->setColor(*color, filter, percent);
 		}
 	};
 

@@ -29,7 +29,7 @@ Speed::Speed(string speed) {
 		this->speed = str2speed(speed);
 }
 
-string Speed::speed2str(const Speeds speed) {
+string Speed::speed2str(Speeds speed) {
 	switch (speed) {
 	case Speeds::VeryFast:
 		return "Very Fast";
@@ -59,7 +59,7 @@ Speed::Speeds Speed::str2speed(const string& speed) {
 	throw Error("Invalid speed " + speed);
 }
 
-void Speed::drawConfig() const {
+void Speed::drawConfig() {
 	cout << "Speed: " << speed2str(speed) << endl;
 }
 

@@ -61,7 +61,7 @@ public:
 	/**
 	 * Displays the internal information.
 	 */
-	void drawConfig() const;
+	void drawConfig();
 
 	/**
 	 * Execute a frame.
@@ -109,6 +109,12 @@ public:
 	bool isRunning() const;
 
 	/**
+	 * Whatever the always
+	 * @return
+	 */
+	bool displayElements() const;
+
+	/**
 	 * @return a read only reference to the background color.
 	 */
 	const Color& getBackgroundColor() const;
@@ -118,8 +124,8 @@ public:
 	 */
 	const string& getName() const;
 
-	void addAlwaysOnElement(Element* element, const Color& color, const Color::Filters& filter);
-	void addAlwaysOnGroup(Group* group, const Color& color, const Color::Filters& filter);
+	void addAlwaysOnElement(Element* element, const Color& color);
+	void addAlwaysOnGroup(Group* group, const Color& color);
 
 	static void addTemporaryAlwaysOnElement(const string name, const Element::Item item);
 	static void removeTemporaryAlwaysOnElement(const string name);
@@ -144,10 +150,10 @@ public:
 protected:
 
 	/// Keeps the profile name.
-	const string name;
+	string name;
 
 	/// Color to use when cleaning up.
-	const Color& backgroundColor;
+	Color backgroundColor;
 
 	/// What the profile is doing.
 	vector<Actor*>* currentActors;

@@ -99,7 +99,7 @@ void PulseAudio::disconnect() {
 	}
 }
 
-void PulseAudio::drawConfig() const {
+void PulseAudio::drawConfig() {
 	cout << "Type: Pulseaudio" << endl;
 	AudioActor::drawConfig();
 }

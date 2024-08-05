@@ -322,7 +322,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 					col = &DataLoader::allElements.at(n)->getDefaultColor();
 
 				LogDebug("Using element " + n + " color " + col->getName());
-				profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col, Color::Filters::Normal);
+				profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col);
 			}
 
 			// Add Groups.

@@ -43,7 +43,7 @@ void Pulse::calculateElements() {
 		advanceColor();
 }
 
-void Pulse::drawConfig() const {
+void Pulse::drawConfig() {
 	cout << "Type: Pulse " << endl;
 	cout << "Colors: ";
 	this->drawColors();
@@ -51,7 +51,7 @@ void Pulse::drawConfig() const {
 	DirectionActor::drawConfig();
 }
 
-string Pulse::mode2str(const Modes mode) {
+string Pulse::mode2str(Modes mode) {
 	switch (mode) {
 	case Modes::Linear:
 		return "Linear";

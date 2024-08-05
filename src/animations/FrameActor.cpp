@@ -55,7 +55,7 @@ FrameActor::FrameActor(
 	Utility::verifyValue(startAt, static_cast<uint16_t>(0), static_cast<uint16_t>(100));
 }
 
-void FrameActor::drawConfig() const {
+void FrameActor::drawConfig() {
 	Speed::drawConfig();
 	if (cycles)
 		cout << "Cycles: " << to_string(cycles) << endl;

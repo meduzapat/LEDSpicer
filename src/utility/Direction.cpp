@@ -44,7 +44,7 @@ Direction::Directions Direction::str2direction(const string& direction) {
 	throw Error("Invalid direction " + direction);
 }
 
-string Direction::direction2str(const Directions direction) {
+string Direction::direction2str(Directions direction) {
 	switch (direction) {
 	case Directions::Stop:
 		return "None";
@@ -64,6 +64,6 @@ Direction::Directions Direction::getOppositeDirection(const Directions direction
 	return (direction == Directions::Forward ? Directions::Backward : Directions::Forward);
 }
 
-void Direction::drawConfig() const {
+void Direction::drawConfig() {
 	cout << "Direction: " << direction2str(direction) << endl;
 }

@@ -49,14 +49,14 @@ FileReader::FileReader(umap<string, string>& parameters, Group* const group) :
 	totalFrames = frames->second.size() - 1;
 }
 
-void FileReader::drawConfig() const {
+void FileReader::drawConfig() {
 	cout
 		<< "Type: FileReader " << endl
 		<< "File: " << frames->first << endl;
 	DirectionActor::drawConfig();
 }
 
-string FileReader::Format2str(const Formats format) {
+string FileReader::Format2str(Formats format) {
 	switch (format) {
 	case Formats::rgba:
 		return "rgba";

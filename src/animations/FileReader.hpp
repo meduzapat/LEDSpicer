@@ -42,11 +42,11 @@ public:
 
 	virtual ~FileReader() {}
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
-	static string Format2str(const Formats format);
+	string Format2str(Formats format);
 
-	static Formats str2Format(const string& format);
+	Formats str2Format(const string& format);
 
 protected:
 

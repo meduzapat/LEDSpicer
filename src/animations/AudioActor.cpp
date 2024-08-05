@@ -415,7 +415,7 @@ void AudioActor::restart() {
 	Actor::restart();
 }
 
-void AudioActor::drawConfig() const {
+void AudioActor::drawConfig() {
 	cout <<
 		"mode: "        << mode2str(userPref.mode)       << endl <<
 		"channel: "     << channel2str(userPref.channel) << endl <<

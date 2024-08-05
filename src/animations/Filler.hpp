@@ -43,11 +43,11 @@ public:
 
 	virtual ~Filler() = default;
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
-	static string mode2str(const Modes mode);
+	string mode2str(Modes mode);
 
-	static Modes str2mode(const string& mode);
+	Modes str2mode(const string& mode);
 
 	void restart() override;
 

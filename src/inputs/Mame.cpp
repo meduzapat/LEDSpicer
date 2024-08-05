@@ -26,7 +26,7 @@ using namespace LEDSpicer::Inputs;
 
 inputFactory(Mame)
 
-void Mame::drawConfig() const {
+void Mame::drawConfig() {
 	cout << SEPARATOR << endl << "Type: Mame" << endl;
 	Input::drawConfig();
 }

@@ -148,7 +148,7 @@ void Filler::fillElementsRandom() {
 	}
 }
 
-void Filler::drawConfig() const {
+void Filler::drawConfig() {
 	cout <<
 		"Type: Filler" << endl <<
 		"Mode: " << mode2str(mode) << endl;
@@ -157,7 +157,7 @@ void Filler::drawConfig() const {
 	StepActor::drawConfig();
 }
 
-string Filler::mode2str(const Modes mode) {
+string Filler::mode2str(Modes mode) {
 	switch (mode) {
 	case Modes::Normal:
 		return "Normal";

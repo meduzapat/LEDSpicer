@@ -37,7 +37,7 @@ DirectionActor::DirectionActor(
 		currentFrame = totalFrames;
 }
 
-void DirectionActor::drawConfig() const {
+void DirectionActor::drawConfig() {
 	Direction::drawConfig();
 	FrameActor::drawConfig();
 }

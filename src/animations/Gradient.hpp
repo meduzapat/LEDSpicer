@@ -49,17 +49,17 @@ public:
 
 	virtual ~Gradient() = default;
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
 	static Modes str2mode(const string& mode);
 
-	static string mode2str(const Modes mode);
+	static string mode2str(Modes mode);
 
 protected:
 
-	const Modes mode;
+	Modes mode;
 
-	const uint8_t tones;
+	uint8_t tones = DEFAULT_TONES;
 
 	vector<Color> precalc;
 

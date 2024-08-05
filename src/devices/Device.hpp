@@ -41,10 +41,10 @@ public:
 
 	/**
 	 * Creates a new Device
-	 * @param LEDs the number of connectors or single LEDs.
+	 * @param leds the number of connectors or single LEDs.
 	 * @param name hardware name
 	 */
-	Device(uint16_t leds, const string& name) : Hardware(name), LEDs(leds, 0), oldLEDs(leds, 1) {}
+	Device(uint16_t leds, const string& name);
 
 	virtual ~Device() = default;
 

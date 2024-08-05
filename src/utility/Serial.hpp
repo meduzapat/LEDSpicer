@@ -81,7 +81,7 @@ protected:
 	virtual void connect();
 
 	/**
-	 * Disconnects to the serial port.
+	 * Disonnects to the serial port.
 	 */
 	virtual void disconnect();
 

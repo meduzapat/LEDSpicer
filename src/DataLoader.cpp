@@ -142,7 +142,7 @@ void DataLoader::processDevices() {
 
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
-	// Only used to report unused LEDs.
+	// Only used to report unused leds.
 	vector<bool> ledCheck(device->getNumberOfLeds(), false);
 
 	tinyxml2::XMLElement* xmlElement = deviceNode->FirstChildElement(NODE_ELEMENT);
@@ -152,35 +152,28 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 	for (; xmlElement; xmlElement = xmlElement->NextSiblingElement(NODE_ELEMENT)) {
 		umap<string, string> tempAttr = processNode(xmlElement);
 
-		// Check mandatory.
+		if (allElements.count(tempAttr[PARAM_NAME]))
+			throw LEDError("Duplicated element " + tempAttr[PARAM_NAME]);
+
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "device element");
 
-		// Check dupe.
-		string name(tempAttr[PARAM_NAME]);
-		if (allElements.count(name))
-			throw LEDError("Duplicated element [" + name + "]");
-
-		int brightness(tempAttr.count(PARAM_BRIGHTNESS) ?
+		int brightness = tempAttr.count(PARAM_BRIGHTNESS) ?
 			Utility::parseNumber(
 				tempAttr[PARAM_BRIGHTNESS],
-				invalidValueFor(PARAM_BRIGHTNESS) " in " + device->getFullName() + " element " + name
-			) : 0);
-
-		// Reference to the stored color.
-		const Color& defaultColor(tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR));
-
-		// % of brightness.
-		if (not Utility::verifyValue(brightness, 1, 99, false))
+				invalidValueFor(PARAM_BRIGHTNESS) " in " + device->getFullName() + " element " + tempAttr[PARAM_NAME]
+			) : 0;
+		if (not Utility::verifyValue(brightness, 1, 99, false)) {
 			brightness = 0;
+		}
 
 		// Single color.
 		if (tempAttr.count(PARAM_LED)) {
-			uint16_t led(Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1);
+			uint16_t led = Utility::parseNumber(tempAttr[PARAM_LED], invalidValueFor(PARAM_LED) " in " + device->getFullName()) - 1;
 
 			device->registerElement(
-				name,
+				tempAttr[PARAM_NAME],
 				led,
-				defaultColor,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
 				0,
 				brightness
 			);
@@ -188,90 +181,37 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		}
 		// Solenoids, Motors, Recoils, any other time sensitive hardware.
 		else if (tempAttr.count(PARAM_TIMED)) {
-			uint16_t solenid(Utility::parseNumber(tempAttr[PARAM_TIMED], invalidValueFor(PARAM_TIMED) " in " + device->getFullName()) - 1);
+			uint16_t solenid = Utility::parseNumber(tempAttr[PARAM_TIMED], invalidValueFor(PARAM_TIMED) " in " + device->getFullName()) - 1;
 			device->registerElement(
-				name,
+				tempAttr[PARAM_NAME],
 				solenid,
-				defaultColor != Color::Off ? Color::On : Color::Off,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor("On"),
 				tempAttr.count(PARAM_TIME_ON) ? Utility::parseNumber(tempAttr[PARAM_TIME_ON], invalidValueFor(PARAM_TIME_ON)) : DEFAULT_SOLENOID,
 				0
 			);
 			ledCheck[solenid] = true;
 		}
-		// LED Strips and RGB.
-		else if (tempAttr.count(PARAM_POSITION)) {
-			uint16_t
-				r, g, b,
-				// If size is 1 is just a RGB element, strips otherwise.
-				size (tempAttr.count(PARAM_STRIP) ? Utility::parseNumber(tempAttr[PARAM_STRIP], invalidValueFor(PARAM_STRIP) " in " + device->getFullName())  * 3: 3),
-				pos  (Utility::parseNumber(tempAttr[PARAM_POSITION], invalidValueFor(PARAM_POSITION) " in " + device->getFullName()) - 1),
-				elem (1);
-			string
-				order(tempAttr.count(PARAM_COLORFORMAT) ? tempAttr.at(PARAM_COLORFORMAT) : DEFAULT_ORDER),
-				groupName(name);
-			// Create a group for the strip only.
-			if (size > 3)
-				layout.emplace(
-					groupName,
-					Group{
-						groupName,
-						defaultColor
-					}
-				);
-			// Process element(s)
-			for (uint16_t c = pos; c < pos + size; ++elem) {
-				string elemName(name + (size > 3 ? to_string(elem) : ""));
-				for (char col : order) {
-					switch (col) {
-					case 'r':
-						ledCheck[c] = true;
-						r = c++;
-						break;
-					case 'g':
-						ledCheck[c] = true;
-						g = c++;
-					break;
-					case 'b':
-						ledCheck[c] = true;
-						b = c++;
-					break;
-					}
-				}
-				device->registerElement(
-					elemName,
-					r, g , b,
-					defaultColor,
-					brightness
-				);
-				// Add element to group for strip only.
-				if (size > 3) {
-					layout.at(groupName).linkElement(device->getElement(elemName));
-					allElements.emplace(elemName, device->getElement(elemName));
-				}
-			}
-		}
 		// RGB.
 		else {
-			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, name);
+			Utility::checkAttributes(REQUIRED_PARAM_RGB_LED, tempAttr, tempAttr[PARAM_NAME]);
 			uint16_t
 				r = Utility::parseNumber(tempAttr[PARAM_RED], invalidValueFor(  "red led")   " in " + device->getFullName()) - 1,
 				g = Utility::parseNumber(tempAttr[PARAM_GREEN], invalidValueFor("green led") " in " + device->getFullName()) - 1,
 				b = Utility::parseNumber(tempAttr[PARAM_BLUE], invalidValueFor( "blue led")  " in " + device->getFullName()) - 1;
 			device->registerElement(
-				name,
+				tempAttr[PARAM_NAME],
 				r, g , b,
-				defaultColor,
+				tempAttr.count(PARAM_DEFAULT_COLOR) ? Color::getColor(tempAttr[PARAM_DEFAULT_COLOR]) : Color::getColor(DEFAULT_COLOR),
 				brightness
 			);
 			ledCheck[r] = true;
 			ledCheck[g] = true;
 			ledCheck[b] = true;
 		}
-		if (not tempAttr.count(PARAM_STRIP) )
-			allElements.emplace(name, device->getElement(name));
+		allElements.emplace(tempAttr[PARAM_NAME], device->getElement(tempAttr[PARAM_NAME]));
 	}
 
-	LogNotice(
+	LogInfo(
 		device->getFullName()                    + " with "              +
 		to_string(ledCheck.size())               + " LEDs divided into " +
 		to_string(device->getNumberOfElements()) + " elements"
@@ -452,8 +392,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 				throw LEDError("Unknown element [" + tempAttr[PARAM_NAME] + "] for always on element on profile " + name);
 			profilePtr->addAlwaysOnElement(
 				allElements.at(tempAttr[PARAM_NAME]),
-				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : allElements.at(tempAttr[PARAM_NAME])->getDefaultColor(),
-				Color::Filters::Normal
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : allElements.at(tempAttr[PARAM_NAME])->getDefaultColor()
 			);
 		}
 	}
@@ -469,9 +408,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 				throw LEDError("Unknown group [" + tempAttr[PARAM_NAME] + "] for always on group on profile " + name);
 			profilePtr->addAlwaysOnGroup(
 				&layout.at(tempAttr[PARAM_NAME]),
-				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : layout.at(tempAttr[PARAM_NAME]).getDefaultColor(),
-				Color::Filters::Normal
-			);
+				tempAttr.count(PARAM_COLOR) ? Color::getColor(tempAttr[PARAM_COLOR]) : layout.at(tempAttr[PARAM_NAME]).getDefaultColor()
+			 );
 		}
 	}
 

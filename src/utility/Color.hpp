@@ -207,7 +207,7 @@ public:
 	 * Output the colors from an array of colors.
 	 * @param colors
 	 */
-	static void drawColors(const vector<const Color*>& colors);
+	static void drawColors(vector<const Color*>& colors);
 
 	/**
 	 * Output the current color HEX.
@@ -224,7 +224,7 @@ public:
 	 * @param filter
 	 * @return
 	 */
-	static string filter2str(const Filters filter);
+	static string filter2str(Filters filter);
 
 	/**
 	 * Converts a string into a filter.
@@ -275,10 +275,10 @@ public:
 protected:
 
 	/// Loaded colors.
-	static umap<string, const Color> colors;
+	static umap<string, Color> colors;
 
 	/// Possible values for random.
-	static vector<const Color*> randomColors;
+	static vector<Color*> randomColors;
 
 	/// List of color names.
 	static vector<string> names;

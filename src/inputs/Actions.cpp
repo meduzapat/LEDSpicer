@@ -147,7 +147,7 @@ void Actions::deactivate() {
 	Reader::deactivate();
 }
 
-void Actions::drawConfig() const {
+void Actions::drawConfig() {
 	cout << SEPARATOR << endl << "Type: Actions" << endl;
 	Reader::drawConfig();
 	if (groupsMaps.size()) {

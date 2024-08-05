@@ -48,11 +48,11 @@ public:
 
 	virtual ~Pulse() = default;
 
-	void drawConfig() const override;
+	void drawConfig() override;
 
-	static string mode2str(const Modes type);
+	string mode2str(Modes type);
 
-	static Modes str2mode(const string& type);
+	Modes str2mode(const string& type);
 
 	void restart() override;
 
@@ -62,7 +62,7 @@ protected:
 
 private:
 
-	const Modes mode;
+	Modes mode;
 
 };
 

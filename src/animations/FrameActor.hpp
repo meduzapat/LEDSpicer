@@ -46,7 +46,7 @@ public:
 	/**
 	 * @see Actor::drawConfig()
 	 */
-	void drawConfig() const override;
+	void drawConfig() override;
 
 	/**
 	 * @return true if the current frame is the first frame.
@@ -67,7 +67,7 @@ public:
 
 	bool isRunning() override;
 
-	bool acceptCycles() const override {
+	bool acceptCycles() override {
 		return true;
 	}
 

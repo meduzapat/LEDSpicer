@@ -36,9 +36,9 @@ Actor::Actor(
 	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	repeat(parameters.count("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0),
-	affectedElements(group->size(), false),
 	group(group)
 {
+	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
 }
@@ -63,7 +63,7 @@ void Actor::draw() {
 	}
 }
 
-void Actor::drawConfig() const {
+void Actor::drawConfig() {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
@@ -170,7 +170,7 @@ void Actor::affectAllElements(bool value) {
 	affectedElements.assign(group->size(), value);
 }
 
-bool Actor::isElementAffected(uint16_t index) const {
+bool Actor::isElementAffected(uint16_t index) {
 	return affectedElements[index];
 }
 
@@ -179,7 +179,7 @@ bool Actor::checkRepeats() {
 	if (not repeat or repeat == 1 or repeated == repeat)
 		return false;
 
-	++repeated;
+	++repeat;
 	restart();
 	return true;
 }

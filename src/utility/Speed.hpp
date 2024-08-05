@@ -45,17 +45,17 @@ public:
 
 	enum class Speeds : uint8_t {VeryFast, Fast, Normal, Slow, VerySlow};
 
-	Speed() = delete;
+	Speed() = default;
 
 	Speed(string speed);
 
 	virtual ~Speed() = default;
 
-	static string speed2str(const Speeds speed);
+	static string speed2str(Speeds speed);
 
 	static Speeds str2speed(const string& speed);
 
-	void drawConfig() const;
+	void drawConfig();
 
 protected:
 

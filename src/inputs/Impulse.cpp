@@ -26,7 +26,7 @@ using namespace LEDSpicer::Inputs;
 
 inputFactory(Impulse)
 
-void Impulse::drawConfig() const {
+void Impulse::drawConfig() {
 	cout << SEPARATOR << endl << "Type: Impulse" << endl;
 	Reader::drawConfig();
 }

@@ -25,6 +25,11 @@
 
 using namespace LEDSpicer::Devices;
 
+Device::Device(uint16_t leds, const string& name) : Hardware(name), LEDs(leds, 0), oldLEDs(leds, 1) {
+	LEDs.shrink_to_fit();
+	oldLEDs.shrink_to_fit();
+}
+
 void Device::initialize() {
 
 	if (dumpMode)
