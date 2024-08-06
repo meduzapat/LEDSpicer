@@ -222,7 +222,7 @@ protected:
 	 */
 	bool isElementAffected(uint16_t index) const;
 
-	/**
+  /**
 	 * Checks if the actor will repeat.
 	 * @return true if the actor will repeat.
 	 */

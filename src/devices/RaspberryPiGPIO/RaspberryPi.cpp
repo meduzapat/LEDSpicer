@@ -46,7 +46,7 @@ void RaspberryPi::openHardware() {
 	for (auto& element : *getElements()) {
 		LogDebug("Element " + element.second.getName());
 		for (auto& led : element.second.getLeds()) {
-			// Find the element led position in the LEDs array.
+			// Find the element LED position in the LEDs array.
 			uint8_t gpioled = led - firstled + 1;
 			gpioSetMode(gpioled, PI_OUTPUT);
 			usedleds.push_back(gpioled);
