@@ -24,44 +24,6 @@
 
 using namespace LEDSpicer::Devices;
 
-Element::Element(
-	const string& name,
-	uint8_t* led,
-	const Color& defaultColor,
-	uint timeOn,
-	uint8_t brightness
-) :
-	name(name),
-	leds{led},
-	defaultColor(defaultColor),
-	timeOn(timeOn),
-	// Only calculate brightness of not 0 or 100.
-	brightness(brightness)
-{
-	leds.shrink_to_fit();
-}
-
-Element::Element(
-	const string& name,
-	uint8_t* ledR,
-	uint8_t* ledG,
-	uint8_t* ledB,
-	const Color& defaultColor,
-	uint8_t brightness
-) :
-	name(name),
-	leds{ledR, ledG, ledB},
-	defaultColor(defaultColor),
-	// Only calculate brightness of not 0 or 100.
-	brightness(brightness)
-{
-	leds.shrink_to_fit();
-}
-
-Element::Element(Element* other) : name(other->name), leds(other->leds.size(), nullptr), defaultColor(other->defaultColor), brightness(other->brightness) {
-	leds.shrink_to_fit();
-}
-
 void Element::setColor(const Color& color) {
 	Color newColor = brightness ? color.fade(brightness) : color;
 	// RGB.
@@ -96,7 +58,7 @@ void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t
 		setColor(*getColor().set(color, filter, percent));
 }
 
-LEDSpicer::Color Element::getColor() {
+LEDSpicer::Color Element::getColor() const {
 	Color color;
 	if (leds.size() == 1)
 		color.set(*leds[SINGLE_LED], *leds[SINGLE_LED], *leds[SINGLE_LED]);
@@ -111,10 +73,6 @@ LEDSpicer::Color Element::getColor() {
 
 void Element::setLedValue(uint16_t led, uint8_t val) {
 	*leds[led] = val;
-}
-
-void Element::linkLed(uint8_t* val) {
-	leds.push_back(val);
 }
 
 uint8_t Element::getLedValue(uint16_t led) const {
@@ -135,15 +93,15 @@ uint8_t Element::size() const {
 	return leds.size();
 }
 
-string Element::getName() {
+const string Element::getName() const {
 	return name;
 }
 
-const LEDSpicer::Color& Element::getDefaultColor() {
+const LEDSpicer::Color& Element::getDefaultColor() const {
 	return defaultColor;
 }
 
-bool Element::isTimed() {
+bool Element::isTimed() const {
 	return timeOn != 0;
 }
 

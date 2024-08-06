@@ -67,7 +67,7 @@ void Random::generateNewColors() {
 		newColors.push_back(colors[std::rand() / ((RAND_MAX + 1u) / colors.size())]);
 }
 
-void Random::drawConfig() {
+void Random::drawConfig() const {
 	cout << "Type: Random " << endl;
 	cout << "Colors: ";
 	Color::drawColors(colors);

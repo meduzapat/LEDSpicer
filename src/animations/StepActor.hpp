@@ -47,7 +47,7 @@ public:
 	/**
 	 * @see Actor::drawConfig()
 	 */
-	virtual void drawConfig();
+	virtual void drawConfig() const override;
 
 	/**
 	 * @return The current relative step.

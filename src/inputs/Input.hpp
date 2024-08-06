@@ -67,7 +67,7 @@ public:
 	/**
 	 * Draws the input configuration.
 	 */
-	virtual void drawConfig();
+	virtual void drawConfig() const;
 
 	/**
 	 * Called when a profile is activated.

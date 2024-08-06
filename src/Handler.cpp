@@ -36,5 +36,4 @@ Handler::~Handler() {
 	if (not handler)
 		return;
 	dlclose(handler);
-	handler = nullptr;
 }

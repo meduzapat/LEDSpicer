@@ -30,13 +30,11 @@ Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
 	Colors(parameters["colors"]),
 	mode(str2mode(parameters["mode"])),
-	tones(parameters.count("tones") ? Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number") : DEFAULT_TONES)
+	tones((parameters.count("tones") ? Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number") : DEFAULT_TONES) * static_cast<float>(speed) + 1)
 {
 	// Add the first color to the end so the gradient ends in the same color that started.
 	colors.push_back(colors.front());
 
-	// Calculate speed and tones base on speed.
-	tones *= static_cast<float>(speed) + 1;
 	// More speed less tones.
 	setTotalStepFrames(static_cast<float>(speed));
 
@@ -72,7 +70,7 @@ void Gradient::calculateElements() {
 	}
 }
 
-void Gradient::drawConfig() {
+void Gradient::drawConfig() const {
 	cout <<
 		"Type: Gradient"                     << endl <<
 		"Mode: "  << mode2str(mode)          << endl <<

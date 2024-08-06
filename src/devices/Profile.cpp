@@ -86,7 +86,7 @@ void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }
 
-void Profile::drawConfig() {
+void Profile::drawConfig() const {
 
 	cout << "* Background color: " << backgroundColor.getName() << endl;
 
@@ -151,7 +151,7 @@ void Profile::runFrame() {
 		for (Input* i : inputs)
 			i->process();
 	}
-	// Keeps track of the currect batch of actors (start, normal, or ending).
+	// Keeps track of the current batch of actors (start, normal, or ending).
 	bool running = false;
 
 	if (currentActors) {
@@ -193,7 +193,7 @@ void Profile::runFrame() {
 	if (not isTransiting() and currentActors) {
 		// Set always on groups from profile.
 		for (auto& gE : alwaysOnGroups) {
-			gE.process(50);
+			gE.process(50, nullptr);
 		}
 
 		// Set always on elements from profile.
@@ -201,17 +201,17 @@ void Profile::runFrame() {
 
 		// Set always on groups from temporary requests.
 		for (auto& gE : temporaryAlwaysOnGroups) {
-			gE.second.process(50);
+			gE.second.process(50, nullptr);
 		}
 
 		// Set always on elements from temporary requests.
 		for (auto& eE : temporaryAlwaysOnElements) {
-			eE.second.process(50);
+			eE.second.process(50, nullptr);
 		}
 
 		// Set controlled items from input plugins.
 		for (auto& item : Input::getControlledInputs()) {
-			item.second->process(50);
+			item.second->process(50, nullptr);
 		}
 	}
 }
@@ -296,12 +296,12 @@ const string& Profile::getName() const {
 	return name;
 }
 
-void Profile::addAlwaysOnElement(Element* element, const Color& color) {
-	alwaysOnElements.emplace_back(element, &color, Color::Filters::Normal);
+void Profile::addAlwaysOnElement(Element* element, const Color& color, const Color::Filters& filter) {
+	alwaysOnElements.emplace_back(element, &color, filter);
 }
 
-void Profile::addAlwaysOnGroup(Group* group, const Color& color) {
-	alwaysOnGroups.emplace_back(group, &color, Color::Filters::Normal);
+void Profile::addAlwaysOnGroup(Group* group, const Color& color, const Color::Filters& filter) {
+	alwaysOnGroups.emplace_back(group, &color,filter);
 }
 
 void Profile::addTemporaryAlwaysOnElement(const string name, const Element::Item item) {
@@ -361,7 +361,6 @@ void Profile::runAlwaysOnElements(bool force) {
 		// Ignore ways if the flag is set.
 		if ((Utility::globalFlags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
 			continue;
-		eE.filter = filter;
-		eE.process(force ? 50 : elementProgress);
+		eE.process(force ? 50 : elementProgress, &filter);
 	}
 }

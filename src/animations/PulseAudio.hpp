@@ -48,7 +48,7 @@ public:
 
 	virtual ~PulseAudio();
 
-	void drawConfig();
+	void drawConfig() const override;
 
 protected:
 

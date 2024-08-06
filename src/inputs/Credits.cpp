@@ -199,7 +199,7 @@ void Credits::deactivate() {
 	Reader::deactivate();
 }
 
-void Credits::drawConfig() {
+void Credits::drawConfig() const {
 	cout << SEPARATOR << endl << "Type: Credits" << endl;
 	Reader::drawConfig();
 	cout << "Linked Items: " << endl;

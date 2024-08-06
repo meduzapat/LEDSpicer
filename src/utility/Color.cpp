@@ -24,9 +24,9 @@
 
 using namespace LEDSpicer;
 
-umap<string, Color> Color::colors;
+umap<string, const Color> Color::colors;
 vector<string> Color::names;
-vector<Color*> Color::randomColors;
+vector<const Color*> Color::randomColors;
 const Color Color::On(255, 255, 255);
 const Color Color::Off(0, 0, 0);
 
@@ -198,7 +198,7 @@ void Color::loadColors(const umap<string, string>& colorsData, const string& for
 	for (auto& colorData : colorsData) {
 		if (colorData.first == Color_Random)
 			continue;
-		colors[colorData.first] = std::move(Color(colorData.second, format));
+		colors.emplace(colorData.first, std::move(Color(colorData.second, format)));
 		names.push_back(colorData.first);
 	}
 }
@@ -217,7 +217,7 @@ void Color::drawColors() {
 		cout << endl;
 }
 
-void Color::drawColors(vector<const Color*>& colors) {
+void Color::drawColors(const vector<const Color*>& colors) {
 	uint8_t count = 0;
 	for (auto& c : colors) {
 		c->drawColor();
@@ -240,7 +240,7 @@ void Color::drawColor() const {
 	cout << getName();
 }
 
-string Color::filter2str(Filters filter) {
+string Color::filter2str(const Filters filter) {
 	switch (filter) {
 	case Filters::Normal:
 		return "Normal";

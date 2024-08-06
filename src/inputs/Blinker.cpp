@@ -61,7 +61,7 @@ void Blinker::deactivate() {
 	Reader::deactivate();
 }
 
-void Blinker::drawConfig() {
+void Blinker::drawConfig() const {
 	cout << SEPARATOR << endl << "Type: Blinker" << endl;
 	Reader::drawConfig();
 	cout << "Stop After " << to_string(times) << " times" << endl;

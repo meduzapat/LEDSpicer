@@ -51,7 +51,7 @@ StepActor::StepActor(
 	}
 }
 
-void StepActor::drawConfig() {
+void StepActor::drawConfig() const {
 	cout << "Steps: " << static_cast<uint>(totalStepFrames) << endl;
 	DirectionActor::drawConfig();
 }

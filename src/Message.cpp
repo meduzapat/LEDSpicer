@@ -24,7 +24,7 @@
 
 using namespace LEDSpicer;
 
-string Message::toString() {
+const string Message::toString() const {
 	string ret;
 	for (auto& s : data)
 		ret.append(s).push_back(RECORD_SEPARATOR);
@@ -33,14 +33,14 @@ string Message::toString() {
 	return ret;
 }
 
-string Message::toHumanString() {
+const string Message::toHumanString() const {
 	string ret(Utility::implode(data, ID_GROUP_SEPARATOR));
 	std::replace(ret.begin(), ret.end(), FIELD_SEPARATOR, ID_SEPARATOR);
 	std::replace(ret.begin(), ret.end(), GROUP_SEPARATOR, ':');
 	return ret;
 }
 
-string Message::type2str(Types type) {
+const string Message::type2str(const Types type) {
 	switch (type) {
 	case Types::LoadProfile:
 		return "LoadProfile";
@@ -68,7 +68,7 @@ string Message::type2str(Types type) {
 	throw Error("Invalid type");
 }
 
-Message::Types Message::str2type(const string& type) {
+const Message::Types Message::str2type(const string& type) {
 	if (type == "LoadProfile")
 		return Types::LoadProfile;
 	if (type == "LoadProfileByEmulator")
@@ -94,7 +94,7 @@ Message::Types Message::str2type(const string& type) {
 	throw Error("Invalid type " + type);
 }
 
-string Message::flag2str(uint8_t flags) {
+const string Message::flag2str(const uint8_t flags) {
 	vector<string> result;
 	if (flags & FLAG_NO_ANIMATIONS)
 		result.push_back("NO_ANIMATIONS");
@@ -152,7 +152,7 @@ void Message::addData(const string& data) {
 	this->data.push_back(data);
 }
 
-Message::Types Message::getType() const {
+const Message::Types Message::getType() const {
 	return type;
 }
 

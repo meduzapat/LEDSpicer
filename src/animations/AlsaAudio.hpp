@@ -45,7 +45,7 @@ public:
 
 	virtual ~AlsaAudio();
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 

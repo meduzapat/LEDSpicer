@@ -47,7 +47,7 @@ public:
 
 	void deactivate() override;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 
