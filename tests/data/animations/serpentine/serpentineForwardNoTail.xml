@@ -12,7 +12,7 @@
 		direction="Forward"
 		tailLength="0"
 		tailColor="Purple"
-		tailIntensity="75"
+		tailIntensity="25"
 	/>
 	<actor
 		type="Serpentine"
@@ -23,6 +23,6 @@
 		direction="Forward"
 		tailLength="0"
 		tailColor="Purple"
-		tailIntensity="75"
+		tailIntensity="25"
 	/>
 </LEDSpicer>

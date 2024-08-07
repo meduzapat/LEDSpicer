@@ -24,137 +24,98 @@
 
 using namespace LEDSpicer::Devices;
 
-Element::Element(
-	const string& name,
-	uint8_t* pin,
-	const Color& defaultColor,
-	uint timeOn,
-	uint8_t brightness
-) :
-	name(name),
-	pins{pin},
-	defaultColor(defaultColor),
-	timeOn(timeOn),
-	// Only calculate brightness of not 0 or 100.
-	brightness(brightness)
-{
-	pins.shrink_to_fit();
-}
-
-Element::Element(
-	const string& name,
-	uint8_t* pinR,
-	uint8_t* pinG,
-	uint8_t* pinB,
-	const Color& defaultColor,
-	uint8_t brightness
-) :
-	name(name),
-	pins{pinR, pinG, pinB},
-	defaultColor(defaultColor),
-	// Only calculate brightness of not 0 or 100.
-	brightness(brightness)
-{
-	pins.shrink_to_fit();
-}
-
-Element::Element(Element* other) : name(other->name), defaultColor(other->defaultColor), brightness(other->brightness) {
-	for (auto p : other->pins)
-		pins.push_back(nullptr);
-	pins.shrink_to_fit();
-}
-
 void Element::setColor(const Color& color) {
-	Color newColor = brightness ? color.fade(brightness) : color;
-	if (pins.size() == 3) {
-		*pins[Color::Channels::Red]   = newColor.getR();
-		*pins[Color::Channels::Green] = newColor.getG();
-		*pins[Color::Channels::Blue]  = newColor.getB();
+	const Color& newColor(brightness ? color.fade(brightness) : color);
+	// RGB.
+	if (leds.size() == 3) {
+		*leds[Color::Channels::Red]   = newColor.getR();
+		*leds[Color::Channels::Green] = newColor.getG();
+		*leds[Color::Channels::Blue]  = newColor.getB();
 	}
+	// Handle solenoids.
 	else if (timeOn) {
+		// set solenoid off
 		if (newColor == Color::Off) {
-			*pins[SINGLE_PIN] = 0;
+			*leds[SINGLE_LED] = 0;
 		}
-		else if (not *pins[SINGLE_PIN]) {
-			*pins[SINGLE_PIN] = 255;
+		// On, always kick full intense.
+		else if (not *leds[SINGLE_LED]) {
+			*leds[SINGLE_LED] = 255;
 			clockTime = std::chrono::system_clock::now() + std::chrono::milliseconds(timeOn);
 		}
 	}
+	// Single led in monochrome.
 	else {
-		*pins[SINGLE_PIN] = newColor.getMonochrome();
+		*leds[SINGLE_LED] = newColor.getMonochrome();
 	}
 }
 
 void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
-	Color newColor = brightness ? color.fade(brightness) : color;
+	const Color& newColor = brightness ? color.fade(brightness) : color;
 	if (filter == Color::Filters::Normal)
 		setColor(color);
 	else
 		setColor(*getColor().set(color, filter, percent));
 }
 
-LEDSpicer::Color Element::getColor() {
+LEDSpicer::Color Element::getColor() const {
 	Color color;
-	if (pins.size() == 1)
-		color.set(*pins[SINGLE_PIN], *pins[SINGLE_PIN], *pins[SINGLE_PIN]);
+	if (leds.size() == 1)
+		color.set(*leds[SINGLE_LED], *leds[SINGLE_LED], *leds[SINGLE_LED]);
 	else
 		color.set(
-			*pins[Color::Channels::Red],
-			*pins[Color::Channels::Green],
-			*pins[Color::Channels::Blue]
+			*leds[Color::Channels::Red],
+			*leds[Color::Channels::Green],
+			*leds[Color::Channels::Blue]
 		);
 	return color;
 }
 
-void Element::setPinValue(uint8_t pinNumber, uint8_t val) {
-	*pins[pinNumber] = val;
+void Element::setLedValue(uint16_t led, uint8_t val) {
+	*leds[led] = val;
 }
 
-void Element::linkPin(uint8_t* val) {
-	pins.push_back(val);
+uint8_t Element::getLedValue(uint16_t led) const {
+	return *leds[led];
 }
 
-uint8_t Element::getPinValue(uint8_t pinNumber) const {
-	return *pins[pinNumber];
+uint8_t* const Element::getLed(uint16_t led) const {
+	if (led > leds.size())
+		throw Error("Invalid led number");
+	return leds[led];
 }
 
-uint8_t* const Element::getPin(uint8_t pinNumber) const {
-	if (pinNumber > pins.size())
-		throw Error("Invalid pin number");
-	return pins[pinNumber];
-}
-
-const vector<uint8_t*>& Element::getPins() const {
-	return pins;
+const vector<uint8_t*>& Element::getLeds() const {
+	return leds;
 }
 
 uint8_t Element::size() const {
-	return pins.size();
+	return leds.size();
 }
 
-string Element::getName() {
+const string Element::getName() const {
 	return name;
 }
 
-const LEDSpicer::Color& Element::getDefaultColor() {
+const LEDSpicer::Color& Element::getDefaultColor() const {
 	return defaultColor;
 }
 
-bool Element::isTimed() {
+bool Element::isTimed() const {
 	return timeOn != 0;
 }
 
 void Element::checkTime() {
-	if (*pins[SINGLE_PIN] and std::chrono::system_clock::now() > clockTime)
-		*pins[SINGLE_PIN] = 0;
+	if (*leds[SINGLE_LED] and std::chrono::system_clock::now() > clockTime)
+		*leds[SINGLE_LED] = 0;
 }
 
 void Element::draw() {
 	cout <<
 		std::left << std::setfill(' ') << std::setw(20) << name <<
-		" Pin" << (pins.size() == 1 ? (timeOn ? "*" : " ") : "s") << ": ";
-	for (auto pin : pins)
-		cout << std::right << std::setw(2) << to_string(*pin) << " ";
+		" Led" << (leds.size() == 1 ? (timeOn ? "*" : " ") : "s") << ": ";
+	for (auto led : leds)
+		cout << std::right << std::setw(2) << to_string(*led) << " ";
 
 	if (timeOn)
 		cout << std::left << std::setw(6) << (to_string(timeOn) + "ms");
@@ -164,5 +125,5 @@ void Element::draw() {
 		(brightness ? " Brightness:" + to_string(brightness) + "%" : "") << endl;
 
 	if (timeOn)
-		cout << "  * Timed pins like solenoids" << endl;
+		cout << "  * Connected timed hardware like a solenoids" << endl;
 }

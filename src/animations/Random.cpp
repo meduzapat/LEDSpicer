@@ -33,7 +33,7 @@ Random::Random(umap<string, string>& parameters, Group* const group) :
 
 	oldColors.reserve(group->size());
 
-	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
+	for (uint16_t c = 0; c < getNumberOfElements(); ++c)
 		oldColors.push_back(&Color::getColor("Black"));
 
 	generateNewColors();
@@ -45,7 +45,7 @@ void Random::calculateElements() {
 #ifdef DEVELOP
 	cout << "Random: F: " << std::setw(3) << to_string(currentFrame + 1) << std::setw(4) << to_string(percent) << "% ";
 #endif
-	for (uint8_t c = 0; c < getNumberOfElements(); ++c) {
+	for (uint16_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, oldColors[c]->transition(*newColors[c], percent), filter);
 #ifdef DEVELOP
 	cout << " " << to_string(c + 1);
@@ -63,11 +63,11 @@ void Random::calculateElements() {
 
 void Random::generateNewColors() {
 	newColors.reserve(getNumberOfElements());
-	for (uint8_t c = 0; c < getNumberOfElements(); ++c)
+	for (uint16_t c = 0; c < getNumberOfElements(); ++c)
 		newColors.push_back(colors[std::rand() / ((RAND_MAX + 1u) / colors.size())]);
 }
 
-void Random::drawConfig() {
+void Random::drawConfig() const {
 	cout << "Type: Random " << endl;
 	cout << "Colors: ";
 	Color::drawColors(colors);

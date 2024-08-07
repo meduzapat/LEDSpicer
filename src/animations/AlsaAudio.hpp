@@ -45,7 +45,7 @@ public:
 
 	virtual ~AlsaAudio();
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 protected:
 
@@ -54,9 +54,6 @@ protected:
 	static snd_pcm_t* pcm;
 
 	void calcPeak() override;
-
-	void calcPeaks() override;
-
 };
 
 } /* namespace */

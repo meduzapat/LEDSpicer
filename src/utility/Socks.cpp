@@ -56,7 +56,7 @@ void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind
 		* serverInfo,
 		* result;
 
-	memset((char *)&hints, 0, sizeof(hints));
+	memset(reinterpret_cast<char*>(&hints), 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC; // AF_UNIX
 	hints.ai_socktype = sockType; // SOCK_DGRAM, SOCK_STREAM | SOCK_NONBLOCK;
 	if (bind)
@@ -105,8 +105,10 @@ bool Socks::send(const string& message) throw() {
 
 	if (message.empty())
 		return true;
-
-	return (message.length() == ::send(sockFB, message.c_str(), message.length(), 0));
+#ifdef DEVELOP
+	LogDebug("Message sent: [" + message + "]");
+#endif
+	return (message.length() + 1 == ::send(sockFB, (message + '\0').c_str(), message.length() + 1, 0));
 }
 
 bool Socks::recive(string& buffer) {
@@ -123,7 +125,7 @@ bool Socks::recive(string& buffer) {
 	FD_ZERO(&readset);
 	FD_SET(sockFB, &readset);
 
-	ioctl(sockFB, FIONBIO, (char*) &on);
+	ioctl(sockFB, FIONBIO, reinterpret_cast<char*>(&on));
 
 	// Check if there is any data to read.
 	n = select(sockFB + 1, NULL, &readset, NULL, NULL);
@@ -135,6 +137,9 @@ bool Socks::recive(string& buffer) {
 	n = recv(sockFB, &bufferp, BUFFER_SIZE, 0);// MSG_DONTWAIT
 	if (n >= 0) {
 		buffer = bufferp;
+#ifdef DEVELOP
+		LogDebug("Message received: [" + buffer + "]");
+#endif
 		return true;
 	}
 	return false;

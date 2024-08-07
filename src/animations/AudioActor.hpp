@@ -34,6 +34,8 @@
 #define MID_POINT 55
 #define LOW_POINT 25
 
+#define CHANNELS 2
+
 namespace LEDSpicer::Animations {
 
 /**
@@ -45,7 +47,7 @@ class AudioActor: public Actor, public Direction {
 
 public:
 
-	enum class Modes : uint8_t {VuMeter, Levels, Single, Wave};
+	enum class Modes : uint8_t {VuMeter, Single, Wave, Disco};
 
 	enum Channels : uint8_t {Left = 1, Right, Both, Mono};
 
@@ -53,15 +55,15 @@ public:
 
 	virtual ~AudioActor() = default;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 	static Modes str2mode(const string& mode);
 
-	static string mode2str(Modes mode);
+	static string mode2str(const Modes mode);
 
 	static Channels str2channel(const string& channel);
 
-	static string channel2str(Channels channel);
+	static string channel2str(const Channels channel);
 
 	void restart() override;
 
@@ -72,7 +74,7 @@ public:
 protected:
 
 	struct Values {
-		uint8_t
+		uint16_t
 			l = 0,
 			r = 0;
 	};
@@ -83,11 +85,8 @@ protected:
 	/// Preprocessed value.
 	static Values value;
 
-	/// Preprocessed values.
-	static vector<Values> values;
-
 	/// Total elements per side, stereo or mono.
-	uint8_t totalElements = 0;
+	Values totalElements = {0, 0};
 
 	struct UserPref {
 		const Color
@@ -104,9 +103,9 @@ protected:
 	} userPref;
 
 	/**
-	 * Stores information for Wave mode.
+	 * Stores information for last peaks.
 	 */
-	vector<Color> waveData;
+	vector<Color> colorData;
 
 	/**
 	 * Detects the color based on the percent.
@@ -116,40 +115,30 @@ protected:
 	 */
 	Color detectColor(uint8_t percent, bool gradient = true);
 
+	/**
+	 * Returns the color based on the percent.
+	 * @param percent
+	 * @return
+	 */
+	Color getColorByPercent(const uint8_t percent);
+
 	void calculateElements() override;
 
 	/**
-	 * Delete the peak information.
+	 * Refresh the peak information (calls calcPeak).
 	 */
-	void resetPeak();
+	void refreshPeak();
 
 	/**
-	 * Delete the peaks information.
-	 */
-	void resetPeaks();
-
-	/**
-	 * Calculates and returns the peak out of raw data.
-	 * @return
+	 * Calculates the peak out of raw data in percentage (0 to 100).
 	 */
 	virtual void calcPeak() = 0;
-
-	/**
-	 * Calculates and returns the peaks per channel out of raw data.
-	 * @return
-	 */
-	virtual void calcPeaks() = 0;
 
 #ifdef DEVELOP
 	/**
 	 * for debug.
 	 */
 	void displayPeak();
-
-	/**
-	 * for debug.
-	 */
-	void displayPeaks();
 #endif
 
 	/**
@@ -163,14 +152,14 @@ protected:
 	void vuMeters();
 
 	/**
-	 * Calculates multiple VU meters.
-	 */
-	void levels();
-
-	/**
 	 * Calculates waves
 	 */
 	void waves();
+
+	/**
+	 * Calculates disco effects
+	 */
+	void disco();
 
 };
 

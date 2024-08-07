@@ -49,14 +49,14 @@ FileReader::FileReader(umap<string, string>& parameters, Group* const group) :
 	totalFrames = frames->second.size() - 1;
 }
 
-void FileReader::drawConfig() {
+void FileReader::drawConfig() const {
 	cout
 		<< "Type: FileReader " << endl
 		<< "File: " << frames->first << endl;
 	DirectionActor::drawConfig();
 }
 
-string FileReader::Format2str(Formats format) {
+string FileReader::Format2str(const Formats format) {
 	switch (format) {
 	case Formats::rgba:
 		return "rgba";
@@ -128,7 +128,7 @@ void FileReader::calculateElements() {
 #ifdef DEVELOP
 	cout << "FileReader: " << DrawDirection(cDirection) << " F: " << (currentFrame + 1) << endl;
 #endif
-	for (uint8_t c = 0; c < frames->second[currentFrame].size(); ++c) {
+	for (uint16_t c = 0; c < frames->second[currentFrame].size(); ++c) {
 #ifdef DEVELOP
 		cout << "element: " <<  to_string(c)  << " -> ";
 		frames->second[currentFrame].at(c).drawHex();

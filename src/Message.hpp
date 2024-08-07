@@ -52,40 +52,40 @@ struct Message {
 
 	Message() = default;
 
-	Message(Types type) : type(type) {}
+	Message(const Types type) : type(type) {}
 
 	/**
 	 * Creates a string to be send over the wire.
 	 * @return a string with the data.
 	 */
-	string toString();
+	const string toString() const;
 
 	/**
 	 * Creates a string to be displayed.
 	 * @return a string with the data in human readable format.
 	 */
-	string toHumanString();
+	const string toHumanString() const;
 
 	/**
 	 * Convert the type to string.
 	 * @param type
 	 * @return
 	 */
-	static string type2str(Types type);
+	static const string type2str(const Types type);
 
 	/**
 	 * Convert the strin to type.
 	 * @param type
 	 * @return
 	 */
-	static Types str2type(const string& type);
+	static const Types str2type(const string& type);
 
 	/**
 	 * Converts the flags into strings to be send over the wire.
 	 * @param flags
 	 * @return
 	 */
-	static string flag2str(uint8_t flags);
+	static const string flag2str(const uint8_t flags);
 
 	/**
 	 * Extract the flags from a string.
@@ -100,7 +100,7 @@ struct Message {
 
 	void addData(const string& data);
 
-	Types getType() const;
+	const Types getType() const;
 
 	void setType(Types type);
 

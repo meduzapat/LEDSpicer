@@ -43,18 +43,18 @@ public:
 
 	virtual ~Filler() = default;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
-	string mode2str(Modes mode);
+	static string mode2str(const Modes mode);
 
-	Modes str2mode(const string& mode);
+	static Modes str2mode(const string& mode);
 
 	void restart() override;
 
 protected:
 
 	struct Data {
-		uint8_t
+		uint16_t
 			begin,
 			end;
 		Directions dir;
@@ -68,7 +68,7 @@ private:
 	Modes mode;
 
 	/// Keeps the currently processed random.
-	uint8_t currentRandom;
+	uint16_t currentRandom;
 
 	/// Keeps track if the process is filling / emptying.
 	bool filling = true;

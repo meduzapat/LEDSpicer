@@ -40,7 +40,7 @@ void Input::clearControlledInputs() {
 	Input::controlledItems.clear();
 }
 
-void Input::drawConfig() {
+void Input::drawConfig() const {
 
 	if (not itemsMap.size())
 		return;

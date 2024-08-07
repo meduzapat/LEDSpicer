@@ -59,13 +59,13 @@ public:
 	 * Function to initialize the logs, other case they will output to the terminal.
 	 * @param logToStdOut
 	 */
-	static void initialize(bool logToStdOut);
+	static void initialize(const bool logToStdOut);
 
 	/**
 	 * Changes the logging destination.
 	 * @param option Enables/disables the logging into the terminal.
 	 */
-	static void logToStdErr(bool option = false);
+	static void logToStdErr(const bool option = false);
 
 	/**
 	 * Logs errors.
@@ -114,34 +114,34 @@ public:
 	 *  LOG_DEBUG
 	 * @param level
 	 */
-	static void setLogLevel(int level);
+	static void setLogLevel(const int level);
 
 	/**
 	 * Returns the current in use log level.
 	 * @return
 	 */
-	static int getLogLevel();
+	static const int getLogLevel();
 
 	/**
 	 * returns true if the logger is logging the level.
 	 * @param level
 	 * @return
 	 */
-	static bool isLogging(int level);
+	static const bool isLogging(const int level);
 
 	/**
 	 * Converts a string log level into its numeric value.
 	 * @param level
 	 * @return
 	 */
-	static int str2level(const string& level);
+	static const int str2level(const string& level);
 
 	/**
 	 * Converts a log level value into its string representation.
 	 * @param level
 	 * @return
 	 */
-	static string level2str(int level);
+	static const string level2str(const int level);
 
 protected:
 
@@ -160,21 +160,21 @@ protected:
 	 * @param message
 	 * @param level
 	 */
-	static void logIntoSysLog(const string& message, int level);
+	static void logIntoSysLog(const string& message,const  int level);
 
 	/**
 	 * Function to log into the standard output
 	 * @param message
 	 * @param level
 	 */
-	static void logIntoStdOut(const string& message, int level);
+	static void logIntoStdOut(const string& message,const  int level);
 
 	/**
 	 * Creates a log entry
 	 * @param message the message to log
 	 * @param level the log level (LOG_ERR, LOG_WARNING, etc)
 	 */
-	static void log(const string& message, int level);
+	static void log(const string& message,const  int level);
 
 private:
 

@@ -50,7 +50,7 @@ public:
 
 	string getFullName() const override;
 
-	void drawHardwarePinMap() override;
+	void drawHardwareLedMap() override;
 
 	void transfer() const override;
 

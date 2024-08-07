@@ -93,7 +93,7 @@ void MainBase::testLeds() {
 		return;
 
 	while (true) {
-		uint8_t led;
+		uint16_t led;
 		std::cin.clear();
 		cout << endl << "Select a Led (r to reset, q to quit):" << endl;
 		std::getline(std::cin, inp);
@@ -169,11 +169,11 @@ void MainBase::dumpConfiguration() {
 	Color::drawColors();
 	cout  << endl << "Hardware:" << endl;
 	for (auto d : DataLoader::devices)
-		d->drawHardwarePinMap();
+		d->drawHardwareLedMap();
 	cout <<
 		"Log level: " << Log::level2str(Log::getLogLevel()) << endl <<
 		"Interval: " << DataLoader::waitTime.count() << "ms" << endl <<
-		"Total Elements registered: " << (int)DataLoader::allElements.size() << endl << endl <<
+		"Total Elements registered: " << static_cast<uint16_t>(DataLoader::allElements.size()) << endl << endl <<
 		"Layout:";
 	for (auto group : DataLoader::layout) {
 		cout << endl << "Group: '" << group.first << "' with ";
@@ -234,24 +234,52 @@ void MainBase::wait(milliseconds wasted) {
 }
 
 Profile* MainBase::tryProfiles(const vector<string>& data) {
-	Profile* profile = nullptr;
-	bool replace(profiles.size() and (Utility::globalFlags & FLAG_REPLACE));
+	Profile
+		* profile    = nullptr,
+		* oldProfile = nullptr;
+	bool
+		replace(profiles.size() and (Utility::globalFlags & FLAG_REPLACE)),
+		reload(Utility::globalFlags & FLAG_FORCE_RELOAD),
+		isDefault(false);
 	for (auto& profileName : data) {
 		LogInfo((replace ? "Replacing current profile with " : "Changing to profile ") + profileName);
 		try {
 			// Check cache.
-			profile = DataLoader::getProfileFromCache(profileName);
-			if (not profile) {
+			oldProfile = DataLoader::getProfileFromCache(profileName);
+			// Ensure that the default profile is updated if needed.
+			if (oldProfile and reload) {
+				isDefault = oldProfile == DataLoader::defaultProfile;
+				LogDebug("Ignoring cache, reloading profile.");
+			}
+			// If not in cache is the same as reload.
+			if (not oldProfile or reload) {
 				profile = DataLoader::processProfile(profileName);
 			}
+			// If reload, delete old, reload is for testing, no animations.
+			if (reload) {
+				if (isDefault)
+					DataLoader::defaultProfile = profile;
+				// Update all copies before delete.
+				for (auto& p : profiles) {
+					if (p == oldProfile)
+						p = profile;
+				}
+				delete oldProfile;
+			}
+			// If exist and no reload use cache.
+			else if (oldProfile) {
+				profile = oldProfile;
+			}
 			if (replace) {
-				terminateCurrentProfile();
+				if (not reload)
+					terminateCurrentProfile();
 				profiles.pop_back();
 			}
 			else {
 				// Deactivate any overwrite.
 				clearOverrides();
-				currentProfile->stop();
+				if (not reload)
+					currentProfile->stop();
 			}
 			profiles.push_back(profile);
 			currentProfile = profile;
@@ -294,7 +322,7 @@ Profile* MainBase::craftProfile(const string& name, const string& elements, cons
 					col = &DataLoader::allElements.at(n)->getDefaultColor();
 
 				LogDebug("Using element " + n + " color " + col->getName());
-				profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col);
+				profile->addAlwaysOnElement(DataLoader::allElements.at(n), *col, Color::Filters::Normal);
 			}
 
 			// Add Groups.

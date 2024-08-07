@@ -14,12 +14,12 @@ uint16_t PacLed64::getProduct() const {
 	return PAC_LED64_PRODUCT + boardId - 1;
 }
 
-void PacLed64::drawHardwarePinMap() {
+void PacLed64::drawHardwareLedMap() {
 
-	cout << getFullName() << " Pins " << PAC_LED64_LEDS << endl << "Hardware pin map:" << endl;
-	for (uint8_t led = 0; led < PAC_LED64_LEDS; ++led)
+	cout << getFullName() << " LEDs " << PAC_LED64_LEDS << endl << "Hardware connection map:" << endl;
+	for (uint16_t led = 0; led < PAC_LED64_LEDS; ++led)
 		setLed(led, led + 1);
-	for (uint8_t led = 0; led < 15; ++led) {
+	for (uint16_t led = 0; led < 15; ++led) {
 		if (not (led % 3))
 			cout << "+  +    +  +" << endl;
 		cout

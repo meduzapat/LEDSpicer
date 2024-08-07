@@ -36,9 +36,9 @@ Actor::Actor(
 	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
 	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	repeat(parameters.count("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0),
+	affectedElements(group->size(), false),
 	group(group)
 {
-	affectedElements.resize(group->size(), false);
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
 }
@@ -52,9 +52,9 @@ void Actor::draw() {
 	if (not affectedElements.empty()) {
 		switch (filter) {
 		case Color::Filters::Mask: {
-			const Color& black = Color::getColor("Black");
+			const Color& black(Color::getColor("Black"));
 			// turn off any non affected element.
-			for (uint8_t elIdx = 0; elIdx < group->size(); ++elIdx) {
+			for (uint16_t elIdx = 0; elIdx < group->size(); ++elIdx) {
 				if (affectedElements[elIdx])
 					continue;
 				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
@@ -63,7 +63,7 @@ void Actor::draw() {
 	}
 }
 
-void Actor::drawConfig() {
+void Actor::drawConfig() const {
 	cout <<
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
@@ -151,18 +151,18 @@ void Actor::newFrame() {
 	++frame;
 }
 
-uint8_t Actor::getNumberOfElements() const {
+uint16_t Actor::getNumberOfElements() const {
 	return group->getElements().size();
 }
 
-void Actor::changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent) {
+void Actor::changeElementColor(uint16_t index, const Color& color, Color::Filters filter, uint8_t percent) {
 	affectedElements[index] = true;
 	Element* e = group->getElement(index);
 	e->setColor(color, filter, percent);
 }
 
 void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent) {
-	for (uint8_t c = 0; c < group->size(); ++c)
+	for (uint16_t c = 0; c < group->size(); ++c)
 		changeElementColor(c, color, filter, percent);
 }
 
@@ -170,7 +170,7 @@ void Actor::affectAllElements(bool value) {
 	affectedElements.assign(group->size(), value);
 }
 
-bool Actor::isElementAffected(uint8_t index) {
+bool Actor::isElementAffected(uint16_t index) const {
 	return affectedElements[index];
 }
 
@@ -179,7 +179,7 @@ bool Actor::checkRepeats() {
 	if (not repeat or repeat == 1 or repeated == repeat)
 		return false;
 
-	++repeat;
+	++repeated;
 	restart();
 	return true;
 }

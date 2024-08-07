@@ -25,17 +25,6 @@
 
 using namespace LEDSpicer::Devices;
 
-Device::Device(
-	uint8_t  pins,
-	const string& name
-) : Hardware(name) {
-	LEDs.resize(pins);
-	// So is different.
-	oldLEDs.resize(pins, 1);
-	LEDs.shrink_to_fit();
-	oldLEDs.shrink_to_fit();
-}
-
 void Device::initialize() {
 
 	if (dumpMode)
@@ -56,7 +45,7 @@ void Device::terminate() {
 	closeHardware();
 }
 
-Device* Device::setLed(uint8_t led, uint8_t intensity) {
+Device* Device::setLed(uint16_t led, uint8_t intensity) {
 #ifdef DEVELOP
 	validateLed(led);
 #endif
@@ -65,12 +54,11 @@ Device* Device::setLed(uint8_t led, uint8_t intensity) {
 }
 
 Device* Device::setLeds(uint8_t intensity) {
-	for (auto& led : LEDs)
-		led = intensity;
+	std::fill(LEDs.begin(), LEDs.end(), intensity);
 	return this;
 }
 
-uint8_t* Device::getLed(uint8_t ledPos) {
+uint8_t* Device::getLed(uint16_t ledPos) {
 #ifdef DEVELOP
 	validateLed(ledPos);
 #endif
@@ -79,7 +67,7 @@ uint8_t* Device::getLed(uint8_t ledPos) {
 
 void Device::registerElement(
 	const string& name,
-	uint8_t led,
+	uint16_t led,
 	const Color& defaultColor,
 	uint timeOn,
 	uint8_t brightness
@@ -90,9 +78,9 @@ void Device::registerElement(
 
 void Device::registerElement(
 	const string& name,
-	uint8_t led1,
-	uint8_t led2,
-	uint8_t led3,
+	uint16_t led1,
+	uint16_t led2,
+	uint16_t led3,
 	const Color& defaultColor,
 	uint8_t brightness
 ) {
@@ -116,16 +104,16 @@ void Device::resetLeds() {
 	transfer();
 }
 
-void Device::validateLed(uint8_t led) const {
+void Device::validateLed(uint16_t led) const {
 	if (led >= LEDs.size())
 		throw Error("Invalid led number " + to_string(led + 1));
 }
 
-uint8_t Device::getNumberOfElements() const {
+uint16_t Device::getNumberOfElements() const {
 	return elementsByName.size();
 }
 
-uint8_t Device::getNumberOfLeds() const {
+uint16_t Device::getNumberOfLeds() const {
 	return LEDs.size();
 }
 

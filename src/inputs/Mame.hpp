@@ -43,7 +43,7 @@ public:
 
 	virtual ~Mame() = default;
 
-	void drawConfig() override;
+	void drawConfig() const override;
 
 	void process() override;
 

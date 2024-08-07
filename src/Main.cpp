@@ -200,7 +200,7 @@ void Main::run() {
 			 * 3 system
 			 */
 			if (msg.getData().size() != 4) {
-				LogNotice("Invalid message for " + Message::type2str(Message::Types::ClearGroup));
+				LogNotice("Invalid message for " + Message::type2str(Message::Types::CraftProfile));
 				break;
 			}
 			Profile* profile = tryProfiles({msg.getData()[0]});
@@ -328,10 +328,10 @@ int main(int argc, char **argv) {
 		signal(SIGTERM, signalHandler);
 		signal(SIGQUIT, signalHandler);
 		signal(SIGABRT, signalHandler);
-		signal(SIGINT, signalHandler);
-		signal(SIGCONT, SIG_IGN);
-		signal(SIGSTOP, SIG_IGN);
-		signal(SIGHUP, signalHandler);
+		signal(SIGINT,  signalHandler);
+		signal(SIGCONT, reinterpret_cast<__sighandler_t>(1));
+		signal(SIGSTOP, reinterpret_cast<__sighandler_t>(1));
+		signal(SIGHUP,  signalHandler);
 
 		if (DataLoader::getMode() == DataLoader::Modes::Profile)
 			DataLoader::defaultProfile = DataLoader::processProfile(profile);
@@ -386,11 +386,12 @@ void Main::runCurrentProfile() {
 	}
 
 	// Reset elements.
+	const Color& color(currentProfile->getBackgroundColor());
 	for (auto& eD : DataLoader::allElements) {
 		if (eD.second->isTimed())
 			eD.second->checkTime();
 		else
-			eD.second->setColor(currentProfile->getBackgroundColor());
+			eD.second->setColor(color);
 	}
 
 	currentProfile->runFrame();

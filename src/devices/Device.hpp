@@ -39,7 +39,12 @@ class Device : public Hardware {
 
 public:
 
-	Device(uint8_t elements, const string& name);
+	/**
+	 * Creates a new Device
+	 * @param LEDs the number of connectors or single LEDs.
+	 * @param name hardware name
+	 */
+	Device(uint16_t leds, const string& name) : Hardware(name), LEDs(leds, 0), oldLEDs(leds, 1) {}
 
 	virtual ~Device() = default;
 
@@ -59,12 +64,12 @@ public:
 	virtual void transfer() const = 0;
 
 	/**
-	 * Set a LED to an intensity
-	 * @param led
+	 * Set a LED to an intensity.
+	 * @param led The Led number on the hardware.
 	 * @param intensity (0-255)
 	 * @return
 	 */
-	Device* setLed(uint8_t led, uint8_t intensity);
+	Device* setLed(uint16_t led, uint8_t intensity);
 
 	/**
 	 * Set all the LEDs to an specific intensity
@@ -75,20 +80,20 @@ public:
 
 	/**
 	 * Returns a pointer to a single LED.
-	 * @param ledPos
+	 * @param led
 	 * @return
 	 */
-	uint8_t* getLed(uint8_t ledPos);
+	uint8_t* getLed(uint16_t led);
 
 	/**
 	 * Register a new Element with a single LED.
-	 * @param name
-	 * @param led
+	 * @param name Element name
+	 * @param led the led position in this hardware.
 	 * @param defaultColor
 	 */
 	void registerElement(
 		const string& name,
-		uint8_t led,
+		uint16_t led,
 		const Color& defaultColor,
 		uint timeOn,
 		uint8_t brightness
@@ -96,17 +101,17 @@ public:
 
 	/**
 	 * Register a new Element with three LEDs (RGB).
-	 * @param name
-	 * @param led1
-	 * @param led2
-	 * @param led3
+	 * @param name The element name
+	 * @param led1 Position for the Red LED
+	 * @param led2 Position for the Green LED
+	 * @param led3 Position for the Blue LED
 	 * @param defaultColor
 	 */
 	void registerElement(
 		const string& name,
-		uint8_t led1,
-		uint8_t led2,
-		uint8_t led3,
+		uint16_t led1,
+		uint16_t led2,
+		uint16_t led3,
 		const Color& defaultColor,
 		uint8_t brightness
 	);
@@ -119,17 +124,17 @@ public:
 	Element* getElement(const string& name);
 
 	/**
-	 * Check if a LED (or pin) is valid.
+	 * Check if a LED (or connector) is valid.
 	 * @param led
 	 * @throw Error if not valid.
 	 */
-	void validateLed(uint8_t led) const;
+	void validateLed(uint16_t led) const;
 
 	/**
 	 * Returns the number of registered elements.
 	 * @return
 	 */
-	uint8_t getNumberOfElements() const;
+	uint16_t getNumberOfElements() const;
 
 	/**
 	 * Returns all elements mapped by name.
@@ -143,16 +148,16 @@ public:
 	virtual void resetLeds();
 
 	/**
-	 * Populates the pins with the correct pin number used by elements and
-	 * displays the pin in a similar way they are found on the hardware.
+	 * Populates the LEDs with the correct connector number used by elements and
+	 * displays the connector in a similar way they are found on the hardware.
 	 */
-	virtual void drawHardwarePinMap() = 0;
+	virtual void drawHardwareLedMap() = 0;
 
 	/**
-	 * Returns the number of LEDs (pins) this board controls.
+	 * Returns the number of LEDs (connectors) this board controls.
 	 * @return
 	 */
-	uint8_t getNumberOfLeds() const;
+	uint16_t getNumberOfLeds() const;
 
 	/**
 	 * Pack the data into the device.
@@ -161,10 +166,10 @@ public:
 
 protected:
 
-	/// Device LEDs (pins)
+	/// Device LEDs.
 	vector<uint8_t> LEDs;
 
-	/// Copy of device LEDs (pins)
+	/// Copy of device LEDs
 	vector<uint8_t> oldLEDs;
 
 	/// Maps elements by name.

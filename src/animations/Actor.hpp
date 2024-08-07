@@ -78,7 +78,7 @@ public:
 	/**
 	 * Draws the actor configuration.
 	 */
-	virtual void drawConfig();
+	virtual void drawConfig() const;
 
 	/**
 	 * Reset the animation back to begin.
@@ -112,7 +112,7 @@ public:
 	/**
 	 * @return true If the actor can be handled by cycles.
 	 */
-	virtual bool acceptCycles() {
+	virtual bool acceptCycles() const {
 		return false;
 	}
 
@@ -168,9 +168,9 @@ protected:
 	static uint8_t frame;
 
 	uint16_t
-		/// Number of secods to wait until start processing this actor.
+		/// Number of seconds to wait until start processing this actor.
 		secondsToStart = 0,
-		/// Number of secods to wait to stop this actor.
+		/// Number of seconds to wait to stop this actor.
 		secondsToEnd   = 0;
 
 	/// Start time clock for this actor.
@@ -189,7 +189,7 @@ protected:
 	/**
 	 * @return the number of elements on the animation's group.
 	 */
-	uint8_t getNumberOfElements() const;
+	uint16_t getNumberOfElements() const;
 
 	/**
 	 * Changes an element color with a new one applying filters.
@@ -199,7 +199,7 @@ protected:
 	 * @param filter
 	 * @param percent the amount of effect to apply, only used by Combine.
 	 */
-	void changeElementColor(uint8_t index, const Color& color, Color::Filters filter, uint8_t percent = 50);
+	void changeElementColor(uint16_t index, const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	/**
 	 * Changes the colors with a new one applying filters.
@@ -220,9 +220,9 @@ protected:
 	/**
 	 * @return true if an element got affected (dirty/changed) on this frame.
 	 */
-	bool isElementAffected(uint8_t index);
+	bool isElementAffected(uint16_t index) const;
 
-	/**
+  /**
 	 * Checks if the actor will repeat.
 	 * @return true if the actor will repeat.
 	 */
@@ -236,11 +236,11 @@ private:
 	/// A pointer to the real group of elements.
 	Group* const group;
 
-	uint8_t
+
 		/// If this actor will repeat, default 0, repeat for ever.
-		repeat    = 0,
+	uint8_t	const repeat;
 		/// Times repeated.
-		repeated  = 0;
+	uint8_t	repeated  = 0;
 };
 
 } /* namespace */

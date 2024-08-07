@@ -106,7 +106,7 @@ string Utility::implode(const vector<string>& values, const char& delimiter) {
 	return r;
 }
 
-string Utility::hex2str(int number) {
+string Utility::hex2str(const int number) {
 	std::stringstream stream;
 	stream << std::hex << std::showbase << number;
 	return string(stream.str());
