@@ -47,25 +47,29 @@ void Adalight::transfer() const {
 	lo = numLeds & 0xFF;
 	checksum = hi ^ lo ^ 0x55
 	*/
-	vector<uint8_t> serialData {
-		// Magic word
-		'A', 'd', 'a',
-		// LED count high byte
-		static_cast<uint8_t>((numLeds << 8) & 0xFF),
-		// LED count low byte
-		static_cast<uint8_t>(numLeds & 0xFF)
-	};
+		vector<uint8_t> serialData {
+			// Magic word
+			'A', 'd', 'a',
+			// LED count high byte
+			static_cast<uint8_t>((numLeds >> 8) & 0xFF),
+			// LED count low byte
+			static_cast<uint8_t>(numLeds & 0xFF)
+		};
 	// Checksum
 	serialData.push_back(static_cast<uint8_t>(serialData[3] ^ serialData[4] ^ 0x55));
-	for (uint16_t l = 0; l < numIndividualLeds; ++l)
-		serialData.push_back(LEDs[l]);
+
+	// Data
+	serialData.insert(serialData.end(), LEDs.begin(), LEDs.begin() + numIndividualLeds);
+
 
 	transferToConnection(serialData);
-	/* for testing:
-	auto data(transferFromConnection(512));
+	/* for testing:*/
+/*	auto data(transferFromConnection(512));
 	string dataStr(data.begin(), data.end());
-	LogInfo("R: " + dataStr);
-	*/
+	std::replace(dataStr.begin(), dataStr.end(), '\n', ' ');
+	dataStr.erase(std::remove(dataStr.begin(), dataStr.end(), '\r'), dataStr.end());
+	LogInfo("R: " + dataStr);*/
+
 }
 
 void Adalight::drawHardwareLedMap() {
@@ -73,13 +77,10 @@ void Adalight::drawHardwareLedMap() {
 		<< getFullName() << " LEDs " << LEDs.size() << " (" << LEDs.size() / 3 << " RGB LEDs)" << std::endl
 		<< "Hardware LED map:" << std::endl << "0  2 G  +5v" << std::endl;
 	for (uint16_t r = 0; r < LEDs.size(); r += 3) {
-		LEDs[r] = r + 1;
-		LEDs[r + 1] = r + 2;
-		LEDs[r + 2] = r + 3;
 		std::cout <<
-			" --- " << std::endl << static_cast<uint16_t>(*getLed(r)) <<
-			" " << static_cast<uint16_t>(*getLed(r + 1)) <<
-			" " << static_cast<uint16_t>(*getLed(r + 2)) << std::endl;
+			" --- " << std::endl << static_cast<uint16_t>(r + 1) <<
+			" " << static_cast<uint16_t>(r + 2) <<
+			" " << static_cast<uint16_t>(r + 3) << std::endl;
 	}
 	std::cout << std::endl;
 }

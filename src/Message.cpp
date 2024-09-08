@@ -115,7 +115,6 @@ const string Message::flag2str(const uint8_t flags) {
 
 void Message::str2flag(uint8_t& currentFlags, const string& flags) {
 	auto parts = Utility::explode(flags, '|');
-	bool rotator = false;
 	for (auto& flag : parts) {
 		if (flag == "NO_ANIMATIONS")
 			currentFlags |= FLAG_NO_ANIMATIONS;
@@ -129,15 +128,11 @@ void Message::str2flag(uint8_t& currentFlags, const string& flags) {
 			currentFlags |= FLAG_NO_START_TRANSITIONS | FLAG_NO_END_TRANSITIONS;
 		else if (flag == "NO_ROTATOR")
 			currentFlags |= FLAG_NO_ROTATOR;
-		else if (flag == "SHOW_ROTATOR")
-			rotator = true;
 		else if (flag == "FORCE_RELOAD")
 			currentFlags |= FLAG_FORCE_RELOAD;
 		else if (flag == "REPLACE")
 			currentFlags |= FLAG_REPLACE;
 	}
-	if (rotator)
-		currentFlags &= ~FLAG_NO_ROTATOR;
 }
 
 const vector<string>& LEDSpicer::Message::getData() const {

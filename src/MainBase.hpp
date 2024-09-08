@@ -90,7 +90,20 @@ protected:
 	static vector<Profile*> profiles;
 
 	/// Starting point for the frame.
-	static high_resolution_clock::time_point start;
+	static high_resolution_clock::time_point
+#ifdef BENCHMARK
+		start,
+		startAnimation,
+		startMessage,
+		startTransfer;
+
+	static milliseconds
+		timeAnimation,
+		timeMessage,
+		timeTransfer;
+#else
+		start;
+#endif
 
 	/**
 	 * Functionality for test programs.

@@ -30,6 +30,7 @@ pa_threaded_mainloop* PulseAudio::tml = nullptr;
 pa_context* PulseAudio::context       = nullptr;
 pa_stream* PulseAudio::stream         = nullptr;
 uint8_t PulseAudio::instances         = 0;
+float PulseAudio::smoother            = 1;
 AudioActor::Values PulseAudio::top    {0, 0};
 string PulseAudio::source;
 std::mutex PulseAudio::mutex;
@@ -50,6 +51,7 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 		return;
 	}
 
+	smoother = group->size() / TOP;
 	tml = pa_threaded_mainloop_new();
 	if (not tml) {
 		LogError("Failed create pulseaudio main loop");
@@ -292,15 +294,15 @@ void PulseAudio::calcPeak() {
 		uint8_t v = rawData[c];
 		// Even for left, odd for right.
 		if (c % CHANNELS) {
-			if (top.r >= TOP and v < top.r - TOP)
-				v = top.r - TOP;
+			if (top.r >= smoother and v < top.r - smoother)
+				v = top.r - smoother;
 			top.r = v;
 			if (v > value.r)
 				value.r = v;
 		}
 		else {
-			if (top.l >= TOP and v < top.l - TOP)
-				v = top.l - TOP;
+			if (top.l >= smoother and v < top.l - smoother)
+				v = top.l - smoother;
 			top.l = v;
 			if (v > value.l)
 				value.l = v;

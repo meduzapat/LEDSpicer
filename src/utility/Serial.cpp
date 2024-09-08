@@ -48,37 +48,41 @@ void Serial::connect() {
 		return;
 	}
 
-	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
+	if ((fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC)) < 0) {
 		throw Error("Can't open port " + port);
 	}
 
-	// Serial port config swiped from RXTX library (rxtx.qbang.org):
-	if (tcgetattr(fd, &tty) != 0) {
-		close(fd);
-		throw Error("Error getting serial port settings");
+	try {
+		termios tty;
+		// Serial port config swiped from RXTX library (rxtx.qbang.org):
+		if (tcgetattr(fd, &tty) != 0) {
+			throw Error("Error getting serial port settings");
+		}
+		tty.c_iflag     = INPCK;
+		tty.c_lflag     = 0;
+		tty.c_oflag     = 0;
+		tty.c_cflag     = CREAD | CS8 | CLOCAL;
+		tty.c_cc[VMIN]  = 0;
+		tty.c_cc[VTIME] = 0;
+		cfsetispeed(&tty, B115200);
+		cfsetospeed(&tty, B115200);
+		if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+			throw Error("Error setting serial port attributes");
+		}
+		// Set DTR
+		int status;
+		if (ioctl(fd, TIOCMGET, &status) == -1) {
+			throw Error("Error getting modem status");
+		}
+		status |= TIOCM_DTR;
+		if (ioctl(fd, TIOCMSET, &status) == -1) {
+			throw Error("Error setting DTR");
+		}
+		tcdrain(fd);
 	}
-	tty.c_iflag     = INPCK;
-	tty.c_lflag     = 0;
-	tty.c_oflag     = 0;
-	tty.c_cflag     = CREAD | CS8 | CLOCAL;
-	tty.c_cc[VMIN]  = 0;
-	tty.c_cc[VTIME] = 0;
-	cfsetispeed(&tty, B115200);
-	cfsetospeed(&tty, B115200);
-	if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+	catch (Error& e) {
 		close(fd);
-		throw Error("Error setting serial port attributes");
-	}
-	// Set DTR
-	int status;
-	if (ioctl(fd, TIOCMGET, &status) == -1) {
-		close(fd);
-		throw Error("Error getting modem status");
-	}
-	status |= TIOCM_DTR;
-	if (ioctl(fd, TIOCMSET, &status) == -1) {
-		close(fd);
-		throw Error("Error setting DTR");
+		throw e;
 	}
 }
 
@@ -88,7 +92,7 @@ void Serial::disconnect() {
 	LogDebug("No disconnect - DRY RUN");
 	return;
 #endif
-
+	tcdrain(fd);
 	// Clear DTR
 	int status;
 	ioctl(fd, TIOCMGET, &status);
@@ -130,6 +134,7 @@ void Serial::transferToConnection(vector<uint8_t>& data) const {
 
 vector<uint8_t> Serial::transferFromConnection(uint size) const {
 #ifdef DRY_RUN
+	// Most devices right now expect OK as a good answer.
 	return std::vector<uint8_t>({'o','k','\n'});
 #else
 	std::vector<uint8_t> response(size);
@@ -148,14 +153,14 @@ string Serial::findPortByUsbId(const string& id) {
 	for (uint8_t c = 0; c < MAX_SERIAL_PORTS_TO_SCAN; ++c) {
 		for (const string& name : DEFAULT_SERIAL_PORTS) {
 			string search(name + to_string(c));
-			std::ifstream file("/sys/class/tty/" + search + "/device/uevent");
+			std::ifstream file(FS_PREPEND + search + FS_APPEND);
 			if (not file.is_open())
 				continue;
 			std::string line;
 			while (std::getline(file, line)) {
 				if (line.find(id) != std::string::npos) {
-					LogDebug("Port found at " + search);
-					return "/dev/" + search;
+					LogDebug("Port found at " FS_DIR + search);
+					return FS_DIR + search;
 				}
 			}
 		}
