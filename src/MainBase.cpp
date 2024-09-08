@@ -28,6 +28,15 @@ bool MainBase::running = false;
 Profile* MainBase::currentProfile = nullptr;
 vector<Profile*> MainBase::profiles;
 high_resolution_clock::time_point MainBase::start;
+#ifdef BENCHMARK
+high_resolution_clock::time_point MainBase::startAnimation;
+high_resolution_clock::time_point MainBase::startMessage;
+high_resolution_clock::time_point MainBase::startTransfer;
+
+milliseconds MainBase::timeAnimation;
+milliseconds MainBase::timeMessage;
+milliseconds MainBase::timeTransfer;
+#endif
 
 MainBase::MainBase() :
 	messages(
@@ -226,11 +235,16 @@ Device* MainBase::selectDevice() {
 
 void MainBase::wait(milliseconds wasted) {
 	if (wasted < DataLoader::waitTime) {
+		start = high_resolution_clock::now();
 		std::this_thread::sleep_for(DataLoader::waitTime - wasted);
+		LogDebug("Waited time: " + to_string(duration_cast<milliseconds>(high_resolution_clock::now() - start).count()) + "ms");
 	}
 	else {
-		LogInfo("The frame took " + to_string(wasted.count()) + "ms longer to render than the minimal wait time of " + to_string(DataLoader::waitTime.count()) + "ms.");
+		LogInfo("The frame took " + to_string(wasted.count()) + "ms to render, that is longer than the minimal wait time of " + to_string(DataLoader::waitTime.count()) + "ms.");
 	}
+#ifdef BENCHMARK
+	LogDebug("Message time: " + to_string(timeMessage.count()) + "ms, Animation Time: " + to_string(timeAnimation.count()) + "ms, Transmission time: " + to_string(timeTransfer.count()) + "ms.");
+#endif
 }
 
 Profile* MainBase::tryProfiles(const vector<string>& data) {
@@ -404,9 +418,14 @@ void MainBase::terminateCurrentProfile() {
 void MainBase::sendData() {
 	// Send data.
 	// TODO: need to test speed: single thread or running one thread per device.
+#ifdef BENCHMARK
+	startTransfer = high_resolution_clock::now();
+#endif
 	for (auto device : DataLoader::devices)
 		device->packData();
-
+#ifdef BENCHMARK
+	timeTransfer = duration_cast<milliseconds>(high_resolution_clock::now() - startTransfer);
+#endif
 	// Wait...
 	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
 }

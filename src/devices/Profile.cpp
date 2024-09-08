@@ -354,9 +354,6 @@ void Profile::runAlwaysOnElements(bool force) {
 
 	// Set always on elements from profile.
 	for (auto& eE : alwaysOnElements) {
-		// Ignore ways if the flag is set.
-		if ((Utility::globalFlags & FLAG_NO_ROTATOR) and eE.element->getName().find(WAYS_INDICATOR) != string::npos)
-			continue;
 		eE.process(force ? 50 : elementProgress, &filter);
 	}
 }

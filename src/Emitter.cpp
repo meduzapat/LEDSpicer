@@ -79,8 +79,8 @@ int main(int argc, char **argv) {
 				"-v or --version               Display version information.\n"
 				"-h or --help                  Display this help screen.\n"
 				"-c <conf> or --config <conf>  Use an alternative configuration file.\n"
-				"-n or --no-rotate             Avoid trigger rotators (only used when LoadProfileByEmulator). will raise NO_ROTATOR flag\n"
-				"-r or --replace               Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator) same as REPLACE flag.\n"
+				"-n or --no-rotate             Will raise NO_ROTATOR flag\n"
+				"-r or --replace               Same as REPLACE flag.\n"
 				"-f <flags> or --flags <flags> Send extra flags to LEDSPicer, pipe separated surrounded by quotes.\n"
 				"  Available Flags:\n"
 				"  * NO_ANIMATIONS        The animations of the profile will be ignored.\n"
@@ -88,10 +88,9 @@ int main(int argc, char **argv) {
 				"  * NO_START_TRANSITIONS The stating animations of the profile will be ignored.\n"
 				"  * NO_END_TRANSITIONS   The ending animations of the current profile will be ignored.\n"
 				"  * NO_TRANSITIONS       Same as NO_START_TRANSITIONS and NO_END_TRANSITIONS together.\n"
-				"  * SHOW_ROTATOR         Only necessary to override the -n.\n"
-				"  * NO_ROTATOR           Do not display rotator information.\n"
+				"  * NO_ROTATOR           Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
 				"  * FORCE_RELOAD         The profile will be load from the file instead of using cache.\n"
-				"  * REPLACE              The current running profile will be replaced with the new one, will process the ending transition if any.\n"
+				"  * REPLACE              Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator)\n"
 				"  example: -f \"NO_ANIMATIONS|NO_INPUTS|FORCE_RELOAD\"\n"
 				"If -c or --config is not provided, emitter will use " CONFIG_FILE
 				<< endl;
@@ -286,7 +285,7 @@ int main(int argc, char **argv) {
 						gd.rotate(parameters);
 					}
 					else {
-						LogDebug("No restrictors found");
+						LogDebug("Restrictors ignored or not found");
 					}
 				}
 			}

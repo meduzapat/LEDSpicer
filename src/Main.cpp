@@ -73,7 +73,9 @@ void Main::run() {
 			runCurrentProfile();
 			continue;
 		}
-
+#ifdef BENCHMARK
+		startMessage = high_resolution_clock::now();
+#endif
 		Message msg(messages.getMessage());
 		LogDebug("Received message: Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
 		// Set global flags.
@@ -219,6 +221,9 @@ void Main::run() {
 		default:
 			break;
 		}
+#ifdef BENCHMARK
+		timeMessage = duration_cast<milliseconds>(high_resolution_clock::now() - startMessage);
+#endif
 	}
 	currentProfile = DataLoader::defaultProfile;
 	terminateCurrentProfile();
@@ -393,8 +398,12 @@ void Main::runCurrentProfile() {
 		else
 			eD.second->setColor(color);
 	}
-
+#ifdef BENCHMARK
+	startAnimation = high_resolution_clock::now();
+#endif
 	currentProfile->runFrame();
-
+#ifdef BENCHMARK
+	timeAnimation = duration_cast<milliseconds>(high_resolution_clock::now() - startAnimation);
+#endif
 	sendData();
 }
