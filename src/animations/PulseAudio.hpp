@@ -32,7 +32,7 @@
 #define STREAM_NAME "Peek Reader"
 #define SAMPLE_FORMAT PA_SAMPLE_FLOAT32
 #define RATE 144
-#define TOP 1.77f
+#define TOP 30.00f
 
 namespace LEDSpicer::Animations {
 
@@ -58,6 +58,7 @@ protected:
 
 	static uint8_t instances;
 
+
 	static string source;
 
 	/// To avoid updating when is reading the buffer.
@@ -67,6 +68,7 @@ protected:
 	static vector<uint8_t> rawData;
 
 	static Values top;
+	static float smoother;
 
 	static void disconnect();
 

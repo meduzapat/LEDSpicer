@@ -39,6 +39,9 @@
 /// Ports to scan: ignoring old or unrelated like /dev/ttyS
 #define DEFAULT_SERIAL_PORTS {"ttyUSB", "ttyACM"}
 #define MAX_SERIAL_PORTS_TO_SCAN 5
+#define FS_PREPEND "/sys/class/tty/"
+#define FS_APPEND  "/device/uevent"
+#define FS_DIR     "/dev/"
 
 namespace LEDSpicer {
 
@@ -63,8 +66,6 @@ public:
 	string getPort();
 
 protected:
-
-	termios tty;
 
 	string port;
 
