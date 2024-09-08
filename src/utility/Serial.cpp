@@ -159,7 +159,7 @@ string Serial::findPortByUsbId(const string& id) {
 			std::string line;
 			while (std::getline(file, line)) {
 				if (line.find(id) != std::string::npos) {
-					LogDebug("Port found at " + FS_DIR + search);
+					LogDebug("Port found at " FS_DIR + search);
 					return FS_DIR + search;
 				}
 			}
