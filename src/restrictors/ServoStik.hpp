@@ -64,6 +64,8 @@ public:
 
 	uint8_t getMaxIds() const override;
 
+	const bool productBasedId() const override;
+
 protected:
 
 	void storeWays(const string& profile, const string& ways) const;

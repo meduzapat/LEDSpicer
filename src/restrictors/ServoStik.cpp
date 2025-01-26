@@ -64,11 +64,15 @@ uint16_t ServoStik::getVendor() const {
 }
 
 uint16_t ServoStik::getProduct() const {
-	return (SERVOSTIK_PRODUCT + getId() - 1);
+	return (SERVOSTIK_PRODUCT);
 }
 
 uint8_t ServoStik::getMaxIds() const {
 	return 2;
+}
+
+const bool ServoStik::productBasedId() const {
+	return false;
 }
 
 void ServoStik::storeWays(const string& profile, const string& ways) const {

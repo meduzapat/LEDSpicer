@@ -70,6 +70,12 @@ public:
 	uint8_t getId() const;
 
 	/**
+	 * Returns true if the Board ID modifies the USB product code, false if not.
+	 * @return
+	 */
+	virtual const bool productBasedId() const;
+
+	/**
 	 * This function will be used to close the USB session,
 	 * need to be called only once when ledspicer exit.
 	 */
