@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,6 +61,7 @@ using std::chrono::milliseconds;
 #define PARAM_BLUE            "blue"
 #define PARAM_STRIP           "stripSize"
 #define PARAM_POSITION        "position"
+#define PARAM_POSITIONS       "positions"
 #define PARAM_COLORFORMAT     "colorFormat"
 #define PARAM_DEFAULT_PROFILE "defaultProfile"
 #define PARAM_USER_ID         "userId"

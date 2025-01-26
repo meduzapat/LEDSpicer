@@ -4,7 +4,7 @@
  * @since     Jun 25, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -301,6 +301,7 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color, const Color::Fi
 }
 
 void Profile::addTemporaryAlwaysOnElement(const string name, const Element::Item item) {
+	removeTemporaryAlwaysOnElement(name);
 	temporaryAlwaysOnElements.emplace(name, item);
 }
 
@@ -314,6 +315,7 @@ void Profile::removeTemporaryAlwaysOnElements() {
 }
 
 void Profile::addTemporaryAlwaysOnGroup(const string name, const Group::Item item) {
+	removeTemporaryAlwaysOnGroup(name);
 	temporaryAlwaysOnGroups.emplace(name, item);
 }
 

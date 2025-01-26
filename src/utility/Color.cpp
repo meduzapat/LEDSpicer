@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,7 +78,7 @@ void Color::set(const string& color) {
 
 void Color::set(const string& color, bool format) {
 
-	if (color.empty() or color.size() != 6)
+	if (color.size() != 6)
 		set(0, 0, 0);
 	else
 		set(std::stoul(color, nullptr, 16));

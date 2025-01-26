@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -90,6 +90,27 @@ void Device::registerElement(
 	elementsByName.emplace(name, Element(
 		name,
 		&LEDs[led1], &LEDs[led2], &LEDs[led3],
+		defaultColor,
+		brightness
+	));
+}
+
+void Device::registerElement(
+	const string& name,
+	const vector<uint16_t>& ledPositions,
+	const Color& defaultColor,
+	uint8_t brightness
+) {
+	vector<uint8_t*> leds;
+	for (uint16_t led : ledPositions) {
+		validateLed(led);
+		// Map the LED positions to pointers
+		leds.push_back(&LEDs[led]);
+	}
+
+	elementsByName.emplace(name, Element(
+		name,
+		leds,
 		defaultColor,
 		brightness
 	));

@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -79,6 +79,8 @@ public:
 	 * @param name Element name.
 	 * @param led pointer to the LED on the hardware.
 	 * @param defaultColor
+	 * @param timeOn the number of milliseconds to say ON, used for solenoids.
+	 * @param brightness The intensity of modifier for this Element.
 	 */
 	Element(
 		const string& name,
@@ -91,7 +93,7 @@ public:
 		leds{led},
 		defaultColor(defaultColor),
 		timeOn(timeOn),
-		// Only calculate brightness of not 0 or 100.
+		// Only calculates brightness if is not 0 or 100.
 		brightness(brightness)
 	{}
 
@@ -102,6 +104,7 @@ public:
 	 * @param ledG pointer for the Green LED
 	 * @param ledB pointer for the Blue LED
 	 * @param defaultColor
+	 * @param brightness The intensity of modifier for this Element.
 	 */
 	Element(
 		const string& name,
@@ -114,7 +117,27 @@ public:
 		name(name),
 		leds{ledR, ledG, ledB},
 		defaultColor(defaultColor),
-		// Only calculate brightness of not 0 or 100.
+		// Only calculates brightness if is not 0 or 100.
+		brightness(brightness)
+	{}
+
+	/**
+	 * Creates a new Element that may control multiple RGB LEDs.
+	 * @param name Element name.
+	 * @param leds reference to the LEDs on the hardware, is multiple of 3 for RGB.
+	 * @param defaultColor
+	 * @param brightness The intensity of modifier for this Element.
+	 */
+	Element(
+		const string& name,
+		const vector<uint8_t*>& leds,
+		const Color& defaultColor,
+		uint8_t brightness
+	) :
+		name(name),
+		leds(leds),
+		defaultColor(defaultColor),
+		// Only calculates brightness if is not 0 or 100.
 		brightness(brightness)
 	{}
 

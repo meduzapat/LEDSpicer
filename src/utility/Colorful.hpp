@@ -4,7 +4,7 @@
  * @since     Nov 2, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,7 +29,9 @@
 namespace LEDSpicer {
 
 /**
- * LEDSpicer::Inputs::Colorful
+ * LEDSpicer::Colorful
+ *
+ * Adds extra functionality to Colors.
  */
 class Colorful: public Colors {
 
