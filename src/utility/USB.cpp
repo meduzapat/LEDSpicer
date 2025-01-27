@@ -86,14 +86,17 @@ void USB::connect() {
 
 		if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
 			// For ID by product only check the vendor and product.
-			if (productBasedId()) {
+			if (isProductBasedId()) {
+				break;
+			}
+			// For hardware that have no order use the position on the list.
+			else if (isNonBasedId() and idx + 1 == boardId) {
 				break;
 			}
 			// For independent hardware check device ID.
 			else if (desc.bcdDevice == boardId) {
 				break;
 			}
-
 		}
 		device = nullptr;
 	}
@@ -164,8 +167,12 @@ uint8_t USB::getId() const {
 	return boardId;
 }
 
-const bool USB::productBasedId() const {
+const bool USB::isProductBasedId() const {
 	return true;
+}
+
+const bool USB::isNonBasedId() const {
+	return false;
 }
 
 int USB::send(vector<uint8_t>& data) const {

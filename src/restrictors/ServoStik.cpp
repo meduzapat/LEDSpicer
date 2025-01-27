@@ -71,8 +71,8 @@ uint8_t ServoStik::getMaxIds() const {
 	return 2;
 }
 
-const bool ServoStik::productBasedId() const {
-	return false;
+const bool ServoStik::isNonBasedId() const {
+	return true;
 }
 
 void ServoStik::storeWays(const string& profile, const string& ways) const {

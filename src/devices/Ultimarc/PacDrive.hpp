@@ -62,7 +62,7 @@ public:
 
 	uint16_t getProduct() const override;
 
-	const bool productBasedId() const override;
+	const bool isProductBasedId() const override;
 
 protected:
 

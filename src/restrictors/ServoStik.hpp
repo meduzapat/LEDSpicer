@@ -64,7 +64,7 @@ public:
 
 	uint8_t getMaxIds() const override;
 
-	const bool productBasedId() const override;
+	const bool isNonBasedId() const override;
 
 protected:
 

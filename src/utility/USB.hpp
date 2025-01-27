@@ -73,7 +73,13 @@ public:
 	 * Returns true if the Board ID modifies the USB product code, false if not.
 	 * @return
 	 */
-	virtual const bool productBasedId() const;
+	virtual const bool isProductBasedId() const;
+
+	/**
+	 * Some hardware have no way to differentiate between the same product, so the ID will be the position on the USB list.
+	 * @return
+	 */
+	virtual const bool isNonBasedId() const;
 
 	/**
 	 * This function will be used to close the USB session,
