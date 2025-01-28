@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
 	Log::initialize(true);
 
-	umap<string, Restrictor::Ways> playersData, availablePlayersData;
+	umap<string, Restrictor::Ways> playersRequestedData, availablePlayersData;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -113,11 +113,11 @@ int main(int argc, char **argv) {
 			LogError("Invalid player data");
 			return EXIT_FAILURE;
 		}
-		playersData.emplace(commandline + "_" + argv[i + 1], Restrictor::str2ways(argv[i + 2]));
+		playersRequestedData.emplace(commandline + "_" + argv[i + 1], Restrictor::str2ways(argv[i + 2]));
 		i+=2;
 	}
 
-	if (playersData.empty() and resetWays.empty()) {
+	if (playersRequestedData.empty() and resetWays.empty()) {
 		LogError("Nothing to do");
 		return EXIT_SUCCESS;
 	}
@@ -148,58 +148,52 @@ int main(int argc, char **argv) {
 
 		for (; element; element = element->NextSiblingElement(RESTRICTOR)) {
 			umap<string, string> restrictorAttr(XMLHelper::processNode(element));
-			umap<string, uint8_t> playerData(std::move(processPlayerNode(element)));
-			if (playerData.empty())
+			umap<string, uint8_t> configPlayersData(std::move(processPlayerNode(element)));
+			if (configPlayersData.empty())
 				continue;
 			Utility::checkAttributes(REQUIRED_PARAM_RESTRICTOR, restrictorAttr, RESTRICTOR);
 			Restrictor* restrictor = nullptr;
 			if (restrictorAttr["name"] == ULTRASTIK_NAME) {
-				restrictor = new UltraStik360(restrictorAttr, playerData);
+				restrictor = new UltraStik360(restrictorAttr, configPlayersData);
 			}
 			else if (restrictorAttr["name"] == SERVOSTIK_NAME) {
-				restrictor = new ServoStik(restrictorAttr, playerData);
+				restrictor = new ServoStik(restrictorAttr, configPlayersData);
 			}
 			else if (restrictorAttr["name"] == GPWIZ49_NAME) {
-				restrictor = new GPWiz49(restrictorAttr, playerData);
+				restrictor = new GPWiz49(restrictorAttr, configPlayersData);
 			}
 			else if (restrictorAttr["name"] == GPWIZ40ROTOX_NAME) {
-				restrictor = new GPWiz40RotoX(restrictorAttr, playerData);
+				restrictor = new GPWiz40RotoX(restrictorAttr, configPlayersData);
 			}
 			else if (restrictorAttr["name"] == TOS428_NAME) {
-				restrictor = new TOS428(restrictorAttr, playerData);
+				restrictor = new TOS428(restrictorAttr, configPlayersData);
 			}
 			else {
 				LogError("Unknown hardware type " + restrictorAttr["name"]);
 				continue;
 			}
 
-			if (playerData.size() > restrictor->getMaxIds()) {
+			if (configPlayersData.size() > restrictor->getMaxIds()) {
 				LogDebug(restrictor->getFullName() + " supports only " + to_string(restrictor->getMaxIds()) + " devices");
 			}
 
-			for (const auto& pd : playerData) {
-				if (playersData.count(pd.first))
-					availablePlayersData.emplace(pd.first, playersData.at(pd.first));
-				else
-					LogDebug("This hardware type " + restrictorAttr["name"] + " does not support " + pd.first);
-			}
-
-			for (const auto& pd : playerData) {
-				if (playersData.count(pd.first))
-					availablePlayersData.emplace(pd.first, playersData.at(pd.first));
-				else
-					LogDebug("This hardware type " + restrictorAttr["name"] + " does not support " + pd.first);
+			for (const auto& pd : configPlayersData) {
+				// Set Rotations.
+				if (playersRequestedData.size() and playersRequestedData.count(pd.first)) {
+					availablePlayersData.emplace(pd.first, playersRequestedData.at(pd.first));
+				}
+				// Reset all.
+				else if (resetWays.size()) {
+					availablePlayersData.emplace(pd.first, Restrictor::str2ways(resetWays));
+				}
+				else {
+					LogDebug("This hardware type " + restrictor->getFullName() + " cannot handle " + pd.first);
+				}
 			}
 
 			restrictor->initialize();
-
-			if (resetWays.empty())
-				// Run Rotations.
-				restrictor->rotate(availablePlayersData);
-			else
-				// Reset all.
-				restrictor->rotate(Restrictor::str2ways(resetWays));
-
+			restrictor->rotate(availablePlayersData);
+			availablePlayersData.clear();
 			restrictor->terminate();
 			delete restrictor;
 		}

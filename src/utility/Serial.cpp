@@ -35,7 +35,11 @@ void Serial::detectPort() {
 void Serial::connect() {
 	if (port.empty()) {
 		LogDebug("Port is not defined attempting detection...");
+#ifdef DRY_RUN
+		LogDebug("No port detection - DRY RUN");
+#else
 		detectPort();
+#endif
 	}
 	LogDebug("Opening connection to " + port);
 #ifdef DRY_RUN

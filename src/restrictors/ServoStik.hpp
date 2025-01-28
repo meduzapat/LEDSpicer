@@ -68,9 +68,9 @@ public:
 
 protected:
 
-	void storeWays(const string& profile, const string& ways) const;
+	void storeWays(const string& profile, const Ways& ways) const;
 
-	const string retrieveWays(const string& profile) const;
+	const Ways retrieveWays(const string& profile) const;
 
 };
 
