@@ -120,3 +120,8 @@ const string Restrictor::ways2StrWays(Ways ways) {
 bool Restrictor::isRotary(const Ways& ways) {
 	return (ways == Ways::rotary8 or ways == Ways::rotary12);
 }
+
+const string Restrictor::getProfileStr(const string& profile) {
+	auto parts(Utility::explode(profile, '_'));
+	return "Player " + parts[0] + ", Joystick " + parts[1];
+}

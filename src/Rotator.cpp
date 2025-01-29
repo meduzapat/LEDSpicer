@@ -187,15 +187,19 @@ int main(int argc, char **argv) {
 					availablePlayersData.emplace(pd.first, Restrictor::str2ways(resetWays));
 				}
 				else {
-					LogDebug("This hardware type " + restrictor->getFullName() + " cannot handle " + pd.first);
+					LogDebug(Restrictor::getProfileStr(pd.first) + " not requested for " + restrictor->getFullName());
 				}
 			}
 
+			if (availablePlayersData.empty()) {
+				continue;
+			}
 			restrictor->initialize();
 			restrictor->rotate(availablePlayersData);
 			availablePlayersData.clear();
 			restrictor->terminate();
 			delete restrictor;
+			std::this_thread::sleep_for(std::chrono::milliseconds(250));
 		}
 
 	}

@@ -97,6 +97,13 @@ public:
 	 */
 	static bool isRotary(const Ways& ways);
 
+	/**
+	 * Converts a profile into human readable.
+	 * @param profile like 1_1
+	 * @return a string like Player 1, Joystick 1
+	 */
+	static const string getProfileStr(const string& profile);
+
 protected:
 
 	/// Supported players for this restrictor in the form of P_J => id (player_joystick)
