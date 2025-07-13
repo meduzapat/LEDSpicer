@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
-AC_INIT([LEDSpicer],[0.6.3],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
+AC_INIT([LEDSpicer],[0.6.4],[https://sourceforge.net/p/ledspicer/tickets],[ledspicer],[https://sourceforge.net/projects/ledspicer])
 
-AC_COPYRIGHT([Copyright © 2018 - 2024 Patricio A. Rossi])
+AC_COPYRIGHT([Copyright © 2018 - 2025 Patricio A. Rossi])
 AC_CONFIG_SRCDIR([src/utility/Error.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -29,7 +29,7 @@ m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], AC_SUBST([pkgconfigdir], ${libdir}/
 AC_SUBST([LIB_VERSION], [1:1:0])
 DATA_VERSION=["1.0"]
 AC_DEFINE([DATA_VERSION], ["1.0"], [Data files version])
-AC_DEFINE([COPYRIGHT], ["Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)"], [Copyright message])
+AC_DEFINE([COPYRIGHT], ["Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)"], [Copyright message])
 
 dnl Enable MiSTer only code.
 AC_ARG_ENABLE(mister,

@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -87,9 +87,11 @@ public:
 
 	/**
 	 * Register a new Element with a single LED.
-	 * @param name Element name
+	 * @param name Element name.
 	 * @param led the led position in this hardware.
-	 * @param defaultColor
+	 * @param defaultColor Color to use by default.
+	 * @param timeOn number of milliseconds to be ON.
+	 * @param brightness 0 to 100% brightness adjustment.
 	 */
 	void registerElement(
 		const string& name,
@@ -105,13 +107,28 @@ public:
 	 * @param led1 Position for the Red LED
 	 * @param led2 Position for the Green LED
 	 * @param led3 Position for the Blue LED
-	 * @param defaultColor
+	 * @param defaultColor Color to use by default.
+	 * @param brightness 0 to 100% brightness adjustment.
 	 */
 	void registerElement(
 		const string& name,
 		uint16_t led1,
 		uint16_t led2,
 		uint16_t led3,
+		const Color& defaultColor,
+		uint8_t brightness
+	);
+
+	/**
+	 * Register a new Element with a list of LEDs so one element can control multiple RGB LEDs.
+	 * @param name The element name
+	 * @param ledPositions a list of RGB positions on the hardware in RGB format.
+	 * @param defaultColor Color to use by default.
+	 * @param brightness 0 to 100% brightness adjustment.
+	 */
+	void registerElement(
+		const string& name,
+		const vector<uint16_t>& ledPositions,
 		const Color& defaultColor,
 		uint8_t brightness
 	);

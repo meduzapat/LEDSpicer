@@ -4,7 +4,7 @@
  * @since     Oct 8, 2023
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,11 @@ void Serial::detectPort() {
 void Serial::connect() {
 	if (port.empty()) {
 		LogDebug("Port is not defined attempting detection...");
+#ifdef DRY_RUN
+		LogDebug("No port detection - DRY RUN");
+#else
 		detectPort();
+#endif
 	}
 	LogDebug("Opening connection to " + port);
 #ifdef DRY_RUN

@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -202,9 +202,10 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 		else if (tempAttr.count(PARAM_POSITION)) {
 			uint16_t
 				r, g, b,
-				// If size is 1 is just a RGB element, strips otherwise.
+				// size is the number of PINs, If size is 3 (1x3) is just a RGB element, strips otherwise.
 				size (tempAttr.count(PARAM_STRIP) ? Utility::parseNumber(tempAttr[PARAM_STRIP], invalidValueFor(PARAM_STRIP) " in " + device->getFullName())  * 3: 3),
-				pos  (Utility::parseNumber(tempAttr[PARAM_POSITION], invalidValueFor(PARAM_POSITION) " in " + device->getFullName()) - 1),
+				// 1st RGB element
+				pos  ((Utility::parseNumber(tempAttr[PARAM_POSITION], invalidValueFor(PARAM_POSITION) " in " + device->getFullName()) - 1) * 3),
 				elem (1);
 			string
 				order(tempAttr.count(PARAM_COLORFORMAT) ? tempAttr.at(PARAM_COLORFORMAT) : DEFAULT_ORDER),
@@ -249,6 +250,48 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 					allElements.emplace(elemName, device->getElement(elemName));
 				}
 			}
+		}
+		// Multiple RGB LEDs together as a single element.
+		else if (tempAttr.count(PARAM_POSITIONS)) {
+
+			string order(tempAttr.count(PARAM_COLORFORMAT) ? tempAttr.at(PARAM_COLORFORMAT) : DEFAULT_ORDER);
+			vector<uint16_t> ledPositions;
+			// Process leds.
+			for (auto& posStr : Utility::explode(tempAttr.at(PARAM_POSITIONS), ',')) {
+				uint16_t
+					pos = (Utility::parseNumber(posStr, invalidValueFor(PARAM_POSITIONS) " in " + device->getFullName()) - 1),
+					c   = pos * 3,
+					r, g, b;
+				if (not Utility::verifyValue(pos, static_cast<uint16_t>(0), device->getNumberOfElements())) {
+					throw LEDError("Invalid value " + posStr + " in " + tempAttr.at(PARAM_POSITIONS) + " for element " + name + " in " + device->getFullName());
+				}
+				// Process element(s)
+				for (char col : order) {
+					switch (col) {
+					case 'r':
+						ledCheck[c] = true;
+						r = c++;
+						break;
+					case 'g':
+						ledCheck[c] = true;
+						g = c++;
+					break;
+					case 'b':
+						ledCheck[c] = true;
+						b = c++;
+					break;
+					}
+				}
+				ledPositions.push_back(r);
+				ledPositions.push_back(g);
+				ledPositions.push_back(b);
+			}
+			device->registerElement(
+				name,
+				ledPositions,
+				defaultColor,
+				brightness
+			);
 		}
 		// RGB.
 		else {

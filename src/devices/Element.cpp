@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,7 +26,15 @@ using namespace LEDSpicer::Devices;
 
 void Element::setColor(const Color& color) {
 	const Color& newColor(brightness ? color.fade(brightness) : color);
-	// RGB.
+	// Multiple RGB.
+	if (leds.size() > 3) {
+		for (size_t i = 0; i < leds.size(); i += 3) {
+			*leds[i + Color::Channels::Red]   = newColor.getR();
+			*leds[i + Color::Channels::Green] = newColor.getG();
+			*leds[i + Color::Channels::Blue]  = newColor.getB();
+		}
+	}
+	// Single RGB.
 	if (leds.size() == 3) {
 		*leds[Color::Channels::Red]   = newColor.getR();
 		*leds[Color::Channels::Green] = newColor.getG();
@@ -51,7 +59,6 @@ void Element::setColor(const Color& color) {
 }
 
 void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t percent) {
-	const Color& newColor = brightness ? color.fade(brightness) : color;
 	if (filter == Color::Filters::Normal)
 		setColor(color);
 	else
@@ -113,9 +120,7 @@ void Element::checkTime() {
 void Element::draw() {
 	cout <<
 		std::left << std::setfill(' ') << std::setw(20) << name <<
-		" Led" << (leds.size() == 1 ? (timeOn ? "*" : " ") : "s") << ": ";
-	for (auto led : leds)
-		cout << std::right << std::setw(2) << to_string(*led) << " ";
+		" Led: " << (leds.size() == 1 ? (timeOn ? "Solenoid" : "Single Color") : (leds.size() == 3 ? "RGB" : "Multi RGB"));
 
 	if (timeOn)
 		cout << std::left << std::setw(6) << (to_string(timeOn) + "ms");

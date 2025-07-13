@@ -4,7 +4,7 @@
  * @since     Jul 4, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2024 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -68,6 +68,18 @@ public:
 	 * @return
 	 */
 	uint8_t getId() const;
+
+	/**
+	 * Returns true if the Board ID modifies the USB product code, false if not.
+	 * @return
+	 */
+	virtual const bool isProductBasedId() const;
+
+	/**
+	 * Some hardware have no way to differentiate between the same product, so the ID will be the position on the USB list.
+	 * @return
+	 */
+	virtual const bool isNonBasedId() const;
 
 	/**
 	 * This function will be used to close the USB session,

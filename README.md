@@ -4,20 +4,20 @@
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
 ![GitHub License](https://img.shields.io/github/license/meduzapat/ledspicer?logo=opensourceinitiative&logoColor=%233DA639&color=blue)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
-[![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LVNVCXN4NKWP8)
+[![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8)
 [![Static Badge](https://img.shields.io/badge/OH-rgb(90%2C%2042%2C%20130)?label=Project%20Summary&labelColor=gray)](https://openhub.net/p/ledspicer)
 
-**LEDSpicer Overview: Illuminate Your Project with Dynamic LEDs and Joystick Control**
+## LEDSpicer Overview: Advanced LED and Joystick Control for Enhanced Projects
 
-LEDSpicer is a versatile linear LED controller daemon designed for managing single-color or RGB LEDs across various devices.
+LEDSpicer is a robust linear LED controller daemon engineered to manage both single-color and RGB LEDs across a wide range of devices.
 
-With LEDSpicer, you can effortlessly execute captivating animations and profiles, providing a dynamic and visually appealing experience. The daemon seamlessly integrates with user input, allowing interactive control over the LEDs. What sets LEDSpicer apart is its ability to trigger profiles based on diverse events, including user input, network interactions, or specific game names. It seamlessly integrates with MAME events, enabling precise control of LEDs based on in-game actions.
+This solution enables the seamless execution of sophisticated animations and profiles, delivering a visually striking and dynamic user experience. Designed for flexibility, LEDSpicer integrates effortlessly with user inputs, offering responsive and interactive LED control. Its standout feature lies in its ability to activate profiles based on a variety of triggers, such as user commands, network events, or specific game titles. With full compatibility for MAME events, it provides precise LED synchronization tied to in-game activities.
 
-Moreover, LEDSpicer goes beyond mere illumination by offering support for joystick restrictors and rotators. Elevate your gaming experience with precision-controlled joysticks, creating a harmonious blend of visual and mechanical excellence.
+Beyond illumination, LEDSpicer extends its functionality to include support for joystick restrictors and rotators. This enhances gaming applications by combining precise mechanical control with high-quality visual output, ensuring a cohesive and immersive experience.
 
-Enhance your project's visual aesthetics and user engagement with LEDSpicer – where LED control meets simplicity and creativity, extending its reach to the realm of joystick restrictors and rotators.
+Elevate your project’s aesthetic appeal and interactivity with LEDSpicer—a powerful tool that merges advanced LED management with intuitive design, while expanding its capabilities to include joystick control solutions.
 
->A program to flavor your Arcade project.
+> *Optimized software for enhancing arcade and interactive projects.*
 
 ## Getting Started
 
