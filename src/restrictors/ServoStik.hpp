@@ -64,11 +64,13 @@ public:
 
 	uint8_t getMaxIds() const override;
 
+	const bool isNonBasedId() const override;
+
 protected:
 
-	void storeWays(const string& profile, const string& ways) const;
+	void storeWays(const string& profile, const Ways& ways) const;
 
-	const string retrieveWays(const string& profile) const;
+	const Ways retrieveWays(const string& profile) const;
 
 };
 

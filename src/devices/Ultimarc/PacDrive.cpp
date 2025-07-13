@@ -61,36 +61,6 @@ uint16_t PacDrive::getProduct() const {
 	return PAC_DRIVE_PRODUCT;
 }
 
-void PacDrive::connect() {
-
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " " + getFullName());
-
-#ifdef DRY_RUN
-	LogDebug("No USB handle - DRY RUN");
-	return;
-#endif
-
-	libusb_device** list;
-	libusb_device* device;
-	libusb_get_device_list(usbSession, &list);
-	for (size_t idx = 0; list[idx] != nullptr; idx++) {
-		device = list[idx];
-		libusb_device_descriptor desc = {0};
-		libusb_get_device_descriptor(device, &desc);
-#ifdef DEVELOP
-		LogDebug("Found: Vendor-Device-bcdDevice = " + Utility::hex2str(desc.idVendor) + "-" + Utility::hex2str(desc.idProduct) + "-" + to_string(desc.bcdDevice));
-#endif
-		if (desc.idVendor == getVendor() and desc.idProduct == getProduct() and desc.bcdDevice == boardId)
-			break;
-		device = nullptr;
-	}
-	libusb_free_device_list(list, 1);
-
-	if (not device or libusb_open(device, &handle))
-		throw Error(
-			"Unable to connect to " +
-			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
-			" " + getFullName()
-		);
-	libusb_set_auto_detach_kernel_driver(handle, true);
+const bool PacDrive::isProductBasedId() const {
+	return false;
 }

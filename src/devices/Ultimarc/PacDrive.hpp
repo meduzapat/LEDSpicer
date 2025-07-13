@@ -62,9 +62,9 @@ public:
 
 	uint16_t getProduct() const override;
 
-protected:
+	const bool isProductBasedId() const override;
 
-	void connect() override;
+protected:
 
 	void afterConnect() override {}
 };

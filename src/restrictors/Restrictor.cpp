@@ -46,13 +46,6 @@ uint8_t Restrictor::getMaxIds() const {
 	return RESTRICTOR_SINGLE_ID;
 }
 
-void Restrictor::rotate(Ways ways) {
-	umap<string, Ways> playersData;
-	for (auto& p : players)
-		playersData.emplace(p.first, ways);
-	rotate(playersData);
-}
-
 Restrictor::Ways Restrictor::str2ways(const string& ways) {
 	if (ways == "1" or ways == "2" or ways == "strange2")
 		return Ways::w2;
@@ -105,7 +98,7 @@ string Restrictor::ways2str(Ways ways) {
 	return "";
 }
 
-Restrictor::Ways Restrictor::strWaysToWays(const std::string& strWays) {
+const Restrictor::Ways Restrictor::strWays2Ways(const std::string& strWays) {
 	try {
 		int intValue(std::stoi(strWays));
 		if (intValue >= static_cast<int>(Ways::invalid) && intValue <= static_cast<int>(Ways::rotary12)) {
@@ -118,10 +111,17 @@ Restrictor::Ways Restrictor::strWaysToWays(const std::string& strWays) {
 	}
 }
 
-string Restrictor::waysToStrWays(Ways ways) {
+const string Restrictor::ways2StrWays(Ways ways) {
+	if (ways == Ways::invalid)
+		return "invalid";
 	return to_string(static_cast<int>(ways));
 }
 
 bool Restrictor::isRotary(const Ways& ways) {
 	return (ways == Ways::rotary8 or ways == Ways::rotary12);
+}
+
+const string Restrictor::getProfileStr(const string& profile) {
+	auto parts(Utility::explode(profile, '_'));
+	return "Player " + parts[0] + ", Joystick " + parts[1];
 }

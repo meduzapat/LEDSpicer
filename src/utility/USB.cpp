@@ -66,7 +66,7 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 
 void USB::connect() {
 
-	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()));
+	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " Id: " + to_string(boardId));
 
 #ifdef DRY_RUN
 	LogDebug("No USB handle - DRY RUN");
@@ -84,17 +84,28 @@ void USB::connect() {
 		libusb_device_descriptor desc = {0};
 		libusb_get_device_descriptor(device, &desc);
 
-		if (desc.idVendor == getVendor() and desc.idProduct == getProduct())
-			break;
+		if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
+			// For ID by product only check the vendor and product.
+			if (isProductBasedId()) {
+				break;
+			}
+			// For hardware that have no order use the position on the list.
+			else if (isNonBasedId() and idx + 1 == boardId) {
+				break;
+			}
+			// For independent hardware check device ID.
+			else if (desc.bcdDevice == boardId) {
+				break;
+			}
+		}
 		device = nullptr;
 	}
+	libusb_free_device_list(list, 1);
 
 	if (device and libusb_open(device, &handle) == LIBUSB_SUCCESS) {
 		libusb_set_auto_detach_kernel_driver(handle, true);
-		libusb_free_device_list(list, 1);
 		return;
 	}
-	libusb_free_device_list(list, 1);
 	throw Error("Failed to open device " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " id " + to_string(getId()));
 }
 
@@ -154,6 +165,14 @@ void USB::closeSession() {
 
 uint8_t USB::getId() const {
 	return boardId;
+}
+
+const bool USB::isProductBasedId() const {
+	return true;
+}
+
+const bool USB::isNonBasedId() const {
+	return false;
 }
 
 int USB::send(vector<uint8_t>& data) const {

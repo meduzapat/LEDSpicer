@@ -64,20 +64,14 @@ public:
 	virtual void rotate(const umap<string, Ways>& playersData) = 0;
 
 	/**
-	 * Rotate all players to this profile.
-	 * @param ways
-	 */
-	virtual void rotate(Ways ways);
-
-	/**
-	 * Convert strings into joystick positions.
+	 * Convert human readable strings into joystick positions.
 	 * @param ways
 	 * @return defaults to 8 ways.
 	 */
 	static Ways str2ways(const string& ways);
 
 	/**
-	 * Convert Ways into strings.
+	 * Convert Ways into human readable strings.
 	 * @param ways
 	 * @return
 	 */
@@ -88,20 +82,27 @@ public:
 	 * @param strWays
 	 * @return
 	 */
-	static Ways strWaysToWays(const std::string& strWays);
+	static const Ways strWays2Ways(const std::string& strWays);
 
 	/**
 	 * Converts ways into its string representation.
 	 * @param ways
 	 * @return
 	 */
-	static string waysToStrWays(Ways ways);
+	static const string ways2StrWays(Ways ways);
 
 	/**
 	 * @param ways
 	 * @return Returns true if the hardware is rotary, false if is restrictor.
 	 */
 	static bool isRotary(const Ways& ways);
+
+	/**
+	 * Converts a profile into human readable.
+	 * @param profile like 1_1
+	 * @return a string like Player 1, Joystick 1
+	 */
+	static const string getProfileStr(const string& profile);
 
 protected:
 

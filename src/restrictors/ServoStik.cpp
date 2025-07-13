@@ -26,37 +26,57 @@ using namespace LEDSpicer::Restrictors;
 
 void ServoStik::rotate(const umap<string, Ways>& playersData) {
 
-
 	// ServoStik can move two restrictors to the same ways, pick the first and ignore the rest.
 	Ways way(playersData.begin()->second);
 	if (way == Ways::invalid)
 		return;
-
+	switch (way) {
+		case Ways::w2:
+		case Ways::w2v:
+		case Ways::w4:
+			way = Ways::w4;
+			break;
+		default:
+			way = Ways::w8;
+	}
 	string pd(playersData.begin()->first);
 
 	// Retrieve the previous state.
-	Ways prevState(strWaysToWays(retrieveWays(pd)));
+	Ways prevState(retrieveWays(pd));
 
 	// Check if the current state is different from the previous state
-	if (prevState == way)
+	if (prevState == way) {
+		LogDebug("Rotation not necessary for " + getFullName() + " already set to " + ways2str(prevState));
 		return;
+	}
 
 	vector<uint8_t> data {0, 0xdd, 0, 0};
-	switch (way) {
-	case Ways::w2:
-	case Ways::w2v:
-	case Ways::w4:
+	if (way == Ways::w4) {
 		LogDebug("Rotating " + getFullName() + " to 4 ways.");
 		data[3] = 0;
-		break;
-	default:
+	}
+	else {
 		LogDebug("Rotating " + getFullName() + " to 8 ways.");
 		data[3] = 1;
 	}
 	transferToConnection(data);
 
-	// Store the current state.
-	storeWays(pd, waysToStrWays(way));
+	// Store the current state for every config.
+	for (auto& pd: playersData) {
+		Ways way(pd.second);
+		switch (way) {
+			case Ways::invalid:
+				continue;
+			case Ways::w2:
+			case Ways::w2v:
+			case Ways::w4:
+				way = Ways::w4;
+				break;
+			default:
+				way = Ways::w8;
+		}
+		storeWays(pd.first, way);
+	}
 }
 
 uint16_t ServoStik::getVendor() const {
@@ -64,14 +84,18 @@ uint16_t ServoStik::getVendor() const {
 }
 
 uint16_t ServoStik::getProduct() const {
-	return (SERVOSTIK_PRODUCT + getId() - 1);
+	return (SERVOSTIK_PRODUCT);
 }
 
 uint8_t ServoStik::getMaxIds() const {
 	return 2;
 }
 
-void ServoStik::storeWays(const string& profile, const string& ways) const {
+const bool ServoStik::isNonBasedId() const {
+	return true;
+}
+
+void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 
 	string configDir = Utility::getConfigDir();
 	// Check if the directory exists, if not, create it
@@ -90,23 +114,25 @@ void ServoStik::storeWays(const string& profile, const string& ways) const {
 	string filePath(configDir + SERVOSTIK_DATA(profile));
 	std::ofstream outputFile(filePath);
 	if (outputFile.is_open()) {
-		LogDebug("File " + filePath + " stored " + ways);
-		outputFile << ways;
+		LogDebug("File " + filePath + " stored " + ways2str(ways));
+		outputFile << ways2StrWays(ways);
 		outputFile.close();
 		return;
 	}
 	LogDebug("Unable to save " + filePath);
 }
 
-const string ServoStik::retrieveWays(const string& profile) const {
+const Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
 	std::string filePath(Utility::getConfigDir() + SERVOSTIK_DATA(profile));
 	std::ifstream inputFile(filePath);
 	if (inputFile.is_open()) {
 		LogDebug("Reading " + filePath);
 		const string content((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
+		const Ways way(strWays2Ways(content));
+		LogDebug("File " + filePath + " got " + ways2str(way));
 		inputFile.close();
-		return content;
+		return way;
 	}
 	LogDebug("Unable to read " + filePath);
-	return "";
+	return Ways::invalid;
 }
