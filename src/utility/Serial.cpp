@@ -127,10 +127,11 @@ void Serial::transferToConnection(vector<uint8_t>& data) const {
 #endif
 
 #ifndef DRY_RUN
-	tcdrain(fd);
-	int responseCode;
-	if ((responseCode = write(fd, data.data(), data.size())) >= 0)
+	int responseCode = write(fd, data.data(), data.size());
+	if (responseCode >= 0) {
+		tcdrain(fd);
 		return;
+	}
 	LogError("Fail to send to serial: port " + port + " size " + std::to_string(data.size()));
 	throw Error(string(strerror(responseCode)));
 #endif
