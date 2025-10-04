@@ -22,8 +22,7 @@
 
 #include "Reader.hpp"
 
-#ifndef IMPULSE_HPP_
-#define IMPULSE_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Inputs {
 
@@ -42,6 +41,4 @@ public:
 
 	void process() override;
 };
-} /* namespace */
-
-#endif /* IMPULSE_HPP_ */
+} // namespace

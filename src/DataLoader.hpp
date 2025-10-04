@@ -20,29 +20,20 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// To handle daemonization and uid/gid.
-#include <unistd.h>
-
-#include <chrono>
-using std::chrono::milliseconds;
-#include <thread>
-
-#include "config.h"
-
-#include "Messages.hpp"
-#include "utility/XMLHelper.hpp"
-#include "utility/Color.hpp"
-#include "devices/Profile.hpp"
+#include "utilities/Messages.hpp"
+#include "utilities/XMLHelper.hpp"
+#include "devices/transitions/FadeOutIn.hpp"
+#include "devices/transitions/CrossFade.hpp"
+#include "devices/transitions/Curtain.hpp"
 #include "animations/ActorHandler.hpp"
 #include "devices/DeviceHandler.hpp"
 #include "inputs/InputHandler.hpp"
 
-#ifndef DATALOADER_HPP_
-#define DATALOADER_HPP_ 1
+#pragma once
 
-#define ACTOR_DIR   "animations/"
-#define PROFILE_DIR "profiles/"
-#define INPUT_DIR   "inputs/"
+#define ACTOR_DIR   "/animations/"
+#define PROFILE_DIR "/profiles/"
+#define INPUT_DIR   "/inputs/"
 #define MAXIMUM_FPS 60
 
 #define PARAM_FPS             "fps"
@@ -77,13 +68,10 @@ using std::chrono::milliseconds;
 #define NODE_COLOR             "color"
 #define NODE_ANIMATIONS        "animations"
 #define NODE_ANIMATION         "animation"
-#define NODE_START_TRANSITION  "startTransition"
-#define NODE_END_TRANSITION    "endTransition"
-#define NODE_START_TRANSITIONS "startTransitions"
-#define NODE_END_TRANSITIONS   "endTransitions"
 #define NODE_INPUTS            "inputs"
 #define NODE_INPUT             "input"
 #define NODE_ACTOR             "actor"
+#define NODE_TRANSITION        "transition"
 
 #define REQUIRED_PARAM_ROOT           {"colors", "fps", "port", "userId", "groupId"}
 #define REQUIRED_PARAM_COLOR          {"name", "color"}
@@ -103,16 +91,11 @@ using std::chrono::milliseconds;
 
 namespace LEDSpicer {
 
-using Animations::Actor;
-using Animations::FrameActor;
-using Animations::ActorHandler;
-using Devices::DeviceHandler;
-using Devices::Device;
-using Devices::Profile;
-using Devices::Group;
-using Devices::Element;
-using Inputs::Input;
-using Inputs::InputHandler;
+using namespace Utilities;
+using namespace Animations;
+using namespace Devices;
+using namespace Inputs;
+using namespace Transitions;
 
 /**
  * LEDSpicer::DataLoader
@@ -145,8 +128,10 @@ public:
 
 	/**
 	 * Reads and process the configuration file.
+	 *
+	 * @param testProfile if set will load this profile instead of the default one.
 	 */
-	void readConfiguration();
+	void readConfiguration(const string& testProfile);
 
 	/**
 	 * Check if a profile exists in the cache.
@@ -160,8 +145,22 @@ public:
 	 * Reads a profile file form disk or cache.
 	 * @param name
 	 * @param extra, if set will use it to differentiate from other profiles with the same name, only used while crafting profiles.
+	 * @throws Error if the profile is invalid.
 	 */
 	static Profile* processProfile(const string& name, const string& extra = "");
+
+	/**
+	 * @param profile
+	 * @return the transition for this profile or null.
+	 */
+	static Transition* getTransitionFromCache(Profile* profile);
+
+	/**
+	 * Process a transition.
+	 * @param profile
+	 * @param settings the setting to use to create the transition obj
+	 */
+	static void processTransition(Profile* profile, const Settings& settings);
 
 	/**
 	 * Reads an animation file.
@@ -204,48 +203,28 @@ public:
 
 /* Storage */
 
-	/// list with all elements by name.
-	static umap<string, Element*> allElements;
-
-	/// Stores groups by name.
-	static umap<string, Group> layout;
-
-	/// Stores the default profile name.
-	static string defaultProfileName;
-
-	/// Stores the default profile name.
-	static Profile* defaultProfile;
-
 	/// Port number to use for listening.
 	static string portNumber;
-
-	/// Stores devices.
-	static vector<Device*> devices;
-
-	/// Keeps references to device handlers by device type.
-	static umap<string, DeviceHandler*> deviceHandlers;
-
-	/// Keeps references to actor handlers by actor name.
-	static umap<string, ActorHandler*> actorHandlers;
-
-	/// Keeps references to inputs handlers by input name.
-	static umap<string, InputHandler*> inputHandlers;
 
 	/// Keeps the milliseconds to wait.
 	static milliseconds waitTime;
 
 protected:
 
+	/// Stores the running mode.
 	static Modes mode;
 
 	/// Keeps references to profiles.
-	static umap<string, Profile*> profilesCache;
+	static ProfilePtrUMap profilesCache;
 
 	/// Keeps references to actors (handled in actor handlers).
-	static umap<string, vector<Actor*>> animationCache;
+	static ActorPtrsUmap animationCache;
 
 	/// Keeps references to inputs (handled in input handlers).
-	static umap<string, Input*> inputCache;
+	static InputPtrUMap inputCache;
+
+	/// Stores the transitions for each unique profile.
+	static unordered_map<Profile*, Transition*> transitions;
 
 	/**
 	 * Loads the color File
@@ -267,8 +246,9 @@ protected:
 
 	/**
 	 * Reads the layout and group sections from config.
+	 * @return the default profile name.
 	 */
-	void processLayout();
+	const string processLayout();
 
 	/**
 	 * Reads elements from groups.
@@ -283,14 +263,14 @@ protected:
 	 * @param boardId
 	 * @return
 	 */
-	static Device* createDevice(umap<string, string>& deviceData);
+	static Device* createDevice(StringUMap& deviceData);
 
 	/**
 	 * Creates a new animation object.
 	 * @param actorData
 	 * @return
 	 */
-	static Actor* createAnimation(umap<string, string>& actorData);
+	static Actor* createAnimation(StringUMap& actorData);
 
 	/**
 	 * Extract a list of input sources (listen events in the kernel)
@@ -308,7 +288,7 @@ protected:
 	 * @param id only used to differentiate sources.
 	 * @return
 	 */
-	static void processInputMap(tinyxml2::XMLElement* inputNode, umap<string, Items*>& inputMaps, const string& id = "");
+	static void processInputMap(tinyxml2::XMLElement* inputNode, ItemPtrUMap& inputMaps, const string& id = "");
 
 	/**
 	 * Prepares the filenames.
@@ -325,6 +305,5 @@ protected:
 	void static dropRootPrivileges(uid_t uid, gid_t gid);
 };
 
-} /* namespace LEDSpicer */
+} // namespace
 
-#endif /* DATALOADER_HPP_ */

@@ -20,21 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// To handle c signals.
-#include <csignal>
-using std::signal;
-
 #include "DataLoader.hpp"
-#include "devices/DeviceUSB.hpp"
-
-#ifndef MAINBASE_HPP_
-#define MAINBASE_HPP_ 1
+#include "utilities/USB.hpp"
 
 namespace LEDSpicer {
-
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-
 
 /**
  * LEDSpicer::MainBase
@@ -72,7 +61,7 @@ public:
 	 * Waits for a defined amount of ms.
 	 * @param milliseconds wasted keeps track of the wasted milliseconds.
 	 */
-	static void wait(milliseconds wasted);
+	void wait(milliseconds wasted);
 
 protected:
 
@@ -82,22 +71,23 @@ protected:
 	/// Keeps messages incoming.
 	Messages messages;
 
-	static Profile* currentProfile;
+	/// Keeps a reference to profile in focus.
+	Profile* currentProfile = nullptr;
 
 	/**
-	 * Stack of profiles.
+	 * List of requested profiles that will be run in stack order.
+	 * The last one is the one in focus (Pointed by currentProfile).
+	 * If empty, the default profile is in focus.
 	 */
-	static vector<Profile*> profiles;
+	vector<Profile*> profiles;
 
 	/// Starting point for the frame.
-	static high_resolution_clock::time_point
+	high_resolution_clock::time_point
 #ifdef BENCHMARK
 		start,
-		startAnimation,
-		startMessage,
 		startTransfer;
 
-	static milliseconds
+	milliseconds
 		timeAnimation,
 		timeMessage,
 		timeTransfer;
@@ -112,35 +102,9 @@ protected:
 	Device* selectDevice();
 
 	/**
-	 * Attempts to load profiles from a list of names.
-	 * @param data
-	 * @return nullptr if all failed.
-	 */
-	Profile* tryProfiles(const vector<string>& data);
-
-	/**
-	 * Attempts create a profile with the values provided.
-	 * @param name
-	 * @return null if failed.
-	 */
-	Profile* craftProfile(const string& name, const string& elements, const string& groups);
-
-	/**
-	 * Terminates the current profile and reset everything.
-	 */
-	void terminateCurrentProfile();
-
-	/**
 	 * Send data to all devices.
 	 */
 	void sendData();
-
-	/**
-	 * Clears always on Elements and Groups and the Input states.
-	 */
-	void clearOverrides();
 };
 
-} /* namespace LEDSpicer */
-
-#endif /* MAINBASE_HPP_ */
+} // namespace

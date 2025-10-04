@@ -24,6 +24,8 @@
 
 using namespace LEDSpicer::Devices;
 
+unordered_map<string, Group> Group::layout;
+
 void Group::drawElements() {
 	cout << elements.size() << " Element(s): " << endl;
 	for (auto element : elements)
@@ -36,17 +38,23 @@ uint16_t Group::size() const {
 
 void Group::linkElement(Element* element) {
 	elements.push_back(element);
+	// Append this element’s LEDs to cached list if not solenoid.
+	if (element->isTimed())
+		return;
+	const auto& eLeds = element->getLeds();
+	leds.insert(leds.end(), eLeds.begin(), eLeds.end());
 }
 
 void Group::shrinkToFit() {
 	elements.shrink_to_fit();
+	leds.shrink_to_fit();
 }
 
 const vector<Element*>& Group::getElements() const {
 	return elements;
 }
 
-Element* const Group::getElement(uint16_t index) const {
+Element* Group::getElement(uint16_t index) const {
 	return elements.at(index);
 }
 
@@ -54,6 +62,10 @@ const string& Group::getName() const {
 	return name;
 }
 
-const LEDSpicer::Color& Group::getDefaultColor() const {
+const Color& Group::getDefaultColor() const {
 	return defaultColor;
+}
+
+const vector<uint8_t*>& Group::getLeds() const {
+	return leds;
 }

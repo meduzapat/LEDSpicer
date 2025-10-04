@@ -23,8 +23,7 @@
 #include "devices/Device.hpp"
 #include <pigpio.h>
 
-#ifndef RASPBERRYPI_HPP_
-#define RASPBERRYPI_HPP_ 1
+#pragma once
 
 #define RPI_NAME     "Raspberry Pi"
 #define RPI_LEDS     28
@@ -42,7 +41,7 @@ class RaspberryPi : public Device {
 
 public:
 
-	RaspberryPi(umap<string, string>& options) : Device(RPI_LEDS, RPI_NAME) {}
+	RaspberryPi(StringUMap& options) : Device(RPI_LEDS, RPI_NAME) {}
 
 	virtual ~RaspberryPi() = default;
 
@@ -69,7 +68,5 @@ protected:
 
 deviceFactory(RaspberryPi)
 
-} /* namespace */
+} // namespace
 
-
-#endif /* RASPBERRYPI_HPP_ */

@@ -21,13 +21,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Hardware.hpp"
+#include "utilities/Hardware.hpp"
 #include "Group.hpp"
 
-#ifndef DEVICE_HPP_
-#define DEVICE_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices {
+
+using LEDSpicer::Utilities::Log;
+using LEDSpicer::Utilities::Error;
+using LEDSpicer::Utilities::Hardware;
 
 /**
  * LEDSpicer::Devices::Device
@@ -157,7 +160,7 @@ public:
 	 * Returns all elements mapped by name.
 	 * @return
 	 */
-	umap<string, Element>* getElements();
+	ElementUMap* getElements();
 
 	/**
 	 * Sets all LEDs off.
@@ -181,6 +184,9 @@ public:
 	 */
 	virtual void packData();
 
+	/// Stores devices.
+	static vector<Device*> devices;
+
 protected:
 
 	/// Device LEDs.
@@ -190,15 +196,16 @@ protected:
 	vector<uint8_t> oldLEDs;
 
 	/// Maps elements by name.
-	umap<string, Element> elementsByName;
+	ElementUMap elementsByName;
 
 };
 
+using DevicePrs = vector<Device*>;
+
+
+} // namespace
+
 // The functions to create and destroy devices.
 #define deviceFactory(plugin) \
-	extern "C" Device* createDevice(umap<string, string>& options) { return new plugin(options); } \
+	extern "C" Device* createDevice(StringUMap& options) { return new plugin(options); } \
 	extern "C" void destroyDevice(Device* instance) { delete instance; }
-
-} /* namespace */
-
-#endif /* DEVICE_HPP_ */

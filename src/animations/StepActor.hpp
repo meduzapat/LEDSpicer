@@ -22,71 +22,33 @@
 
 #include "DirectionActor.hpp"
 
-#ifndef STEPACTOR_HPP_
-#define STEPACTOR_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::StepActor
  *
- * Step actors will move from frame to frame in steps.
+ * Step actors adds helper methods to create smooth transitions between frames.
  */
 class StepActor: public DirectionActor {
 
 public:
 
-	StepActor(
-		umap<string, string>& parameters,
-		Group* const group,
-		const vector<string>& requiredParameters
-	);
+	using DirectionActor::DirectionActor;
 
 	virtual ~StepActor() = default;
 
 	/**
-	 * @see Actor::drawConfig()
-	 */
-	virtual void drawConfig() const override;
-
-	/**
-	 * @return The current relative step.
-	 */
-	uint16_t getCurrentStep() const;
-
-	/**
-	 * @see Actor::restart()
-	 */
-	virtual void restart();
-
-	/**
-	 * @see DirectionActor::isFirstFrame()
-	 */
-	virtual bool isFirstFrame() const;
-
-	/**
-	 * @see DirectionActor::isLastFrame()
-	 */
-	virtual bool isLastFrame() const;
-
-	/**
-	 * Sets the total step frames.
+	 * Calculates the percent per step to use.
 	 * @param totalStepFrames
 	 */
-	void setTotalStepFrames(uint16_t totalStepFrames);
-
-	const uint16_t getFullFrames() const override;
+	void calculateStepPercent();
 
 protected:
 
-	uint16_t
-		totalStepFrames  = 0,
-		currentStepFrame = 0;
-
-	/// Keeps the pre-calculated 1%.
+	/// Keeps the pre-calculated %.
 	float stepPercent = 0;
-
-	virtual void advanceFrame();
 
 	/**
 	 * Fades the element at index.
@@ -119,8 +81,14 @@ protected:
 	 */
 	void changeFrameElement(const Color& color, const Color& colorNext, Directions direction);
 
+private:
+
+	struct FrameTransition {
+		float    percent;
+		uint16_t next;
+	};
+
+	StepActor::FrameTransition changeFrameElementCommon(const Directions& direction) const;
 };
 
-} /* namespace */
-
-#endif /* STEPACTOR_HPP_ */
+} // namespace

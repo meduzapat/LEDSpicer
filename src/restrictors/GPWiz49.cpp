@@ -24,7 +24,7 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void GPWiz49::rotate(const umap<string, Ways>& playersData) {
+void GPWiz49::rotate(const WaysUMap& playersData) {
 
 	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)

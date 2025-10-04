@@ -20,18 +20,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-#include "utility/XMLHelper.hpp"
+#include "utilities/XMLHelper.hpp"
 #include "FileReader.hpp"
 
 using namespace LEDSpicer::Animations;
 
 actorFactory(FileReader)
 
-umap<string, vector<vector<LEDSpicer::Color>>> FileReader::fileData;
+stringMatrixColorsUmap FileReader::fileData;
 
-FileReader::FileReader(umap<string, string>& parameters, Group* const group) :
-	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_FILEREADER)
+FileReader::FileReader(StringUMap& parameters, Group* const group) :
+	DirectionActor(parameters, group, REQUIRED_PARAM_ACTOR_FILEREADER)
 {
 	auto found = fileData.find(parameters["filename"]);
 	if (found == fileData.end()) {
@@ -45,40 +44,37 @@ FileReader::FileReader(umap<string, string>& parameters, Group* const group) :
 		LogDebug("File " + parameters["filename"] + " already on memory.");
 		frames = found;
 	}
-	totalStepFrames /= 2;
-	totalFrames = frames->second.size() - 1;
+	stepping.frames = frames->second.size() - 1;
+	stepping.steps  = calculateStepsBySpeed(speed);
 }
 
 void FileReader::drawConfig() const {
-	cout
-		<< "Type: FileReader " << endl
-		<< "File: " << frames->first << endl;
+	cout <<
+		"Type: FileReader "       << endl <<
+		"File: " << frames->first << endl;
 	DirectionActor::drawConfig();
 }
 
 string FileReader::Format2str(const Formats format) {
 	switch (format) {
-	case Formats::rgba:
-		return "rgba";
+	case Formats::rgba: return "rgba";
+	default: return "";
 	}
-	return "";
 }
 
 FileReader::Formats FileReader::str2Format(const string& format) {
-	if (format == "rgba")
-		return Formats::rgba;
-	throw Error("Invalid type " + format);
+	if (format == "rgba") return Formats::rgba;
+	throw Error("Invalid type ") << format;
 }
 
 void FileReader::processRGBA(const string& filename) {
 	XMLHelper file(filename, "");
-	umap<string, string> fileAttr = file.processNode(file.getRoot());
+	StringUMap fileAttr = file.processNode(file.getRoot());
 	tinyxml2::XMLElement * element = file.getRoot()->FirstChildElement("frm");
-	if (not element)
-		throw LEDError("No frames found for " + filename);
+	if (not element) throw Error("No frames found for " + filename);
 	vector<vector<Color>> framesTmp;
 	for (; element; element = element->NextSiblingElement("frm")) {
-		umap<string, string> frameData = file.processNode(element);
+		StringUMap frameData = file.processNode(element);
 		Utility::checkAttributes({"dec"}, frameData, "frm");
 		vector<string> colorData = Utility::explode(frameData["dec"], ',');
 		uint16_t ceil = std::ceil(colorData.size() / 3.00);
@@ -98,8 +94,7 @@ void FileReader::processRGBA(const string& filename) {
 		Color colorTmp;
 		for (uint16_t c = 0; c < colorData.size();) {
 			for (uint8_t c2 = 0; c2 < 3; ++c2, ++c) {
-				if (c == colorData.size())
-					break;
+				if (c == colorData.size()) break;
 				uint8_t color = std::stoi(colorData[c]);
 				switch (c2) {
 				case 0:
@@ -114,8 +109,7 @@ void FileReader::processRGBA(const string& filename) {
 				}
 			}
 			frameTmp.push_back(std::move(colorTmp));
-			if (frameTmp.size() == getNumberOfElements())
-				break;
+			if (frameTmp.size() == getNumberOfElements()) break;
 		}
 		frameTmp.shrink_to_fit();
 		framesTmp.push_back(std::move(frameTmp));
@@ -126,14 +120,14 @@ void FileReader::processRGBA(const string& filename) {
 
 void FileReader::calculateElements() {
 #ifdef DEVELOP
-	cout << "FileReader: " << DrawDirection(cDirection) << " F: " << (currentFrame + 1) << endl;
+	cout << "FileReader: " << DrawDirection(cDirection.getDirection()) << " F: " << (stepping.frame + 1) << endl;
 #endif
-	for (uint16_t c = 0; c < frames->second[currentFrame].size(); ++c) {
+	for (uint16_t c = 0; c < frames->second[stepping.frame].size(); ++c) {
 #ifdef DEVELOP
 		cout << "element: " <<  to_string(c)  << " -> ";
-		frames->second[currentFrame].at(c).drawHex();
+		frames->second[stepping.frame].at(c).drawHex();
 		cout << endl;
 #endif
-		changeElementColor(c, frames->second[currentFrame].at(c), filter);
+		changeElementColor(c, frames->second[stepping.frame].at(c), filter);
 	}
 }

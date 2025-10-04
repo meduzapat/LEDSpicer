@@ -24,8 +24,7 @@
 #include <fstream>  // to store and read files.
 #include <sys/stat.h>
 
-#ifndef RESTRICTORS_SERVOSTIK_HPP_
-#define RESTRICTORS_SERVOSTIK_HPP_ 1
+#pragma once
 
 #define SERVOSTIK_NAME       "ServoStik"
 #define SERVOSTIK_FULLNAME   "Ultimarc ServoStik"
@@ -37,6 +36,8 @@
 
 namespace LEDSpicer::Restrictors {
 
+using namespace LEDSpicer::Utilities;
+
 /**
  * LEDSpicer::Restrictor::ServoStick
  */
@@ -44,7 +45,7 @@ class ServoStik : public RestrictorUSB {
 
 public:
 
-	ServoStik(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	ServoStik(StringUMap& options, Uint8UMap& playerData) :
 	RestrictorUSB(
 		playerData,
 		SERVOSTIK_WVALUE,
@@ -56,7 +57,7 @@ public:
 
 	virtual ~ServoStik() = default;
 
-	virtual void rotate(const umap<string, Ways>& playersData);
+	virtual void rotate(const WaysUMap& playersData);
 
 	uint16_t getVendor() const override;
 
@@ -64,16 +65,15 @@ public:
 
 	uint8_t getMaxIds() const override;
 
-	const bool isNonBasedId() const override;
+	bool isNonBasedId() const override;
 
 protected:
 
 	void storeWays(const string& profile, const Ways& ways) const;
 
-	const Ways retrieveWays(const string& profile) const;
+	Ways retrieveWays(const string& profile) const;
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* RESTRICTORS_SERVOSTIK_HPP_ */

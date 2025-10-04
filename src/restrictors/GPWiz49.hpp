@@ -22,8 +22,7 @@
 
 #include "RestrictorUSB.hpp"
 
-#ifndef RESTRICTORS_GPWIZ49_HPP_
-#define RESTRICTORS_GPWIZ49_HPP_ 1
+#pragma once
 
 #define GPWIZ49_NAME       "GPWiz49"
 #define GPWIZ49_FULLNAME   "GroovyGameGear GP-Wiz49"
@@ -35,6 +34,8 @@
 
 namespace LEDSpicer::Restrictors {
 
+using namespace LEDSpicer::Utilities;
+
 /**
  * LEDSpicer::Restrictor::GPWiz49
  */
@@ -42,7 +43,7 @@ class GPWiz49 : public RestrictorUSB {
 
 public:
 
-	GPWiz49(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	GPWiz49(StringUMap& options, Uint8UMap& playerData) :
 	RestrictorUSB(
 		playerData,
 		GPWIZ49_WVALUE,
@@ -51,15 +52,15 @@ public:
 		GPWIZ49_MAX_BOARDS,
 		GPWIZ49_FULLNAME
 	),
-	williams(options.count(WILLIAMS) ? options.at(WILLIAMS) == "True" : false) {}
+	williams(options.exists(WILLIAMS) ? options.at(WILLIAMS) == "True" : false) {}
 
 	virtual ~GPWiz49() = default;
 
-	virtual void rotate(const umap<string, Ways>& playersData);
+	void rotate(const WaysUMap& playersData) override;
 
-	virtual uint16_t getVendor() const;
+	uint16_t getVendor() const override;
 
-	virtual uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 protected:
 
@@ -67,6 +68,4 @@ protected:
 	bool williams = false;
 };
 
-} /* namespace */
-
-#endif /* RESTRICTORS_GPWIZ49_HPP_ */
+} // namespace

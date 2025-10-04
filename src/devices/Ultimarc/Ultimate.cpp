@@ -41,7 +41,7 @@ void Ultimate::afterConnect() {
 	// Detect interface.
 	LogDebug("Detecting interface");
 
-	libusb_device *device = libusb_get_device(handle);
+	libusb_device* device = libusb_get_device(handle);
 
 	if (not device)
 		throw Error("Unable to retrieve device information");

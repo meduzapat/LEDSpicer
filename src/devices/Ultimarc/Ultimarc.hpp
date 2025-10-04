@@ -22,8 +22,7 @@
 
 #include "devices/DeviceUSB.hpp"
 
-#ifndef ULTIMARC_HPP_
-#define ULTIMARC_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices::Ultimarc {
 
@@ -46,6 +45,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* ULTIMARC_HPP_ */
+} // namespace

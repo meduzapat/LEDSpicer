@@ -20,23 +20,24 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-#include "utility/Direction.hpp"
+#include "utilities/Direction.hpp"
 #include "Actor.hpp"
 
-#ifndef AUDIOACTOR_HPP_
-#define AUDIOACTOR_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_ACTOR_AUDIO {"mode", "off", "low", "mid", "high", "channel"}
-#define VU_MIN_ELEMETS 6
+#define VU_MIN_ELEMENTS 6
 
 #define HIG_POINT 95
 #define MID_POINT 55
 #define LOW_POINT 25
 
-#define CHANNELS 2
+constexpr uint8_t CHANNELS = 2;
 
 namespace LEDSpicer::Animations {
+
+using LEDSpicer::Utilities::Direction;
+using LEDSpicer::Utilities::Error;
 
 /**
  * LEDSpicer::Inputs::AudioActor
@@ -51,7 +52,7 @@ public:
 
 	enum Channels : uint8_t {Left = 1, Right, Both, Mono};
 
-	AudioActor(umap<string, string>& parameters, Group* const group);
+	AudioActor(StringUMap& parameters, Group* const group);
 
 	virtual ~AudioActor() = default;
 
@@ -67,20 +68,18 @@ public:
 
 	void restart() override;
 
-	const uint16_t getFullFrames() const override;
+	uint16_t getFullFrames() const override;
 
-	const float getRunTime() const override;
+	float getRunTime() const override;
 
 protected:
 
+	/// Peaks 0 to 100% but also used for number of elements per side
 	struct Values {
 		uint16_t
 			l = 0,
 			r = 0;
 	};
-
-	static uint8_t lastF;
-	static uint8_t lastFs;
 
 	/// Preprocessed value.
 	static Values value;
@@ -163,6 +162,5 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* AUDIOACTOR_HPP_ */

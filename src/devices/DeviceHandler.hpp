@@ -23,8 +23,7 @@
 #include "Handler.hpp"
 #include "Device.hpp"
 
-#ifndef DEVICEHANDLER_HPP_
-#define DEVICEHANDLER_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices {
 
@@ -49,7 +48,10 @@ public:
 	 * Creates a device calling the create function and keep record of it.
 	 * @see createFunction pointer.
 	 */
-	Device* createDevice(umap<string, string>& options);
+	Device* createDevice(StringUMap& options);
+
+	/// Keeps references to device handlers by device type.
+	static unordered_map<string, DeviceHandler*> deviceHandlers;
 
 protected:
 
@@ -61,7 +63,7 @@ protected:
 	 * @param plugin parameters.
 	 * @return a new created plugin.
 	 */
-	Device*(*createFunction)(umap<string, string>&) = nullptr;
+	Device*(*createFunction)(StringUMap&) = nullptr;
 
 	/**
 	 * Pointer to the plugin's destruction function.
@@ -70,6 +72,4 @@ protected:
 	void(*destroyFunction)(Device*) = nullptr;
 };
 
-} /* namespace */
-
-#endif /* DEVICEHANDLER_HPP_ */
+} // namespace

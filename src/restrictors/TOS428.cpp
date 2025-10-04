@@ -28,7 +28,7 @@ uint8_t TOS428::getMaxIds() const {
 	return TOS428_MAX_ID;
 }
 
-void TOS428::rotate(const umap<string, Ways>& playersData) {
+void TOS428::rotate(const WaysUMap& playersData) {
 
 	Ways way = playersData.begin()->second;
 
@@ -56,7 +56,7 @@ void TOS428::rotate(const umap<string, Ways>& playersData) {
 void TOS428::detectPort() {
 	port = findPortByUsbId("PRODUCT=" TOS428_PRODUCT_ID);
 	if (port.empty())
-		throw Error("Unable to autodetect the serial port.");
+		throw Utilities::Error("Unable to autodetect the serial port.");
 }
 
 void TOS428::createPackage(Ways way, uint8_t target) {
@@ -73,5 +73,5 @@ void TOS428::createPackage(Ways way, uint8_t target) {
 	LogDebug("Rotating " + getFullName() + (target == 0 ? " all restrictors" : " restrictor " + std::to_string(target)) + " to " + ways2str(way));
 	vector<uint8_t> data TOS428_DATA(static_cast<uint8_t>(target + '0'), w);
 	transferToConnection(data);
-	std::this_thread::sleep_for(std::chrono::microseconds(1000));
+	sleep_for(std::chrono::microseconds(1000));
 }

@@ -22,8 +22,7 @@
 
 #include "RestrictorSerial.hpp"
 
-#ifndef RESTRICTORS_TOS428_HPP_
-#define RESTRICTORS_TOS428_HPP_ 1
+#pragma once
 
 #define TOS428_NAME       "TOS428"
 #define TOS428_FULLNAME   "GRS TOS Restrictor"
@@ -44,18 +43,18 @@ class TOS428: public RestrictorSerial {
 
 public:
 
-	TOS428(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	TOS428(StringUMap& options, Uint8UMap& playerData) :
 	RestrictorSerial(
-		options.count("port") ? options.at("port") : "",
+		options.exists("port") ? options.at("port") : "",
 		playerData,
 		TOS428_FULLNAME
 	) {}
 
 	virtual ~TOS428() = default;
 
-	virtual void rotate(const umap<string, Ways>& playersData);
+	void rotate(const WaysUMap& playersData) override;
 
-	uint8_t getMaxIds() const;
+	uint8_t getMaxIds() const override;
 
 protected:
 
@@ -64,6 +63,5 @@ protected:
 	void createPackage(Ways way, uint8_t target);
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* RESTRICTORS_TOS428_HPP_ */

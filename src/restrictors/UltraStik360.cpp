@@ -24,50 +24,47 @@
 
 using namespace LEDSpicer::Restrictors;
 
-umap<UltraStik360::Ways, vector<uint8_t>> UltraStik360::umdataCache;
+unordered_map<UltraStik360::Ways, vector<uint8_t>> UltraStik360::umdataCache;
 
-void UltraStik360::rotate(const umap<string, Ways>& playersData) {
+void UltraStik360::rotate(const WaysUMap& playersData) {
 
 	Ways way = playersData.begin()->second;
-	if (way == Ways::invalid)
-		return;
+	if (way == Ways::invalid) return;
 
 	LogDebug("Rotating " + getFullName() + " to " + ways2str(way));
 
 	vector<uint8_t> data(96, 0);
 	uint8_t c;
 
-	if (umdataCache.count(way)) {
+	if (umdataCache.exists(way)) {
 		LogDebug("Reusing data for " + ways2file(way));
 		data = umdataCache[way];
 	}
 	else {
-		umap<string, vector<uint8_t>> umdata = processUmFile(UM_FILES_DIR + ways2file(way) + ".um");
+		unordered_map<string, vector<uint8_t>> umdata = processUmFile(UM_FILES_DIR + ways2file(way) + ".um");
 
-		if (umdata.empty())
-			return;
+		if (umdata.empty()) return;
 
 		data[0] = 0x50;
 		data[1] = 9;
 		data[2] = handleRestrictor ? 0x09 : 0x10;
 
 		// Process map borders.
-		if (not umdata.count("MapBorderLocations"))
+		if (not umdata.exists("MapBorderLocations"))
 			umdata["MapBorderLocations"] = DEFAULT_MAP_BORDERS;
 		if (umdata["MapBorderLocations"].size() != 8)
 			throw Error("Invalid number of elements for MapBorderLocations");
 		c = 3;
-		for (uint8_t b : umdata["MapBorderLocations"])
-			data[c++] = b;
+		for (uint8_t b : umdata["MapBorderLocations"]) data[c++] = b;
 
 		// Process Rows.
 		for (uint8_t r = 1; r < 10; ++r) {
 			string mapname = "MapRow" + to_string(r);
-			if (not umdata.count(mapname))
-				throw Error("Missing row " + mapname);
+			if (not umdata.exists(mapname))
+				throw Error("Missing row ") << mapname;
 			vector<uint8_t> t = umdata[mapname];
 			if (t.size() != 9)
-				throw Error("Invalid number of elements for " + mapname);
+				throw Error("Invalid number of elements for ") << mapname;
 			for (uint8_t b : t)
 				data[c++] = b;
 		}
@@ -94,10 +91,10 @@ uint16_t UltraStik360::getProduct() const {
 	return (ULTRASTIK_PRODUCT + getId() - 1);
 }
 
-umap<string, vector<uint8_t>> UltraStik360::processUmFile(const string& file) {
+unordered_map<string, vector<uint8_t>> UltraStik360::processUmFile(const string& file) {
 
 	LogDebug(getFullName() + " Reading UM file " + file);
-	umap<string, vector<uint8_t>> result;
+	unordered_map<string, vector<uint8_t>> result;
 
 	// Read file.
 	std::ifstream infile(file, std::ios::in | std::ios::binary);
@@ -195,6 +192,8 @@ string UltraStik360::ways2file(Ways ways) {
 	case Ways::mouse:
 		if (handleMouse)
 			return "Mouse";
+		break;
+	default: break;
 	}
 	return "";
 }

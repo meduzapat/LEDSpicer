@@ -21,12 +21,13 @@
  */
 
 #include "Restrictor.hpp"
-#include "utility/Serial.hpp"
+#include "utilities/Serial.hpp"
 
-#ifndef RESTRICTORS_RESTRICTORSERIAL_HPP_
-#define RESTRICTORS_RESTRICTORSERIAL_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Restrictors {
+
+using LEDSpicer::Utilities::Serial;
 
 /**
  * LEDSpicer::Restrictors::RestrictorSerial
@@ -37,25 +38,24 @@ class RestrictorSerial: public Serial, public Restrictor {
 public:
 
 	RestrictorSerial(
-		const string&          port,
-		umap<string, uint8_t>& playerData,
-		const string&          name
+		const string& port,
+		Uint8UMap&    playerData,
+		const string& name
 	) :
-		Restrictor(playerData, name),
-		Serial(port) {}
+		Serial(port),
+		Restrictor(playerData, name) {}
 
 	virtual ~RestrictorSerial() = default;
 
-	virtual string getFullName() const;
+	string getFullName() const override;
 
 protected:
 
-	virtual void openHardware();
+	void openHardware() override;
 
-	virtual void closeHardware();
+	void closeHardware() override;
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* RESTRICTORS_RESTRICTORSERIAL_HPP_ */

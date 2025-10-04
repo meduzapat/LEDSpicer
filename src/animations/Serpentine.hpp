@@ -20,16 +20,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Color.hpp"
-#include "Actor.hpp"
+#include "utilities/Color.hpp"
 #include "StepActor.hpp"
 
-#ifndef SERPENTINE_HPP_
-#define SERPENTINE_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_ACTOR_SERPENTINE {"speed", "direction"}
 
 namespace LEDSpicer::Animations {
+
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Serpentine
@@ -38,7 +38,7 @@ class Serpentine : public StepActor, public Color {
 
 public:
 
-	Serpentine(umap<string, string>& parameters, Group* const layout);
+	Serpentine(StringUMap& parameters, Group* const layout);
 
 	virtual ~Serpentine() = default;
 
@@ -53,8 +53,8 @@ private:
 	const Color& tailColor;
 
 	struct TailData {
-		uint8_t  percent;
-		uint16_t position;
+		uint8_t  percent  = 0;
+		uint16_t position = 0;
 	};
 
 	vector<TailData> tailData;
@@ -62,6 +62,4 @@ private:
 	void calculateTailPosition();
 };
 
-} /* namespace */
-
-#endif /* SERPENTINE_HPP_ */
+} // namespace

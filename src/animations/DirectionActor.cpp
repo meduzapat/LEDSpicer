@@ -24,147 +24,93 @@
 
 using namespace LEDSpicer::Animations;
 
-DirectionActor::DirectionActor(
-	umap<string, string>& parameters,
-	Group* const group,
-	const vector<string>& requiredParameters
-) :
-	FrameActor(parameters, group, requiredParameters),
-	Direction(parameters["direction"]),
-	cDirection(direction)
-{
-	if (not isDirectionForward())
-		currentFrame = totalFrames;
-}
-
 void DirectionActor::drawConfig() const {
 	Direction::drawConfig();
 	FrameActor::drawConfig();
 }
 
-bool DirectionActor::isBouncing() const {
-	switch (direction) {
-	case Directions::ForwardBouncing:
-		return cDirection == Directions::Backward;
-	case Directions::BackwardBouncing:
-		return cDirection == Directions::Forward;
-	}
-	return false;
+void DirectionActor::restart() {
+	FrameActor::restart();
+	if (not isForward()) stepping.frame = stepping.getLastFrame();
 }
 
-bool DirectionActor::isBouncer() const {
-	return direction == Directions::ForwardBouncing or direction == Directions::BackwardBouncing;
+bool DirectionActor::isBouncing() const {
+	return cDirection.isBouncer();
 }
 
 bool DirectionActor::isFirstFrame() const {
-	switch (direction) {
-	case Directions::Forward:
-	case Directions::ForwardBouncing:
-		if (cDirection == Directions::Forward and currentFrame == 0)
-			return true;
-		break;
-	case Directions::Backward:
-	case Directions::BackwardBouncing:
-		if (cDirection == Directions::Backward and currentFrame == totalFrames)
-			return true;
-		break;
+	return (
+		(cDirection.isForward()  and FrameActor::isFirstFrame()) or
+		(cDirection.isBackward() and FrameActor::isLastFrame())
+	);
+}
+
+bool DirectionActor::isStartOfCycle() const {
+
+	if (FrameActor::isStartOfCycle()) {
+		if (isBouncer()) {
+			if (isBouncing() and cDirection.isBackward()) return true;
+		}
+		if (cDirection.isForward()) return true;
+		if (cDirection.isStopped()) return true;
+	}
+	else if (FrameActor::isLastFrame() and stepping.step == 0) {
+		if (isBouncer()) {
+			if (isBouncing() and cDirection.isForward()) return true;
+		}
+		if (cDirection.isBackward()) return true;
+		if (cDirection.isStopped()) return true;
 	}
 	return false;
 }
 
 bool DirectionActor::isLastFrame() const {
-	switch (direction) {
-	case Directions::Forward:
-	case Directions::BackwardBouncing:
-		if (cDirection == Directions::Forward and currentFrame == totalFrames)
-			return true;
-		break;
-	case Directions::Backward:
-	case Directions::ForwardBouncing:
-		if (cDirection == Directions::Backward and currentFrame == 0)
-			return true;
-		break;
-	}
-	return false;
+	return (
+		(FrameActor::isFirstFrame() and cDirection.isBackward()) or
+		(FrameActor::isLastFrame()  and cDirection.isForward())
+	);
 }
 
-bool DirectionActor::isDirectionForward() const {
-	return direction == Directions::Forward or direction == Directions::ForwardBouncing;
-}
-
-bool DirectionActor::isDirectionBackward() const {
-	return direction == Directions::Backward or direction == Directions::BackwardBouncing;
-}
-
-DirectionActor::Directions DirectionActor::getOppositeDirection() const {
-	return Direction::getOppositeDirection(cDirection);
-}
-
-void DirectionActor::restart() {
-	if (isDirectionForward()) {
-		currentFrame = 0;
-		cDirection = Directions::Forward;
-	}
-	else {
-		currentFrame = totalFrames;
-		cDirection = Directions::Backward;
-	}
-	FrameActor::restart();
+bool DirectionActor::isEndOfCycle() const {
+	if (not stepping.isLastStep()) return false;
+	if (not isBouncer()) return isLastFrame();
+	return isBouncing() and isLastFrame();
 }
 
 uint16_t DirectionActor::calculateNextOf(
-	Directions& currentDirection,
-	uint16_t index,
-	Directions direction,
-	uint16_t amount)
-{
-
-	switch (direction) {
-	case Directions::Forward:
-		if (index == amount)
-			index = 0;
-		else
-			++index;
-		break;
-	case Directions::ForwardBouncing:
-	case Directions::BackwardBouncing:
-		if (currentDirection == Directions::Forward) {
-			// change of direction.
-			if (index == amount) {
-				currentDirection = Directions::Backward;
-				--index;
-				break;
-			}
-			++index;
-			break;
+	Direction&      currentDirection,
+	const uint16_t  index,
+	const Direction direction,
+	const uint16_t  last
+) {
+	// Handle boundary conditions.
+	if ((currentDirection.isForward() and index == last) or (not currentDirection.isForward() and index == 0)) {
+		if (direction.isBouncer()) {
+			currentDirection.reverse();
+			return index;
 		}
-		// change of direction.
-		if (index == 0) {
-			currentDirection = Directions::Forward;
-			++index;
-			break;
-		}
-		--index;
-		break;
-	case Directions::Backward:
-		if (index == 0)
-			index = amount;
-		else
-			--index;
-		break;
+		// Non-bouncer: wrap to opposite end.
+		return currentDirection.isForward() ? 0 : last;
 	}
 
-	return index;
+	// Normal movement.
+	return currentDirection.isForward() ? index + 1 : index - 1;
 }
 
-uint16_t DirectionActor::nextOf(Directions currentDirection, uint16_t index, Directions direction, uint16_t amount) {
+uint16_t DirectionActor::nextOf(
+	Direction       currentDirection,
+	const uint16_t  index,
+	const Direction direction,
+	const uint16_t  amount
+) {
 	return calculateNextOf(currentDirection, index, direction, amount);
 }
 
 void DirectionActor::advanceFrame() {
-	currentFrame = calculateNextOf(cDirection, currentFrame, direction, totalFrames);
+	if (stepping.shouldMoveFrame())
+		stepping.frame = calculateNextOf(cDirection, stepping.frame, *this, stepping.frames -1);
 }
 
-const uint16_t DirectionActor::getFullFrames() const {
-	return (totalFrames * (1 + isBouncer()));
+uint16_t DirectionActor::getFullFrames() const {
+	return (FrameActor::getFullFrames() * (1 + isBouncer()));
 }

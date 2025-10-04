@@ -21,11 +21,9 @@
  */
 
 #include "DirectionActor.hpp"
-#include "utility/Colorful.hpp"
-#include <cmath>
+#include "utilities/Colorful.hpp"
 
-#ifndef PULSE_HPP_
-#define PULSE_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_ACTOR_PULSE {"speed", "direction"}
 
@@ -40,11 +38,7 @@ public:
 
 	enum class Modes : uint8_t {Linear, Exponential};
 
-	Pulse(umap<string, string>& parameters, Group* const layout):
-		DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
-		Colorful(parameters.count("color") ? parameters["color"] : parameters.count("colors") ? parameters["colors"] : ""),
-		mode(parameters.count("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
-	{}
+	Pulse(StringUMap& parameters, Group* const layout);
 
 	virtual ~Pulse() = default;
 
@@ -66,6 +60,5 @@ private:
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* PULSE_HPP_ */

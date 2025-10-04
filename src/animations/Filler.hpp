@@ -21,25 +21,26 @@
  */
 
 #include "StepActor.hpp"
-#include "utility/Colorful.hpp"
+#include "utilities/Colorful.hpp"
 
-#ifndef FILLER_HPP_
-#define FILLER_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_ACTOR_FILLER {"speed", "direction", "mode"}
 
 namespace LEDSpicer::Animations {
 
+using namespace LEDSpicer::Utilities;
+
 /**
- * LEDSpicer::Animations::Fill
+ * LEDSpicer::Animations::Filler
  */
 class Filler: public StepActor, public Colorful {
 
 public:
 
-	enum class Modes : uint8_t {Normal, Random};
+	enum class Modes : uint8_t {Normal, Random, Wave, Curtain};
 
-	Filler(umap<string, string>& parameters, Group* const group);
+	Filler(StringUMap& parameters, Group* const group);
 
 	virtual ~Filler() = default;
 
@@ -53,13 +54,6 @@ public:
 
 protected:
 
-	struct Data {
-		uint16_t
-			begin,
-			end;
-		Directions dir;
-	};
-
 	void calculateElements() override;
 
 private:
@@ -70,11 +64,8 @@ private:
 	/// Keeps the currently processed random.
 	uint16_t currentRandom;
 
-	/// Keeps track if the process is filling / emptying.
-	bool filling = true;
-
 	/// Keeps track of the previous frame affected elements.
-	vector<bool> previousFrameAffectedElements;
+	vector<uint8_t> previousFrameAffectedElements;
 
 	/**
 	 * Generates the next random element.
@@ -83,17 +74,26 @@ private:
 
 	/**
 	 * Fills the group in a linear way.
-	 * @param values
 	 */
-	void fillElementsLinear(const Data& values);
+	void fillElementsLinear();
 
 	/**
 	 * Fills the group in a random way.
 	 */
 	void fillElementsRandom();
 
+	/**
+	 * Fills the group like linear but doing waves.
+	 * The idea in this mode is to duplicate the number of frames to create a filling and draining effect
+	 * in the same direction.
+	 */
+	void fillElementsWave();
+
+	/**
+	 * Fills the group like a curtain, from both sides toward center (inward/forward)
+	 * or from center toward both sides (outward/backward).
+	 */
+	void fillElementsCurtain();
 };
 
-} /* namespace */
-
-#endif /* FILLER_HPP_ */
+} // namespace

@@ -40,7 +40,7 @@ void Mame::process() {
 		activate();
 
 	string buffer;
-	if (not socks.recive(buffer))
+	if (not socks.receive(buffer))
 		return;
 
 	buffer = Utility::extractChars(buffer, '*', 'z');
@@ -59,31 +59,31 @@ void Mame::process() {
 		Log::debug("MAME running");
 	}
 
-	umap<string, bool> messages;
+	unordered_map<string, bool> messages;
 
 	auto parts = Utility::explode(buffer, '=');
 
 	// Several outputs use digits, to make things simple zero ( 0 ) will be OFF, everything else will be ON
 
-	if (itemsMap.count(parts[0]))
+	if (itemsUMap.exists(parts[0]))
 		messages[parts[0]] = parts[1][0] != '0';
 
 	if (parts.size() > 2) {
 		bool last = parts.back()[0] != '0';
 		parts.pop_back();
 		for (uint c = 1; c < parts.size(); c++) {
-			if (itemsMap.count(parts[c].substr(1)))
+			if (itemsUMap.exists(parts[c].substr(1)))
 				messages[parts[c].substr(1)] = parts[c + 1][0] != '0';
 		}
-		if (itemsMap.count(parts[parts.size() - 1].substr(1)))
+		if (itemsUMap.exists(parts[parts.size() - 1].substr(1)))
 			messages[parts[parts.size() - 1].substr(1)] = last;
 	}
 
 	for (auto& message : messages) {
 		LogDebug("Sending: " + message.first + " " + (message.second ? "on" : "off"));
 		if (message.second) {
-			if (not controlledItems.count(message.first))
-				controlledItems.emplace(message.first, itemsMap[message.first]);
+			if (not controlledItems.exists(message.first))
+				controlledItems.emplace(message.first, itemsUMap[message.first]);
 		}
 		else
 			controlledItems.erase(message.first);

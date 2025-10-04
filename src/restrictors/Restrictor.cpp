@@ -25,21 +25,16 @@
 using namespace LEDSpicer::Restrictors;
 
 void Restrictor::initialize() {
-
-	if (dumpMode)
-		return;
-
 	LogDebug("Initializing Restrictor " + getFullName());
 	openHardware();
+	initialized = true;
 }
 
 void Restrictor::terminate() {
-
-	if (dumpMode)
-		return;
-
+	if (not initialized) return;
 	LogDebug("Disconnect " + getFullName());
 	closeHardware();
+	initialized = false;
 }
 
 uint8_t Restrictor::getMaxIds() const {
@@ -94,11 +89,12 @@ string Restrictor::ways2str(Ways ways) {
 		return "rotary 8";
 	case Ways::rotary12:
 		return "rotary 12";
+	default:
+		return "";
 	}
-	return "";
 }
 
-const Restrictor::Ways Restrictor::strWays2Ways(const std::string& strWays) {
+Restrictor::Ways Restrictor::strWays2Ways(const std::string& strWays) {
 	try {
 		int intValue(std::stoi(strWays));
 		if (intValue >= static_cast<int>(Ways::invalid) && intValue <= static_cast<int>(Ways::rotary12)) {
@@ -111,7 +107,7 @@ const Restrictor::Ways Restrictor::strWays2Ways(const std::string& strWays) {
 	}
 }
 
-const string Restrictor::ways2StrWays(Ways ways) {
+string Restrictor::ways2StrWays(Ways ways) {
 	if (ways == Ways::invalid)
 		return "invalid";
 	return to_string(static_cast<int>(ways));
@@ -122,6 +118,6 @@ bool Restrictor::isRotary(const Ways& ways) {
 }
 
 const string Restrictor::getProfileStr(const string& profile) {
-	auto parts(Utility::explode(profile, '_'));
+	auto parts(Utilities::Utility::explode(profile, '_'));
 	return "Player " + parts[0] + ", Joystick " + parts[1];
 }

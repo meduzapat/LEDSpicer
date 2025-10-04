@@ -35,10 +35,10 @@ void RaspberryPi::resetLeds() {
 void RaspberryPi::openHardware() {
 
 	if (initialized)
-		throw Error(getFullName() + " device can only be loaded once");
+		throw Error(getFullName()) << " device can only be loaded once";
 
 	if (gpioInitialise() < 0) {
-		throw Error("Failed to initialized " + getFullName());
+		throw Error("Failed to initialized ") << getFullName();
 	}
 
 	// Only handle used element's LEDs.

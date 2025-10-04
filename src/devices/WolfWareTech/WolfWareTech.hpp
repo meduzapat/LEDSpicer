@@ -22,8 +22,7 @@
 
 #include "devices/DeviceUSB.hpp"
 
-#ifndef WOLFWARETECH_HPP_
-#define WOLFWARETECH_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices::WolfWareTech {
 
@@ -48,6 +47,4 @@ protected:
 	void afterClaimInterface() override {}
 };
 
-} /* namespace */
-
-#endif /* WOLFWARETECH_HPP_ */
+} // namespace

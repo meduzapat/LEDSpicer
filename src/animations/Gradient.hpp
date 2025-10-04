@@ -20,11 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Colors.hpp"
+#include "utilities/Colors.hpp"
 #include "StepActor.hpp"
 
-#ifndef GRADIENT_HPP_
-#define GRADIENT_HPP_ 1
+#pragma once
 
 #define DEFAULT_TONES 10
 
@@ -33,19 +32,21 @@
 namespace LEDSpicer::Animations {
 
 /**
- * LEDSpicer::Animations::Rainbow
+ * LEDSpicer::Animations::Gradient
+ * Handles gradient animations across LED elements.
  */
 class Gradient: public StepActor, public Colors {
 
 public:
 
 	/**
-	 * All: will gradient every element with the same color.
-	 * Cyclic: Will create a smooth gradient over the elements in the group.
+	 * Modes for gradient application:
+	 * All: Applies the same gradient color to every element.
+	 * Cyclic: Distributes the gradient smoothly across elements in the group.
 	 */
 	enum class Modes : uint8_t {All, Cyclic};
 
-	Gradient(umap<string, string>& parameters, Group* const layout);
+	Gradient(StringUMap& parameters, Group* const layout);
 
 	virtual ~Gradient() = default;
 
@@ -57,22 +58,22 @@ public:
 
 protected:
 
+	/// The selected mode.
 	const Modes mode;
 
-	const uint8_t tones;
+	/// Number of tones (steps) per color transition segment.
+	uint8_t tones;
 
+	/// Precalculated colors for the entire gradient cycle.
 	vector<Color> precalc;
 
 	void calculateElements() override;
 
 private:
 
-	void calculateSingle();
-
 	void calculateMultiple();
 
 };
 
-} /* namespace */
+} // namespace LEDSpicer::Animations
 
-#endif /* GRADIENT_HPP_ */

@@ -59,7 +59,7 @@ void LedWiz32::transfer() const {
 		load.push_back(48 * (l / 255.00f));
 		if (load.size() == 8) {
 			transferToConnection(load);
-			std::this_thread::sleep_for(std::chrono::microseconds(LEDWIZ_WAIT));
+			sleep_for(std::chrono::microseconds(LEDWIZ_WAIT));
 			load.clear();
 		}
 	}

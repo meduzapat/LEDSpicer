@@ -26,52 +26,61 @@ using namespace LEDSpicer::Animations;
 
 actorFactory(Serpentine)
 
-Serpentine::Serpentine(umap<string, string>& parameters, Group* const group) :
+Serpentine::Serpentine(StringUMap& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	Color(Color::getColor(parameters["color"])),
-	tailColor(Color::getColor(parameters["tailColor"]))
+	tailColor(Color::getColor(parameters.exists("tailColor") ? parameters.at("tailColor") : "Off"))
 {
-
+	stepping.frames = group->size();
+	stepping.steps  = calculateStepsBySpeed(speed);
+	calculateStepPercent();
 	// Tail cannot be larger than the array, serpentine will overlap.
 	uint16_t tailLength = Utility::parseNumber(
-		parameters.count("tailLength") ? parameters.at("tailLength") : "0",
-		"Invalid tailLength, enter a number 0 - " + to_string(totalFrames)
+		parameters.exists("tailLength") ? parameters.at("tailLength") : "0",
+		"Invalid tailLength, enter a number 0 - " + to_string(stepping.frames)
 	);
 
-	if (not Utility::verifyValue<uint16_t>(tailLength, 0, group->size()))
-		throw Error("Tail cannot be larger than the group: " + to_string(totalFrames));
+	if (not Utility::verifyValue<uint16_t>(tailLength, 0, stepping.frames))
+		throw Error("Tail cannot be larger than the group: ") << stepping.frames;
 
-	if (not tailLength)
-		return;
+	if (not tailLength) return;
 
 	uint8_t tailIntensity = Utility::parseNumber(parameters["tailIntensity"], "Invalid tailIntensity, enter a number 0-100");
 	if (not Utility::verifyValue<uint8_t>(tailIntensity, 0, 100))
 		throw Error("Invalid tailIntensity, enter a number 0-100");
 
 	tailData.resize(tailLength);
-	tailData.shrink_to_fit();
 
-	float tailweight = tailIntensity / static_cast<float>(tailData.size() + 1), intensity = 0;
-	for (auto& tail : tailData) {
-		tail.percent = tailIntensity - intensity;
-		if (direction == Directions::Forward)
-			tail.position = 0;
+	// Higher values = steeper decay
+	const float decayFactor = 3.f;
+	const float baseIntensity = tailIntensity;
+
+	for (size_t i = 0; i < tailData.size(); ++i) {
+		// Exponential decay: intensity = base * e^(-factor * position/length)
+		const float normalizedPosition = static_cast<float>(i) / static_cast<float>(tailData.size());
+		const float intensity = baseIntensity * std::exp(-decayFactor * normalizedPosition);
+
+		tailData[i].percent = intensity;
+
+		if (cDirection.isForward())
+			tailData[i].position = 0;
 		else
-			tail.position = group->size() - 1;
-		intensity += tailweight;
+			tailData[i].position = stepping.getLastFrame();
 	}
 }
 
 void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
-	cout << "Serpentine: " << DrawDirection(cDirection) << " Pos: " << static_cast<uint16_t>(currentFrame + 1) << " ";
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << "Serpentine: " << DrawDirection(cDirection.getDirection()) << " ";
+	}
 #endif
 
-	// For very fast, a much simple algorithm can be used.
 	if (not tailData.size()) {
-		if (speed == Speeds::VeryFast)
-			changeElementColor(currentFrame, *this, filter);
+		// For very fast, a much simple algorithm can be used.
+		if (speed == Speeds::VeryFast) // and not bounce
+			changeElementColor(stepping.frame, *this, filter);
 		else
 			changeFrameElement(*this, true, direction);
 		return;
@@ -79,9 +88,20 @@ void Serpentine::calculateElements() {
 
 	calculateTailPosition();
 #ifdef DEVELOP
-	cout << "Tail: ";
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << "Tail: ";
+	}
 #endif
-	for (auto& data : tailData) {
+	for (size_t i = 1; i < tailData.size(); ++i) {
+		auto data(tailData[i]);
+		if (data.position == stepping.frame) {
+#ifdef DEVELOP
+			if (Log::isLogging(LOG_DEBUG)) {
+				cout << std::setw(2) << static_cast<uint16_t>(data.position + 1) << "=--% ";
+			}
+#endif
+			continue;
+		}
 		switch (filter) {
 		case Color::Filters::Mask:
 			changeElementColor(data.position, tailColor.fade(data.percent), filter);
@@ -95,42 +115,49 @@ void Serpentine::calculateElements() {
 			);
 		}
 #ifdef DEVELOP
-		cout << static_cast<uint16_t>(data.position + 1) << "=" << static_cast<uint16_t>(data.percent) << "% ";
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << std::setw(2)        << static_cast<uint16_t>(data.position + 1)
+			 << "=" << std::setw(2) << static_cast<uint16_t>(data.percent) << "% ";
+	}
 #endif
 	}
 
 	// For very fast, a much simple algorithm can be used.
-	if (speed == Speeds::VeryFast)
-		changeElementColor(currentFrame, *this, filter);
-	else
+	if (speed == Speeds::VeryFast) {
+#ifdef DEVELOP
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << endl;
+	}
+#endif
+		changeElementColor(stepping.frame, *this, filter);
+	}
+	else {
 		changeFrameElement(tailColor, *this, direction);
+	}
 }
 
 void Serpentine::calculateTailPosition() {
-	Directions tailDirection = getOppositeDirection();
-	uint16_t lastTail = currentFrame; //calculateNextOf(tailDirection, currentFrame, tailDirection, totalFrames);
-	// Avoid changing the tail when doing the same frame.
-	if (tailData[0].position == lastTail)
-		return;
+	// only calculate on new frames.
+	if (stepping.step) return;
+	uint16_t lastTail = stepping.frame;
 	for (uint16_t c = tailData.size() - 1; c > 0; --c)
 		tailData[c].position = tailData[c - 1].position;
 	tailData[0].position = lastTail;
 }
 
 void Serpentine::drawConfig() const {
-	cout << "Type: Serpentine " << endl;
-	cout << "Color: ";
-	drawColor();
-	cout << endl << "Tail: ";
+	cout <<
+		"Type: Serpentine "          << endl <<
+		"Color: " << this->getName() << endl <<
+		"Tail: ";
 	if (not tailData.size()) {
 		cout << "No Tail" << endl;
 	}
 	else {
-		cout << " Color: ";
-		tailColor.drawColor();
 		cout <<
-			", Length: " << static_cast<int>(tailData.size()) <<
-			", Intensity: " << (tailData.front().percent + 0) <<
+			" Color: "      << tailColor.getName()               <<
+			", Length: "    << static_cast<int>(tailData.size()) <<
+			", Intensity: " << (tailData.front().percent + 0)    <<
 			"%" << endl;
 	}
 	StepActor::drawConfig();

@@ -4,7 +4,7 @@ includedir=@includedir@/@PACKAGE@
 libdir=@libdir@/@PACKAGE@
 
 Name: @PACKAGE_NAME@
-Description: LEDSpicer is a LEDs controler and animator program.
+Description: Advanced LED and Joystick Control for Arcade Systems
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lledspicer

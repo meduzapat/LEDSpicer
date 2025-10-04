@@ -24,13 +24,15 @@
 
 using namespace LEDSpicer::Inputs;
 
+unordered_map<string, InputHandler*> InputHandler::inputHandlers;
+
 InputHandler::InputHandler(const string& inputName) :
 	Handler(INPUTS_DIR + inputName + ".so"),
-	createFunction(reinterpret_cast<Input*(*)(umap<string, string>&, umap<string, Items*>&)>(dlsym(handler, "createInput"))),
+	createFunction(reinterpret_cast<Input*(*)(StringUMap&, ItemPtrUMap&)>(dlsym(handler, "createInput"))),
 	destroyFunction(reinterpret_cast<void(*)(Input*)>(dlsym(handler, "destroyInput")))
 {
 	if (char *errstr = dlerror())
-		throw Error("Failed to load input " + inputName + " " + errstr);
+		throw Error("Failed to load input ") << inputName << " " << errstr;
 }
 
 InputHandler::~InputHandler() {
@@ -42,7 +44,7 @@ InputHandler::~InputHandler() {
 	}
 }
 
-Input* InputHandler::createInput(umap<string, string>& parameters, umap<string, Items*>& maps) {
+Input* InputHandler::createInput(StringUMap& parameters, ItemPtrUMap& maps) {
 
 	Input* instance = createFunction(parameters, maps);
 	instances.push_back(instance);

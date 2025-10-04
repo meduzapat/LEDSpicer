@@ -22,8 +22,7 @@
 
 #include "WolfWareTech.hpp"
 
-#ifndef HOWLER_HPP_
-#define HOWLER_HPP_ 1
+#pragma once
 
 #define HOWLER_NAME       "Howler"
 #define HOWLER_PRODUCT    0x6800
@@ -51,7 +50,7 @@ class Howler: public WolfWareTech {
 
 public:
 
-	Howler(umap<string, string>& options) :
+	Howler(StringUMap& options) :
 	WolfWareTech(
 		HOWLER_WVALUE,
 		HOWLER_INTERFACE,
@@ -77,6 +76,4 @@ protected:
 
 deviceFactory(Howler)
 
-} /* namespace */
-
-#endif /* HOWLER_HPP_ */
+} // namespace

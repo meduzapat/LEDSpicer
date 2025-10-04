@@ -23,8 +23,7 @@
 #include "Input.hpp"
 #include "Handler.hpp"
 
-#ifndef INPUTSHANDLER_HPP_
-#define INPUTSHANDLER_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Inputs {
 
@@ -54,7 +53,10 @@ public:
 	 * @param maps
 	 * @return the newly created input plugin.
 	 */
-	Input* createInput(umap<string, string>& parameters, umap<string, Items*>& maps);
+	Input* createInput(StringUMap& parameters, ItemPtrUMap& maps);
+
+	/// Keeps references to inputs handlers by input name.
+	static unordered_map<string, InputHandler*> inputHandlers;
 
 protected:
 
@@ -66,7 +68,7 @@ protected:
 	 * @param plugin parameters.
 	 * @return a new created plugin.
 	 */
-	Input*(*createFunction)(umap<string, string>&, umap<string, Items*>&) = nullptr;
+	Input*(*createFunction)(StringUMap&, ItemPtrUMap&) = nullptr;
 
 	/**
 	 * Pointer to the plugin's destruction function.
@@ -76,6 +78,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* INPUTSHANDLER_HPP_ */
+} // namespace

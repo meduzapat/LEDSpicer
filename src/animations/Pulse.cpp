@@ -26,26 +26,38 @@ using namespace LEDSpicer::Animations;
 
 actorFactory(Pulse)
 
+Pulse::Pulse(StringUMap& parameters, Group* const layout) :
+	DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
+	Colorful(parameters.exists("color") ? parameters["color"] : parameters.exists("colors") ? parameters["colors"] : ""),
+	mode(parameters.exists("mode") ? str2mode(parameters["mode"]) : Modes::Exponential)
+{
+	stepping.frames = calculateFramesBySpeed(speed);
+}
+
 void Pulse::calculateElements() {
 	const Color* color = colors[currentColor];
 	float c;
 	if (mode == Modes::Linear)
-		c = currentFrame;
+		c = stepping.frame;
 	else
-		c = static_cast<float>(currentFrame * currentFrame) / totalFrames;
+		c = static_cast<float>(stepping.frame * stepping.frame) / stepping.frames;
 #ifdef DEVELOP
-	cout << "Pulse: " << DrawDirection(cDirection) << " F: " <<  to_string(currentFrame + 1) << " = " << PERCENT(c, totalFrames) << " ";
-	color->drawColor();
-	cout << endl;
+	if (Log::isLogging(LOG_DEBUG)) {
+	cout <<
+		"Pulse: " << DrawDirection(cDirection.getDirection())  <<
+		" Frame " << (stepping.frame + 1)                      <<
+		" = "     << PERCENT(c, stepping.frames)               <<
+		"% "      << color->getName()                          << endl;
+	}
 #endif
-	changeElementsColor(color->fade(PERCENT(c, totalFrames)), filter);
-	if (isLastFrame())
-		advanceColor();
+	changeElementsColor(color->fade(PERCENT(c, stepping.frames)), filter);
+	if (isEndOfCycle()) advanceColor();
 }
 
 void Pulse::drawConfig() const {
-	cout << "Type: Pulse " << endl;
-	cout << "Colors: ";
+	cout <<
+		"Type: Pulse " << endl <<
+		"Colors: ";
 	this->drawColors();
 	cout << endl << "Mode: " << mode2str(mode) << endl;
 	DirectionActor::drawConfig();
@@ -53,20 +65,16 @@ void Pulse::drawConfig() const {
 
 string Pulse::mode2str(const Modes mode) {
 	switch (mode) {
-	case Modes::Linear:
-		return "Linear";
-	case Modes::Exponential:
-		return "exponential";
+	case Modes::Linear:      return "Linear";
+	case Modes::Exponential: return "exponential";
 	}
 	return "";
 }
 
 Pulse::Modes Pulse::str2mode(const string& mode) {
-	if (mode == "Linear")
-		return Modes::Linear;
-	if (mode == "Exponential")
-		return Modes::Exponential;
-	throw Error("Invalid mode " + mode);
+	if (mode == "Linear")      return Modes::Linear;
+	if (mode == "Exponential") return Modes::Exponential;
+	throw Error("Invalid mode ") << mode;
 }
 
 void Pulse::restart() {

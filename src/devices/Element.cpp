@@ -24,35 +24,31 @@
 
 using namespace LEDSpicer::Devices;
 
+unordered_map<string, Element*> Element::allElements;
+
 void Element::setColor(const Color& color) {
 	const Color& newColor(brightness ? color.fade(brightness) : color);
-	// Multiple RGB.
-	if (leds.size() > 3) {
+	// Single RGB or Multiple RGB.
+	if (leds.size() >= 3) {
 		for (size_t i = 0; i < leds.size(); i += 3) {
 			*leds[i + Color::Channels::Red]   = newColor.getR();
 			*leds[i + Color::Channels::Green] = newColor.getG();
 			*leds[i + Color::Channels::Blue]  = newColor.getB();
 		}
 	}
-	// Single RGB.
-	if (leds.size() == 3) {
-		*leds[Color::Channels::Red]   = newColor.getR();
-		*leds[Color::Channels::Green] = newColor.getG();
-		*leds[Color::Channels::Blue]  = newColor.getB();
-	}
-	// Handle solenoids.
+	// Handle timed motors or solenoids.
 	else if (timeOn) {
-		// set solenoid off
+		// set off
 		if (newColor == Color::Off) {
 			*leds[SINGLE_LED] = 0;
 		}
 		// On, always kick full intense.
 		else if (not *leds[SINGLE_LED]) {
 			*leds[SINGLE_LED] = 255;
-			clockTime = std::chrono::system_clock::now() + std::chrono::milliseconds(timeOn);
+			reset(timeOn);
 		}
 	}
-	// Single led in monochrome.
+	// Single led monochrome.
 	else {
 		*leds[SINGLE_LED] = newColor.getMonochrome();
 	}
@@ -65,7 +61,7 @@ void Element::setColor(const Color& color, const Color::Filters& filter, uint8_t
 		setColor(*getColor().set(color, filter, percent));
 }
 
-LEDSpicer::Color Element::getColor() const {
+Color Element::getColor() const {
 	Color color;
 	if (leds.size() == 1)
 		color.set(*leds[SINGLE_LED], *leds[SINGLE_LED], *leds[SINGLE_LED]);
@@ -86,9 +82,8 @@ uint8_t Element::getLedValue(uint16_t led) const {
 	return *leds[led];
 }
 
-uint8_t* const Element::getLed(uint16_t led) const {
-	if (led > leds.size())
-		throw Error("Invalid led number");
+uint8_t* Element::getLed(uint16_t led) const {
+	if (led >= leds.size()) throw Error("Invalid led number");
 	return leds[led];
 }
 
@@ -104,7 +99,7 @@ const string Element::getName() const {
 	return name;
 }
 
-const LEDSpicer::Color& Element::getDefaultColor() const {
+const Color& Element::getDefaultColor() const {
 	return defaultColor;
 }
 
@@ -113,11 +108,11 @@ bool Element::isTimed() const {
 }
 
 void Element::checkTime() {
-	if (*leds[SINGLE_LED] and std::chrono::system_clock::now() > clockTime)
-		*leds[SINGLE_LED] = 0;
+	// If is on and ran out of time, set it off.
+	if (*leds[SINGLE_LED] and isTime()) *leds[SINGLE_LED] = 0;
 }
 
-void Element::draw() {
+void Element::draw() const {
 	cout <<
 		std::left << std::setfill(' ') << std::setw(20) << name <<
 		" Led: " << (leds.size() == 1 ? (timeOn ? "Solenoid" : "Single Color") : (leds.size() == 3 ? "RGB" : "Multi RGB"));

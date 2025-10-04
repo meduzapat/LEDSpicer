@@ -20,20 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
-#include <cstdlib>
-#include <cstring>
-#include <array>
 #include <memory>
 
-#include "Messages.hpp"
-#include "utility/XMLHelper.hpp"
-
-#ifndef EMITTER_HPP_
-#define EMITTER_HPP_ 1
+#include "utilities/Messages.hpp"
+#include "utilities/XMLHelper.hpp"
 
 #define ARCADE_SYSTEM "arcade"
 
@@ -43,7 +33,7 @@ using std::endl;
 #define DATA_SOURCE_CONTROLSINI "controls.ini"
 
 // dataSource fields.
-#define CONTROLLERS_FILE PACKAGE_DATA_DIR "gameData.xml"
+#define CONTROLLERS_FILE PROJECT_DATA_DIR "/gameData.xml"
 #define CONTROL "C"
 #define PLAYERS "ps"
 #define PLAYER  "p"
@@ -64,7 +54,7 @@ using std::endl;
 #define CCOINS   "coins"
 
 // controls.ini fields.
-#define CONTROLINI_FILE PACKAGE_DATA_DIR "controls.ini"
+#define CONTROLINI_FILE PROJECT_DATA_DIR "/controls.ini"
 
 // Controllers
 #define MOUSE      "MOUSE"
@@ -76,9 +66,11 @@ using std::endl;
 #define POSITIONAL "POSITIONAL"
 #define JOYSTICK   "JOYSTICK"
 
-#define COLORINI_FILE PACKAGE_DATA_DIR "colors.ini"
+#define COLORINI_FILE PROJECT_DATA_DIR "/colors.ini"
 
 bool ignoreMissingColors = false;
+
+using namespace LEDSpicer::Utilities;
 
 struct PlayerData {
 
@@ -89,8 +81,8 @@ struct PlayerData {
 	vector<string> controllers;
 	vector<string> ways;
 
-	umap<string, string> controlColors;
-	umap<string, string> buttonColors;
+	StringUMap controlColors;
+	StringUMap buttonColors;
 
 	/**
 	 * @return The data-set as a string.
@@ -109,7 +101,7 @@ struct GameRecord {
 		players = "0",
 		coins   = "0";
 
-	umap<string, PlayerData> playersData;
+	unordered_map<string, PlayerData> playersData;
 
 	/**
 	 * @return The data-set as a string.
@@ -193,5 +185,3 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 void controlIniController2ledspicer(const string& controller, PlayerData& pd);
 
 string mameController2ledspicer(const string& controller);
-
-#endif /* EMITTER_HPP_ */

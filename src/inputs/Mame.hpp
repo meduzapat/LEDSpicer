@@ -20,16 +20,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Socks.hpp"
-using LEDSpicer::Socks;
 #include "Input.hpp"
+#include "utilities/Socks.hpp"
 
-#ifndef MAME_HPP_
-#define MAME_HPP_ 1
+#pragma once
 
 #define MAME_PORT "8000"
 
 namespace LEDSpicer::Inputs {
+
+using LEDSpicer::Utilities::Socks;
 
 /**
  * LEDSpicer::Inputs::Mame
@@ -57,6 +57,5 @@ protected:
 
 	bool active = true;
 };
-} /* namespace */
+} // namespace
 
-#endif /* MAME_HPP_ */

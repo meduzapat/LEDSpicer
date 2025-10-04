@@ -20,17 +20,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <dlfcn.h>
 
-#include "utility/Log.hpp"
-#include "utility/Error.hpp"
+#include "utilities/Log.hpp"
+#include "utilities/Error.hpp"
 
-#ifndef HANDLER_HPP_
-#define HANDLER_HPP_ 1
+#pragma once
 
 namespace LEDSpicer {
+
+using Utilities::Log;
+using Utilities::Error;
 
 /**
  * LEDSpicer::Handler
@@ -64,6 +64,4 @@ protected:
 
 };
 
-} /* namespace LEDSpicer */
-
-#endif /* HANDLER_HPP_ */
+} // namespace

@@ -27,12 +27,15 @@
 #include <alsa/asoundlib.h>
 #include "AudioActor.hpp"
 
-#ifndef ALSAAUDIO_HPP_
-#define ALSAAUDIO_HPP_ 1
+#pragma once
 
-#define PEAKS 64
+constexpr uint16_t SAMPLE_RATE = 48000;
+constexpr float MAX_AMP        = 32767.0f;
 
 namespace LEDSpicer::Animations {
+
+using LEDSpicer::Utilities::Log;
+using LEDSpicer::Utilities::Error;
 
 /**
  * LEDSpicer::Animations::AlsaAudio
@@ -41,7 +44,7 @@ class AlsaAudio: public AudioActor {
 
 public:
 
-	AlsaAudio(umap<string, string>& parameters, Group* const group);
+	AlsaAudio(StringUMap& parameters, Group* const group);
 
 	virtual ~AlsaAudio();
 
@@ -49,13 +52,14 @@ public:
 
 protected:
 
+	/// Number of active instances sharing the PCM handle.
 	static uint8_t instances;
 
+	/// Shared PCM handle for audio capture.
 	static snd_pcm_t* pcm;
 
 	void calcPeak() override;
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* ALSAAUDIO_HPP_ */

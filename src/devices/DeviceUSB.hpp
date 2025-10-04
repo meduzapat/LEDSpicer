@@ -22,12 +22,13 @@
  */
 
 #include "Device.hpp"
-#include "utility/USB.hpp"
+#include "utilities/USB.hpp"
 
-#ifndef DEVICEUSB_HPP_
-#define DEVICEUSB_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices {
+
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Devices::Device
@@ -42,11 +43,11 @@ public:
 		uint8_t  interface,
 		uint16_t leds,
 		uint8_t  maxBoards,
-		umap<string, string>& options,
+		StringUMap& options,
 		const string& name
 	) :
-		Device(leds, name),
-		USB(wValue, interface, options.count("boardId") ? Utility::parseNumber(options["boardId"], "Device id should be a number") : 1, maxBoards) {}
+		USB(wValue, interface, options.exists("boardId") ? Utility::parseNumber(options["boardId"], "Device id should be a number") : 1, maxBoards),
+		Device(leds, name) {}
 
 	virtual ~DeviceUSB() = default;
 
@@ -63,6 +64,5 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* DEVICEUSB_HPP_ */

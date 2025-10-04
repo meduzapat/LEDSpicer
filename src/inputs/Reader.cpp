@@ -25,14 +25,14 @@
 using namespace LEDSpicer::Inputs;
 
 vector<Reader::ReadData> Reader::events;
-umap<string, Reader::ListenEventData> Reader::listenEvents;
+unordered_map<string, Reader::ListenEventData> Reader::listenEvents;
 Input* Reader::readController = nullptr;
 
-Reader::Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps) : Input(parameters, inputMaps) {
-	if (parameters.count("listenEvents")) {
+Reader::Reader(StringUMap& parameters, ItemPtrUMap& inputMaps) : Input(parameters, inputMaps) {
+	if (parameters.exists("listenEvents")) {
 		for (auto& e : Utility::explode(parameters["listenEvents"], FIELD_SEPARATOR)) {
 			Utility::trim(e);
-			if (not listenEvents.count(e))
+			if (not listenEvents.exists(e))
 				listenEvents.emplace(e, ListenEventData{-1, static_cast<uint8_t>(listenEvents.size())});
 		}
 	}
@@ -84,9 +84,8 @@ void Reader::readAll() {
 			continue;
 
 		input_event event;
-		char buffer[sizeof(event)];
 		while (true) {
-			ssize_t r = read(l.second.rCode, reinterpret_cast<void*>(&event), sizeof(event));
+			ssize_t r = read(l.second.rCode, &event, sizeof(event));
 			if (r < 1)
 				break;
 			if (event.type != EV_KEY) // and event.type != EV_REL))

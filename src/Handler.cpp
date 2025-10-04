@@ -29,7 +29,7 @@ Handler::Handler(const string& filename) :
 {
 	LogDebug("Loading library " + filename);
 	if (char *errstr = dlerror())
-		throw Error("Failed to load library " + filename + " " + errstr);
+		throw Error("Failed to load library ") << filename << " " << errstr;
 }
 
 Handler::~Handler() {

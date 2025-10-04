@@ -28,38 +28,39 @@ uint8_t Actor::FPS   = 0;
 uint8_t Actor::frame = 0;
 
 Actor::Actor(
-	umap<string, string>& parameters,
+	StringUMap& parameters,
 	Group* const group,
 	const vector<string>& requiredParameters
 ) :
-	filter(Color::str2filter(parameters.count("filter") ? parameters["filter"] : "Normal")),
-	secondsToStart(parameters.count("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
-	secondsToEnd(parameters.count("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
-	repeat(parameters.count("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0),
+	filter(Color::str2filter(parameters.exists("filter") ? parameters["filter"] : "Normal")),
+	secondsToStart(parameters.exists("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
+	secondsToEnd(parameters.exists("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
 	affectedElements(group->size(), false),
-	group(group)
+	group(group),
+	repeat(parameters.exists("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0)
 {
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor.");
 }
 
+Group& Actor::getGroup() const {
+	return *group;
+}
+
 void Actor::draw() {
-	++frame;
-	if (frame == FPS)
-		frame = 0;
+
+	if (not isRunning()) return;
+
+	// Reset Affected.
 	affectAllElements();
 	calculateElements();
-	if (not affectedElements.empty()) {
-		switch (filter) {
-		case Color::Filters::Mask: {
-			const Color& black(Color::getColor("Black"));
-			// turn off any non affected element.
-			for (uint16_t elIdx = 0; elIdx < group->size(); ++elIdx) {
-				if (affectedElements[elIdx])
-					continue;
-				changeElementColor(elIdx, black, Color::Filters::Normal, 100);
-			}
-		}}
+	// After effects.
+	if (not affectedElements.empty() and filter == Color::Filters::Mask) {
+		// turn off any non affected element.
+		for (uint16_t elIdx = 0; elIdx < group->size(); ++elIdx) {
+			if (affectedElements[elIdx]) continue;
+			changeElementColor(elIdx, Color::Off, Color::Filters::Normal, 100);
+		}
 	}
 }
 
@@ -68,11 +69,11 @@ void Actor::drawConfig() const {
 		"Group: " << group->getName() << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
 	if (secondsToStart)
-		cout << "Start After: " << secondsToStart << " sec" << endl;
+		cout << "Start After: "     << secondsToStart << " sec"   << endl;
 	if (secondsToEnd)
-		cout << "Stop After: " << secondsToEnd << " sec" << endl;
+		cout << "Stop After: "      << secondsToEnd   << " sec"   << endl;
 	if (repeat)
-		cout << "Will repeat for: " << repeat << " times" << endl;
+		cout << "Will repeat for: " << repeat         << " times" << endl;
 	if (acceptCycles()) {
 		cout << "Frames: " << getFullFrames() << " (" << getFullFrames() / FPS << " sec)" << endl;
 	}
@@ -90,8 +91,7 @@ void Actor::restart() {
 	}
 
 	if (secondsToStart) {
-		if (startTime)
-			delete startTime;
+		if (startTime) delete startTime;
 		startTime = new Time(secondsToStart);
 	}
 	else if (secondsToEnd) {
@@ -100,17 +100,14 @@ void Actor::restart() {
 }
 
 bool Actor::isRunning() {
-
 	if (startTime) {
-		if (not startTime->isTime())
-			return checkRepeats();
+		if (not startTime->isTime()) return false;
 		delete startTime;
 		startTime = nullptr;
 #ifdef DEVELOP
-		LogDebug("Staring Actor by time after " + to_string(secondsToStart) + " seconds.");
+		LogDebug("Starting Actor by time after " + to_string(secondsToStart) + " seconds.");
 #endif
-		if (secondsToEnd)
-			endTime = new Time(secondsToEnd);
+		if (secondsToEnd) endTime = new Time(secondsToEnd);
 	}
 
 	if (endTime and endTime->isTime()) {
@@ -121,10 +118,9 @@ bool Actor::isRunning() {
 #endif
 	}
 
-	// Time Over: there is an end time that ran out, and not start time, so is not running.
-	if (not startTime and not endTime and secondsToEnd)
+	if (not endTime and secondsToEnd) {
 		return checkRepeats();
-
+	}
 	return true;
 }
 
@@ -137,17 +133,8 @@ uint8_t Actor::getFPS() {
 	return FPS;
 }
 
-void Actor::setStartTime(uint16_t seconds) {
-	secondsToStart = seconds;
-}
-
-void Actor::setEndTime(uint16_t seconds) {
-	secondsToEnd = seconds;
-}
-
 void Actor::newFrame() {
-	if (frame == FPS)
-		frame = 0;
+	if (frame == FPS) frame = 0;
 	++frame;
 }
 
@@ -166,6 +153,10 @@ void Actor::changeElementsColor(const Color& color, Color::Filters filter, uint8
 		changeElementColor(c, color, filter, percent);
 }
 
+const vector<uint8_t*>& Actor::getLeds() const {
+	return group->getLeds();
+}
+
 void Actor::affectAllElements(bool value) {
 	affectedElements.assign(group->size(), value);
 }
@@ -175,12 +166,8 @@ bool Actor::isElementAffected(uint16_t index) const {
 }
 
 bool Actor::checkRepeats() {
-
-	if (not repeat or repeat == 1 or repeated == repeat)
-		return false;
-
+	if (not repeat or repeat == 1 or repeated == repeat) return false;
 	++repeated;
 	restart();
 	return true;
 }
-

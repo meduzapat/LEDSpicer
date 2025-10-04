@@ -23,10 +23,11 @@
 #include "Handler.hpp"
 #include "Actor.hpp"
 
-#ifndef ACTORHANDLER_HPP_
-#define ACTORHANDLER_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Animations {
+
+using LEDSpicer::Devices::Group;
 
 /**
  * LEDSpicer::Animations::ActorHandler
@@ -42,7 +43,10 @@ public:
 
 	virtual ~ActorHandler();
 
-	Actor* createActor(umap<string, string>& parameters, Group* const group);
+	Actor* createActor(StringUMap& parameters, Group* const group);
+
+	/// Keeps references to actor handlers by actor name.
+	static unordered_map<string, ActorHandler*> actorHandlers;
 
 protected:
 
@@ -55,7 +59,7 @@ protected:
 	 * @param group
 	 * @return a new created plugin.
 	 */
-	Actor*(*createFunction)(umap<string, string>&, Group* const) = nullptr;
+	Actor*(*createFunction)(StringUMap&, Group* const) = nullptr;
 
 	/**
 	 * Pointer to the plugin's destruction function.
@@ -64,6 +68,4 @@ protected:
 	void(*destroyFunction)(Actor*) = nullptr;
 };
 
-} /* namespace */
-
-#endif /* ACTORHANDLER_HPP_ */
+} // namespace

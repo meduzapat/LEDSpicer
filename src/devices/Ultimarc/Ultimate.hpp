@@ -20,13 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For special io format
-#include <iomanip>
-
 #include "Ultimarc.hpp"
 
-#ifndef ULTIMATE_HPP_
-#define ULTIMATE_HPP_ 1
+#pragma once
 
 #define IPAC_ULTIMATE_NAME       "Ultimarc Ipac Ultimate IO"
 #define IPAC_ULTIMATE_PRODUCT    0x0410
@@ -51,7 +47,7 @@ public:
 	/**
 	 * @param options
 	 */
-	Ultimate(umap<string, string>& options) :
+	Ultimate(StringUMap& options) :
 	Ultimarc(
 		IPAC_ULTIMATE_WVALUE,
 		0, // to be defined.
@@ -79,6 +75,4 @@ protected:
 
 deviceFactory(Ultimate)
 
-} /* namespace */
-
-#endif /* ULTIMATE_HPP_ */
+} // namespace

@@ -26,13 +26,11 @@
 
 #include "AudioActor.hpp"
 
-#ifndef PULSEAUDIO_HPP_
-#define PULSEAUDIO_HPP_ 1
+#pragma once
 
 #define STREAM_NAME "Peek Reader"
 #define SAMPLE_FORMAT PA_SAMPLE_FLOAT32
-#define RATE 144
-#define TOP 30.00f
+#define RATE 60
 
 namespace LEDSpicer::Animations {
 
@@ -44,7 +42,7 @@ class PulseAudio: public AudioActor {
 
 public:
 
-	PulseAudio(umap<string, string>& parameters, Group* const layout);
+	PulseAudio(StringUMap& parameters, Group* const layout);
 
 	virtual ~PulseAudio();
 
@@ -66,9 +64,6 @@ protected:
 
 	/// Raw peak data.
 	static vector<uint8_t> rawData;
-
-	static Values top;
-	static float smoother;
 
 	static void disconnect();
 
@@ -109,7 +104,5 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* PULSEAUDIO_HPP_ */
+} // namespace
 

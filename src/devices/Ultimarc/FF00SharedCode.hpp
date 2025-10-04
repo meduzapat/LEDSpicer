@@ -8,8 +8,7 @@
 
 #include "Ultimarc.hpp"
 
-#ifndef FF00SHAREDCODE_HPP_
-#define FF00SHAREDCODE_HPP_ 1
+#pragma once
 
 #define FF00_MSG(byte1, byte2) {byte1, byte2}
 #define FF00_TRANSFER 2 // Batches.
@@ -30,7 +29,7 @@ public:
 		uint8_t  interface,
 		uint16_t  leds,
 		uint8_t  maxBoards,
-		umap<string, string>& options,
+		StringUMap& options,
 		const string& name
 	) : Ultimarc(
 		wValue,
@@ -52,6 +51,4 @@ protected:
 	void afterConnect() override {}
 };
 
-} /* namespace */
-
-#endif /* NANOPACSHAREDCODE_HPP_ */
+} // namespace

@@ -24,12 +24,11 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void ServoStik::rotate(const umap<string, Ways>& playersData) {
+void ServoStik::rotate(const WaysUMap& playersData) {
 
 	// ServoStik can move two restrictors to the same ways, pick the first and ignore the rest.
 	Ways way(playersData.begin()->second);
-	if (way == Ways::invalid)
-		return;
+	if (way == Ways::invalid) return;
 	switch (way) {
 		case Ways::w2:
 		case Ways::w2v:
@@ -91,7 +90,7 @@ uint8_t ServoStik::getMaxIds() const {
 	return 2;
 }
 
-const bool ServoStik::isNonBasedId() const {
+bool ServoStik::isNonBasedId() const {
 	return true;
 }
 
@@ -122,7 +121,7 @@ void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 	LogDebug("Unable to save " + filePath);
 }
 
-const Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
+Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
 	std::string filePath(Utility::getConfigDir() + SERVOSTIK_DATA(profile));
 	std::ifstream inputFile(filePath);
 	if (inputFile.is_open()) {

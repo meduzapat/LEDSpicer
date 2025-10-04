@@ -26,7 +26,7 @@ using namespace LEDSpicer::Inputs;
 
 inputFactory(Network)
 
-LEDSpicer::Socks Network::sock;
+Socks Network::sock;
 
 void Network::activate() {
 	if (sock.isConnected())
@@ -44,24 +44,23 @@ void Network::process() {
 		activate();
 
 	string buffer;
-	if (not sock.recive(buffer))
+	if (not sock.receive(buffer))
 		return;
 
 	Log::debug("Message received " + buffer);
-	if (buffer.empty())
-		return;
+	if (buffer.empty()) return;
 	buffer = Utility::extractChars(buffer, '!', RECORD_SEPARATOR);
 	for (string& entry : Utility::explode(buffer, RECORD_SEPARATOR)) {
 #ifdef DEVELOP
 		LogDebug("Processing " + entry);
 #endif
-		if (itemsMap.count(entry)) {
+		if (itemsUMap.exists(entry)) {
 			if (removeControlledItemByTrigger(entry)) {
 				LogDebug("map " + entry +" Off");
 			}
 			else {
 				LogDebug("map " + entry +" On");
-				controlledItems.emplace(entry, itemsMap[entry]);
+				controlledItems.emplace(entry, itemsUMap[entry]);
 			}
 		}
 	}

@@ -8,8 +8,7 @@
 
 #include "FF00SharedCode.hpp"
 
-#ifndef NANOLED_HPP_
-#define NANOLED_HPP_ 1
+#pragma once
 
 #define NANO_LED_NAME       "Ultimarc NanoLed"
 #define NANO_LED_PRODUCT    0x1481
@@ -29,7 +28,7 @@ class NanoLed: public FF00SharedCode {
 
 public:
 
-	NanoLed(umap<string, string>& options) :
+	NanoLed(StringUMap& options) :
 	FF00SharedCode(
 		NANO_LED_WVALUE,
 		0, // to be defined.
@@ -49,6 +48,4 @@ public:
 
 deviceFactory(NanoLed)
 
-} /* namespace */
-
-#endif /* NANOLED_HPP_ */
+} // namespace

@@ -21,12 +21,13 @@
  */
 
 #include "Restrictor.hpp"
-#include "utility/USB.hpp"
+#include "utilities/USB.hpp"
 
-#ifndef RESTRICTORS_USB_HPP_
-#define RESTRICTORS_USB_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Restrictors {
+
+using LEDSpicer::Utilities::USB;
 
 /**
  * LEDSpicer::Restrictor::RestrictorUSB
@@ -37,11 +38,11 @@ class RestrictorUSB : public USB, public Restrictor {
 public:
 
 	RestrictorUSB(
-		umap<string, uint8_t>& playerData,
-		uint16_t wValue,
-		uint8_t  interface,
-		uint8_t  boardId,
-		uint8_t  maxBoards,
+		Uint8UMap&    playerData,
+		uint16_t      wValue,
+		uint8_t       interface,
+		uint8_t       boardId,
+		uint8_t       maxBoards,
 		const string& name
 	) :
 		USB(wValue, interface, boardId, maxBoards),
@@ -49,20 +50,18 @@ public:
 
 	virtual ~RestrictorUSB() = default;
 
-	virtual string getFullName() const;
+	string getFullName() const override;
 
 protected:
 
-	virtual void openHardware();
+	void openHardware() override;
 
-	virtual void closeHardware();
+	void closeHardware() override;
 
-	virtual void afterConnect() {}
+	void afterConnect() override {}
 
-	virtual void afterClaimInterface() {};
+	virtual void afterClaimInterface() override {};
 
 };
 
-} /* namespace */
-
-#endif /* RESTRICTORS_USB_HPP_ */
+} // namespace

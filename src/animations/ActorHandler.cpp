@@ -24,13 +24,15 @@
 
 using namespace LEDSpicer::Animations;
 
+unordered_map<string, ActorHandler*> ActorHandler::actorHandlers;
+
 ActorHandler::ActorHandler(const string& actorName) :
 	Handler(ACTORS_DIR + actorName + ".so"),
-	createFunction(reinterpret_cast<Actor*(*)(umap<string, string>&, Group* const)>(dlsym(handler, "createActor"))),
+	createFunction(reinterpret_cast<Actor*(*)(StringUMap&, Group* const)>(dlsym(handler, "createActor"))),
 	destroyFunction(reinterpret_cast<void(*)(Actor*)>(dlsym(handler, "destroyActor")))
 {
 	if (char *errstr = dlerror())
-		throw Error("Failed to load actor " + actorName + " " + errstr);
+		throw Error("Failed to load actor ") << actorName << " " << errstr;
 }
 
 ActorHandler::~ActorHandler() {
@@ -44,7 +46,7 @@ ActorHandler::~ActorHandler() {
 	}
 }
 
-Actor* ActorHandler::createActor(umap<string, string>& parameters, Group* const group) {
+Actor* ActorHandler::createActor(StringUMap& parameters, Group* const group) {
 	Actor* actor = createFunction(parameters, group);
 	actors.push_back(actor);
 	return actor;

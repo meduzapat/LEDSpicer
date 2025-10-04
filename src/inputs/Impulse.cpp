@@ -39,15 +39,15 @@ void Impulse::process() {
 		return;
 
 	for (auto& event : events) {
-		if (itemsMap.count(event.trigger)) {
-			if (controlledItems.count(event.trigger)) {
+		if (itemsUMap.exists(event.trigger)) {
+			if (controlledItems.exists(event.trigger)) {
 				// released
 				if (not event.value)
 					controlledItems.erase(event.trigger);
 			}
 			else
 				// activated
-				controlledItems.emplace(event.trigger, itemsMap[event.trigger]);
+				controlledItems.emplace(event.trigger, itemsUMap[event.trigger]);
 		}
 	}
 }

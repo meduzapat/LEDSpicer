@@ -33,7 +33,7 @@ struct Map {
 
 Map* currentMap = nullptr;
 
-umap<string, Map> maps;
+unordered_map<string, Map> maps;
 
 void callEmitter(const string& rom, const string& system = "") {
 	string parameters(currentConfigFile != CONFIG_FILE ? "-c \"" + currentConfigFile + "\"" : "");
@@ -163,21 +163,17 @@ void checkIfProcessIsRunning() {
 
 void findRunningProcess() {
 
-	umap<string, string> processList;
+	StringUMap processList;
 	dirent* dirEntity = nullptr;
 
 	DIR* dir = opendir(PROC_DIRECTORY) ;
-	if (not dir)
-		throw Error("Couldn't open the " PROC_DIRECTORY " directory");
+	if (not dir) throw Error("Couldn't open the " PROC_DIRECTORY " directory");
 
 	// Loop while not NULL
 	while ((dirEntity = readdir(dir))) {
 
-		if (dirEntity->d_type != DT_DIR)
-			continue;
-
-		if (dirEntity->d_name[0] < '0' || dirEntity->d_name[0] > '9')
-			continue;
+		if (dirEntity->d_type != DT_DIR) continue;
+		if (dirEntity->d_name[0] < '0' || dirEntity->d_name[0] > '9') continue;
 
 		// Read command line.
 		string file = PROC_DIRECTORY;
@@ -185,12 +181,10 @@ void findRunningProcess() {
 		file.append(CMDLINE);
 		std::ifstream cmdFile;
 		cmdFile.open(file.c_str(), std::ios::in);
-		if (not cmdFile.is_open())
-			continue;
+		if (not cmdFile.is_open()) continue;
 		std::getline(cmdFile, file);
 		cmdFile.close();
-		if (file.empty())
-			continue;
+		if (file.empty()) continue;
 
 		// Process command line.
 		vector<string> parts = Utility::explode(file, '\0');
@@ -234,26 +228,38 @@ void signalHandler(int sig) {
 		running = false;
 		return;
 	case SIGHUP:
-		LogNotice("processLookup received re load configuration signal");
+		LogNotice("processLookup received reload configuration signal");
 		// TODO: reload the profiles and restart everything?
 		return;
 	case SIGSEGV:
 	case SIGILL:
+	case SIGFPE:
+	case SIGBUS:
 		// Display back trace.
 		exit(EXIT_FAILURE);
+		break;
+	default:
+		// Log unexpected signals
+		LogWarning(PROJECT_NAME " received unexpected signal: " + std::to_string(sig));
 		break;
 	}
 }
 
 int main(int argc, char **argv) {
 
+	signal(SIGSEGV, signalHandler);
+	signal(SIGILL,  signalHandler);
+	signal(SIGFPE,  signalHandler);
+	signal(SIGBUS,  signalHandler);
 	signal(SIGTERM, signalHandler);
 	signal(SIGQUIT, signalHandler);
 	signal(SIGABRT, signalHandler);
 	signal(SIGINT,  signalHandler);
-	signal(SIGCONT, SIG_IGN);
-	signal(SIGSTOP, SIG_IGN);
 	signal(SIGHUP,  signalHandler);
+
+	// Ignored signals
+	signal(SIGPIPE, reinterpret_cast<__sighandler_t>(1));
+
 	string
 		commandline,
 		configFile   = "";
@@ -290,11 +296,11 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				"processLookup is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " " COPYRIGHT "\n\n"
-				"For more information visit <" PACKAGE_URL ">\n\n"
-				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
-				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
+				"processLookup is part of " PROJECT_NAME PROJECT_VERSION << endl <<
+				PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
+				"For more information visit <" PROJECT_SITE ">\n\n"
+				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
+				PROJECT_NAME " is free software under the GPL 3 license\n\n"
 				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
 				<< endl;
 			return EXIT_SUCCESS;
@@ -315,8 +321,7 @@ int main(int argc, char **argv) {
 
 	Log::initialize(true);
 
-	if (configFile.empty())
-		configFile = CONFIG_FILE;
+	if (configFile.empty()) configFile = CONFIG_FILE;
 
 	currentConfigFile = configFile;
 
@@ -331,23 +336,22 @@ int main(int argc, char **argv) {
 
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");
-		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
+		StringUMap configValues = XMLHelper::processNode(config.getRoot());
 
 		// Set log level.
-		if (configValues.count("logLevel"))
+		if (configValues.exists("logLevel"))
 			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
 
 		// Process main node.
 		tinyxml2::XMLElement* elementXML = config.getRoot()->FirstChildElement(NODE_MAIN_PROCESS);
-		if (not elementXML)
-			throw Error("Missing configuration");
+		if (not elementXML) throw Error("Missing configuration");
 
 		configValues = XMLHelper::processNode(elementXML);
 
 		// Set read time.
-		int waitTimeNum = configValues.count(PARAM_MILLISECONDS) ? Utility::parseNumber(configValues[PARAM_MILLISECONDS], "Invalid value for " PARAM_MILLISECONDS) : 1000;
+		int waitTimeNum = configValues.exists(PARAM_MILLISECONDS) ? Utility::parseNumber(configValues[PARAM_MILLISECONDS], "Invalid value for " PARAM_MILLISECONDS) : 1000;
 		if (waitTimeNum == 0)
-			throw LEDError(PARAM_MILLISECONDS " should be a number bigger than 0");
+			throw Error(PARAM_MILLISECONDS " should be a number bigger than 0");
 		waitTime = milliseconds(waitTimeNum);
 
 #ifdef MiSTer
@@ -366,20 +370,19 @@ int main(int argc, char **argv) {
 		for (; elementXML; elementXML = elementXML->NextSiblingElement(NODE_MAP)) {
 			configValues = XMLHelper::processNode(elementXML);
 			// Set process name.
-			if (not configValues.count(PARAM_PROCESS_NAME)) {
+			if (not configValues.exists(PARAM_PROCESS_NAME)) {
 				LogWarning("Missing " PARAM_PROCESS_NAME);
 				continue;
 			}
 			maps.emplace(
 				configValues[PARAM_PROCESS_NAME] , Map{
-					configValues.count(PARAM_SYSTEM) ? configValues[PARAM_SYSTEM] : "arcade",
+					configValues.exists(PARAM_SYSTEM) ? configValues[PARAM_SYSTEM] : "arcade",
 					"",
-					static_cast<uint8_t>(configValues.count(PARAM_PROCESS_POS) ? Utility::parseNumber(configValues[PARAM_PROCESS_POS], "") : 0)
+					static_cast<uint8_t>(configValues.exists(PARAM_PROCESS_POS) ? Utility::parseNumber(configValues[PARAM_PROCESS_POS], "") : 0)
 				}
 			);
 		}
-		if (not maps.size())
-			throw Error("No maps found");
+		if (not maps.size()) throw Error("No maps found");
 #endif
 	}
 	catch(Error& e) {
@@ -397,7 +400,7 @@ int main(int argc, char **argv) {
 		else
 			checkIfProcessIsRunning();
 #endif
-		std::this_thread::sleep_for(waitTime);
+		sleep_for(waitTime);
 	}
 	return EXIT_SUCCESS;
 }

@@ -61,6 +61,6 @@ uint16_t PacDrive::getProduct() const {
 	return PAC_DRIVE_PRODUCT;
 }
 
-const bool PacDrive::isProductBasedId() const {
+bool PacDrive::isProductBasedId() const {
 	return false;
 }

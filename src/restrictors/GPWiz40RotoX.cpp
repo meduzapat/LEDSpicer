@@ -28,7 +28,7 @@ uint8_t GPWiz40RotoX::getMaxIds() const {
 	return GPWIZ40ROTOX_MAX_ID;
 }
 
-void GPWiz40RotoX::rotate(const umap<string, Ways>& playersData) {
+void GPWiz40RotoX::rotate(const WaysUMap& playersData) {
 
 	/*
 	bit0 (1) = 12-way rotary enable on Rotary Stick 1
@@ -39,7 +39,7 @@ void GPWiz40RotoX::rotate(const umap<string, Ways>& playersData) {
 	vector<uint8_t> data {207, speedOn, speedOff, 0};
 
 	for (auto& p : players)
-		if (playersData.count(p.first) and isRotary(playersData.at(p.first))) {
+		if (playersData.exists(p.first) and isRotary(playersData.at(p.first))) {
 			data[3] += p.second + (playersData.at(p.first) == Ways::rotary8 ? (p.second == 1 ? 16 : 32) : 0);
 			LogDebug("Rotating " + getFullName() + " Rotor " +  to_string(p.second) + " to " + ways2str(playersData.at(p.first)));
 		}

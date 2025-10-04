@@ -22,8 +22,7 @@
 
 #include "Element.hpp"
 
-#ifndef LAYOUT_HPP_
-#define LAYOUT_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices {
 
@@ -53,6 +52,13 @@ public:
 
 		Item() = delete;
 
+		/**
+		 * Constructs an Item for a Group with specified properties.
+		 * @param group Pointer to the associated Group.
+		 * @param color Pointer to the desired color.
+		 * @param filter Color filter to apply.
+		 * @param pos Position in a list (default 0).
+		 */
 		Item(Group* group, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
 			group(group) {}
@@ -100,7 +106,7 @@ public:
 	 * @param index
 	 * @return a reference to the internal element.
 	 */
-	Element* const getElement(uint16_t index) const;
+	Element* getElement(uint16_t index) const;
 
 	/**
 	 * @return the group name.
@@ -108,22 +114,35 @@ public:
 	const string& getName() const;
 
 	/**
-	 * Returns the default color for this element.
-	 * @return
+	 * @return the default color for this element.
 	 */
 	const Color& getDefaultColor() const;
+
+	/**
+	 * @return a reference to the hardware internal LEDs for all elements.
+	 */
+	const vector<uint8_t*>& getLeds() const;
+
+	/// Stores groups by name.
+	static unordered_map<string, Group> layout;
 
 protected:
 
 	/// Elements on this group.
 	vector<Element*> elements;
 
+	/// Cache all LED pointers here.
+	vector<uint8_t*> leds;
+
+	/// Stores the name.
 	string name = "";
 
+	/// Stores the default color.
 	const Color& defaultColor;
 
 };
 
-} /* namespace */
+using GroupPtrUMap  = unordered_map<string, Group*>;
+using GroupItemUMap = unordered_map<string, Group::Item>;
 
-#endif /* LAYOUT_HPP_ */
+} // namespace

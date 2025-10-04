@@ -21,10 +21,9 @@
  */
 
 #include "Ultimarc.hpp"
-#include "utility/Monochromatic.hpp"
+#include "utilities/Monochromatic.hpp"
 
-#ifndef PACDRIVE_HPP_
-#define PACDRIVE_HPP_ 1
+#pragma once
 
 #define PAC_DRIVE_NAME      "Ultimarc Pac Drive Controller"
 #define PAC_DRIVE_PRODUCT    0x1500
@@ -36,6 +35,8 @@
 
 namespace LEDSpicer::Devices::Ultimarc {
 
+using LEDSpicer::Utilities::Monochromatic;
+
 /**
  * LEDSpicer::PacLED
  */
@@ -43,7 +44,7 @@ class PacDrive : public Ultimarc, public Monochromatic {
 
 public:
 
-	PacDrive(umap<string, string>& options) :
+	PacDrive(StringUMap& options) :
 	Ultimarc(
 		PAC_DRIVE_WVALUE,
 		PAC_DRIVE_INTERFACE,
@@ -62,7 +63,7 @@ public:
 
 	uint16_t getProduct() const override;
 
-	const bool isProductBasedId() const override;
+	bool isProductBasedId() const override;
 
 protected:
 
@@ -71,6 +72,4 @@ protected:
 
 deviceFactory(PacDrive)
 
-} /* namespace */
-
-#endif /* PACDRIVE_HPP_ */
+} // namespace
