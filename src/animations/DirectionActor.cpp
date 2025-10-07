@@ -4,7 +4,7 @@
  * @since     Jul 18, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ void DirectionActor::drawConfig() const {
 
 void DirectionActor::restart() {
 	FrameActor::restart();
-	if (not isForward()) stepping.frame = stepping.getLastFrame();
+	if (isBackward()) stepping.frame = stepping.getLastFrame();
 }
 
 bool DirectionActor::isBouncing() const {

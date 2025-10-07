@@ -10,7 +10,7 @@ set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer")
 set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
-set(COPYRIGHT         "Copyright © 2018 - 2025 Patricio A. Rossi")
+set(COPYRIGHT         "Copyright © 2018 - 2026 Patricio A. Rossi")
 set(DATA_VERSION      "1.1")
 
 # Set C++ standard

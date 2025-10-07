@@ -4,7 +4,7 @@
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -81,14 +81,12 @@ int main(int argc, char **argv) {
 				"-r or --replace               Same as REPLACE flag.\n"
 				"-f <flags> or --flags <flags> Send extra flags to LEDSPicer, pipe separated surrounded by quotes.\n"
 				"  Available Flags:\n"
-				"  * NO_ANIMATIONS        The animations of the profile will be ignored.\n"
-				"  * NO_INPUTS            The inputs of the profile will be ignored.\n"
-				"  * NO_START_TRANSITIONS The stating animations of the profile will be ignored.\n"
-				"  * NO_END_TRANSITIONS   The ending animations of the current profile will be ignored.\n"
-				"  * NO_TRANSITIONS       Same as NO_START_TRANSITIONS and NO_END_TRANSITIONS together.\n"
-				"  * NO_ROTATOR           Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
-				"  * FORCE_RELOAD         The profile will be load from the file instead of using cache.\n"
-				"  * REPLACE              Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator)\n"
+				"  * NO_ANIMATIONS  The animations of the profile will be ignored.\n"
+				"  * NO_INPUTS      The inputs of the profile will be ignored.\n"
+				"  * NO_TRANSITIONS Transitions will be ignored.\n"
+				"  * NO_ROTATOR     Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
+				"  * FORCE_RELOAD   The profile will be load from the file instead of using cache.\n"
+				"  * REPLACE        Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator)\n"
 				"  example: -f \"NO_ANIMATIONS|NO_INPUTS|FORCE_RELOAD\"\n"
 				"If -c or --config is not provided, emitter will use " CONFIG_FILE
 				<< endl;

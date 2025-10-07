@@ -4,7 +4,7 @@
  * @since     Oct 26, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -115,11 +115,11 @@ void Filler::fillElementsLinear() {
 
 	const Color* color(colors[currentColor]);
 
-	// For very fast, a much simple algorithm can be used.
+	// For very fast, a much simpler algorithm can be used.
 	if (speed == Speeds::VeryFast)
 		changeElementColor(stepping.frame, *color, filter);
 	else
-		changeFrameElement(stepping.frame, *color, cDirection.getDirection());
+		changeFrameElement(stepping.frame, *color, getFadeEffectDirection());
 
 	// Fill in between
 	uint16_t begin, end;
@@ -161,38 +161,51 @@ void Filler::fillElementsRandom() {
 void Filler::fillElementsWave() {
 
 	const Color* color(colors[currentColor]);
+	uint16_t frames = stepping.frames / 2, frame, begin, end;
+	bool isEmptying;
+	Directions dir;
 
-	uint16_t frames = stepping.frames / 2;
-	bool isEmptying = stepping.frame >= frames;
-	uint16_t frame  = isEmptying ? frames - (stepping.frames - stepping.frame) : stepping.frame;
+	auto setEmptyingParams = [&]() {
+		frame = frames - (stepping.frames - stepping.frame);
+		dir   = cDirection.getOppositeDirection();
+		begin = frame;
+		end   = frames;
+	};
 
-	// For very fast, a much simple algorithm can be used.
+	auto setFillingParams = [&]() {
+		frame = stepping.frame;
+		dir   = cDirection.getDirection();
+		begin = 0;
+		end   = frame;
+	};
+
+	if (isForward()) {
+		isEmptying = stepping.frame >= frames;
+		if (isEmptying) setEmptyingParams();
+		else setFillingParams();
+	}
+	else {
+		isEmptying = stepping.frame < frames;
+		if (isEmptying) setFillingParams();
+		else setEmptyingParams();
+	}
+
+	// For very fast, a much simpler algorithm can be used.
 	if (speed == Speeds::VeryFast)
 		changeElementColor(frame, *color, filter);
 	else
-		changeFrameElement(frame, *color, isEmptying ? cDirection.getOppositeDirection() : cDirection.getDirection());
+		changeFrameElement(frame, *color, dir);
 
 	// Fill / Emptying in between
-	uint16_t begin, end;
-	if (isForward() == isEmptying) {
-		begin = frame;
-		end   = frames;
-	}
-	else {
-		begin = 0;
-		end   = frame;
-	}
-
 	for (uint16_t c = begin; c < end; ++c)
-		if (c != frame)
-			changeElementColor(c, *color, filter);
+		if (c != frame) changeElementColor(c, *color, filter);
 }
 
 void Filler::fillElementsCurtain() {
 	const Color* color(colors[currentColor]);
 	// Calculate left and right positions based on current frame
 	uint16_t rightPos = getNumberOfElements() - 1 - stepping.frame;
-	Directions cd = isForward() ? cDirection.getDirection() : cDirection.getOppositeDirection();
+	Directions cd = getFadeEffectDirection();
 
 	// For very fast, use simple algorithm
 	if (speed == Speeds::VeryFast) {
@@ -253,10 +266,17 @@ Filler::Modes Filler::str2mode(const string& mode) {
 void Filler::restart() {
 	currentColor = colors.size() - 1;
 	StepActor::restart();
-	if (mode == Modes::Random) {
+	switch (mode) {
+	case Modes::Random:
 		std::fill(previousFrameAffectedElements.begin(), previousFrameAffectedElements.end(), false);
+		break;
+	case Modes::Curtain:
+		if (isBackward()) stepping.frame = stepping.frames - 1;
+		break;
+	default: break;
 	}
-	else if (mode == Modes::Curtain and isBackward()) {
-		stepping.frame = stepping.frames - 1;
-	}
+}
+
+Direction::Directions Filler::getFadeEffectDirection() const {
+	return isForward() ? cDirection.getDirection() : cDirection.getOppositeDirection();
 }

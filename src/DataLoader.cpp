@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -546,7 +546,11 @@ void DataLoader::processTransition(Profile* profile, const Settings& settings) {
 		}
 	}
 	if (not transition) throw Utilities::Error("Invalid Transition");
-	transitions.emplace(profile, transition);
+	// Save Cache, replace previous value if any.
+	if (transitions.exists(profile)) {
+		delete transitions[profile];
+	}
+	transitions[profile] = transition;
 }
 
 Device* DataLoader::createDevice(StringUMap& deviceData) {
@@ -570,8 +574,7 @@ vector<Actor*> DataLoader::processAnimation(const string& file, const string& ex
 
 	StringUMap actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement(NODE_ACTOR);
-	if (not element)
-		throw Utilities::Error("No actors found");
+	if (not element) throw Utilities::Error("No actors found");
 
 	vector<Actor*> actors;
 	for (; element; element = element->NextSiblingElement(NODE_ACTOR)) {

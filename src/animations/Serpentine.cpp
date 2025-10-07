@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,7 +78,7 @@ void Serpentine::calculateElements() {
 #endif
 
 	if (not tailData.size()) {
-		// For very fast, a much simple algorithm can be used.
+		// For very fast, a much simpler algorithm can be used.
 		if (speed == Speeds::VeryFast) // and not bounce
 			changeElementColor(stepping.frame, *this, filter);
 		else
@@ -122,7 +122,7 @@ void Serpentine::calculateElements() {
 #endif
 	}
 
-	// For very fast, a much simple algorithm can be used.
+	// For very fast, a much simpler algorithm can be used.
 	if (speed == Speeds::VeryFast) {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {

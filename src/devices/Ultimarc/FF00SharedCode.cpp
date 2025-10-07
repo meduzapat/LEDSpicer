@@ -3,7 +3,7 @@
  * @file      FF00SharedCode.cpp
  * @since     Apr 7, 2019
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  */
 
 #include "FF00SharedCode.hpp"
