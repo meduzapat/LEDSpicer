@@ -31,7 +31,7 @@ Socks::Socks(const string& hostAddress, const string& hostPort, bool bind) {
 
 void Socks::prepare(const string& hostAddress, const string& hostPort, bool bind, int sockType) {
 
-	if (socketFB) throw Error("Already prepared.");
+	if (socketFB) throw Error("Already prepared");
 
 	if (bind) {
 		// Server Mode.

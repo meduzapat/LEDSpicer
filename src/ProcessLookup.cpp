@@ -114,7 +114,7 @@ void checkIfProcessIsRunning() {
 		}
 
 		// Core is running but is not the same than before, different core loaded.
-		LogDebug("Different Core loaded.");
+		LogDebug("Different Core loaded");
 		lastRunning = data;
 	}
 
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
 				"For more information visit <" PROJECT_SITE ">\n\n"
 				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 				PROJECT_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -330,7 +330,7 @@ int main(int argc, char **argv) {
 		if (demonize) {
 			LogDebug("Daemonizing");
 			if (daemon(0, 0) == -1)
-				throw Error("Unable to daemonize.");
+				throw Error("Unable to daemonize");
 			LogDebug("Daemonized");
 		}
 

@@ -21,5 +21,5 @@ void NanoLed::drawHardwareLedMap() {
 		setLed(led, led + 1);
 		cout << std::left << std::setfill(' ') << std::setw(3) << static_cast<int>(*getLed(led)) << endl;
 	}
-	cout << "This device only have 1 connector with 60 LEDs in series."<< endl;
+	cout << "This device only have 1 connector with 60 LEDs in series"<< endl;
 }

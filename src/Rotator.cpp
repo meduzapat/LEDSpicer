@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 				"For more information visit <" PROJECT_SITE ">\n\n"
 				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 				PROJECT_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -138,11 +138,11 @@ int main(int argc, char **argv) {
 		// Process restrictors.
 		tinyxml2::XMLElement* element = config.getRoot()->FirstChildElement(RESTRICTORS);
 		if (not element)
-			throw Error("No restrictors section detected.");
+			throw Error("No restrictors section detected");
 
 		element = element->FirstChildElement(RESTRICTOR);
 		if (not element)
-			throw Error("No restrictors found.");
+			throw Error("No restrictors found");
 
 		for (; element; element = element->NextSiblingElement(RESTRICTOR)) {
 			StringUMap restrictorAttr(XMLHelper::processNode(element));

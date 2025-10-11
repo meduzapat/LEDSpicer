@@ -23,29 +23,9 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
+#include "MockProfile.hpp"
 #include "devices/transitions/ProgressiveTransition.hpp"
 #include "devices/Profile.hpp"
-
-// Reuse MockProfile from TransitionTest.cpp.
-struct MockProfile : public LEDSpicer::Devices::Profile {
-
-	using Profile::Profile;
-
-	virtual ~MockProfile() = default;
-
-	void addTestDummies() {
-		temporaryOnElements.emplace("test", Element::Item{&element, &Color::On, Color::Filters::Normal, 0});
-		temporaryOnGroups.emplace("test", Group::Item{&group, &Color::On, Color::Filters::Normal, 0});
-	}
-
-	bool gotReset() const {
-		return temporaryOnElements.empty() and temporaryOnGroups.empty();
-	}
-
-	uint8_t pin = 0;
-	Element element{"name", &pin, Color::On, 0, 100};
-	Group   group{Color::On};
-};
 
 // Mock subclass to test abstract base (implements calculate as no-op).
 class MockProgressiveTransition : public LEDSpicer::Devices::Transitions::ProgressiveTransition {

@@ -14,6 +14,7 @@ add_compile_options(-Wall -Wextra -fexceptions)
 include_directories(
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_SOURCE_DIR}/tests/src
+	${CMAKE_SOURCE_DIR}/tests/mocks
 	${GTEST_INCLUDE_DIRS}
 )
 

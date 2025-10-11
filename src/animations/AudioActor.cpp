@@ -54,7 +54,7 @@ AudioActor::AudioActor(StringUMap& parameters, Group* const group) :
 		if (group->size() < VU_MIN_ELEMENTS)
 			throw Error("To use VU meter a minimum of ")
 				<< VU_MIN_ELEMENTS
-				<< " elements is needed on the group.";
+				<< " elements is needed on the group";
 		break;
 	case Modes::Disco:
 	case Modes::Wave:

@@ -39,7 +39,7 @@ int main(int, char **) {
 		"For more information visit <" PROJECT_SITE ">\n\n"
 		"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 		PROJECT_NAME " is free software under the GPL 3 license\n\n"
-		"See the GNU General Public License for more details <http://www.gnu.org/licenses/>." << endl << endl <<
+		"See the GNU General Public License for more details <http://www.gnu.org/licenses/>" << endl << endl <<
 		"press q to exit" << endl << endl;
 
 	DIR *dir;

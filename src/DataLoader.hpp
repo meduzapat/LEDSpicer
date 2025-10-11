@@ -22,10 +22,21 @@
 
 #include "utilities/Messages.hpp"
 #include "utilities/XMLHelper.hpp"
+#ifdef ALSAAUDIO
+#include "animations/AlsaAudio.hpp"
+#endif
+#include "animations/FileReader.hpp"
+#include "animations/Filler.hpp"
+#include "animations/Gradient.hpp"
+#include "animations/Pulse.hpp"
+#ifdef PULSEAUDIO
+#include "animations/PulseAudio.hpp"
+#endif
+#include "animations/Random.hpp"
+#include "animations/Serpentine.hpp"
 #include "devices/transitions/FadeOutIn.hpp"
 #include "devices/transitions/CrossFade.hpp"
 #include "devices/transitions/Curtain.hpp"
-#include "animations/ActorHandler.hpp"
 #include "devices/DeviceHandler.hpp"
 #include "inputs/InputHandler.hpp"
 
@@ -160,7 +171,13 @@ public:
 	 * @param profile
 	 * @param settings the setting to use to create the transition obj
 	 */
-	static void processTransition(Profile* profile, const Settings& settings);
+	static void processTransition(Profile* profile, const StringUMap& settings);
+
+	/**
+	 * Removes a transition from the cache and frees its memory.
+	 * @param profile the profile that owns the transition in cache.
+	 */
+	static void removeTransitionFromCache(Profile* profile);
 
 	/**
 	 * Reads an animation file.
@@ -216,9 +233,6 @@ protected:
 
 	/// Keeps references to profiles.
 	static ProfilePtrUMap profilesCache;
-
-	/// Keeps references to actors (handled in actor handlers).
-	static ActorPtrsUmap animationCache;
 
 	/// Keeps references to inputs (handled in input handlers).
 	static InputPtrUMap inputCache;

@@ -28,6 +28,13 @@ Profile* Profile::defaultProfile = nullptr;
 ElementItemUMap Profile::temporaryOnElements;
 GroupItemUMap   Profile::temporaryOnGroups;
 
+Profile::~Profile() {
+#ifdef DEVELOP
+	cout << "Removing profile actors" << endl;
+#endif
+	for (auto a : animations) delete a;
+}
+
 void Profile::addAnimation(const vector<Actor*>& animation) {
 	animations.insert(animations.begin(), animation.begin(), animation.end());
 }

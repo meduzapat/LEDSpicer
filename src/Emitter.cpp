@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 				"For more information visit <" PROJECT_SITE ">\n\n"
 				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 				PROJECT_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -322,7 +322,7 @@ GameRecord parseMameDataFile(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game ") << rom << " no player data found.";
+		throw Error("Game ") << rom << " no player data found";
 
 	LogDebug("Game data: " + output);
 
@@ -353,7 +353,7 @@ GameRecord parseMame(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game ") << rom << " no player data found.";
+		throw Error("Game ") << rom << " no player data found";
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
@@ -434,7 +434,7 @@ GameRecord parseControlsIni(const string& rom) {
 	}
 	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
 	if (not ps)
-		throw Error("Game ") << rom << " no player data found.";
+		throw Error("Game ") << rom << " no player data found";
 
 	if (not mirror and controls.size() != ps)
 		throw Error("Game ") << rom << " with " << ps << " players, invalid mirrored value or missing players information";
@@ -453,7 +453,7 @@ GameRecord parseControlsIni(const string& rom) {
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
-	LogDebug("Controller data for game " + rom + " found.");
+	LogDebug("Controller data for game " + rom + " found");
 	return tempData;
 }
 
@@ -516,7 +516,7 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 			pd.controllers.push_back(JOYSTICK);
 		}
 	}
-	LogDebug("Controller data for game " + rom + " found.");
+	LogDebug("Controller data for game " + rom + " found");
 	return tempData;
 }
 

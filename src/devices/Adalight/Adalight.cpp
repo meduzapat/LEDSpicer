@@ -30,7 +30,7 @@ void Adalight::detectPort() {
 		port = findPortByUsbId(adaID);
 		if (not port.empty()) return;
 	}
-	throw Error("Unable to autodetect the serial port.");
+	throw Error("Unable to autodetect the serial port");
 }
 
 void Adalight::transfer() const {

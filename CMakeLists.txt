@@ -89,6 +89,7 @@ endif()
 
 if(ENABLE_MISTER)
 	add_compile_definitions(MiSTer=1)
+	# MiSTer uses ALSA only (not sure at this moment 2025)
 	set(ENABLE_PULSEAUDIO OFF)
 endif()
 
@@ -109,7 +110,7 @@ if(ENABLE_TESTS)
 	endif()
 endif()
 
-# Shared library: libledspicer
+# Shared library to be used on different binaries: libledspicer
 add_library(ledspicer SHARED
 	src/utilities/Log.cpp
 	src/utilities/Utility.cpp
@@ -129,15 +130,9 @@ add_library(ledspicer SHARED
 	src/restrictors/RestrictorSerial.cpp
 	src/devices/Element.cpp
 	src/devices/Group.cpp
-	src/devices/Profile.cpp
 	src/devices/Device.cpp
 	src/devices/DeviceSerial.cpp
 	src/devices/DeviceUSB.cpp
-	src/animations/Actor.cpp
-	src/animations/FrameActor.cpp
-	src/animations/DirectionActor.cpp
-	src/animations/StepActor.cpp
-	src/animations/AudioActor.cpp
 	src/inputs/Input.cpp
 	src/inputs/Reader.cpp
 	src/utilities/Message.cpp
@@ -185,7 +180,22 @@ endmacro()
 ###############
 
 # LEDSpicer Daemon
-add_executable(ledspicerd
+# List of sources for LEDSpicer Daemon
+set(LEDSPICER_SOURCES
+	src/animations/Actor.cpp
+	src/animations/FrameActor.cpp
+	src/animations/DirectionActor.cpp
+	src/animations/StepActor.cpp
+	src/animations/AudioActor.cpp
+	src/animations/AudioActor.cpp
+	src/animations/FileReader.cpp
+	src/animations/Filler.cpp
+	src/animations/Gradient.cpp
+	src/animations/Pulse.cpp
+	src/animations/PulseAudio.cpp
+	src/animations/Random.cpp
+	src/animations/Serpentine.cpp
+	src/devices/Profile.cpp
 	src/devices/transitions/Transition.cpp
 	src/devices/transitions/ProgressiveTransition.cpp
 	src/devices/transitions/ActorDriven.cpp
@@ -193,20 +203,49 @@ add_executable(ledspicerd
 	src/devices/transitions/CrossFade.cpp
 	src/devices/transitions/Curtain.cpp
 	src/Handler.cpp
-	src/animations/ActorHandler.cpp
 	src/devices/DeviceHandler.cpp
 	src/inputs/InputHandler.cpp
 	src/DataLoader.cpp
 	src/MainBase.cpp
 	src/Main.cpp
 )
-if(NOT ENABLE_DRY_RUN)
-	target_include_directories(ledspicerd PRIVATE ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
-	target_link_libraries(ledspicerd ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL} ${LIBUSB_LIBRARIES})
-else()
-	target_include_directories(ledspicerd PRIVATE ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS})
-	target_link_libraries(ledspicerd ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL})
+
+set(LEDSPICER_DEFINES)
+set(LEDSPICER_INCLUDE_DIRS)
+set(LEDSPICER_LIBS)
+
+# PulseAudio animation (conditional)
+if(ENABLE_PULSEAUDIO)
+	list(APPEND LEDSPICER_SOURCES src/animations/PulseAudio.cpp)
+	list(APPEND LEDSPICER_DEFINES PRIVATE PULSEAUDIO=1)
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${LIBPULSE_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ${LIBPULSE_LIBRARIES})
+#	add_compile_definitions(PULSEAUDIO=1)
 endif()
+
+# ALSA audio animation (conditional)
+if(ENABLE_ALSAAUDIO)
+	list(APPEND LEDSPICER_SOURCES src/animations/AlsaAudio.cpp)
+	list(APPEND LEDSPICER_DEFINES PRIVATE ALSAAUDIO=1)
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${LIBALSA_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ${LIBALSA_LIBRARIES})
+#	add_compile_definitions(ALSAAUDIO=1)
+endif()
+
+add_executable(ledspicerd ${LEDSPICER_SOURCES})
+target_compile_definitions(ledspicerd ${LEDSPICER_DEFINES})
+
+if(NOT ENABLE_DRY_RUN)
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL} ${LIBUSB_LIBRARIES})
+else()
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL})
+endif()
+
+target_include_directories(ledspicerd PRIVATE ${LEDSPICER_INCLUDE_DIRS})
+target_link_libraries(ledspicerd ${LEDSPICER_LIBS})
+
 target_compile_definitions(ledspicerd PRIVATE
 	ACTORS_DIR="${ACTORS_DIR}/"
 	DEVICES_DIR="${DEVICES_DIR}/"
@@ -258,64 +297,6 @@ add_executable(processLookup src/ProcessLookup.cpp)
 target_include_directories(processLookup PRIVATE ${TINYXML2_INCLUDE_DIRS})
 target_link_libraries(processLookup ledspicer ${TINYXML2_LIBRARIES})
 install(TARGETS processLookup RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-#################
-# Actor plugins #
-#################
-
-# Gradient animation plugin
-add_plugin(Gradient
-	"src/animations/Gradient.cpp"
-	"${ACTORS_DIR}"
-)
-
-# Pulse animation plugin
-add_plugin(Pulse
-	"src/animations/Pulse.cpp"
-	"${ACTORS_DIR}"
-)
-
-# Serpentine animation plugin
-add_plugin(Serpentine
-	"src/animations/Serpentine.cpp"
-	"${ACTORS_DIR}"
-)
-
-# Random animation plugin
-add_plugin(Random
-	"src/animations/Random.cpp"
-	"${ACTORS_DIR}"
-)
-
-# Filler animation plugin
-add_plugin(Filler
-	"src/animations/Filler.cpp"
-	"${ACTORS_DIR}"
-)
-
-# FileReader animation plugin
-add_plugin(FileReader
-	"src/animations/FileReader.cpp"
-	"${ACTORS_DIR}"
-)
-
-# PulseAudio animation plugin (conditional)
-if(ENABLE_PULSEAUDIO)
-	add_library(PulseAudio MODULE src/animations/PulseAudio.cpp)
-	target_include_directories(PulseAudio PRIVATE ${LIBPULSE_INCLUDE_DIRS})
-	target_link_libraries(PulseAudio ledspicer ${LIBPULSE_LIBRARIES})
-	set_target_properties(PulseAudio PROPERTIES PREFIX "")
-	install(TARGETS PulseAudio LIBRARY DESTINATION ${ACTORS_DIR})
-endif()
-
-# ALSA audio animation plugin (conditional)
-if(ENABLE_ALSAAUDIO)
-	add_library(AlsaAudio MODULE src/animations/AlsaAudio.cpp)
-	target_include_directories(AlsaAudio PRIVATE ${LIBALSA_INCLUDE_DIRS})
-	target_link_libraries(AlsaAudio ledspicer ${LIBALSA_LIBRARIES})
-	set_target_properties(AlsaAudio PROPERTIES PREFIX "")
-	install(TARGETS AlsaAudio LIBRARY DESTINATION ${ACTORS_DIR})
-endif()
 
 ################################
 # Device plugins (conditional) #

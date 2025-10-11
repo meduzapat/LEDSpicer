@@ -109,7 +109,7 @@ void Main::run() {
 
 		case Message::Types::FinishLastProfile:
 			if (not profiles.size()) break;
-			LogInfo("Profile " + currentProfile->getName() + " terminated.");
+			LogInfo("Profile " + currentProfile->getName() + " terminated");
 			profiles.pop_back();
 			if (profiles.size())
 				newProfile = profiles.back();
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
 				"For more information visit <" PROJECT_SITE ">\n\n"
 				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 				PROJECT_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
 			profile = argv[++i];
 			if (profile.empty()) {
 				cerr
-					<< "A profile name must be provided with -p or --profile option."
+					<< "A profile name must be provided with -p or --profile option"
 					<< endl;
 				return EXIT_FAILURE;
 			}
@@ -410,22 +410,17 @@ Profile* Main::tryProfiles(const vector<string>& data) {
 
 			// Reload is normally used for debugging profiles.
 			if (reload) {
-				LogDebug("Ignoring cache, reloading profile.");
-				// Reload or cache miss is the same.
+				LogDebug("Ignoring cache, reloading profile");
+				// Reload or cache miss is the same, but if exist it will be replaced.
 				profile = DataLoader::processProfile(profileName);
-				// But if there is a cache hit, update any reference.
+				// Update any reference.
 				if (oldProfile) {
-					if (oldProfile == Profile::defaultProfile) {
-						LogDebug("Updating default profile.");
-						Profile::defaultProfile = profile;
-					}
+					DataLoader::removeTransitionFromCache(oldProfile);
+					// Check default profile and current profile.
+					if (oldProfile == Profile::defaultProfile) Profile::defaultProfile = profile;
 					if (oldProfile == currentProfile) currentProfile = profile;
-
 					// Also update all copies before delete.
-					for (auto &p : profiles) {
-						if (p == oldProfile) p = profile;
-					}
-					delete oldProfile;
+					for (auto &p : profiles) if (p == oldProfile) p = profile;
 				}
 				return profile;
 			}
@@ -533,6 +528,7 @@ void Main::changeProfile(Profile* to, bool store) {
 	// For transition disable inputs
 	auto gfb = Utility::globalFlags;
 	Utility::globalFlags = FLAG_NO_INPUTS;
+	// Get a transition to to or the ending transition using nullptr
 	Transition* transition = DataLoader::getTransitionFromCache(to ? currentProfile : nullptr);
 	transition->setTarget(to);
 

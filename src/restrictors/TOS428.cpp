@@ -56,7 +56,7 @@ void TOS428::rotate(const WaysUMap& playersData) {
 void TOS428::detectPort() {
 	port = findPortByUsbId("PRODUCT=" TOS428_PRODUCT_ID);
 	if (port.empty())
-		throw Utilities::Error("Unable to autodetect the serial port.");
+		throw Utilities::Error("Unable to autodetect the serial port");
 }
 
 void TOS428::createPackage(Ways way, uint8_t target) {

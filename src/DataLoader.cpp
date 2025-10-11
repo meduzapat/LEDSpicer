@@ -31,7 +31,6 @@ InputPtrUMap      DataLoader::inputCache;
 string            DataLoader::portNumber;
 milliseconds      DataLoader::waitTime;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
-ActorPtrsUmap     DataLoader::animationCache;
 unordered_map<Profile*, Transition*> DataLoader::transitions;
 
 DataLoader::Modes DataLoader::getMode() {
@@ -389,12 +388,12 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 
 Profile* DataLoader::getProfileFromCache(const string& name) {
 	if (not profilesCache.exists(name)) {
-		LogDebug("Profile cache miss.");
+		LogDebug("Profile cache miss");
 		return nullptr;
 	}
 
 	auto profile(profilesCache.at(name));
-	LogDebug("Profile from cache.");
+	LogDebug("Profile from cache");
 	return profile;
 }
 
@@ -413,12 +412,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "transition for profile " + name);
 		transition = tempAttr[PARAM_NAME];
 	}
-	Settings settings(Settings::str2effect(transition), tempAttr);
-	Profile* profilePtr = new Profile(
-		name,
-		Color::getColor(backgroundColor)
-	);
-	processTransition(profilePtr, settings);
+	Profile* profilePtr = new Profile(name, Color::getColor(backgroundColor));
+	processTransition(profilePtr, tempAttr);
 
 	// Check for animations.
 	xmlElement = profile.getRoot()->FirstChildElement(NODE_ANIMATIONS);
@@ -492,32 +487,34 @@ Transition* DataLoader::getTransitionFromCache(Profile* profile) {
 	return nullptr;
 }
 
-void DataLoader::processTransition(Profile* profile, const Settings& settings) {
+void DataLoader::processTransition(Profile* profile, const StringUMap& settings) {
 
 	// Check cache
 	Transition* transition = getTransitionFromCache(profile);
 	if (transition) return;
 
-	if (settings.effect == Settings::Effects::None) {
+	const Transition::Effects effect(settings.exists("name") ? Transition::str2effect(settings.at("name")): Transition::Effects::None);
+
+	if (effect  == Transition::Effects::None) {
 		transitions.emplace(profile, new Transition(profile));
 		return;
 	}
 
-	const string speed(settings.parameters.exists("speed") ? settings.parameters.at("speed") : "Normal");
+	const string speed(settings.exists("speed") ? settings.at("speed") : "Normal");
 
-	switch (settings.effect) {
+	switch (effect) {
 	default:
-		case Settings::Effects::FadeOutIn: {
-			const Color& color(settings.parameters.exists("color") and Color::hasColor(settings.parameters.at("color")) ? Color::getColor(settings.parameters.at("color")) : Color::Off);
+		case Transition::Effects::FadeOutIn: {
+			const Color& color(settings.exists("color") and Color::hasColor(settings.at("color")) ? Color::getColor(settings.at("color")) : Color::Off);
 			transition = new FadeOutIn(profile, speed, color);
 			break;
 		}
-		case Settings::Effects::Crossfade: {
+		case Transition::Effects::Crossfade: {
 			transition = new CrossFade(profile, speed);
 			break;
 		}
-		case Settings::Effects::Curtain: {
-			string color(settings.parameters.exists("color") and Color::hasColor(settings.parameters.at("color")) ? settings.parameters.at("color") : "Off");
+		case Transition::Effects::Curtain: {
+			string color(settings.exists("color") and Color::hasColor(settings.at("color")) ? settings.at("color") : "Off");
 			StringUMap actorSettings{
 				{"type",      "Filler"},
 				{"group",     "All"},
@@ -528,7 +525,7 @@ void DataLoader::processTransition(Profile* profile, const Settings& settings) {
 				{"bouncer",   "True"},
 				{"cycles",    "1"}
 			};
-			Curtain::ClosingWays mode(Curtain::str2ClosingWays(settings.parameters.exists("closing") ? settings.parameters.at("closing") : "Both"));
+			Curtain::ClosingWays mode(Curtain::str2ClosingWays(settings.exists("closing") ? settings.at("closing") : "Both"));
 			switch (mode) {
 			case Curtain::ClosingWays::Right:
 				actorSettings["direction"] = "Backward";
@@ -547,31 +544,22 @@ void DataLoader::processTransition(Profile* profile, const Settings& settings) {
 	}
 	if (not transition) throw Utilities::Error("Invalid Transition");
 	// Save Cache, replace previous value if any.
-	if (transitions.exists(profile)) {
-		delete transitions[profile];
-	}
+	removeTransitionFromCache(profile);
 	transitions[profile] = transition;
 }
 
-Device* DataLoader::createDevice(StringUMap& deviceData) {
-
-	string deviceName = deviceData["name"];
-	if (not DeviceHandler::deviceHandlers.exists(deviceName))
-		DeviceHandler::deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
-	return DeviceHandler::deviceHandlers[deviceName]->createDevice(deviceData);
+void DataLoader::removeTransitionFromCache(Profile* profile) {
+	auto it = transitions.find(profile);
+	if (it != transitions.end()) {
+		delete it->second;
+		transitions.erase(it);
+	}
 }
 
 vector<Actor*> DataLoader::processAnimation(const string& file, const string& extra) {
 
 	string name(file + extra);
-	// Check cache.
-	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD) and animationCache.exists(name)) {
-		LogDebug("Animation from cache.");
-		return animationCache.at(name);
-	}
-
 	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
-
 	StringUMap actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement(NODE_ACTOR);
 	if (not element) throw Utilities::Error("No actors found");
@@ -583,9 +571,7 @@ vector<Actor*> DataLoader::processAnimation(const string& file, const string& ex
 		actors.push_back(createAnimation(actorData));
 	}
 
-	// Save Cache, replace previous value if any.
-	animationCache[name] = std::move(actors);
-	return animationCache.at(name);
+	return actors;
 }
 
 Actor* DataLoader::createAnimation(StringUMap& actorData) {
@@ -595,18 +581,42 @@ Actor* DataLoader::createAnimation(StringUMap& actorData) {
 		actorName = actorData["type"];
 
 	if (not Group::layout.exists(groupName))
-		throw Utilities::Error(groupName + " is not a valid group name in animation " + actorName);
+		throw Utilities::Error(groupName) << " is not a valid group name in animation " << actorName;
 
-	if (not ActorHandler::actorHandlers.exists(actorName))
-		ActorHandler::actorHandlers.emplace(actorName, new ActorHandler(actorName));
-	return ActorHandler::actorHandlers[actorName]->createActor(actorData, &Group::layout.at(groupName));
+#ifdef ALSAAUDIO
+	if (actorName == "AlsaAudio")
+		return new AlsaAudio(actorData, &Group::layout.at(groupName));
+#endif
+
+	if (actorName == "FileReader")
+		return new FileReader(actorData, &Group::layout.at(groupName));
+
+	if (actorName == "Filler")
+		return new Filler(actorData,     &Group::layout.at(groupName));
+
+	if (actorName == "Gradient")
+		return new Gradient(actorData,   &Group::layout.at(groupName));
+
+	if (actorName == "Pulse")
+		return new Pulse(actorData,      &Group::layout.at(groupName));
+
+#ifdef PULSEAUDIO
+	if (actorName == "PulseAudio")
+		return new PulseAudio(actorData, &Group::layout.at(groupName));
+#endif
+	if (actorName == "Random")
+		return new Random(actorData,     &Group::layout.at(groupName));
+
+	if (actorName == "Serpentine")
+		return new Serpentine(actorData, &Group::layout.at(groupName));
+	throw Utilities::Error(actorName) << " is not a valid animation";
 }
 
 void DataLoader::processInput(Profile* profile, const string& file) {
 
 	// Check cache.
 	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD) and inputCache.exists(file)) {
-		LogDebug("Input from cache.");
+		LogDebug("Input from cache");
 		profile->addInput(inputCache.at(file));
 		return;
 	}
@@ -646,6 +656,14 @@ void DataLoader::processInput(Profile* profile, const string& file) {
 
 	// Save Cache, replace previous value if any.
 	inputCache[file] = input;
+}
+
+Device* DataLoader::createDevice(StringUMap& deviceData) {
+
+	string deviceName = deviceData["name"];
+	if (not DeviceHandler::deviceHandlers.exists(deviceName))
+		DeviceHandler::deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
+	return DeviceHandler::deviceHandlers[deviceName]->createDevice(deviceData);
 }
 
 vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode) {

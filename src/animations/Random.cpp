@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(Random)
-
 Random::Random(StringUMap& parameters, Group* const group) :
 	FrameActor(parameters, group, REQUIRED_PARAM_ACTOR_RANDOM),
 	Colors(parameters.exists("colors") ? parameters["colors"] : "")

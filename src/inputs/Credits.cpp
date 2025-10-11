@@ -48,7 +48,7 @@ Credits::Credits(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 		// This is a list of two or more positions, separated by ID_SEPARATOR ex: 1,2,3.
 		auto groupMapIDs = Utility::explode(linkGroup, ID_SEPARATOR);
 		if (groupMapIDs.size() < 2) {
-			LogWarning("Ignoring group with less than two items.");
+			LogWarning("Ignoring group with less than two items");
 			continue;
 		}
 

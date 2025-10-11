@@ -22,30 +22,9 @@
 
 #include <gtest/gtest.h>
 
+#include "MockProfile.hpp"
 #include "devices/transitions/Transition.hpp"
 #include "devices/Profile.hpp"
-
-// Mock Profile class for testing.
-struct MockProfile : public LEDSpicer::Devices::Profile {
-
-	using Profile::Profile;
-
-	virtual ~MockProfile() = default;
-
-	void addTestDummies() {
-		temporaryOnElements.emplace("test", Element::Item{&element, &Color::On, Color::Filters::Normal, 0});
-		temporaryOnGroups.emplace("test", Group::Item{&group, &Color::On, Color::Filters::Normal, 0});
-	}
-
-	bool gotReset() const {
-		return temporaryOnElements.empty() and temporaryOnGroups.empty();
-	}
-
-	uint8_t pin = 0;
-	Element element{"name", &pin, Color::On, 0, 100};
-	Group   group{Color::On};
-
-};
 
 namespace LEDSpicer::Devices::Transitions {
 

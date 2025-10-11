@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(Pulse)
-
 Pulse::Pulse(StringUMap& parameters, Group* const layout) :
 	DirectionActor(parameters, layout, REQUIRED_PARAM_ACTOR_PULSE),
 	Colorful(parameters.exists("color") ? parameters["color"] : parameters.exists("colors") ? parameters["colors"] : ""),

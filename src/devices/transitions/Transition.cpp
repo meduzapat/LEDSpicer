@@ -44,3 +44,21 @@ void Transition::drawConfig() const {
 void Transition::reset() {
 	if (to) to->reset();
 }
+
+Transition::Effects Transition::str2effect(const string& effect) {
+	if (effect == "None")      return Effects::None;
+	if (effect == "FadeOutIn") return Effects::FadeOutIn;
+	if (effect == "Crossfade") return Effects::Crossfade;
+	if (effect == "Curtain")   return Effects::Curtain;
+	return Effects::None;
+}
+
+string Transition::effect2str(Effects effect) {
+	switch (effect) {
+	default:
+	case Effects::None:      return "None";
+	case Effects::FadeOutIn: return "FadeOutIn";
+	case Effects::Crossfade: return "Crossfade";
+	case Effects::Curtain:   return "Curtain";
+	}
+}

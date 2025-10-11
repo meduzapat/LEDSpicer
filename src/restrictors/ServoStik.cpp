@@ -51,11 +51,11 @@ void ServoStik::rotate(const WaysUMap& playersData) {
 
 	vector<uint8_t> data {0, 0xdd, 0, 0};
 	if (way == Ways::w4) {
-		LogDebug("Rotating " + getFullName() + " to 4 ways.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways");
 		data[3] = 0;
 	}
 	else {
-		LogDebug("Rotating " + getFullName() + " to 8 ways.");
+		LogDebug("Rotating " + getFullName() + " to 8 ways");
 		data[3] = 1;
 	}
 	transferToConnection(data);
@@ -106,7 +106,7 @@ void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 		}
 	}
 	else if (!S_ISDIR(st.st_mode)) {
-		LogDebug("Error: Config directory path exists but is not a directory.");
+		LogDebug("Error: Config directory path exists but is not a directory");
 		return;
 	}
 

@@ -40,7 +40,7 @@ Actor::Actor(
 	repeat(parameters.exists("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0)
 {
 	affectedElements.shrink_to_fit();
-	Utility::checkAttributes(requiredParameters, parameters, "actor.");
+	Utility::checkAttributes(requiredParameters, parameters, "actor");
 }
 
 Group& Actor::getGroup() const {
@@ -105,7 +105,7 @@ bool Actor::isRunning() {
 		delete startTime;
 		startTime = nullptr;
 #ifdef DEVELOP
-		LogDebug("Starting Actor by time after " + to_string(secondsToStart) + " seconds.");
+		LogDebug("Starting Actor by time after " + to_string(secondsToStart) + " seconds");
 #endif
 		if (secondsToEnd) endTime = new Time(secondsToEnd);
 	}
@@ -114,7 +114,7 @@ bool Actor::isRunning() {
 		delete endTime;
 		endTime = nullptr;
 #ifdef DEVELOP
-		LogDebug("Ended Actor by time after " + to_string(secondsToEnd) + " seconds.");
+		LogDebug("Ended Actor by time after " + to_string(secondsToEnd) + " seconds");
 #endif
 	}
 

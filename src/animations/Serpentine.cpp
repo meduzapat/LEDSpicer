@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(Serpentine)
-
 Serpentine::Serpentine(StringUMap& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_SERPENTINE),
 	Color(Color::getColor(parameters["color"])),

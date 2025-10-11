@@ -23,7 +23,6 @@
 #include "animations/Actor.hpp"
 #include "utilities/Color.hpp"
 #include "inputs/Input.hpp"
-#include "devices/transitions/Settings.hpp"
 
 #pragma once
 
@@ -33,7 +32,6 @@ namespace LEDSpicer::Devices {
 
 using Animations::Actor;
 using Inputs::Input;
-using Transitions::Settings;
 
 /**
  * LEDSpicer::Profile
@@ -49,7 +47,7 @@ public:
 	name(name),
 	backgroundColor(backgroundColor) {}
 
-	virtual ~Profile() = default;
+	virtual ~Profile();
 
 	/**
 	 * Adds an animation into the profile.

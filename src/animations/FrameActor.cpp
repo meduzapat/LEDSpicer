@@ -92,7 +92,7 @@ bool FrameActor::isRunning() {
 
 		if (cycle == cycles) {
 #ifdef DEVELOP
-			LogDebug("Actor completed after " + to_string(cycles) + " cycles.");
+			LogDebug("Actor completed after " + to_string(cycles) + " cycles");
 #endif
 			// Increase it by one so the debug message does not repeat.
 			++cycle;

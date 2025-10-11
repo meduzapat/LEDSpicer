@@ -226,8 +226,3 @@ private:
 using ActorPtrsUmap = unordered_map<string, vector<Actor*>>;
 
 } // namespace
-
-// The functions to create and destroy actors.
-#define actorFactory(plugin) \
-	extern "C" Actor* createActor(StringUMap& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
-	extern "C" void destroyActor(Actor* instance) { delete instance; }

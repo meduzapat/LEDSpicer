@@ -44,7 +44,7 @@ MainBase::MainBase() :
 	if (DataLoader::getMode() == DataLoader::Modes::Normal) {
 		LogDebug("Daemonizing");
 		if (daemon(0, 0) == -1)
-			throw Error("Unable to daemonize.");
+			throw Error("Unable to daemonize");
 		LogDebug("Daemonized");
 	}
 #endif
@@ -58,13 +58,6 @@ MainBase::~MainBase() {
 		delete dh.second;
 #ifdef DEVELOP
 		LogDebug("Device Handler of type " + dh.first + " instance deleted");
-#endif
-	}
-
-	for (auto& ah : ActorHandler::actorHandlers) {
-		delete ah.second;
-#ifdef DEVELOP
-		LogDebug("Actor Handler of type " + ah.first + " instance deleted");
 #endif
 	}
 

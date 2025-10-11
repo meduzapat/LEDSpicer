@@ -37,6 +37,20 @@ class Transition {
 
 public:
 
+	/**
+	 * Enum for different transition effects.
+	 */
+	enum class Effects : uint8_t {
+		/// Instantaneous transition, no effect.
+		None,
+		/// Fading out the current profile and fading in the new one.
+		FadeOutIn,
+		/// Crossfading from one profile to the other.
+		Crossfade,
+		/// A curtain closing and opening to the new profile.
+		Curtain
+	};
+
 	Transition() = delete;
 
 	/**
@@ -64,6 +78,20 @@ public:
 	 * @return The name of the Transition.
 	 */
 	virtual void drawConfig() const;
+
+	/**
+	 * Converts a string into a transition effect.
+	 * @param effect
+	 * @return the Effects value
+	 */
+	static Effects str2effect(const string& effect);
+
+	/**
+	 * Converts a transition effect into a string.
+	 * @param effect
+	 * @return the string representation of Effects.
+	 */
+	static string effect2str(Effects effect);
 
 protected:
 

@@ -66,7 +66,7 @@ StringUMap XMLHelper::processNode(const string& nodeElement) const {
 
 	tinyxml2::XMLElement* node = root->FirstChildElement(nodeElement.c_str());
 	if (not node)
-		throw LEDError("Missing ") << nodeElement << " section.";
+		throw LEDError("Missing ") << nodeElement << " section";
 
 	return processNode(node);
 }
