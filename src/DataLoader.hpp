@@ -22,6 +22,7 @@
 
 #include "utilities/Messages.hpp"
 #include "utilities/XMLHelper.hpp"
+
 #ifdef ALSAAUDIO
 #include "animations/AlsaAudio.hpp"
 #endif
@@ -34,14 +35,22 @@
 #endif
 #include "animations/Random.hpp"
 #include "animations/Serpentine.hpp"
+
+#include "inputs/Actions.hpp"
+#include "inputs/Credits.hpp"
+#include "inputs/Impulse.hpp"
+#include "inputs/Blinker.hpp"
+#include "inputs/Network.hpp"
+#include "inputs/Mame.hpp"
+
 #include "devices/transitions/FadeOutIn.hpp"
 #include "devices/transitions/CrossFade.hpp"
 #include "devices/transitions/Curtain.hpp"
 #include "devices/DeviceHandler.hpp"
-#include "inputs/InputHandler.hpp"
 
 #pragma once
 
+// data files location
 #define ACTOR_DIR   "/animations/"
 #define PROFILE_DIR "/profiles/"
 #define INPUT_DIR   "/inputs/"
@@ -161,6 +170,13 @@ public:
 	static Profile* processProfile(const string& name, const string& extra = "");
 
 	/**
+	 * Adds a transition into the cache.
+	 * @param profile
+	 * @param transition
+	 */
+	static void addTransitionIntoCache(Profile* profile, Transition* transition);
+
+	/**
 	 * @param profile
 	 * @return the transition for this profile or null.
 	 */
@@ -176,8 +192,9 @@ public:
 	/**
 	 * Removes a transition from the cache and frees its memory.
 	 * @param profile the profile that owns the transition in cache.
+	 * @param deleteTransition true to delete the instance.
 	 */
-	static void removeTransitionFromCache(Profile* profile);
+	static void removeTransitionFromCache(Profile* profile, bool deleteTransition);
 
 	/**
 	 * Reads an animation file.
@@ -234,9 +251,6 @@ protected:
 	/// Keeps references to profiles.
 	static ProfilePtrUMap profilesCache;
 
-	/// Keeps references to inputs (handled in input handlers).
-	static InputPtrUMap inputCache;
-
 	/// Stores the transitions for each unique profile.
 	static unordered_map<Profile*, Transition*> transitions;
 
@@ -287,15 +301,6 @@ protected:
 	static Actor* createAnimation(StringUMap& actorData);
 
 	/**
-	 * Extract a list of input sources (listen events in the kernel)
-	 * @param inputName current input file
-	 * @param inputNode the input node
-	 * @return an array with the sources.
-	 * @throws exception if not found or is not valid.
-	 */
-	static vector<string> processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode);
-
-	/**
 	 * Decorates input map data.
 	 * @param inputNode XML node from where the maps will be extracted
 	 * @param inputMap where the new maps will be stored.
@@ -303,6 +308,14 @@ protected:
 	 * @return
 	 */
 	static void processInputMap(tinyxml2::XMLElement* inputNode, ItemPtrUMap& inputMaps, const string& id = "");
+
+	/**
+	 * Creates an input from parameters.
+	 * @param inputData
+	 * @param inputMaps
+	 * @return
+	 */
+	static Input* createInput(StringUMap& inputData, ItemPtrUMap& inputMaps);
 
 	/**
 	 * Prepares the filenames.

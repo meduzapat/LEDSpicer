@@ -26,11 +26,13 @@ using namespace LEDSpicer::Devices::Transitions;
 
 Transition::Transition(Profile* current) : current(current) {
 	current->stopInputs();
+	current->removeTemporaries();
 }
 
 void Transition::setTarget(Profile* to) {
 	this->to = to;
-	reset();
+	// Transitions to itself do not rest.
+	if (to != current) reset();
 }
 
 bool Transition::run() {

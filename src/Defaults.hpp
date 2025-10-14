@@ -110,6 +110,7 @@ public:
 constexpr char GROUP_SEPARATOR    = 29;  // Group Separator (GS)
 constexpr char FIELD_SEPARATOR    = 30;  // Record Separator (RS)
 constexpr char RECORD_SEPARATOR   = 31;  // Unit Separator (US)
+constexpr char FIRST_CHARACTER    = 32;  // Space
 constexpr char ID_SEPARATOR       = ','; // Comma
 constexpr char ID_GROUP_SEPARATOR = '|'; // Pipe
 

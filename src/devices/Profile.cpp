@@ -33,6 +33,11 @@ Profile::~Profile() {
 	cout << "Removing profile actors" << endl;
 #endif
 	for (auto a : animations) delete a;
+
+#ifdef DEVELOP
+	cout << "Removing profile inputs" << endl;
+#endif
+	for (auto i : inputs) delete i;
 }
 
 void Profile::addAnimation(const vector<Actor*>& animation) {
@@ -123,6 +128,10 @@ void Profile::reset() {
 	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS))
 		for (auto actor : animations) actor->restart();
 	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) startInputs();
+	removeTemporaries();
+}
+
+void Profile::removeTemporaries() {
 	Profile::removeTemporaryOnGroups();
 	Profile::removeTemporaryOnElements();
 	Input::clearControlledInputs();
@@ -152,26 +161,26 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color, const Color::Fi
 	alwaysOnGroups.emplace_back(group, &color,filter);
 }
 
-void Profile::addTemporaryOnElement(const string name, const Element::Item item) {
+void Profile::addTemporaryOnElement(const string& name, const Element::Item item) {
 	removeTemporaryOnElement(name);
 	temporaryOnElements.emplace(name, item);
 }
 
-void Profile::removeTemporaryOnElement(const string name) {
-	if (temporaryOnElements.exists(name)) temporaryOnElements.erase(name);
+void Profile::removeTemporaryOnElement(const string& name) {
+	temporaryOnElements.erase(name);
 }
 
 void Profile::removeTemporaryOnElements() {
 	temporaryOnElements.clear();
 }
 
-void Profile::addTemporaryOnGroup(const string name, const Group::Item item) {
+void Profile::addTemporaryOnGroup(const string& name, const Group::Item item) {
 	removeTemporaryOnGroup(name);
 	temporaryOnGroups.emplace(name, item);
 }
 
-void Profile::removeTemporaryOnGroup(const string name) {
-	if (temporaryOnGroups.exists(name)) temporaryOnGroups.erase(name);
+void Profile::removeTemporaryOnGroup(const string& name) {
+	temporaryOnGroups.erase(name);
 }
 
 void Profile::removeTemporaryOnGroups() {

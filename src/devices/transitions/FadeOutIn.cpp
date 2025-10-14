@@ -26,7 +26,7 @@ using namespace LEDSpicer::Devices::Transitions;
 
 void FadeOutIn::drawConfig() const {
 	cout << "Transition: FadeInOut" << endl;
-	ProgressiveTransition::drawConfig();
+	Progressive::drawConfig();
 	cout << "Color: " << getName() << endl;
 }
 

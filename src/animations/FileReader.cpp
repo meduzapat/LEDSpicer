@@ -39,7 +39,7 @@ FileReader::FileReader(StringUMap& parameters, Group* const group) :
 		}
 	}
 	else{
-		LogDebug("File " + parameters["filename"] + " already on memory");
+		LogDebug("File " + parameters["filename"] + " already in memory");
 		frames = found;
 	}
 	stepping.frames = frames->second.size() - 1;

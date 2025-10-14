@@ -20,10 +20,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-# Plugin installation directories
-set(ACTORS_DIR  "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ledspicer/actors")
+# Devices installation directory
 set(DEVICES_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ledspicer/devices")
-set(INPUTS_DIR  "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ledspicer/inputs")
 
 # Global compile definitions (for source code)
 add_compile_definitions(
@@ -133,8 +131,6 @@ add_library(ledspicer SHARED
 	src/devices/Device.cpp
 	src/devices/DeviceSerial.cpp
 	src/devices/DeviceUSB.cpp
-	src/inputs/Input.cpp
-	src/inputs/Reader.cpp
 	src/utilities/Message.cpp
 	src/utilities/Messages.cpp
 )
@@ -195,16 +191,23 @@ set(LEDSPICER_SOURCES
 	src/animations/PulseAudio.cpp
 	src/animations/Random.cpp
 	src/animations/Serpentine.cpp
+	src/inputs/Input.cpp
+	src/inputs/Reader.cpp
+	src/inputs/Mame.cpp
+	src/inputs/Impulse.cpp
+	src/inputs/Actions.cpp
+	src/inputs/Blinker.cpp
+	src/inputs/Credits.cpp
+	src/inputs/Network.cpp
 	src/devices/Profile.cpp
 	src/devices/transitions/Transition.cpp
-	src/devices/transitions/ProgressiveTransition.cpp
+	src/devices/transitions/Progressive.cpp
 	src/devices/transitions/ActorDriven.cpp
 	src/devices/transitions/FadeOutIn.cpp
 	src/devices/transitions/CrossFade.cpp
 	src/devices/transitions/Curtain.cpp
 	src/Handler.cpp
 	src/devices/DeviceHandler.cpp
-	src/inputs/InputHandler.cpp
 	src/DataLoader.cpp
 	src/MainBase.cpp
 	src/Main.cpp
@@ -246,11 +249,7 @@ endif()
 target_include_directories(ledspicerd PRIVATE ${LEDSPICER_INCLUDE_DIRS})
 target_link_libraries(ledspicerd ${LEDSPICER_LIBS})
 
-target_compile_definitions(ledspicerd PRIVATE
-	ACTORS_DIR="${ACTORS_DIR}/"
-	DEVICES_DIR="${DEVICES_DIR}/"
-	INPUTS_DIR="${INPUTS_DIR}/"
-)
+target_compile_definitions(ledspicerd PRIVATE DEVICES_DIR="${DEVICES_DIR}/")
 install(TARGETS ledspicerd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Emitter utility
@@ -360,46 +359,6 @@ if(ENABLE_ADALIGHT)
 	)
 endif()
 
-#################
-# Input plugins #
-#################
-
-# MAME input plugin
-add_plugin(Mame
-	"src/inputs/Mame.cpp"
-	"${INPUTS_DIR}"
-)
-
-# Impulse input plugin
-add_plugin(Impulse
-	"src/inputs/Impulse.cpp"
-	"${INPUTS_DIR}"
-)
-
-# Actions input plugin
-add_plugin(Actions
-	"src/inputs/Actions.cpp"
-	"${INPUTS_DIR}"
-)
-
-# Blinker input plugin
-add_plugin(Blinker
-	"src/inputs/Blinker.cpp"
-	"${INPUTS_DIR}"
-)
-
-# Credits input plugin
-add_plugin(Credits
-	"src/inputs/Credits.cpp"
-	"${INPUTS_DIR}"
-)
-
-# Network input plugin
-add_plugin(Network
-	"src/inputs/Network.cpp"
-	"${INPUTS_DIR}"
-)
-
 # Documentation and examples.
 install(FILES README.md COPYING DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES
@@ -466,16 +425,16 @@ Linker       : ${CMAKE_LINKER} ${CMAKE_EXE_LINKER_FLAGS} ${libraries}
 Prefix       : ${CMAKE_INSTALL_PREFIX}
 Data dir     : ${PROJECT_DATA_DIR}
 Config dir   : ${PROJECT_CONF_DIR}
-Devices dir  : ${DEVICES_DIR}
-Actors dir   : ${ACTORS_DIR}
-Inputs dir   : ${INPUTS_DIR}
+Run tests    : ${ENABLE_TESTS}
+------ Special modes --------
 Develop mode : ${ENABLE_DEVELOP}
 Dry run mode : ${ENABLE_DRY_RUN}
-Run tests    : ${ENABLE_TESTS}
+MiSTer code  : ${ENABLE_MISTER}
+---- Conditional Actors -----
 PULSE AUDIO  : ${ENABLE_PULSEAUDIO}
 ALSA AUDIO   : ${ENABLE_ALSAAUDIO}
-MiSTer code  : ${ENABLE_MISTER}
---------- Output Plugins -----------
+--------- Devices -----------
+Devices dir  : ${DEVICES_DIR}
 NanoLed      : ${ENABLE_NANOLED}
 PacDrive     : ${ENABLE_PACDRIVE}
 PacLed64     : ${ENABLE_PACLED64}

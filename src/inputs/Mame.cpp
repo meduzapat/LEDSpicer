@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Mame)
-
 void Mame::drawConfig() const {
 	cout << SEPARATOR << endl << "Type: Mame" << endl;
 	Input::drawConfig();
@@ -33,68 +31,54 @@ void Mame::drawConfig() const {
 
 void Mame::process() {
 
-	if (not active)
-		return;
+	if (not active) return;
 
-	if (not socks.isConnected())
-		activate();
+	if (not socks.isConnected()) activate();
 
 	string buffer;
-	if (not socks.receive(buffer))
-		return;
+	if (not socks.receive(buffer)) return;
 
-	buffer = Utility::extractChars(buffer, '*', 'z');
+	// Mame sent carriage return
+	std::replace(buffer.begin(), buffer.end(), '\r', '\n');
+	buffer.erase(std::remove(buffer.begin(), buffer.end(), ' '), buffer.end());
 
-	if (buffer.empty())
-		return;
+	if (buffer.empty()) return;
 
-	Log::debug("Message received " + buffer);
+	// Process each line separately.
+	for (string& line : Utility::explode(buffer, '\n')) {
 
-	if (buffer.find("mame_stop=1") != string::npos) {
-		active = false;
-		return;
-	}
+		if (line.empty()) continue;
 
-	if (Log::isLogging(LOG_DEBUG) and buffer.find("mame_start=1") != string::npos) {
-		Log::debug("MAME running");
-	}
+		LogDebug("Message received " + line);
 
-	unordered_map<string, bool> messages;
-
-	auto parts = Utility::explode(buffer, '=');
-
-	// Several outputs use digits, to make things simple zero ( 0 ) will be OFF, everything else will be ON
-
-	if (itemsUMap.exists(parts[0]))
-		messages[parts[0]] = parts[1][0] != '0';
-
-	if (parts.size() > 2) {
-		bool last = parts.back()[0] != '0';
-		parts.pop_back();
-		for (uint c = 1; c < parts.size(); c++) {
-			if (itemsUMap.exists(parts[c].substr(1)))
-				messages[parts[c].substr(1)] = parts[c + 1][0] != '0';
+		if (line.find("mame_stop") != string::npos) {
+			active = false;
+			return;
 		}
-		if (itemsUMap.exists(parts[parts.size() - 1].substr(1)))
-			messages[parts[parts.size() - 1].substr(1)] = last;
-	}
 
-	for (auto& message : messages) {
-		LogDebug("Sending: " + message.first + " " + (message.second ? "on" : "off"));
-		if (message.second) {
-			if (not controlledItems.exists(message.first))
-				controlledItems.emplace(message.first, itemsUMap[message.first]);
+		if (line.find("mame_start") != string::npos) continue;
+
+		auto parts = Utility::explode(line, '=');
+		if (parts.size() != 2) continue;
+
+		if (not itemsUMap.exists(parts[0])) continue;
+
+		bool on = not parts[1].empty() and parts[1][0] != '0';
+		LogDebug("Sending: " + parts[0] + " " + (on ? "on" : "off"));
+
+		if (on) {
+			if (not controlledItems.exists(parts[0]))
+				controlledItems.emplace(parts[0], itemsUMap[parts[0]]);
 		}
-		else
-			controlledItems.erase(message.first);
+		else {
+			controlledItems.erase(parts[0]);
+		}
 	}
 }
 
 void Mame::activate() {
 	active = true;
-	if (socks.isConnected()) {
-		return;
-	}
+	if (socks.isConnected()) return;
 	try {
 		// Open connection.
 		socks.prepare(LOCALHOST, MAME_PORT, false, SOCK_STREAM);

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ProgressiveTransition.cpp
+ * @file      Progressive.cpp
  * @since     Sep 21, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -20,11 +20,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProgressiveTransition.hpp"
+#include "Progressive.hpp"
 
 using namespace LEDSpicer::Devices::Transitions;
 
-bool ProgressiveTransition::run() {
+bool Progressive::run() {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
 		cout << "Transition " << progress << "%" << endl;
@@ -35,11 +35,11 @@ bool ProgressiveTransition::run() {
 	return progress < 100;
 }
 
-void ProgressiveTransition::drawConfig() const {
+void Progressive::drawConfig() const {
 	cout << "Speed: " << speed2str(speed) << endl;
 }
 
-float ProgressiveTransition::calculateSpeed(const Speeds speed) {
+float Progressive::calculateSpeed(const Speeds speed) {
 	float durationSec;
 	switch (speed) {
 	case Speeds::VeryFast: durationSec = 0.5f; break;
@@ -53,7 +53,7 @@ float ProgressiveTransition::calculateSpeed(const Speeds speed) {
 	return 100.0f / (durationSec * Actor::getFPS());
 }
 
-void ProgressiveTransition::reset() {
+void Progressive::reset() {
 	Transition::reset();
 	progress = 0;
 }

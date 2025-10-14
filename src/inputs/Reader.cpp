@@ -42,8 +42,7 @@ void Reader::activate() {
 	readController = nullptr;
 	for (auto& l : listenEvents) {
 		// Ignore already connected elements.
-		if (l.second.rCode >= 0)
-			continue;
+		if (l.second.rCode >= 0) continue;
 		LogInfo("Opening device " + l.first);
 		l.second.rCode = open((DEV_INPUT + l.first).c_str(), O_RDONLY | O_NONBLOCK);
 		if (l.second.rCode < 0) {
@@ -54,8 +53,7 @@ void Reader::activate() {
 
 void Reader::deactivate() {
 	for (auto& l : listenEvents) {
-		if (l.second.rCode < 0)
-			continue;
+		if (l.second.rCode < 0) continue;
 		LogInfo("Closing device " DEV_INPUT + l.first);
 		close(l.second.rCode);
 		l.second.rCode = -1;
@@ -72,24 +70,19 @@ void Reader::drawConfig() const {
 
 void Reader::readAll() {
 
-	if (not readController)
-		readController = this;
+	if (not readController) readController = this;
 
-	if (readController != this)
-		return;
+	if (readController != this) return;
 
 	events.clear();
 	for (auto& l : listenEvents) {
-		if (l.second.rCode < 0)
-			continue;
+		if (l.second.rCode < 0) continue;
 
 		input_event event;
 		while (true) {
 			ssize_t r = read(l.second.rCode, &event, sizeof(event));
-			if (r < 1)
-				break;
-			if (event.type != EV_KEY) // and event.type != EV_REL))
-				continue;
+			if (r < 1) break;
+			if (event.type != EV_KEY) continue; // and event.type != EV_REL))
 			string code(std::to_string(event.code));
 			LogDebug(l.first + " - Type: " + (event.type == 1 ? "Key" : "Other") + " code: " + code + string(event.value ? " ON" : " OFF"));
 			events.push_back({std::to_string(l.second.index) + code, event.type, event.value});

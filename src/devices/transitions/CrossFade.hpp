@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProgressiveTransition.hpp"
+#include "Progressive.hpp"
 #include "utilities/Color.hpp"
 
 #pragma once
@@ -31,7 +31,7 @@ namespace LEDSpicer::Devices::Transitions {
  * LEDSpicer::Devices::Transitions::CrossFade
  * A transition that crossfades from the current profile to the target profile.
  */
-class CrossFade : public ProgressiveTransition {
+class CrossFade : public Progressive {
 
 public:
 
@@ -42,7 +42,7 @@ public:
 	 * @param color
 	 */
 	CrossFade(Profile* current, const string& speed) :
-		ProgressiveTransition(current, speed),
+		Progressive(current, speed),
 		allLeds(Group::layout.at("All").getLeds())
 	{
 		cachedBuffer.resize(allLeds.size());

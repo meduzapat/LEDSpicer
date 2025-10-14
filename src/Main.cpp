@@ -68,8 +68,25 @@ void signalHandler(int sig) {
 void Main::run() {
 
 	LogInfo(PROJECT_NAME " Running");
-	currentProfile = Profile::defaultProfile;
-	currentProfile->reset();
+
+	// Run initial profile if any.
+	Profile::defaultProfile->reset();
+	Transition* from = DataLoader::getTransitionFromCache(Profile::defaultProfile);
+	if (from) {
+		LogInfo("Initializing with transition from profile " + Profile::defaultProfile->getName());
+		// Create a temporary blank profile with default profile transition and run it.
+		Profile* blank = new Profile("None", Color::Off);
+		currentProfile = blank;
+		currentProfile->reset();
+		DataLoader::addTransitionIntoCache(blank, from);
+		changeProfile(Profile::defaultProfile, false);
+		// Remove blank
+		DataLoader::removeTransitionFromCache(blank, false);
+		delete blank;
+	}
+	else {
+		currentProfile = Profile::defaultProfile;
+	}
 	while (running) {
 
 		// Frame begins.
@@ -266,9 +283,7 @@ int main(int argc, char **argv) {
 				"-v or --version\t\t\t\tDisplay version information\n"
 				"-h or --help\t\t\t\tDisplay this help screen.\n"
 				"Data directory:    " PROJECT_DATA_DIR "\n"
-				"Actors directory:  " ACTORS_DIR "\n"
-				"Devices directory: " DEVICES_DIR "\n"
-				"Inputs directory:  " INPUTS_DIR "\n"
+				"Devices Plugins directory: " DEVICES_DIR "\n"
 				"If -c or --config is not provided " PROJECT_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
@@ -415,7 +430,7 @@ Profile* Main::tryProfiles(const vector<string>& data) {
 				profile = DataLoader::processProfile(profileName);
 				// Update any reference.
 				if (oldProfile) {
-					DataLoader::removeTransitionFromCache(oldProfile);
+					DataLoader::removeTransitionFromCache(oldProfile, true);
 					// Check default profile and current profile.
 					if (oldProfile == Profile::defaultProfile) Profile::defaultProfile = profile;
 					if (oldProfile == currentProfile) currentProfile = profile;
@@ -524,24 +539,32 @@ void Main::changeProfile(Profile* to, bool store) {
 	else {
 		LogInfo("Terminating Profile " + currentProfile->getName());
 	}
+	currentProfile->stopInputs();
 
-	// For transition disable inputs
-	auto gfb = Utility::globalFlags;
-	Utility::globalFlags = FLAG_NO_INPUTS;
-	// Get a transition to to or the ending transition using nullptr
-	Transition* transition = DataLoader::getTransitionFromCache(to ? currentProfile : nullptr);
-	transition->setTarget(to);
+	// Replacement profiles to itself voids transition.
+	if ((Utility::globalFlags & FLAG_FORCE_RELOAD) and currentProfile == to) {
+		to->reset();
+	}
+	else {
+		// For transition disable inputs
+		auto gfb = Utility::globalFlags;
+		Utility::globalFlags = FLAG_NO_INPUTS;
+		Transition* transition = DataLoader::getTransitionFromCache(to ? currentProfile : nullptr);
+		transition->setTarget(to);
 
-	while (true) {
-		// Frame begins.
-		start = high_resolution_clock::now();
-		if (not transition->run()) break;
-		sendData();
+		Utility::globalFlags = gfb;
+
+		// Run transition.
+		while (true) {
+			// Frame begins.
+			start = high_resolution_clock::now();
+			if (not transition->run()) break;
+			sendData();
+		}
 	}
 
 	if (replace) profiles.pop_back();
 	if (store) profiles.push_back(to);
 	currentProfile = to;
-	Utility::globalFlags = gfb;
 	if (to and not (Utility::globalFlags & FLAG_NO_INPUTS)) to->startInputs();
 }

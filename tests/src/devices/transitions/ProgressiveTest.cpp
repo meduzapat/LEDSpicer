@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ProgressiveTransitionTest.cpp
+ * @file      ProgressiveTest.cpp
  * @since     Sep 22, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -24,15 +24,15 @@
 #include <cmath>
 
 #include "MockProfile.hpp"
-#include "devices/transitions/ProgressiveTransition.hpp"
+#include "devices/transitions/Progressive.hpp"
 #include "devices/Profile.hpp"
 
 // Mock subclass to test abstract base (implements calculate as no-op).
-class MockProgressiveTransition : public LEDSpicer::Devices::Transitions::ProgressiveTransition {
+class MockProgressive : public LEDSpicer::Devices::Transitions::Progressive {
 
 public:
 
-	using ProgressiveTransition::ProgressiveTransition;
+	using Progressive::Progressive;
 
 	float getIncrease() const {
 		return increase;
@@ -45,54 +45,54 @@ protected:
 
 namespace LEDSpicer::Devices::Transitions {
 
-TEST(ProgressiveTransitionTest, ConstructorWithInvalidSpeed) {
+TEST(ProgressiveTest, ConstructorWithInvalidSpeed) {
 	MockProfile current("current", Color::Off);
 	MockProfile to("to", Color::Off);
-	EXPECT_THROW(MockProgressiveTransition(&current, "Invalid"), Error);
+	EXPECT_THROW(MockProgressive(&current, "Invalid"), Error);
 }
 
-TEST(ProgressiveTransitionTest, RunVeryFast) {
+TEST(ProgressiveTest, RunVeryFast) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
-	MockProgressiveTransition transition(&currentProfile, "VeryFast");
+	MockProgressive transition(&currentProfile, "VeryFast");
 	transition.setTarget(&toProfile);
 	int steps = 0;
 	while (transition.run()) steps++;
 	EXPECT_EQ(steps, static_cast<int>(std::ceil(100.0f / transition.getIncrease())));
 }
 
-TEST(ProgressiveTransitionTest, RunNormal) {
+TEST(ProgressiveTest, RunNormal) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
-	MockProgressiveTransition transition(&currentProfile, "Normal");
+	MockProgressive transition(&currentProfile, "Normal");
 	transition.setTarget(&toProfile);
 	int steps = 0;
 	while (transition.run()) steps++;
 	EXPECT_EQ(steps, static_cast<int>(std::ceil(100.0f / transition.getIncrease())));
 }
 
-TEST(ProgressiveTransitionTest, RunVerySlow) {
+TEST(ProgressiveTest, RunVerySlow) {
 	MockProfile current("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
-	MockProgressiveTransition transition(&current, "VerySlow");
+	MockProgressive transition(&current, "VerySlow");
 	transition.setTarget(&toProfile);
 	int steps = 0;
 	while (transition.run()) steps++;
 	EXPECT_EQ(steps, static_cast<int>(std::ceil(100.0f / transition.getIncrease())));
 }
 
-TEST(ProgressiveTransitionTest, RunWithoutToProfile) {
+TEST(ProgressiveTest, RunWithoutToProfile) {
 	MockProfile currentProfile("current", Color::Off);
-	MockProgressiveTransition transition(&currentProfile, "Normal");
+	MockProgressive transition(&currentProfile, "Normal");
 	int steps = 0;
 	while (transition.run()) steps++;
 	EXPECT_EQ(steps, static_cast<int>(std::ceil(100.0f / transition.getIncrease())));
 }
 
-TEST(ProgressiveTransitionTest, DrawConfig) {
+TEST(ProgressiveTest, DrawConfig) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
-	MockProgressiveTransition transition(&currentProfile, "Slow");
+	MockProgressive transition(&currentProfile, "Slow");
 	transition.setTarget(&toProfile);
 	testing::internal::CaptureStdout();
 	transition.drawConfig();

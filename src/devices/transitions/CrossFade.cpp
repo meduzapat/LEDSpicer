@@ -26,10 +26,17 @@ using namespace LEDSpicer::Devices::Transitions;
 
 void CrossFade::drawConfig() const {
 	cout << "Transition: CrossFade" << endl;
-	ProgressiveTransition::drawConfig();
+	Progressive::drawConfig();
 }
 
 void CrossFade::calculate() {
+
+	// No sense to crossfade into the same profile.
+	if (current == to) {
+		current->runFrame();
+		return;
+	}
+
 	// Calculate blend factor (0 → 1)
 	float factor = progress * (1.0f / 100.0f);
 	factor = factor * factor * (3.0f - 2.0f * factor);

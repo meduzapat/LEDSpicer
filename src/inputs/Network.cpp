@@ -24,13 +24,10 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Network)
-
 Socks Network::sock;
 
 void Network::activate() {
-	if (sock.isConnected())
-		return;
+	if (sock.isConnected()) return;
 	sock.prepare(LOCALHOST, DEFAULT_PORT, true);
 }
 
@@ -40,17 +37,15 @@ void Network::deactivate() {
 
 void Network::process() {
 
-	if (not sock.isConnected())
-		activate();
+	if (not sock.isConnected()) activate();
 
 	string buffer;
-	if (not sock.receive(buffer))
-		return;
+	if (not sock.receive(buffer)) return;
 
 	Log::debug("Message received " + buffer);
 	if (buffer.empty()) return;
-	buffer = Utility::extractChars(buffer, '!', RECORD_SEPARATOR);
-	for (string& entry : Utility::explode(buffer, RECORD_SEPARATOR)) {
+	buffer = Utility::extractChars(buffer, FIRST_CHARACTER, ID_GROUP_SEPARATOR); // space to |
+	for (string& entry : Utility::explode(buffer, ID_GROUP_SEPARATOR)) {
 #ifdef DEVELOP
 		LogDebug("Processing " + entry);
 #endif

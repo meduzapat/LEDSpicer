@@ -38,6 +38,7 @@ public:
 
 	/**
 	 * ActorDriven constructor.
+	 * It takes ownership of the actor pointer.
 	 * @param current
 	 * @param to
 	 * @param actor The actor pointer that will handle this transition.
@@ -46,7 +47,10 @@ public:
 		Transition(current),
 		actor(dynamic_cast<DirectionActor*>(actor)) {}
 
-	virtual ~ActorDriven() = default;
+	ActorDriven(const ActorDriven&) = delete;
+	ActorDriven& operator=(const ActorDriven&) = delete;
+
+	virtual ~ActorDriven();
 
 	/**
 	 * @see Transition::drawConfig()
@@ -62,6 +66,7 @@ protected:
 	 * @see Transition::reset()
 	 */
 	void reset() override;
+
 };
 
 } // Namespace

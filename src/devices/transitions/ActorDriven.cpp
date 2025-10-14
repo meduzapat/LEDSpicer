@@ -24,6 +24,10 @@
 
 using namespace LEDSpicer::Devices::Transitions;
 
+ActorDriven::~ActorDriven() {
+	delete actor;
+}
+
 void ActorDriven::drawConfig() const {
 	cout << "Actor: " << endl;
 	actor->drawConfig();

@@ -27,7 +27,6 @@
 using namespace LEDSpicer;
 
 ProfilePtrUMap    DataLoader::profilesCache;
-InputPtrUMap      DataLoader::inputCache;
 string            DataLoader::portNumber;
 milliseconds      DataLoader::waitTime;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
@@ -482,6 +481,10 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 	return profilePtr;
 }
 
+void DataLoader::addTransitionIntoCache(Profile* profile, Transition* transition) {
+	transitions[profile] = transition;
+}
+
 Transition* DataLoader::getTransitionFromCache(Profile* profile) {
 	if (transitions.exists(profile)) return transitions.at(profile);
 	return nullptr;
@@ -537,6 +540,7 @@ void DataLoader::processTransition(Profile* profile, const StringUMap& settings)
 			case Curtain::ClosingWays::Both:
 				actorSettings["mode"] = "Curtain";
 			}
+			// ActorDriven takes ownership of the actor pointer.
 			Actor* actor = DataLoader::createAnimation(actorSettings);
 			transition = new Curtain(profile, actor);
 			break;
@@ -544,14 +548,14 @@ void DataLoader::processTransition(Profile* profile, const StringUMap& settings)
 	}
 	if (not transition) throw Utilities::Error("Invalid Transition");
 	// Save Cache, replace previous value if any.
-	removeTransitionFromCache(profile);
+	removeTransitionFromCache(profile, true);
 	transitions[profile] = transition;
 }
 
-void DataLoader::removeTransitionFromCache(Profile* profile) {
+void DataLoader::removeTransitionFromCache(Profile* profile, bool deleteTransition) {
 	auto it = transitions.find(profile);
 	if (it != transitions.end()) {
-		delete it->second;
+		if (deleteTransition) delete it->second;
 		transitions.erase(it);
 	}
 }
@@ -614,48 +618,38 @@ Actor* DataLoader::createAnimation(StringUMap& actorData) {
 
 void DataLoader::processInput(Profile* profile, const string& file) {
 
-	// Check cache.
-	if (not (Utility::globalFlags & FLAG_FORCE_RELOAD) and inputCache.exists(file)) {
-		LogDebug("Input from cache");
-		profile->addInput(inputCache.at(file));
-		return;
-	}
-
 	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
 	StringUMap inputAttr = processNode(inputFile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, inputAttr, file);
 	string inputName = inputAttr[PARAM_NAME];
-	// If plugin is not loaded, load it.
-	if (not InputHandler::inputHandlers.exists(inputName))
-		InputHandler::inputHandlers.emplace(inputName, new InputHandler(inputName));
-	ItemPtrUMap inputMapTmp;
 
-	if (inputName == "Credits" or inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker") {
-		// Multiple source inputs
-		auto listenEvents(processInputSources(inputName, inputFile.getRoot()));
-		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);
-		tinyxml2::XMLElement* mapsNode = inputFile.getRoot()->FirstChildElement("maps");
-		for (size_t c = 0; c < listenEvents.size(); ++c) {
-			// Check for listenEvents, at this point everything is sanitized.
-			for (; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps")) {
-				StringUMap mapsNodeAttr = processNode(mapsNode);
-				Utility::checkAttributes({"source"}, mapsNodeAttr, listenEvents[c]);
-				if (mapsNodeAttr["source"] == listenEvents[c]) {
-					processInputMap(mapsNode, inputMapTmp, to_string(c));
-					break;
-				}
-			}
+	ItemPtrUMap inputMapTmp;
+	vector<string> listenEvents;
+
+	tinyxml2::XMLElement* mapsNode = inputFile.getRoot()->FirstChildElement("maps");
+	if (not mapsNode) throw Utilities::Error("No maps found for " + inputName);
+
+	bool isReader = (inputName == "Credits" or inputName == "Actions" or inputName == "Impulse" or inputName == "Blinker");
+
+	for (size_t c = 0; mapsNode; mapsNode = mapsNode->NextSiblingElement("maps"), ++c) {
+		if (isReader) {
+			StringUMap mapsNodeAttr = processNode(mapsNode);
+			Utility::checkAttributes({"source"}, mapsNodeAttr, inputName);
+			listenEvents.push_back(mapsNodeAttr["source"]);
+			processInputMap(mapsNode, inputMapTmp, to_string(c));
+		}
+		else {
+			processInputMap(mapsNode, inputMapTmp);
 		}
 	}
-	else {
-		// Single source or malformed.
-		processInputMap(inputFile.getRoot(), inputMapTmp);
-	}
-	Input* input(InputHandler::inputHandlers[inputName]->createInput(inputAttr, inputMapTmp));
-	profile->addInput(input);
 
-	// Save Cache, replace previous value if any.
-	inputCache[file] = input;
+	if (isReader) {
+		if (listenEvents.empty())
+			throw Utilities::Error("No maps with source found for " + inputName);
+		inputAttr["listenEvents"] = Utility::implode(listenEvents, FIELD_SEPARATOR);
+	}
+
+	profile->addInput(createInput(inputAttr, inputMapTmp));
 }
 
 Device* DataLoader::createDevice(StringUMap& deviceData) {
@@ -664,24 +658,6 @@ Device* DataLoader::createDevice(StringUMap& deviceData) {
 	if (not DeviceHandler::deviceHandlers.exists(deviceName))
 		DeviceHandler::deviceHandlers.emplace(deviceName, new DeviceHandler(deviceName));
 	return DeviceHandler::deviceHandlers[deviceName]->createDevice(deviceData);
-}
-
-vector<string> DataLoader::processInputSources(const string& inputName, tinyxml2::XMLElement* inputNode) {
-	// Check for listenEvents.
-	tinyxml2::XMLElement* listenEventsNode = inputNode->FirstChildElement("listenEvents");
-	if (not listenEventsNode) {
-		throw Utilities::Error("Missing listenEvents for " + inputName);
-	}
-	vector<string> listenEvents;
-	listenEventsNode = listenEventsNode->FirstChildElement("listenEvent");
-	for (; listenEventsNode; listenEventsNode = listenEventsNode->NextSiblingElement("listenEvent")) {
-		StringUMap listenEventsAttr = processNode(listenEventsNode);
-		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, listenEventsAttr, inputName);
-		listenEvents.push_back(listenEventsAttr[PARAM_NAME]);
-	}
-	if (listenEvents.empty())
-		throw Utilities::Error("No listenEvents found for " + inputName);
-	return listenEvents;
 }
 
 void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, ItemPtrUMap& inputMaps, const string& id) {
@@ -728,6 +704,31 @@ void DataLoader::processInputMap(tinyxml2::XMLElement* inputNode, ItemPtrUMap& i
 	}
 }
 
+Input* DataLoader::createInput(StringUMap& inputData, ItemPtrUMap& inputMaps) {
+
+	string inputName = inputData["name"];
+
+	if (inputName == "Actions")
+		return new Actions(inputData, inputMaps);
+
+	if (inputName == "Credits")
+		return new Credits(inputData, inputMaps);
+
+	if (inputName == "Impulse")
+		return new Impulse(inputData, inputMaps);
+
+	if (inputName == "Blinker")
+		return new Blinker(inputData, inputMaps);
+
+	if (inputName == "Network")
+		return new Network(inputData, inputMaps);
+
+	if (inputName == "Mame")
+		return new Mame(inputData, inputMaps);
+
+	throw Utilities::Error(inputName) << " is not a valid input";
+}
+
 string DataLoader::createFilename(const string& name) {
 	return (
 		string(PROJECT_DATA_DIR)
@@ -760,6 +761,11 @@ void DataLoader::setInterval(uint8_t waitTime) {
 }
 
 void DataLoader::destroyCache() {
+
+	// Remove profile's transitions.
+	for (const auto& t : transitions) delete t.second;
+	transitions.clear();
+
 	for (auto p : profilesCache) {
 #ifdef DEVELOP
 		LogDebug("Profile " + p.first + " instance deleted");
@@ -767,10 +773,6 @@ void DataLoader::destroyCache() {
 		delete p.second;
 	}
 	profilesCache.clear();
-
-	// Remove profile's transitions.
-	for (auto t : transitions) delete t.second;
-	transitions.clear();
 #ifdef DEVELOP
 		LogDebug("Transitions deleted");
 #endif

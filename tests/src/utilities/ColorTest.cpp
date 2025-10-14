@@ -103,13 +103,8 @@ TEST_F(TestColor, Operators) {
 	EXPECT_TRUE(c1 != c3);
 }
 
-TEST_F(TestColor, SettersAndGetters) {
-	Color c;
-
-	// Set individual channels
-	c.setR(10);
-	c.setG(20);
-	c.setB(30);
+TEST_F(TestColor, Setters) {
+	Color c(10, 20, 30);
 	EXPECT_EQ(c.getR(), 10);
 	EXPECT_EQ(c.getG(), 20);
 	EXPECT_EQ(c.getB(), 30);
@@ -156,53 +151,166 @@ TEST_F(TestColor, SettersAndGetters) {
 
 	// Set with filter (Combine, percent as uint8_t)
 	c3.set(Color(100, 100, 100), Color::Filters::Combine, 50);
-	EXPECT_EQ(c3.getR(), 150); // 200 + (100-200)*50/100 = 200 - 50 = 150
+	EXPECT_EQ(c3.getR(), 150); // 200 + (100-200)*50/100 = 150
 
-	// Set with filter (Mask, uses mono of new color, ignores percent)
+	// Set with filter (Mask, uses mono of new color)
 	c3.set(Color(128, 128, 128), Color::Filters::Mask); // Mono ~128
 	EXPECT_EQ(c3.getR(), 75); // 150 * 128 / 255 ≈ 75
 
-	// Set with filter (Invert, inverts new color)
-	c3.set(Color(50, 60, 70), Color::Filters::Invert);
-	EXPECT_EQ(c3.getR(), 205); // 255-50
+	// Set with filter (Invert, inverts current relative to input, clamped)
+	c3.set(100, 100, 100);
+	c3.set(Color(255, 255, 255), Color::Filters::Invert);
+	EXPECT_EQ(c3.getR(), 155); // 255 - 100 = 155
+	EXPECT_EQ(c3.getG(), 155);
+	EXPECT_EQ(c3.getB(), 155);
+
+	// Set with filter (Invert, clamped to 0)
+	c3.set(200, 200, 200);
+	c3.set(Color(100, 100, 100), Color::Filters::Invert);
+	EXPECT_EQ(c3.getR(), 0); // 100 - 200 clamped to 0
+
+	// Set with filter (Subtract, wraps on underflow)
+	c3.set(50, 100, 200);
+	c3.set(Color(100, 50, 50), Color::Filters::Subtract);
+	EXPECT_EQ(c3.getR(), 206); // 50 - 100 = -50 wraps to 206
+	EXPECT_EQ(c3.getG(), 50);  // 100 - 50 = 50
+	EXPECT_EQ(c3.getB(), 150); // 200 - 50 = 150
+
+	// Set with filter (Add, wraps on overflow)
+	c3.set(200, 100, 50);
+	c3.set(Color(100, 50, 50), Color::Filters::Add);
+	EXPECT_EQ(c3.getR(), 44);  // 200 + 100 = 300 wraps to 44
+	EXPECT_EQ(c3.getG(), 150); // 100 + 50 = 150
+	EXPECT_EQ(c3.getB(), 100); // 50 + 50 = 100
+
+	// Set with filter (Max, keeps brightest)
+	c3.set(100, 200, 50);
+	c3.set(Color(150, 100, 100), Color::Filters::Max);
+	EXPECT_EQ(c3.getR(), 150); // max(100, 150)
+	EXPECT_EQ(c3.getG(), 200); // max(200, 100)
+	EXPECT_EQ(c3.getB(), 100); // max(50, 100)
+
+	// Set with filter (Min, keeps darkest)
+	c3.set(100, 200, 50);
+	c3.set(Color(150, 100, 100), Color::Filters::Min);
+	EXPECT_EQ(c3.getR(), 100); // min(100, 150)
+	EXPECT_EQ(c3.getG(), 100); // min(200, 100)
+	EXPECT_EQ(c3.getB(), 50);  // min(50, 100)
+
+	// Set with filter (Multiply, tints)
+	c3.set(200, 100, 50);
+	c3.set(Color(128, 255, 128), Color::Filters::Multiply);
+	EXPECT_EQ(c3.getR(), 100); // (200 * 128) / 255 ≈ 100
+	EXPECT_EQ(c3.getG(), 100); // (100 * 255) / 255 = 100
+	EXPECT_EQ(c3.getB(), 25);  // (50 * 128) / 255 ≈ 25
+}
+
+TEST_F(TestColor, IndividualSetters) {
+	Color c;
+	c.setR(100);
+	EXPECT_EQ(c.getR(), 100);
+	EXPECT_EQ(c.getG(), 0);
+	EXPECT_EQ(c.getB(), 0);
+
+	c.setG(150);
+	EXPECT_EQ(c.getG(), 150);
+
+	c.setB(200);
+	EXPECT_EQ(c.getB(), 200);
+}
+
+TEST_F(TestColor, RandomColorsValid) {
+	Color::loadColors({{"Red", "FF0000"}, {"Green", "00FF00"}}, "hex");
+	Color::setRandomColors({"Red", "Green"});
+	EXPECT_EQ(randomColorsSize(), 2);
+
+	// getColor("Random") should return one of them
+	const Color& random = Color::getColor("Random");
+	EXPECT_TRUE(random == Color::getColor("Red") or random == Color::getColor("Green"));
+}
+
+TEST_F(TestColor, RandomColorsEmpty) {
+	Color::loadColors({{"Red", "FF0000"}, {"Green", "00FF00"}}, "hex");
+	Color::setRandomColors({});  // Empty = use all colors
+	EXPECT_EQ(randomColorsSize(), 2);
+}
+
+TEST_F(TestColor, GetNameUnknown) {
+	Color c(123, 45, 67);  // Not a named color
+	EXPECT_EQ(c.getName(), "unknown");
+}
+
+TEST_F(TestColor, GetNameSpecials) {
+	EXPECT_EQ(Color::On.getName(), "On");
+	EXPECT_EQ(Color::Off.getName(), "Off");
 }
 
 TEST_F(TestColor, Operations) {
-	Color c1(0, 100, 200);
+	Color c1(100, 150, 200);
 
 	// Fade
 	Color faded = c1.fade(50.f);
-	EXPECT_EQ(faded.getR(), 0);
-	EXPECT_EQ(faded.getG(), 50);
+	EXPECT_EQ(faded.getR(), 50);
+	EXPECT_EQ(faded.getG(), 75);
 	EXPECT_EQ(faded.getB(), 100);
 
 	// Transition
-	Color c2(255, 150, 50);
+	Color c2(200, 100, 50);
 	Color trans = c1.transition(c2, 50.f);
-	EXPECT_EQ(trans.getR(), 127); // 0 + (255-0)*50/100 ≈ 127
-	EXPECT_EQ(trans.getG(), 125); // 100 + (150-100)*0.5 = 125
-	EXPECT_EQ(trans.getB(), 125); // 200 + (50-200)*0.5 = 200 - 75 = 125
+	EXPECT_EQ(trans.getR(), 150); // 100 + (200-100)*0.5 = 150
+	EXPECT_EQ(trans.getG(), 125); // 150 + (100-150)*0.5 = 125
+	EXPECT_EQ(trans.getB(), 125); // 200 + (50-200)*0.5 = 125
 
-	// Difference (note: underflow wraps; suggest clamp in production)
-	Color diff = c1.difference(c2);
-	EXPECT_EQ(diff.getR(), 1); // 0-255 wraps to 1 in uint8_t
-	EXPECT_EQ(diff.getG(), 206); // 100-150 wraps to 206
-	EXPECT_EQ(diff.getB(), 150); // 200-50 = 150
+	// Invert (clamped)
+	Color inv = c1.invert(Color(255, 255, 255));
+	EXPECT_EQ(inv.getR(), 155); // 255 - 100
+	EXPECT_EQ(inv.getG(), 105); // 255 - 150
+	EXPECT_EQ(inv.getB(), 55);  // 255 - 200
+
+	// Invert with smaller base (clamped to 0)
+	Color inv2 = c1.invert(Color(50, 100, 150));
+	EXPECT_EQ(inv2.getR(), 0);  // 50 - 100 clamped
+	EXPECT_EQ(inv2.getG(), 0);  // 100 - 150 clamped
+	EXPECT_EQ(inv2.getB(), 0);  // 150 - 200 clamped
+
+	// Subtract (wraps)
+	Color sub = c1.subtract(Color(150, 100, 50));
+	EXPECT_EQ(sub.getR(), 206); // 100 - 150 wraps
+	EXPECT_EQ(sub.getG(), 50);  // 150 - 100
+	EXPECT_EQ(sub.getB(), 150); // 200 - 50
+
+	// Add (wraps)
+	Color added = c1.add(Color(200, 150, 100));
+	EXPECT_EQ(added.getR(), 44);  // 100 + 200 = 300 wraps to 44
+	EXPECT_EQ(added.getG(), 44);  // 150 + 150 = 300 wraps to 44
+	EXPECT_EQ(added.getB(), 44);  // 200 + 100 = 300 wraps to 44
+
+	// Max
+	Color maxed = c1.max(Color(150, 100, 250));
+	EXPECT_EQ(maxed.getR(), 150); // max(100, 150)
+	EXPECT_EQ(maxed.getG(), 150); // max(150, 100)
+	EXPECT_EQ(maxed.getB(), 250); // max(200, 250)
+
+	// Min
+	Color mined = c1.min(Color(150, 100, 250));
+	EXPECT_EQ(mined.getR(), 100); // min(100, 150)
+	EXPECT_EQ(mined.getG(), 100); // min(150, 100)
+	EXPECT_EQ(mined.getB(), 200); // min(200, 250)
+
+	// Multiply
+	Color mult = c1.multiply(Color(128, 255, 64));
+	EXPECT_EQ(mult.getR(), 50);  // (100 * 128) / 255 ≈ 50
+	EXPECT_EQ(mult.getG(), 150); // (150 * 255) / 255 = 150
+	EXPECT_EQ(mult.getB(), 50);  // (200 * 64) / 255 ≈ 50
 
 	// Mask
 	Color masked = c1.mask(128.f); // ~50%
-	EXPECT_EQ(masked.getR(), 0);
-	EXPECT_EQ(masked.getG(), 50); // 100*128/255≈50
+	EXPECT_EQ(masked.getR(), 50);  // 100*128/255≈50
+	EXPECT_EQ(masked.getG(), 75);  // 150*128/255≈75
 	EXPECT_EQ(masked.getB(), 100); // 200*128/255≈100
 
-	// Invert
-	Color inv = c1.invert();
-	EXPECT_EQ(inv.getR(), 255);
-	EXPECT_EQ(inv.getG(), 155);
-	EXPECT_EQ(inv.getB(), 55);
-
 	// Monochrome
-	EXPECT_EQ(c1.getMonochrome(), static_cast<uint8_t>(0*0.301f + 100*0.587f + 200*0.114f)); // ≈81
+	EXPECT_EQ(c1.getMonochrome(), static_cast<uint8_t>(100*0.301f + 150*0.587f + 200*0.114f)); // ≈141
 }
 
 TEST_F(TestColor, StaticMethods) {
@@ -221,9 +329,27 @@ TEST_F(TestColor, StaticMethods) {
 	EXPECT_EQ(Color::getColor("On").getR(), 255);
 	EXPECT_EQ(Color::getColor("Off").getR(), 0);
 
-	// filter2str and str2filter
-	EXPECT_EQ(Color::filter2str(Color::Filters::Mask), "Mask");
-	EXPECT_EQ(Color::str2filter("Invert"), Color::Filters::Invert);
+	// filter2str
+	EXPECT_EQ(Color::filter2str(Color::Filters::Normal),   "Normal");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Combine),  "Combine");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Mask),     "Mask");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Invert),   "Invert");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Subtract), "Subtract");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Add),      "Add");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Max),      "Max");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Min),      "Min");
+	EXPECT_EQ(Color::filter2str(Color::Filters::Multiply), "Multiply");
+
+	// str2filter
+	EXPECT_EQ(Color::str2filter("Normal"),   Color::Filters::Normal);
+	EXPECT_EQ(Color::str2filter("Combine"),  Color::Filters::Combine);
+	EXPECT_EQ(Color::str2filter("Mask"),     Color::Filters::Mask);
+	EXPECT_EQ(Color::str2filter("Invert"),   Color::Filters::Invert);
+	EXPECT_EQ(Color::str2filter("Subtract"), Color::Filters::Subtract);
+	EXPECT_EQ(Color::str2filter("Add"),      Color::Filters::Add);
+	EXPECT_EQ(Color::str2filter("Max"),      Color::Filters::Max);
+	EXPECT_EQ(Color::str2filter("Min"),      Color::Filters::Min);
+	EXPECT_EQ(Color::str2filter("Multiply"), Color::Filters::Multiply);
 	EXPECT_THROW(Color::str2filter("Invalid"), Error);
 
 	// getNames
@@ -233,32 +359,6 @@ TEST_F(TestColor, StaticMethods) {
 
 	// getName
 	EXPECT_EQ(green.getName(), "Green");
-	EXPECT_EQ(Color::On.getName(), "On");
-	EXPECT_EQ(Color(1,2,3).getName(), "unknown");
-
-	// Random (set specific)
-	Color::setRandomColors({"Green"});
-	EXPECT_EQ(TestColor::randomColorsSize(), 1);
-	EXPECT_EQ(TestColor::getRandomColors()[0]->getName(), "Green");
-	Color rand = Color::getColor("Random");
-	EXPECT_EQ(rand.getName(), "Green");
-
-	// Random (set all)
-	TestColor::clearRandomColors();
-	Color::setRandomColors({});
-	EXPECT_EQ(TestColor::randomColorsSize(), 2);
-	EXPECT_EQ(TestColor::getRandomColors()[0]->getName(), "Green");
-	EXPECT_EQ(TestColor::getRandomColors()[1]->getName(), "Blue");
-
-	// setRandomColors with unknown
-	TestColor::clearRandomColors();
-	EXPECT_THROW(Color::setRandomColors({"Unknown"}), Error);
-
-	// Test multiple calls do nothing
-	Color::setRandomColors({});
-	size_t prevSize = TestColor::randomColorsSize();
-	Color::setRandomColors({"Green"});
-	EXPECT_EQ(TestColor::randomColorsSize(), prevSize); // Unchanged
 }
 
 TEST_F(TestColor, RandomCannotSetRandomCases) {

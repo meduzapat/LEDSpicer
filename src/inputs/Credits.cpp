@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Credits)
-
 Credits::Credits(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 	Reader(parameters, inputMaps),
 	Speed(parameters.exists("speed") ? parameters["speed"] : "Normal"),

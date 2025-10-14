@@ -20,7 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProgressiveTransition.hpp"
+#include "Progressive.hpp"
 #include "utilities/Color.hpp"
 
 #pragma once
@@ -31,7 +31,7 @@ namespace LEDSpicer::Devices::Transitions {
  * LEDSpicer::Devices::Transitions::FadeOutIn
  * A transition that fades out the current profile and fades in the target profile.
  */
-class FadeOutIn : public ProgressiveTransition, public Utilities::Color {
+class FadeOutIn : public Progressive, public Utilities::Color {
 
 public:
 
@@ -42,7 +42,7 @@ public:
 	 * @param color
 	 */
 	FadeOutIn(Profile* current, const string& speed, const Utilities::Color& color) :
-		ProgressiveTransition(current, speed),
+		Progressive(current, speed),
 		Utilities::Color(color)
 	{}
 

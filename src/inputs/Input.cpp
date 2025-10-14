@@ -42,8 +42,7 @@ void Input::clearControlledInputs() {
 
 void Input::drawConfig() const {
 
-	if (not itemsUMap.size())
-		return;
+	if (not itemsUMap.size()) return;
 
 	cout << "Elements and Groups mapping:" << endl;
 	for (auto& e : itemsUMap)

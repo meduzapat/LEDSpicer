@@ -61,13 +61,6 @@ MainBase::~MainBase() {
 #endif
 	}
 
-	for (auto i : InputHandler::inputHandlers) {
-		delete i.second;
-#ifdef DEVELOP
-		LogDebug("Input Handler " + i.first + " instance deleted");
-#endif
-	}
-
 	DataLoader::destroyCache();
 
 	USB::closeSession();

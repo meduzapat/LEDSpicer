@@ -30,11 +30,6 @@ using namespace LEDSpicer::Utilities;
 
 #pragma once
 
-// The functions to create and destroy inputs.
-#define inputFactory(plugin) \
-	extern "C" Input* createInput(StringUMap& parameters, ItemPtrUMap& inputMaps) {return new plugin(parameters, inputMaps);} \
-	extern "C" void destroyInput(Input* instance) {delete instance;}
-
 namespace LEDSpicer::Inputs {
 
 /**

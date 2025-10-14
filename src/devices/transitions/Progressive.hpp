@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      ProgressiveTransition.hpp
+ * @file      Progressive.hpp
  * @since     Sep 21, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
@@ -29,27 +29,27 @@
 namespace LEDSpicer::Devices::Transitions {
 
 /**
- * LEDSpicer::Devices::Transitions::ProgressiveTransition
+ * LEDSpicer::Devices::Transitions::Progressive
  * Base class for transitions that use a progress value.
  */
-class ProgressiveTransition : public Transition, public Speed {
+class Progressive : public Transition, public Speed {
 
 public:
 
-	ProgressiveTransition() = delete;
+	Progressive() = delete;
 
 	/**
 	 * @param current
 	 * @param to
 	 * @param speed
 	 */
-	ProgressiveTransition(Profile* current, const string& speed) :
+	Progressive(Profile* current, const string& speed) :
 		Transition(current),
 		Speed(speed),
 		increase(calculateSpeed(this->speed) / (to ? 2 : 1))
 	{}
 
-	virtual ~ProgressiveTransition() = default;
+	virtual ~Progressive() = default;
 
 	/**
 	 * @see Transition::run()

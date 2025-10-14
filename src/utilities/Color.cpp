@@ -105,13 +105,32 @@ Color* Color::set(const Color& color, const Filters& filter, uint8_t percent) {
 		break;
 
 	case Color::Filters::Invert:
-		set(color.invert());
+		set(this->invert(color));
+		break;
+
+	case Color::Filters::Subtract:
+		set(this->subtract(color));
+		break;
+
+	case Color::Filters::Add:
+		set(this->add(color));
+		break;
+
+	case Color::Filters::Max:
+		set(this->max(color));
+		break;
+
+	case Color::Filters::Min:
+		set(this->min(color));
+		break;
+
+	case Color::Filters::Multiply:
+		set(this->multiply(color));
 		break;
 
 	default:
 		set(color);
 		break;
-
 	}
 	return this;
 }
@@ -159,14 +178,6 @@ Color Color::transition(const Color& destination, float percent) const {
 	);
 }
 
-Color Color::difference(const Color& destination) const {
-	return Color(
-		r - destination.r,
-		g - destination.g,
-		b - destination.b
-	);
-}
-
 Color Color::mask(float intensity) const {
 	if (intensity > 254)
 		return *this;
@@ -179,19 +190,59 @@ Color Color::mask(float intensity) const {
 	);
 }
 
-Color Color::invert() const {
+Color Color::invert(const Color& color) const {
 	return Color(
-		255 - r,
-		255 - g,
-		255 - b
+		color.r > r ? color.r - r : 0,
+		color.g > g ? color.g - g : 0,
+		color.b > b ? color.b - b : 0
+	);
+}
+
+Color Color::subtract(const Color& color) const {
+	return Color(
+		r - color.r,
+		g - color.g,
+		b - color.b
+	);
+}
+
+Color Color::add(const Color& color) const {
+	return Color(
+		r + color.r,
+		g + color.g,
+		b + color.b
+	);
+}
+
+Color Color::max(const Color& color) const {
+	return Color(
+		r > color.r ? r : color.r,
+		g > color.g ? g : color.g,
+		b > color.b ? b : color.b
+	);
+}
+
+Color Color::min(const Color& color) const {
+	return Color(
+		r < color.r ? r : color.r,
+		g < color.g ? g : color.g,
+		b < color.b ? b : color.b
+	);
+}
+
+Color Color::multiply(const Color& color) const {
+	return Color(
+		(r * color.r) / 255,
+		(g * color.g) / 255,
+		(b * color.b) / 255
 	);
 }
 
 uint8_t Color::getMonochrome() const {
 	return static_cast<uint8_t>(
-		0.301 * static_cast<float>(r) +
-		0.587 * static_cast<float>(g) +
-		0.114 * static_cast<float>(b)
+		0.301f * static_cast<float>(r) +
+		0.587f * static_cast<float>(g) +
+		0.114f * static_cast<float>(b)
 	);
 }
 
@@ -245,19 +296,29 @@ void Color::drawColor() const {
 
 string Color::filter2str(const Filters filter) {
 	switch (filter) {
-	case Filters::Normal:  return "Normal";
-	case Filters::Combine: return "Combine";
-	case Filters::Mask:    return "Mask";
-	case Filters::Invert:  return "Invert";
+	case Filters::Normal:   return "Normal";
+	case Filters::Combine:  return "Combine";
+	case Filters::Mask:     return "Mask";
+	case Filters::Invert:   return "Invert";
+	case Filters::Subtract: return "Subtract";
+	case Filters::Add:      return "Add";
+	case Filters::Max:      return "Max";
+	case Filters::Min:      return "Min";
+	case Filters::Multiply: return "Multiply";
 	}
 	throw Error("Invalid filter");
 }
 
 Color::Filters Color::str2filter(const string& filter) {
-	if (filter == "Normal")  return Filters::Normal;
-	if (filter == "Combine") return Filters::Combine;
-	if (filter == "Mask")    return Filters::Mask;
-	if (filter == "Invert")  return Filters::Invert;
+	if (filter == "Normal")   return Filters::Normal;
+	if (filter == "Combine")  return Filters::Combine;
+	if (filter == "Mask")     return Filters::Mask;
+	if (filter == "Invert")   return Filters::Invert;
+	if (filter == "Subtract") return Filters::Subtract;
+	if (filter == "Add")      return Filters::Add;
+	if (filter == "Max")      return Filters::Max;
+	if (filter == "Min")      return Filters::Min;
+	if (filter == "Multiply") return Filters::Multiply;
 	throw Error("Invalid filter type ") << filter;
 }
 

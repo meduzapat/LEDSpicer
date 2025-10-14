@@ -40,12 +40,19 @@ class Color {
 public:
 
 	/**
-	 * Normal:  Will overwrite the background.
-	 * Combine: Will combine with the background.
-	 * Mask:    Will cover the background with a mask.
-	 * Invert:  Will Revert the applying color.
+	 * Filter types for color operations.
+	 *
+	 * Normal:   Overwrites the background color.
+	 * Combine:  Blends with the background using transition.
+	 * Mask:     Covers the background using monochrome mask.
+	 * Invert:   Inverts current color relative to input (clamped).
+	 * Subtract: Subtracts input from current (wraps on underflow).
+	 * Add:      Adds input to current (wraps on overflow).
+	 * Max:      Keeps brightest channel from both colors.
+	 * Min:      Keeps darkest channel from both colors.
+	 * Multiply: Tints current color by input.
 	 */
-	enum class Filters : uint8_t {Normal, Combine, Mask, Invert};
+	enum class Filters : uint8_t {Normal, Combine, Mask, Invert, Add, Subtract, Max, Min, Multiply};
 
 	enum Channels : uint8_t {Red, Green, Blue};
 
@@ -139,13 +146,6 @@ public:
 	Color transition(const Color& destination, float percent) const;
 
 	/**
-	 * Subtracts a color from another color.
-	 * @param destination
-	 * @return
-	 */
-	Color difference(const Color& destination) const;
-
-	/**
 	 * Creates a mask over the color, more intense the mask, more visible the color.
 	 * @param intensity 0 not visible 255 full visible
 	 * @return
@@ -153,9 +153,46 @@ public:
 	Color mask(float intensity) const;
 
 	/**
-	 * @return Returns the color inverted.
+	 * Inverts this color relative to another (clamped, no underflow).
+	 * @param color base to invert from.
+	 * @return new Color with each channel = max(0, color - this).
 	 */
-	Color invert() const;
+	Color invert(const Color& color) const;
+
+	/**
+	 * Subtracts another color (wraps on underflow).
+	 * @param color to subtract.
+	 * @return new Color with each channel = this - color (may wrap).
+	 */
+	Color subtract(const Color& color) const;
+
+	/**
+	 * Adds another color (wraps on overflow).
+	 * @param color to add.
+	 * @return new Color with each channel = this + color (may wrap).
+	 */
+	Color add(const Color& color) const;
+
+	/**
+	 * Returns the brightest channels from both colors.
+	 * @param color to compare.
+	 * @return new Color with each channel = max(this, color).
+	 */
+	Color max(const Color& color) const;
+
+	/**
+	 * Returns the darkest channels from both colors.
+	 * @param color to compare.
+	 * @return new Color with each channel = min(this, color).
+	 */
+	Color min(const Color& color) const;
+
+	/**
+	 * Multiplies (tints) this color by another.
+	 * @param color to multiply by.
+	 * @return new Color with each channel = (this * color) / 255.
+	 */
+	Color multiply(const Color& color) const;
 
 	/**
 	 * Returns the monochrome version of the color.

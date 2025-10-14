@@ -72,6 +72,11 @@ public:
 	void reset();
 
 	/**
+	 * Clean up any temporary handled item (element input or group)
+	 */
+	void removeTemporaries();
+
+	/**
 	 * Start inputs.
 	 */
 	void startInputs();
@@ -94,16 +99,17 @@ public:
 	void addAlwaysOnElement(Element* element, const Color& color, const Color::Filters& filter);
 	void addAlwaysOnGroup(Group* group, const Color& color, const Color::Filters& filter);
 
-	static void addTemporaryOnElement(const string name, const Element::Item item);
-	static void removeTemporaryOnElement(const string name);
+	static void addTemporaryOnElement(const string& name, const Element::Item item);
+	static void removeTemporaryOnElement(const string& name);
 	static void removeTemporaryOnElements();
 
-	static void addTemporaryOnGroup(const string name, const Group::Item item);
-	static void removeTemporaryOnGroup(const string name);
+	static void addTemporaryOnGroup(const string& name, const Group::Item item);
+	static void removeTemporaryOnGroup(const string& name);
 	static void removeTemporaryOnGroups();
 
 	/**
 	 * Adds an input plugin to this profile.
+	 * The Profile now owns the input.
 	 * @param input
 	 */
 	void addInput(Input* input);
