@@ -24,10 +24,10 @@
 
 using namespace LEDSpicer;
 
-libusb_context *USB::usbSession = nullptr;
+libusb_context* USB::usbSession = nullptr;
 
-USB::USB(uint16_t wValue, uint8_t interface, uint8_t boardId, uint8_t maxBoards) : wValue(wValue), interface(interface), boardId(boardId)
-{
+USB::USB(uint16_t wValue, uint8_t  interface,  uint8_t boardId,  uint8_t maxBoards) : 
+    wValue(wValue), interface(interface), boardId(boardId){
 
 	if (not Utility::verifyValue<uint8_t>(boardId, 1, maxBoards, false))
 		throw Error("Board id should be a number between 1 and " + to_string(maxBoards));
