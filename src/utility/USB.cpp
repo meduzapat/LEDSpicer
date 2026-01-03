@@ -24,10 +24,10 @@
 
 using namespace LEDSpicer;
 
-libusb_context* USB::usbSession = nullptr;
+libusb_context *USB::usbSession = nullptr;
 
-USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoards) :
-	wValue(wValue), interface(interface), boardId(boardId) {
+USB::USB(uint16_t wValue, uint8_t interface, uint8_t boardId, uint8_t maxBoards) : wValue(wValue), interface(interface), boardId(boardId)
+{
 
 	if (not Utility::verifyValue<uint8_t>(boardId, 1, maxBoards, false))
 		throw Error("Board id should be a number between 1 and " + to_string(maxBoards));
@@ -37,7 +37,8 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 	return;
 #endif
 
-	if (not usbSession) {
+	if (not usbSession)
+	{
 		LogInfo("Opening USB session");
 		if (libusb_init(&usbSession) != 0)
 			throw new Error("Unable to open USB session");
@@ -50,21 +51,22 @@ USB::USB(uint16_t wValue, uint8_t  interface, uint8_t  boardId, uint8_t  maxBoar
 		LIBUSB_LOG_LEVEL_INFO
 		LIBUSB_LOG_LEVEL_DEBUG
 	*/
-		#if LIBUSB_API_VERSION >= 0x01000106
-		libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
-		#else
-		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_DEBUG);
-		#endif
+#if LIBUSB_API_VERSION >= 0x01000106
+	libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
 #else
-		#if LIBUSB_API_VERSION >= 0x01000106
-		libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
-		#else
-		libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_ERROR);
-		#endif
+	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_DEBUG);
+#endif
+#else
+#if LIBUSB_API_VERSION >= 0x01000106
+	libusb_set_option(usbSession, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
+#else
+	libusb_set_debug(usbSession, LIBUSB_LOG_LEVEL_ERROR);
+#endif
 #endif
 }
 
-void USB::connect() {
+void USB::connect()
+{
 
 	LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " Id: " + to_string(boardId));
 
@@ -76,25 +78,37 @@ void USB::connect() {
 	if (handle)
 		return;
 
-	libusb_device** list;
-	libusb_device* device;
+	libusb_device **list;
+	libusb_device *device;
 	libusb_get_device_list(usbSession, &list);
-	for (size_t idx = 0; list[idx] != nullptr; idx++) {
+
+	size_t matchIndex = 0; // NEW: counts ONLY matching VID/PID devices
+
+	for (size_t idx = 0; list[idx] != nullptr; idx++)
+	{
 		device = list[idx];
 		libusb_device_descriptor desc = {0};
 		libusb_get_device_descriptor(device, &desc);
 
-		if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
+		if (desc.idVendor == getVendor() and desc.idProduct == getProduct())
+		{
 			// For ID by product only check the vendor and product.
-			if (isProductBasedId()) {
+			if (isProductBasedId())
+			{
 				break;
 			}
-			// For hardware that have no order use the position on the list.
-			else if (isNonBasedId() and idx + 1 == boardId) {
-				break;
+			// For hardware that have no order use the position on the "matching" list.
+			else if (isNonBasedId())
+			{
+				matchIndex++;
+				if (matchIndex == boardId)
+				{
+					break;
+				}
 			}
 			// For independent hardware check device ID.
-			else if (desc.bcdDevice == boardId) {
+			else if (desc.bcdDevice == boardId)
+			{
 				break;
 			}
 		}
@@ -102,14 +116,16 @@ void USB::connect() {
 	}
 	libusb_free_device_list(list, 1);
 
-	if (device and libusb_open(device, &handle) == LIBUSB_SUCCESS) {
+	if (device and libusb_open(device, &handle) == LIBUSB_SUCCESS)
+	{
 		libusb_set_auto_detach_kernel_driver(handle, true);
 		return;
 	}
 	throw Error("Failed to open device " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) + " id " + to_string(getId()));
 }
 
-void USB::disconnect() {
+void USB::disconnect()
+{
 
 #ifdef DRY_RUN
 	LogDebug("No disconnect - DRY RUN");
@@ -123,7 +139,8 @@ void USB::disconnect() {
 	LogDebug("Reseting interface: " + to_string(interface));
 #endif
 	auto r = libusb_reset_device(handle);
-	if (r) {
+	if (r)
+	{
 		LogWarning(string(libusb_error_name(r)));
 	}
 #ifdef DEVELOP
@@ -133,7 +150,8 @@ void USB::disconnect() {
 	handle = nullptr;
 }
 
-void USB::claimInterface() {
+void USB::claimInterface()
+{
 
 #ifdef DRY_RUN
 	LogDebug("No USB interface - DRY RUN");
@@ -144,11 +162,11 @@ void USB::claimInterface() {
 	if (libusb_claim_interface(handle, interface))
 		throw Error(
 			"Unable to claim interface to " +
-			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct())
-		);
+			Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()));
 }
 
-void USB::closeSession() {
+void USB::closeSession()
+{
 
 #ifdef DRY_RUN
 	LogDebug("No Close USB - DRY RUN");
@@ -163,19 +181,23 @@ void USB::closeSession() {
 	usbSession = nullptr;
 }
 
-uint8_t USB::getId() const {
+uint8_t USB::getId() const
+{
 	return boardId;
 }
 
-const bool USB::isProductBasedId() const {
+const bool USB::isProductBasedId() const
+{
 	return true;
 }
 
-const bool USB::isNonBasedId() const {
+const bool USB::isNonBasedId() const
+{
 	return false;
 }
 
-int USB::send(vector<uint8_t>& data) const {
+int USB::send(vector<uint8_t> &data) const
+{
 	return libusb_control_transfer(
 		handle,
 		REQUEST_TYPE,
@@ -184,18 +206,20 @@ int USB::send(vector<uint8_t>& data) const {
 		interface,
 		data.data(),
 		data.size(),
-		USB_TIMEOUT
-	);
+		USB_TIMEOUT);
 }
 
-void USB::transferToConnection(vector<uint8_t>& data) const {
+void USB::transferToConnection(vector<uint8_t> &data) const
+{
 
 #ifdef SHOW_OUTPUT
 	cout << "Data sent:" << endl;
 	uint8_t count = MAX_DUMP_COLUMNS;
-	for (auto b : data) {
+	for (auto b : data)
+	{
 		cout << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << static_cast<int>(b) << ' ';
-		if (not --count) {
+		if (not --count)
+		{
 			count = MAX_DUMP_COLUMNS;
 			cout << endl;
 		}
@@ -209,15 +233,15 @@ void USB::transferToConnection(vector<uint8_t>& data) const {
 		return;
 
 	LogDebug(
-		"Error sending to USB: wValue: "  + Utility::hex2str(wValue) +
-		" wIndex: "  + Utility::hex2str(interface) +
-		" wLength: " + to_string(data.size())
-	);
+		"Error sending to USB: wValue: " + Utility::hex2str(wValue) +
+		" wIndex: " + Utility::hex2str(interface) +
+		" wLength: " + to_string(data.size()));
 	throw Error(string(libusb_error_name(responseCode)));
 #endif
 }
 
-vector<uint8_t> USB::transferFromConnection(uint size) const {
+vector<uint8_t> USB::transferFromConnection(uint size) const
+{
 	std::vector<uint8_t> response(size);
 	return response;
 }
