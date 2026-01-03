@@ -23,6 +23,8 @@
 #include "RestrictorUSB.hpp"
 #include <fstream>  // to store and read files.
 #include <sys/stat.h>
+#include <optional>
+#include <string>
 
 #ifndef RESTRICTORS_SERVOSTIK_HPP_
 #define RESTRICTORS_SERVOSTIK_HPP_ 1
@@ -52,7 +54,12 @@ public:
 		Utility::parseNumber(options["boardId"], "Invalid Board ID"),
 		SERVOSTIK_MAX_BOARDS,
 		SERVOSTIK_FULLNAME
-	) {}
+	) {
+		auto it = options.find("usbPath");
+		if (it != options.end() && !it->second.empty()) {
+			usbPath = it->second;
+		}
+	}
 
 	virtual ~ServoStik() = default;
 
@@ -71,6 +78,9 @@ protected:
 	void storeWays(const string& profile, const Ways& ways) const;
 
 	const Ways retrieveWays(const string& profile) const;
+
+	void connect() override;
+	std::optional<std::string> usbPath;
 
 };
 

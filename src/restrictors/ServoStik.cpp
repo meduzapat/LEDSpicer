@@ -22,6 +22,11 @@
 
 #include "ServoStik.hpp"
 
+#include <sstream>
+#include <vector>
+#include <algorithm>
+
+
 using namespace LEDSpicer::Restrictors;
 
 void ServoStik::rotate(const umap<string, Ways>& playersData) {
@@ -136,3 +141,153 @@ const Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
 	LogDebug("Unable to read " + filePath);
 	return Ways::invalid;
 }
+
+void ServoStik::connect() {
+	/*
+     * This override exists because ServoStik controller boards:
+     *  - all share the same VID/PID (d209:1700)
+     *  - do NOT expose a unique USB serial number
+     *  - therefore cannot be uniquely identified by libusb_open_device_with_vid_pid()
+     *
+     * We must enumerate all matching devices and choose the correct one
+     * deterministically using either:
+     *   1) an explicit usbPath from the config (preferred)
+     *   2) boardId as "Nth matching ServoStik device" (fallback)
+     */
+    LogInfo("Connecting to " + Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
+            " Id: " + std::to_string(boardId) +
+            (usbPath ? (" usbPath: " + *usbPath) : ""));
+
+#ifdef DRY_RUN
+    LogDebug("No USB handle - DRY RUN");
+    return;
+#endif
+
+    if (handle) return;
+
+
+    libusb_device** list = nullptr;
+    libusb_get_device_list(usbSession, &list);
+
+
+	/*
+     * We build a list of *candidate* ServoStik devices.
+     * Each candidate stores:
+     *  - the libusb_device*
+     *  - its USB bus number
+     *  - its USB port chain (topology)
+     *  - a stable string form like "1-4.1"
+     */
+    struct Candidate {
+        libusb_device* dev;
+        uint8_t bus;
+        std::vector<uint8_t> ports;
+        std::string path;
+    };
+
+    std::vector<Candidate> cands;
+
+    for (size_t i = 0; list[i] != nullptr; i++) {
+        libusb_device* dev = list[i];
+        libusb_device_descriptor desc{};
+        if (libusb_get_device_descriptor(dev, &desc) != 0) continue;
+
+        if (desc.idVendor != getVendor() || desc.idProduct != getProduct()) continue;
+
+		/*
+         * Retrieve USB topology info:
+         *  - bus number (stable unless device moves controllers)
+         *  - port chain (physical port path, e.g. 4 -> 1 = "4.1")
+         */
+        uint8_t bus = libusb_get_bus_number(dev);
+        uint8_t ports[8];
+        int n = libusb_get_port_numbers(dev, ports, sizeof(ports));
+
+		/*
+         * Build a stable, human-readable usbPath string:
+         *   bus-port[.subport...]
+         * Examples:
+         *   1-3
+         *   1-4.1
+         */
+        std::ostringstream oss;
+        oss << (int)bus << "-";
+        for (int p = 0; p < n; p++) {
+            if (p) oss << ".";
+            oss << (int)ports[p];
+        }
+
+        Candidate c;
+        c.dev = dev;
+        c.bus = bus;
+        c.ports.assign(ports, ports + std::max(0, n));
+        c.path = oss.str();
+        cands.push_back(std::move(c));
+    }
+
+	/*
+     * Sort candidates deterministically
+     *
+     * This ensures boardId fallback is stable:
+     *   boardId=1 -> first physical ServoStik
+     *   boardId=2 -> second physical ServoStik
+     *
+     * Sorting by:
+     *   1) USB bus number
+     *   2) USB port chain
+     */
+    std::sort(cands.begin(), cands.end(), [](const Candidate& a, const Candidate& b) {
+        if (a.bus != b.bus) return a.bus < b.bus;
+        return a.ports < b.ports;
+    });
+
+    libusb_device* chosen = nullptr;
+
+	/*
+     * If usbPath was specified in the config, try to match it exactly
+     *
+     * This is the most explicit and reliable method and avoids any ambiguity.
+     */
+    if (usbPath) {
+        for (const auto& c : cands) {
+            if (c.path == *usbPath) {
+                chosen = c.dev;
+                break;
+            }
+        }
+
+		/*
+         * If usbPath was provided but no device matched,
+         * fall back to boardId so existing setups still work.
+         */
+        if (!chosen) {
+            LogWarning("ServoStik usbPath '" + *usbPath + "' not found; falling back to boardId " + std::to_string(boardId));
+        }
+    }
+
+	/*
+     * Fallback selection using boardId
+     *
+     * boardId is 1-based:
+     *   boardId=1 -> candidates[0]
+     *   boardId=2 -> candidates[1]
+     */
+    if (!chosen) {
+        if (boardId < 1 || boardId > cands.size()) {
+            libusb_free_device_list(list, 1);
+            throw Error("ServoStik boardId " + std::to_string(boardId) + " out of range; found " + std::to_string(cands.size()) + " device(s)");
+        }
+        chosen = cands[boardId - 1].dev;
+    }
+
+    int rc = libusb_open(chosen, &handle);
+    libusb_free_device_list(list, 1);
+
+    if (rc == LIBUSB_SUCCESS) {
+        libusb_set_auto_detach_kernel_driver(handle, true);
+        return;
+    }
+
+    throw Error("Failed to open ServoStik device id " + std::to_string(getId()));
+}
+
