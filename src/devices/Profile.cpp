@@ -28,6 +28,8 @@ Profile* Profile::defaultProfile = nullptr;
 ElementItemUMap Profile::temporaryOnElements;
 GroupItemUMap   Profile::temporaryOnGroups;
 
+bool Profile::transitioning = false;
+
 Profile::~Profile() {
 #ifdef DEVELOP
 	cout << "Removing profile actors" << endl;
@@ -89,11 +91,11 @@ void Profile::runFrame(bool advanceFrame) {
 		else
 			e.second->setColor(backgroundColor);
 
-	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) {
+	if (not transitioning and inputsEnabled) {
 		for (Input* i : inputs) i->process();
 	}
 
-	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS)) {
+	if (animationsEnabled) {
 		// Draw current animations if any.
 		for (auto actor : animations) actor->draw();
 	}
@@ -125,9 +127,8 @@ void Profile::runFrame(bool advanceFrame) {
 }
 
 void Profile::reset() {
-	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS))
-		for (auto actor : animations) actor->restart();
-	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) startInputs();
+	if (animationsEnabled) for (auto actor : animations) actor->restart();
+	if (not transitioning) startInputs();
 	removeTemporaries();
 }
 
@@ -138,7 +139,7 @@ void Profile::removeTemporaries() {
 }
 
 void Profile::startInputs() {
-	for (Input* i : inputs) i->activate();
+	if (inputsEnabled) for (Input* i : inputs) i->activate();
 }
 
 void Profile::stopInputs() {
@@ -163,7 +164,7 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color, const Color::Fi
 
 void Profile::addTemporaryOnElement(const string& name, const Element::Item item) {
 	removeTemporaryOnElement(name);
-	temporaryOnElements.emplace(name, item);
+	temporaryOnElements.emplace(name, std::move(item));
 }
 
 void Profile::removeTemporaryOnElement(const string& name) {
@@ -176,7 +177,7 @@ void Profile::removeTemporaryOnElements() {
 
 void Profile::addTemporaryOnGroup(const string& name, const Group::Item item) {
 	removeTemporaryOnGroup(name);
-	temporaryOnGroups.emplace(name, item);
+	temporaryOnGroups.emplace(name, std::move(item));
 }
 
 void Profile::removeTemporaryOnGroup(const string& name) {
@@ -204,4 +205,28 @@ vector<uint8_t*> Profile::collectUniqueLeds() const {
 		}
 	}
 	return currentLeds;
+}
+
+void Profile::setTransitioning(bool active) {
+	transitioning = active;
+}
+
+bool Profile::isTransitioning() {
+	return transitioning;
+}
+
+void Profile::enableAnimations(bool enable) {
+	animationsEnabled = enable;
+}
+
+bool Profile::hasAnimationsEnabled() const {
+	return animationsEnabled;
+}
+
+void Profile::enableInputs(bool enable) {
+	inputsEnabled = enable;
+}
+
+bool Profile::hasInputsEnabled() const {
+	return inputsEnabled;
 }

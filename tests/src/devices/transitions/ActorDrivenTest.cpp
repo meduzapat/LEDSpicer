@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      ActorDrivenTest.cpp
- * @since     Oct 11, 2025
+ * @since     Oct 2, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -55,35 +55,54 @@ MockDirectionActor* createTestActor(Group* group) {
 } // namespace
 
 TEST(ActorDrivenTest, Constructor) {
-	MockProfile  currentProfile("current", Color::Off);
-	Group        group("TestGroup", DEFAULT_COLOR);
-	auto*        actor(createTestActor(&group));
-	ActorDriven  transition(&currentProfile, actor);
+	Group       group("TestGroup", DEFAULT_COLOR);
+	auto*       actor(createTestActor(&group));
+	ActorDriven transition(actor);
 	EXPECT_FALSE(actor->wasRestarted());
 }
 
-TEST(ActorDrivenTest, Reset) {
+TEST(ActorDrivenTest, Activate) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile to("to", Color::Off);
 	Group       group("TestGroup", DEFAULT_COLOR);
 	auto*       actor(createTestActor(&group));
-	ActorDriven transition(&currentProfile, actor);
+	ActorDriven transition(actor);
 
 	currentProfile.addTestDummies();
 	EXPECT_FALSE(currentProfile.gotReset());
 	EXPECT_FALSE(actor->wasRestarted());
 
-	transition.setTarget(&to);
+	transition.activate(&currentProfile, &to);
 
 	EXPECT_TRUE(currentProfile.gotReset());
 	EXPECT_TRUE(actor->wasRestarted());
 }
 
-TEST(ActorDrivenTest, DrawConfig) {
-	MockProfile currentProfile("current", Color::Off);
+TEST(ActorDrivenTest, Reusable) {
+	MockProfile profile1("profile1", Color::Off);
+	MockProfile profile2("profile2", Color::Off);
+	MockProfile profile3("profile3", Color::Off);
 	Group       group("TestGroup", DEFAULT_COLOR);
-	auto*       actor      = createTestActor(&group);
-	ActorDriven transition(&currentProfile, actor);
+	auto*       actor(createTestActor(&group));
+	ActorDriven transition(actor);
+
+	// First activation.
+	transition.activate(&profile1, &profile2);
+	EXPECT_TRUE(actor->wasRestarted());
+
+	// Reset mock state.
+	actor->resetMockState();
+	EXPECT_FALSE(actor->wasRestarted());
+
+	// Second activation.
+	transition.activate(&profile2, &profile3);
+	EXPECT_TRUE(actor->wasRestarted());
+}
+
+TEST(ActorDrivenTest, DrawConfig) {
+	Group       group("TestGroup", DEFAULT_COLOR);
+	auto*       actor = createTestActor(&group);
+	ActorDriven transition(actor);
 
 	testing::internal::CaptureStdout();
 	transition.drawConfig();

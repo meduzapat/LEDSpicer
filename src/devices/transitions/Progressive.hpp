@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      Progressive.hpp
- * @since     Sep 21, 2025
+ * @since     Sep 22, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -22,32 +22,25 @@
 
 #include "Transition.hpp"
 #include "utilities/Speed.hpp"
-#include "utilities/Utility.hpp"
 
 #pragma once
 
 namespace LEDSpicer::Devices::Transitions {
 
+using LEDSpicer::Utilities::Speed;
+
 /**
  * LEDSpicer::Devices::Transitions::Progressive
- * Base class for transitions that use a progress value.
+ * A transition that progresses over time using speed settings.
  */
 class Progressive : public Transition, public Speed {
 
 public:
 
-	Progressive() = delete;
-
 	/**
-	 * @param current
-	 * @param to
-	 * @param speed
+	 * @param speed The speed setting for the transition.
 	 */
-	Progressive(Profile* current, const string& speed) :
-		Transition(current),
-		Speed(speed),
-		increase(calculateSpeed(this->speed) / (to ? 2 : 1))
-	{}
+	Progressive(const string& speed);
 
 	virtual ~Progressive() = default;
 
@@ -63,27 +56,25 @@ public:
 
 protected:
 
-	/// Keeps the progress value from 0 to 100.
-	float progress = 0;
+	/// Current progress percentage (0-100).
+	uint8_t progress = 0;
 
-	/// Stores the increase per call.
-	const float increase;
+	/// Step increment per frame.
+	uint8_t step = 1;
 
-	/**
-	 * Calculates the next progress.
-	 */
-	virtual void calculate() = 0;
-
-	/**
-	 * @param The speed to calculate.
-	 * @return A value for time based on speed and FPS
-	 */
-	static float calculateSpeed(const Speeds speed);
+	/// Progress limit.
+	static constexpr float COMPLETE = 99.9f;
 
 	/**
 	 * @see Transition::reset()
 	 */
 	void reset() override;
+
+	/**
+	 * Calculates the transition effect for the current progress.
+	 * Subclasses must implement this.
+	 */
+	virtual void calculate() = 0;
 };
 
 } // namespace

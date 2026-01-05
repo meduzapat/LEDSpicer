@@ -125,6 +125,43 @@ public:
 	 */
 	vector<uint8_t*> collectUniqueLeds() const;
 
+	/**
+	 * Sets system-wide transition mode.
+	 * When active, all profiles skip input processing.
+	 *
+	 * @param active
+	 */
+	static void setTransitioning(bool active);
+
+	/**
+	 * @return true if system is currently transitioning.
+	 */
+	static bool isTransitioning();
+
+	/**
+	 * Enables or disables animations for this profile.
+	 *
+	 * @param enable
+	 */
+	void enableAnimations(bool enable);
+
+	/**
+	 * @return true if animations are enabled.
+	 */
+	bool hasAnimationsEnabled() const;
+
+	/**
+	 * Enables or disables inputs for this profile.
+	 *
+	 * @param enable
+	 */
+	void enableInputs(bool enable);
+
+	/**
+	 * @return true if inputs are enabled.
+	 */
+	bool hasInputsEnabled() const;
+
 protected:
 
 	/// Keeps the profile name.
@@ -142,8 +179,17 @@ protected:
 	/// Keeps a list of always on groups.
 	vector<Group::Item> alwaysOnGroups;
 
-	/// Input plugins
+	/// Input plugins.
 	vector<Input*> inputs;
+
+	/// When true, all profiles skip input processing (during transitions).
+	static bool transitioning;
+
+	/// When false, animations are skipped for this profile.
+	bool animationsEnabled = true;
+
+	/// When false, inputs are skipped for this profile.
+	bool inputsEnabled = true;
 
 	/// Keeps a list of temporary activated elements across profiles.
 	static ElementItemUMap temporaryOnElements;

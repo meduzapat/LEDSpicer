@@ -50,6 +50,12 @@ public:
 		return drawCount;
 	}
 
+	/// Reset mock state for reuse tests.
+	void resetMockState() {
+		restarted = false;
+		drawCount = 0;
+	}
+
 	void restart() override {
 		DirectionActor::restart();
 		restarted = true;

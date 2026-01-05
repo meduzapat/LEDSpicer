@@ -1,10 +1,10 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-includedir=@includedir@/@PACKAGE@
-libdir=@libdir@/@PACKAGE@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@/ledspicer
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@/ledspicer
 
-Name: @PACKAGE_NAME@
-Description: Advanced LED and Joystick Control for Arcade Systems
-Version: @PACKAGE_VERSION@
+Name: @PROJECT_NAME@
+Description: LED Animation and Control System for Arcade Machines
+Version: @PROJECT_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lledspicer

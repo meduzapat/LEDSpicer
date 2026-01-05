@@ -84,7 +84,7 @@ void DataLoader::readConfiguration(const string& testProfile) {
 	// Load the requested profile or the default.
 	Profile::defaultProfile = processProfile(mode == Modes::Profile ? testProfile : defaultProfile);
 	// Create ending transition at 0
-	transitions.emplace(nullptr, new FadeOutIn(Profile::defaultProfile, "Normal", Color::Off));
+	transitions.emplace(nullptr, new FadeOutIn("Normal", Color::Off));
 }
 
 void DataLoader::processColorFile(const string& file) {
@@ -498,8 +498,8 @@ void DataLoader::processTransition(Profile* profile, const StringUMap& settings)
 
 	const Transition::Effects effect(settings.exists("name") ? Transition::str2effect(settings.at("name")): Transition::Effects::None);
 
-	if (effect  == Transition::Effects::None) {
-		transitions.emplace(profile, new Transition(profile));
+	if (effect == Transition::Effects::None) {
+		transitions.emplace(profile, new Transition());
 		return;
 	}
 
@@ -509,11 +509,11 @@ void DataLoader::processTransition(Profile* profile, const StringUMap& settings)
 	default:
 		case Transition::Effects::FadeOutIn: {
 			const Color& color(settings.exists("color") and Color::hasColor(settings.at("color")) ? Color::getColor(settings.at("color")) : Color::Off);
-			transition = new FadeOutIn(profile, speed, color);
+			transition = new FadeOutIn(speed, color);
 			break;
 		}
 		case Transition::Effects::Crossfade: {
-			transition = new CrossFade(profile, speed);
+			transition = new CrossFade(speed);
 			break;
 		}
 		case Transition::Effects::Curtain: {
@@ -542,7 +542,7 @@ void DataLoader::processTransition(Profile* profile, const StringUMap& settings)
 			}
 			// ActorDriven takes ownership of the actor pointer.
 			Actor* actor = DataLoader::createAnimation(actorSettings);
-			transition = new Curtain(profile, actor);
+			transition = new Curtain(actor);
 			break;
 		}
 	}

@@ -41,30 +41,22 @@ public:
 	 * Enum for different transition effects.
 	 */
 	enum class Effects : uint8_t {
-		/// Instantaneous transition, no effect.
-		None,
-		/// Fading out the current profile and fading in the new one.
-		FadeOutIn,
-		/// Crossfading from one profile to the other.
-		Crossfade,
-		/// A curtain closing and opening to the new profile.
-		Curtain
+		None,      /// Instantaneous transition, no effect.
+		FadeOutIn, /// Fading out the current profile and fading in the new one.
+		Crossfade, /// Crossfading from one profile to the other.
+		Curtain    /// A curtain closing and opening to the new profile.
 	};
 
-	Transition() = delete;
-
-	/**
-	 * Constructs a transition between two profiles.
-	 * @param current The profile to transition from.
-	 */
-	Transition(Profile* current);
+	Transition() = default;
 
 	virtual ~Transition() = default;
 
 	/**
-	 * @param to The target profile to transition to.
+	 * Activates the transition between two profiles.
+	 * @param from The profile to transition from.
+	 * @param to The profile to transition to (nullptr for termination).
 	 */
-	void setTarget(Profile* to);
+	virtual void activate(Profile* from, Profile* to);
 
 	/**
 	 * Performs one step of the transition.
@@ -73,6 +65,11 @@ public:
 	 * @return true if the transition is still active (more steps needed), false if complete.
 	 */
 	virtual bool run();
+
+	/**
+	 * Clean up after transition ends.
+	 */
+	virtual void deactivate();
 
 	/**
 	 * @return The name of the Transition.
@@ -96,14 +93,14 @@ public:
 protected:
 
 	/**
-	 * Does any reset after target is set.
+	 * Resets the transition state for reuse.
 	 */
 	virtual void reset();
 
 	Profile
-		/// The current profile.
-		* const current,
-		/// The target profile, or nullptr for ending.
+		/// The profile transitioning from.
+		* current = nullptr,
+		/// The profile transitioning to, or nullptr for termination.
 		* to = nullptr;
 };
 

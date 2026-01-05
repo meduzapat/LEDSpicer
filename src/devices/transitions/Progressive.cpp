@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
  * @file      Progressive.cpp
- * @since     Sep 21, 2025
+ * @since     Sep 22, 2025
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -24,33 +24,35 @@
 
 using namespace LEDSpicer::Devices::Transitions;
 
-bool Progressive::run() {
-#ifdef DEVELOP
-	if (Log::isLogging(LOG_DEBUG)) {
-		cout << "Transition " << progress << "%" << endl;
+Progressive::Progressive(const string& speed) : Speed(speed) {
+	switch (this->speed) {
+	case Speeds::VeryFast:
+		step = 16;
+		break;
+	case Speeds::Fast:
+		step = 8;
+		break;
+	case Speeds::Normal:
+		step = 4;
+		break;
+	case Speeds::Slow:
+		step = 2;
+		break;
+	case Speeds::VerySlow:
+		step = 1;
+		break;
 	}
-#endif
+}
+
+bool Progressive::run() {
+	if (progress > COMPLETE) return false;
 	calculate();
-	progress += increase;
-	return progress < 100;
+	progress += step;
+	return true;
 }
 
 void Progressive::drawConfig() const {
-	cout << "Speed: " << speed2str(speed) << endl;
-}
-
-float Progressive::calculateSpeed(const Speeds speed) {
-	float durationSec;
-	switch (speed) {
-	case Speeds::VeryFast: durationSec = 0.5f; break;
-	case Speeds::Fast:     durationSec = 1.0f; break;
-	default:
-	case Speeds::Normal:   durationSec = 1.5f; break;
-	case Speeds::Slow:     durationSec = 2.0f; break;
-	case Speeds::VerySlow: durationSec = 2.5f; break;
-	}
-
-	return 100.0f / (durationSec * Actor::getFPS());
+	Speed::drawConfig();
 }
 
 void Progressive::reset() {

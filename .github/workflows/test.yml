@@ -1,0 +1,43 @@
+# .github/workflows/test.yml
+name: Tests
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [development]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          libtinyxml2-dev \
+          libusb-1.0-0-dev \
+          libpulse-dev \
+          libasound2-dev \
+          libgtest-dev
+
+    - name: Configure
+      run: |
+        mkdir build && cd build
+        cmake .. \
+          -DENABLE_TESTS=ON \
+          -DENABLE_DRY_RUN=ON \
+          -DENABLE_PULSEAUDIO=ON \
+          -DENABLE_ALSAAUDIO=ON
+
+    - name: Build
+      run: cmake --build build -j$(nproc)
+
+    - name: Run tests
+      run: cd build && ctest --output-on-failure

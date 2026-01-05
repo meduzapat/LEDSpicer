@@ -39,12 +39,9 @@ public:
 	/**
 	 * ActorDriven constructor.
 	 * It takes ownership of the actor pointer.
-	 * @param current
-	 * @param to
 	 * @param actor The actor pointer that will handle this transition.
 	 */
-	ActorDriven(Profile* current, Actor* actor) :
-		Transition(current),
+	ActorDriven(Actor* actor) :
 		actor(dynamic_cast<DirectionActor*>(actor)) {}
 
 	ActorDriven(const ActorDriven&) = delete;

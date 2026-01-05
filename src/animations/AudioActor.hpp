@@ -89,14 +89,10 @@ protected:
 
 	struct UserPref {
 		const Color
-			/// Color to use when off
-			& off,
-			/// Color to use when low
-			& c00,
-			/// Color to use when mid
-			& c50,
-			/// Color to use when full
-			& c75;
+			& off, /// Color to use when off
+			& c00, /// Color to use when low
+			& c50, /// Color to use when mid
+			& c75; /// Color to use when full
 		Modes mode;
 		Channels channel;
 	} userPref;

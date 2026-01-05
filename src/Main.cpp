@@ -36,11 +36,11 @@ void signalHandler(int sig) {
 	case SIGABRT:
 	case SIGQUIT:
 	case SIGINT:
-		LogNotice(PROJECT_NAME " terminated by signal");
+		LogNotice(PROJECT_NAME " terminated by signal " + to_string(sig));
 		Main::terminate();
 		return;
 	case SIGHUP:
-		LogNotice(PROJECT_NAME " received reload configuration signal");
+		LogNotice(PROJECT_NAME " received reload configuration signal " + to_string(sig));
 		// TODO: reload the profiles and restart everything?
 		return;
 	case SIGSEGV:
@@ -105,23 +105,29 @@ void Main::run() {
 
 		// If set, will replace currentProfile.
 		Profile* newProfile = nullptr;
+		// If set, will store the profile on the stack.
 		bool storeProfile   = false;
+
 		Message msg(messages.getMessage());
 		LogDebug("Received message: Task: " + Message::type2str(msg.getType()) + "\nData: " + msg.toHumanString() + "\nFlags: " + Message::flag2str(msg.getFlags()));
 		// Set global flags.
-		if (msg.getType() == Message::Types::CraftProfile or msg.getType() == Message::Types::LoadProfile) {
+		if (
+			msg.getType() == Message::Types::CraftProfile or
+			msg.getType() == Message::Types::LoadProfile  or
+			msg.getType() == Message::Types::FinishLastProfile
+		) {
 			Utility::globalFlags = msg.getFlags();
 		}
 
 		switch (msg.getType()) {
 
 		case Message::Types::LoadProfile:
-			newProfile   = tryProfiles(msg.getData());
-			storeProfile = true;
+			newProfile = tryProfiles(msg.getData());
 			if (not newProfile) {
 				LogInfo("All requested profiles failed");
 				break;
 			}
+			storeProfile = true;
 			break;
 
 		case Message::Types::FinishLastProfile:
@@ -246,7 +252,11 @@ void Main::run() {
 #ifdef BENCHMARK
 		timeMessage = duration_cast<milliseconds>(high_resolution_clock::now() - start);
 #endif
-		if (newProfile) changeProfile(newProfile, storeProfile);
+		if (newProfile) {
+			newProfile->enableAnimations(not (Utility::globalFlags & FLAG_NO_ANIMATIONS));
+			newProfile->enableInputs(not (Utility::globalFlags & FLAG_NO_INPUTS));
+			changeProfile(newProfile, storeProfile);
+		}
 	}
 	// Terminate execution with the ending transition.
 	changeProfile(nullptr, false);
@@ -282,8 +292,8 @@ int main(int argc, char **argv) {
 				"-e or --elements\t\t\tTest registered elements.\n"
 				"-v or --version\t\t\t\tDisplay version information\n"
 				"-h or --help\t\t\t\tDisplay this help screen.\n"
-				"Data directory:    " PROJECT_DATA_DIR "\n"
-				"Devices Plugins directory: " DEVICES_DIR "\n"
+				"Data dir:    " PROJECT_DATA_DIR "\n"
+				"Devices dir: " DEVICES_DIR "\n"
 				"If -c or --config is not provided " PROJECT_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
@@ -293,7 +303,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
+				PROJECT_NAME " " PROJECT_VERSION " " COPYRIGHT "\n\n"
 				"For more information visit <" PROJECT_SITE ">\n\n"
 				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
 				PROJECT_NAME " is free software under the GPL 3 license\n\n"
@@ -401,7 +411,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(Error& e) {
-		LogError("Program terminated by error: " + e.getMessage());
+		LogError("Program terminated by error: " + e.getMessage() + (Log::isLogging(LOG_DEBUG) ? "" : "\nFor more details set debug mode in the config"));
 		return EXIT_FAILURE;
 	}
 
@@ -539,32 +549,29 @@ void Main::changeProfile(Profile* to, bool store) {
 	else {
 		LogInfo("Terminating Profile " + currentProfile->getName());
 	}
-	currentProfile->stopInputs();
 
-	// Replacement profiles to itself voids transition.
-	if ((Utility::globalFlags & FLAG_FORCE_RELOAD) and currentProfile == to) {
-		to->reset();
-	}
-	else {
-		// For transition disable inputs
-		auto gfb = Utility::globalFlags;
-		Utility::globalFlags = FLAG_NO_INPUTS;
-		Transition* transition = DataLoader::getTransitionFromCache(to ? currentProfile : nullptr);
-		transition->setTarget(to);
+	if (currentProfile != to) currentProfile->stopInputs();
 
-		Utility::globalFlags = gfb;
+	Transition* transition = (currentProfile != to) ? DataLoader::getTransitionFromCache(to) : nullptr;
 
+	if (transition and not (Utility::globalFlags & FLAG_NO_TRANSITIONS)) {
+
+		transition->activate(currentProfile, to);
 		// Run transition.
 		while (true) {
-			// Frame begins.
 			start = high_resolution_clock::now();
 			if (not transition->run()) break;
 			sendData();
 		}
+		transition->deactivate();
+	}
+	else {
+		if (to) to->reset();
 	}
 
 	if (replace) profiles.pop_back();
 	if (store) profiles.push_back(to);
 	currentProfile = to;
 	if (to and not (Utility::globalFlags & FLAG_NO_INPUTS)) to->startInputs();
+	Utility::globalFlags = 0;
 }

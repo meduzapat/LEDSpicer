@@ -28,39 +28,73 @@
 
 namespace LEDSpicer::Devices::Transitions {
 
-TEST(TransitionTest, Constructors) {
+TEST(TransitionTest, Activate) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
 	currentProfile.addTestDummies();
 	EXPECT_FALSE(currentProfile.gotReset());
-	Transition transition(&currentProfile);
-	transition.setTarget(&toProfile);
+	Transition transition;
+	transition.activate(&currentProfile, &toProfile);
+	// Current profile should have temporaries removed.
 	EXPECT_TRUE(currentProfile.gotReset());
 }
 
 TEST(TransitionTest, RunWithToProfile) {
 	MockProfile currentProfile("current", Color::Off);
 	MockProfile toProfile("to", Color::Off);
-	Transition transition(&currentProfile);
-	transition.setTarget(&toProfile);
+	Transition transition;
+	transition.activate(&currentProfile, &toProfile);
 	EXPECT_FALSE(transition.run());
 }
 
 TEST(TransitionTest, RunWithoutToProfile) {
 	MockProfile currentProfile("current", Color::Off);
-	Transition transition(&currentProfile);
+	Transition transition;
+	transition.activate(&currentProfile, nullptr);
 	EXPECT_FALSE(transition.run());
 }
 
 TEST(TransitionTest, DrawConfig) {
-	MockProfile currentProfile("current", Color::Off);
-	MockProfile toProfile("to", Color::Off);
-	Transition transition(&currentProfile);
-	transition.setTarget(&toProfile);
+	Transition transition;
 	testing::internal::CaptureStdout();
 	transition.drawConfig();
 	string output = testing::internal::GetCapturedStdout();
 	EXPECT_EQ(output, "Transition: None\n");
+}
+
+TEST(TransitionTest, Reusable) {
+	MockProfile profile1("profile1", Color::Off);
+	MockProfile profile2("profile2", Color::Off);
+	MockProfile profile3("profile3", Color::Off);
+
+	Transition transition;
+
+	// First activation.
+	transition.activate(&profile1, &profile2);
+	EXPECT_FALSE(transition.run());
+
+	// Reuse with different profiles.
+	transition.activate(&profile2, &profile3);
+	EXPECT_FALSE(transition.run());
+
+	// Reuse for termination.
+	transition.activate(&profile3, nullptr);
+	EXPECT_FALSE(transition.run());
+}
+
+TEST(TransitionTest, StrToEffect) {
+	EXPECT_EQ(Transition::str2effect("None"),      Transition::Effects::None);
+	EXPECT_EQ(Transition::str2effect("FadeOutIn"), Transition::Effects::FadeOutIn);
+	EXPECT_EQ(Transition::str2effect("Crossfade"), Transition::Effects::Crossfade);
+	EXPECT_EQ(Transition::str2effect("Curtain"),   Transition::Effects::Curtain);
+	EXPECT_EQ(Transition::str2effect("Invalid"),   Transition::Effects::None);
+}
+
+TEST(TransitionTest, EffectToStr) {
+	EXPECT_EQ(Transition::effect2str(Transition::Effects::None),      "None");
+	EXPECT_EQ(Transition::effect2str(Transition::Effects::FadeOutIn), "FadeOutIn");
+	EXPECT_EQ(Transition::effect2str(Transition::Effects::Crossfade), "Crossfade");
+	EXPECT_EQ(Transition::effect2str(Transition::Effects::Curtain),   "Curtain");
 }
 
 } // namespace

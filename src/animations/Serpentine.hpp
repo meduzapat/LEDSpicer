@@ -44,6 +44,8 @@ public:
 
 	void drawConfig() const override;
 
+	void restart() override;
+
 protected:
 
 	void calculateElements() override;

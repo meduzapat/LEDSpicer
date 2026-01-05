@@ -36,13 +36,11 @@ class FadeOutIn : public Progressive, public Utilities::Color {
 public:
 
 	/**
-	 * @param current
-	 * @param to
 	 * @param speed
 	 * @param color
 	 */
-	FadeOutIn(Profile* current, const string& speed, const Utilities::Color& color) :
-		Progressive(current, speed),
+	FadeOutIn(const string& speed, const Utilities::Color& color) :
+		Progressive(speed),
 		Utilities::Color(color)
 	{}
 

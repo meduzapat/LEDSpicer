@@ -91,8 +91,7 @@ void Serpentine::calculateElements() {
 	}
 #endif
 	for (size_t i = 1; i < tailData.size(); ++i) {
-		auto data(tailData[i]);
-		if (data.position == stepping.frame) {
+		if (tailData[i].position == stepping.frame) {
 #ifdef DEVELOP
 			if (Log::isLogging(LOG_DEBUG)) {
 				cout << std::setw(2) << static_cast<uint16_t>(data.position + 1) << "=--% ";
@@ -102,20 +101,21 @@ void Serpentine::calculateElements() {
 		}
 		switch (filter) {
 		case Color::Filters::Mask:
-			changeElementColor(data.position, tailColor.fade(data.percent), filter);
+			changeElementColor(tailData[i].position, tailColor.fade(tailData[i].percent), filter);
 			break;
 		default:
 			changeElementColor(
-				data.position,
+				tailData[i].position,
 				tailColor,
 				Color::Filters::Combine,
-				data.percent
+				tailData[i].percent
 			);
 		}
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
-		cout << std::setw(2)        << static_cast<uint16_t>(data.position + 1)
-			 << "=" << std::setw(2) << static_cast<uint16_t>(data.percent) << "% ";
+		cout <<
+			std::setw(2) << static_cast<uint16_t>(tailData[i].position + 1) << "=" <<
+			std::setw(2) << static_cast<uint16_t>(tailData[i].percent)      << "% ";
 	}
 #endif
 	}
@@ -159,4 +159,11 @@ void Serpentine::drawConfig() const {
 			"%" << endl;
 	}
 	StepActor::drawConfig();
+}
+
+void Serpentine::restart() {
+	StepActor::restart();
+	for (size_t i = 0; i < tailData.size(); ++i) {
+		tailData[i].position = stepping.frame;
+	}
 }

@@ -64,10 +64,11 @@ if(ENABLE_BENCHMARK)
 	add_compile_definitions(BENCHMARK=1)
 endif()
 
+# Find required packages (pkgConfig Threads and dl)
 find_package(PkgConfig REQUIRED)
-# Find required packages
+find_package(Threads REQUIRED)
+
 pkg_check_modules(TINYXML2     REQUIRED tinyxml2>=6.0)
-pkg_check_modules(PTHREADSTUBS REQUIRED pthread-stubs)
 if(NOT ENABLE_DRY_RUN)
 	pkg_check_modules(LIBUSB   REQUIRED libusb-1.0>=1.0.22)
 endif()
@@ -91,9 +92,6 @@ if(ENABLE_MISTER)
 	set(ENABLE_PULSEAUDIO OFF)
 endif()
 
-# Find dl library
-find_library(DL dl REQUIRED)
-
 # Check for tests.
 set(RUN_TESTS NO)
 if(ENABLE_TESTS)
@@ -108,7 +106,10 @@ if(ENABLE_TESTS)
 	endif()
 endif()
 
-# Shared library to be used on different binaries: libledspicer
+################
+# libledspicer #
+################
+
 add_library(ledspicer SHARED
 	src/utilities/Log.cpp
 	src/utilities/Utility.cpp
@@ -239,11 +240,11 @@ add_executable(ledspicerd ${LEDSPICER_SOURCES})
 target_compile_definitions(ledspicerd ${LEDSPICER_DEFINES})
 
 if(NOT ENABLE_DRY_RUN)
-	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
-	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL} ${LIBUSB_LIBRARIES})
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS} ${LIBUSB_LIBRARIES})
 else()
-	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${PTHREADSTUBS_INCLUDE_DIRS})
-	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} ${PTHREADSTUBS_LIBRARIES} ${DL})
+	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS})
+	list(APPEND LEDSPICER_LIBS ledspicer ${TINYXML2_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
 endif()
 
 target_include_directories(ledspicerd PRIVATE ${LEDSPICER_INCLUDE_DIRS})
@@ -371,6 +372,51 @@ install(FILES
 configure_file(data/ledspicer.pc.in ledspicer.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/ledspicer.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
+# Get systemd unit directory from pkg-config
+execute_process(
+	COMMAND ${PKG_CONFIG_EXECUTABLE} systemd --variable=systemdsystemunitdir
+	OUTPUT_VARIABLE SYSTEMD_UNIT_DIR
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+##########################
+# Custom install targets #
+##########################
+
+add_custom_target(install-services
+	COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/ledspicerd.service
+		${SYSTEMD_UNIT_DIR}/ledspicerd.service
+	COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/processlookup.service
+		${SYSTEMD_UNIT_DIR}/processlookup.service
+	COMMENT "Installing service files"
+)
+
+add_custom_target(install-config
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/data/ledspicer.conf
+		${CMAKE_INSTALL_SYSCONFDIR}/ledspicer.conf
+	COMMENT "Installing configuration file"
+)
+
+add_custom_target(uninstall
+	COMMAND ${CMAKE_COMMAND} -E echo "Checking for install manifest..."
+	COMMAND test -f ${CMAKE_BINARY_DIR}/install_manifest.txt || (echo "Error: install_manifest.txt not found. Run 'make install' first." && exit 1)
+	COMMAND xargs rm -f < ${CMAKE_BINARY_DIR}/install_manifest.txt
+	COMMAND ${CMAKE_COMMAND} -E echo "Uninstall complete."
+	COMMENT "Uninstalling LEDSpicer"
+)
+
+####################
+# systemd services #
+####################
+
+# Fallback if pkg-config fails
+if(NOT SYSTEMD_UNIT_DIR)
+	set(SYSTEMD_UNIT_DIR "/usr/lib/systemd/system")
+endif()
+
 # Base service file top part.
 file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"[Unit]\n"
@@ -387,10 +433,15 @@ endif()
 
 # Continue base service file.
 file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-	"\n\n[Service]\n"
-	"Type=simple\n"
+	"\n"
+	"StartLimitIntervalSec=60s\n"
+	"StartLimitBurst=3\n\n"
+
+	"[Service]\n"
+	"Type=forking\n"
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/ledspicerd\n"
 	"Restart=always\n"
+	"RestartSec=5s\n"
 )
 
 # Add PulseAudio environment variable if enabled.
@@ -403,11 +454,30 @@ endif()
 
 # Base service file bottom part.
 file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-	"\n[Install]\n"
+	"\n"
+	"[Install]\n"
 	"WantedBy=multi-user.target\n"
 )
 
-install(FILES ${CMAKE_BINARY_DIR}/ledspicerd.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/system)
+# processLookup service file
+file(WRITE ${CMAKE_BINARY_DIR}/processlookup.service
+	"[Unit]\n"
+	"Description=LEDSpicer Process Lookup Daemon\n"
+	"After=network.target\n\n"
+
+	"[Service]\n"
+	"Type=forking\n"
+	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/processLookup\n"
+	"Restart=always\n"
+	"RestartSec=5s\n\n"
+
+	"[Install]\n"
+	"WantedBy=multi-user.target\n"
+)
+
+###################
+# Test and report #
+###################
 
 if(RUN_TESTS)
 	add_subdirectory(tests)

@@ -133,19 +133,6 @@ constexpr char ID_GROUP_SEPARATOR = '|'; // Pipe
 /// @}
 
 /**
- * Transition types.
- * @{
- */
-/// No transition.
-#define TRANSITION_NONE  0
-/// Transition with a morph effect between two profiles.
-#define TRANSITION_MORPH 1
-/// Transition with a fade effect between two profiles.
-#define TRANSITION_FADE  2
-
-/// @}
-
-/**
  * Connection settings
  * @{
  */

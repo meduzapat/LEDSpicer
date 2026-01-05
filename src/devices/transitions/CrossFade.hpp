@@ -36,13 +36,10 @@ class CrossFade : public Progressive {
 public:
 
 	/**
-	 * @param current
-	 * @param to
 	 * @param speed
-	 * @param color
 	 */
-	CrossFade(Profile* current, const string& speed) :
-		Progressive(current, speed),
+	CrossFade(const string& speed) :
+		Progressive(speed),
 		allLeds(Group::layout.at("All").getLeds())
 	{
 		cachedBuffer.resize(allLeds.size());
@@ -60,6 +57,7 @@ protected:
 	/// Keeps a list of all groups LEDs from current profile.
 	const vector<uint8_t*> allLeds;
 
+	/// Buffer for caching LED values during crossfade.
 	mutable vector<uint8_t> cachedBuffer;
 
 	void calculate() override;
