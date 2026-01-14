@@ -4,7 +4,7 @@
  * @since     Dec 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,7 +29,7 @@ Handler::Handler(const string& filename) :
 {
 	LogDebug("Loading library " + filename);
 	if (char *errstr = dlerror())
-		throw Error("Failed to load library " + filename + " " + errstr);
+		throw Error("Failed to load library ") << filename << " " << errstr;
 }
 
 Handler::~Handler() {

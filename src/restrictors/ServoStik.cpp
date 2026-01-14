@@ -4,7 +4,7 @@
  * @since     Jul 9, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,12 +24,11 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void ServoStik::rotate(const umap<string, Ways>& playersData) {
+void ServoStik::rotate(const WaysUMap& playersData) {
 
 	// ServoStik can move two restrictors to the same ways, pick the first and ignore the rest.
 	Ways way(playersData.begin()->second);
-	if (way == Ways::invalid)
-		return;
+	if (way == Ways::invalid) return;
 	switch (way) {
 		case Ways::w2:
 		case Ways::w2v:
@@ -52,11 +51,11 @@ void ServoStik::rotate(const umap<string, Ways>& playersData) {
 
 	vector<uint8_t> data {0, 0xdd, 0, 0};
 	if (way == Ways::w4) {
-		LogDebug("Rotating " + getFullName() + " to 4 ways.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways");
 		data[3] = 0;
 	}
 	else {
-		LogDebug("Rotating " + getFullName() + " to 8 ways.");
+		LogDebug("Rotating " + getFullName() + " to 8 ways");
 		data[3] = 1;
 	}
 	transferToConnection(data);
@@ -91,7 +90,7 @@ uint8_t ServoStik::getMaxIds() const {
 	return 2;
 }
 
-const bool ServoStik::isNonBasedId() const {
+bool ServoStik::isNonBasedId() const {
 	return true;
 }
 
@@ -107,7 +106,7 @@ void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 		}
 	}
 	else if (!S_ISDIR(st.st_mode)) {
-		LogDebug("Error: Config directory path exists but is not a directory.");
+		LogDebug("Error: Config directory path exists but is not a directory");
 		return;
 	}
 
@@ -122,7 +121,7 @@ void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 	LogDebug("Unable to save " + filePath);
 }
 
-const Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
+Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
 	std::string filePath(Utility::getConfigDir() + SERVOSTIK_DATA(profile));
 	std::ifstream inputFile(filePath);
 	if (inputFile.is_open()) {

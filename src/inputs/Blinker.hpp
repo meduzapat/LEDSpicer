@@ -4,7 +4,7 @@
  * @since     Aug 17, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,7 +21,7 @@
  */
 
 #include "Reader.hpp"
-#include "utility/Speed.hpp"
+#include "utilities/Speed.hpp"
 
 #ifndef BLINKER_HPP_
 #define BLINKER_HPP_ 1
@@ -37,11 +37,11 @@ class Blinker: public Inputs::Reader, public Speed {
 
 public:
 
-	Blinker(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+	Blinker(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 		Reader(parameters, inputMaps),
-		Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
+		Speed(parameters.exists("speed") ? parameters["speed"] : "Normal"),
 		frames(static_cast<uint8_t>(speed) * 3),
-		times(Utility::parseNumber(parameters.count("times") ? parameters["times"] : DEFAULT_BLINKS, "Invalid numeric value ")) {}
+		times(Utility::parseNumber(parameters.exists("times") ? parameters["times"] : DEFAULT_BLINKS, "Invalid numeric value ")) {}
 
 	virtual ~Blinker() = default;
 
@@ -54,8 +54,8 @@ public:
 protected:
 
 	uint8_t
-		times,
 		frames,
+		times,
 		cframe = 0;
 
 	bool on = false;
@@ -65,13 +65,13 @@ protected:
 		uint8_t times = 0;
 	};
 
-	umap<string, Times> blinkingItems;
+	unordered_map<string, Times> blinkingItems;
 
 	vector<string> itemsToClean;
 
 	void blink();
 
 };
-} /* namespace */
+} // namespace
 
 #endif /* BLINKER_HPP_ */

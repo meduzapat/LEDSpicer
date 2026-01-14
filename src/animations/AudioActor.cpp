@@ -4,7 +4,7 @@
  * @since     Oct 6, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,13 +24,11 @@
 
 using namespace LEDSpicer::Animations;
 
-uint8_t AudioActor::lastF  = 250;
-uint8_t AudioActor::lastFs = 250;
 AudioActor::Values AudioActor::value;
 
-AudioActor::AudioActor(umap<string, string>& parameters, Group* const group) :
+AudioActor::AudioActor(StringUMap& parameters, Group* const group) :
 	Actor(parameters, group, REQUIRED_PARAM_ACTOR_AUDIO),
-	Direction(parameters.count("direction") ? parameters["direction"] : "Forward"),
+	Direction(parameters.exists("direction") ? parameters["direction"] : "Forward"),
 	userPref({
 		Color::getColor(parameters["off"]),
 		Color::getColor(parameters["low"]),
@@ -53,20 +51,28 @@ AudioActor::AudioActor(umap<string, string>& parameters, Group* const group) :
 
 	switch (userPref.mode) {
 	case Modes::VuMeter:
-		if (group->size() < VU_MIN_ELEMETS)
-			throw Error("To use VU meter a minimum of " + to_string(VU_MIN_ELEMETS) + " elements is needed on the group.");
+		if (group->size() < VU_MIN_ELEMENTS)
+			throw Error("To use VU meter a minimum of ")
+				<< VU_MIN_ELEMENTS
+				<< " elements is needed on the group";
 		break;
 	case Modes::Disco:
 	case Modes::Wave:
 		colorData.insert(colorData.begin(), group->size(), Color::Off);
 		break;
+	default: break;
 	}
 
 	// No bouncing here.
-	if (direction == Directions::ForwardBouncing)
-		direction = Directions::Forward;
-	else if (direction == Directions::BackwardBouncing)
-		direction = Directions::Backward;
+	bounce = false;
+#ifdef DEVELOP
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout <<
+			"Total Elements:"  << group->size() <<
+			"Total Left:"  << totalElements.l <<
+			"Total Right:" << totalElements.r << endl;
+	}
+#endif
 }
 
 void AudioActor::calculateElements() {
@@ -90,18 +96,17 @@ void AudioActor::refreshPeak() {
 #ifdef DEVELOP
 	displayPeak();
 #endif
-	if (frame == lastF)
-		return;
-	lastF = frame;
 	value.l = value.r = 0;
 	calcPeak();
 }
 
 #ifdef DEVELOP
 void AudioActor::displayPeak() {
-	cout
-		<< "L:" << std::left << std::setfill(' ') << std::setw(5) << to_string(value.l)
-		<< " R:" << std::setw(5) << to_string(value.r) << endl;
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout <<
+			"L:"  << std::left    << std::setfill(' ')  << std::setw(5) << to_string(value.l) <<
+			" R:" << std::setw(5) << to_string(value.r) << endl;
+	}
 }
 #endif
 
@@ -109,8 +114,7 @@ void AudioActor::single() {
 
 	refreshPeak();
 
-	if (not value.l and not value.r)
-		return;
+	if (not value.l and not value.r) return;
 
 	// Left & Right.
 	Color l, r;
@@ -137,7 +141,7 @@ void AudioActor::single() {
 	if (userPref.channel & Channels::Right) {
 		for (uint16_t c = 0; c < totalElements.r; ++c) {
 			changeElementColor(
-				direction == Directions::Forward ? getNumberOfElements() - c - 1 : totalElements.l + c,
+				direction == Directions::Forward ? getNumberOfElements() - c - 1 : totalElements.r + c,
 				r,
 				filter
 			);
@@ -157,77 +161,53 @@ void AudioActor::vuMeters() {
 	auto tintFn = [&] (const uint16_t elems, const uint16_t start, const uint16_t total, const bool reverse) {
 		for (uint16_t e = 0; e < elems; ++e) {
 			uint16_t s(reverse ? start - e : start + e);
-#ifdef DEVELOP
-			cout << std::setw(3) << to_string(s);
-#endif
 			changeElementColor(s, detectColor(round((e + 1) * 100.00f / total), false), filter);
 		}
 	};
 
 	refreshPeak();
 	uint16_t val;
-
-	/*
-	 * Forward / Backward, Start / Total table, for Left, Righ, Mono and Both.
-	 *     L  R  M  BL  BR
-	 * FS: 0  F- 0  0   F-
-	 * BS: F- 0  F- HL- HR-
-	 * FT: F- F- F- HL- HR-
-	 * BT: F- F- F- HL- HR-
-	 * Full/Half size
-	 * -1
-	 */
-
 	// TotalElements l or r have the total number of elements for solo channels.
 	// Convert to mono and them to elements.
 	if (userPref.channel == Channels::Mono) {
-		val = totalElements.l * ((value.l + value.r) / CHANNELS) / 100.00f;
-		if (not val)
-			return;
-		if (val > totalElements.l)
-			val = totalElements.l;
+		val = totalElements.l * ((value.l + value.r) / CHANNELS) / 100.f;
+		if (not val) return;
+		if (val > totalElements.l) val = totalElements.l;
 
 		if (direction == Directions::Forward)
+			// left to right
 			tintFn(val, 0, totalElements.l, false);
 		else
+			// right to left
 			tintFn(val, totalElements.l - 1, totalElements.l, true);
 		return;
 	}
 
 	// Convert left channel peak to elements.
 	if (userPref.channel & Channels::Left) {
-		val  = totalElements.l * value.l / 100;
-		if (val > totalElements.l)
-			val = totalElements.l;
+		val  = totalElements.l * value.l / 100.f;
+		if (val > totalElements.l) val = totalElements.l;
 		if (val) {
 			if (direction == Directions::Forward)
+				// left to right (half way)
 				tintFn(val, 0, totalElements.l, false);
 			else
+				// right (half way) to left
 				tintFn(val, totalElements.l -1, totalElements.l, true);
 		}
 	}
 
 	// Convert right channel peak to elements.
 	if (userPref.channel & Channels::Right) {
-		val = totalElements.r * value.r / 100;
-		if (val > totalElements.r)
-			val = totalElements.r;
+		val = totalElements.r * value.r / 100.f;
+		if (val > totalElements.r) val = totalElements.r;
 		if (val) {
-			uint16_t start, total;
 			if (direction == Directions::Forward)
-				tintFn(
-					val,
-					getNumberOfElements() - 1,
-					totalElements.r,
-					true
-				);
+				// right to left (half way)
+				tintFn(val, getNumberOfElements() - 1, totalElements.r, true);
 			else
-				tintFn(
-					val,
-					(userPref.channel == Channels::Both ? totalElements.r -1 : 0),
-					totalElements.r,
-					false
-				);
+				// left (half way) + 1 to right (using left channel size as mark)
+				tintFn(val, (userPref.channel == Channels::Both ? totalElements.l : 0), totalElements.r, false);
 		}
 	}
 }
@@ -267,9 +247,6 @@ void AudioActor::waves() {
 	}
 
 	refreshPeak();
-#ifdef DEVELOP
-	displayPeak();
-#endif
 
 	switch (userPref.channel) {
 	case Channels::Both:
@@ -298,68 +275,81 @@ void AudioActor::waves() {
 }
 
 void AudioActor::disco() {
+
+	// Fade all existing colors to create persistence.
 	for (auto& value : colorData) {
 		auto tone(value.getMonochrome());
-		if (not tone)
-			continue;
+		if (not tone) continue;
 		value.set(value.fade(80));
 	}
+
 	refreshPeak();
 
-	auto calculateIndex = [&](uint16_t val, uint16_t totalSize, bool isLeft) {
-		float
-			per = 0,
-			// Individual size.
-			boxSize = 100 / (totalSize - 1);
-		uint16_t
-			idx   = val / boxSize,
-			start = idx * boxSize,
-			end   = (idx + 1) * boxSize;
-		if (end > 100)
-			end = 100;
-		per = static_cast<float>(val - start) / (end - start + 1.00f) * 100.00f;
-		if (idx > 0 and per < 1) {
-			--idx;
-			per = 100;
-		}
+	auto applySmoothing = [&](uint16_t idx, uint16_t totalSize, const Color& mainColor) {
+		// Apply main color to the primary index.
+		colorData[idx] = mainColor.transition(colorData[idx], 50);
+
+		// Smooth to adjacent elements if within bounds.
+		if (idx > 0)
+			colorData[idx - 1] = userPref.c50.transition(colorData[idx - 1], 50);
+		if (idx < totalSize - 1)
+			colorData[idx + 1] = userPref.c50.transition(colorData[idx + 1], 50);
+	};
+
+	auto calculateAndApply = [&](uint16_t val, uint16_t totalSize, bool isLeft) {
+		if (not val) return;
+
+		// Map value (0-100) to index (0 to totalSize-1).
+		uint16_t idx = static_cast<uint16_t>(round(static_cast<float>(val) / 100.0f * (totalSize - 1)));
+
+		// Adjust index based on direction and channel.
 		switch (userPref.channel) {
 		case Channels::Mono:
 		case Channels::Left:
-			idx = (direction == Directions::Forward ? idx : totalSize - idx);
+			idx = (direction == Directions::Forward ? idx : totalSize - 1 - idx);
 			break;
 		case Channels::Right:
-			idx = (direction == Directions::Forward ? totalSize - idx : idx);
+			idx = (direction == Directions::Forward ? totalSize - 1 - idx : idx);
 			break;
 		case Channels::Both:
-			// Forward: outside in, Backward: inside out.
 			if (isLeft) {
 				idx = (direction == Directions::Forward ? idx : totalElements.l - 1 - idx);
 				break;
 			}
-			idx = (direction == Directions::Forward ? getNumberOfElements() - 1 - idx : totalElements.r + idx - (totalElements.r - totalElements.l));
+			// Right channel offset.
+			idx += totalElements.l;
+			idx = (direction == Directions::Forward ? getNumberOfElements() - 1 - idx + totalElements.l : idx);
 			break;
 		}
+
 #ifdef DEVELOP
-		cout << "Val:"  << std::setw(3) << to_string(val)
-		     << " Idx:"  << std::setw(3) << to_string(idx)
-		     << "/" << to_string(totalSize)
-		     << " Start:"  << std::setw(3) << to_string(start)
-		     << " End:"  << std::setw(3) << to_string(end)
-		     << " Per:"  << std::setw(3) << to_string(static_cast<uint8_t>(per)) << endl;
+		if (Log::isLogging(LOG_DEBUG)) {
+			cout <<
+				(isLeft ? "L" : "R")    <<
+				" Val:" << std::setw(3) << val <<
+				" Idx:" << std::setw(3) << idx <<
+				"/"     << totalSize    << endl;
+		}
 #endif
-		colorData[idx] = detectColor(per);
+
+		// Detect main color based on value (using gradient for smoothness).
+		Color mainColor = detectColor(val);
+
+		// Apply with smoothing.
+		applySmoothing(idx, totalSize, mainColor);
 	};
 
 	if (userPref.channel == Channels::Mono) {
-		calculateIndex((value.l + value.r) / 2, totalElements.l, false);
+		calculateAndApply((value.l + value.r) / 2, totalElements.l, false);
 	}
 	else {
 		if (userPref.channel & Channels::Left)
-			calculateIndex(value.l, totalElements.l, true);
+			calculateAndApply(value.l, totalElements.l, true);
 		if (userPref.channel & Channels::Right)
-			calculateIndex(value.r, totalElements.r, false);
+			calculateAndApply(value.r, totalElements.r, false);
 	}
-	// Apply colors to the elements
+
+	// Apply colors to the elements.
 	for (uint16_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, colorData[c], filter);
 	}
@@ -367,16 +357,16 @@ void AudioActor::disco() {
 
 #define CALC_PERC(t, b) round(abs(percent - (b)) * 100.00 / ((t) - (b)))
 
-LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
+Color AudioActor::detectColor(uint8_t percent, bool gradient) {
 
 	// Off.
-	if (not percent)
-		return userPref.off;
+	if (not percent) return userPref.off;
 
 	if (gradient) {
 		if (percent == 100)
 			return userPref.c75;
-	} else if (percent > HIG_POINT) {
+	}
+	else if (percent > HIG_POINT) {
 		return userPref.c75;
 	}
 
@@ -395,17 +385,14 @@ LEDSpicer::Color AudioActor::detectColor(uint8_t percent, bool gradient) {
 	return userPref.c00;
 }
 
-LEDSpicer::Color AudioActor::getColorByPercent(const uint8_t percent) {
+Color AudioActor::getColorByPercent(const uint8_t percent) {
 
 	// High.
-	if (percent > HIG_POINT)
-		return userPref.c75;
+	if (percent > HIG_POINT) return userPref.c75;
 	// Mid -> High.
-	if (percent > MID_POINT)
-		return userPref.c50;
+	if (percent > MID_POINT) return userPref.c50;
 	// Low -> Mid.
-	if (percent > LOW_POINT)
-		return userPref.c00;
+	if (percent > LOW_POINT) return userPref.c00;
 	// Low.
 	return userPref.off;
 }
@@ -428,66 +415,48 @@ void AudioActor::drawConfig() const {
 }
 
 AudioActor::Modes AudioActor::str2mode(const string& mode) {
-	if (mode == "VuMeter")
-		return Modes::VuMeter;
-	if (mode == "Single")
-		return Modes::Single;
-	if (mode == "Wave")
-		return Modes::Wave;
-	if (mode == "Disco")
-		return Modes::Disco;
+	if (mode == "VuMeter") return Modes::VuMeter;
+	if (mode == "Single")  return Modes::Single;
+	if (mode == "Wave")    return Modes::Wave;
+	if (mode == "Disco")   return Modes::Disco;
 	LogError("Invalid mode " + mode + " assuming Single");
 	return Modes::Single;
 }
 
 string AudioActor::mode2str(Modes mode) {
 	switch (mode) {
-	case Modes::VuMeter:
-		return "VuMeter";
-	case Modes::Single:
-		return "Single";
-	case Modes::Wave:
-		return "Wave";
-	case Modes::Disco:
-		return "Disco";
+	case Modes::VuMeter: return "VuMeter";
+	case Modes::Single:  return "Single";
+	case Modes::Wave:    return "Wave";
+	case Modes::Disco:   return "Disco";
 	}
 	return "";
 }
 
 AudioActor::Channels AudioActor::str2channel(const string& channel) {
-	if (channel == "Both")
-		return Channels::Both;
-	if (channel == "Right")
-		return Channels::Right;
-	if (channel == "Left")
-		return Channels::Left;
-	if (channel == "Mono")
-		return Channels::Mono;
+	if (channel == "Both")  return Channels::Both;
+	if (channel == "Right") return Channels::Right;
+	if (channel == "Left")  return Channels::Left;
+	if (channel == "Mono")  return Channels::Mono;
 	LogError("Invalid mode " + channel + " assuming Both");
 	return Channels::Both;
 }
 
 string AudioActor::channel2str(Channels channel) {
 	switch (channel) {
-	case Channels::Both:
-		return "Both";
-	case Channels::Left:
-		return "Left";
-	case Channels::Right:
-		return "Right";
-	case Channels::Mono:
-		return "Mono";
+	case Channels::Both:  return "Both";
+	case Channels::Left:  return "Left";
+	case Channels::Right: return "Right";
+	case Channels::Mono:  return "Mono";
 	}
 	return "";
 }
 
-const uint16_t AudioActor::getFullFrames() const {
+uint16_t AudioActor::getFullFrames() const {
 	return 0;
 }
 
-const float AudioActor::getRunTime() const {
-	if (secondsToEnd) {
-		return secondsToEnd;
-	}
+float AudioActor::getRunTime() const {
+	if (secondsToEnd) return secondsToEnd;
 	return 0;
 }

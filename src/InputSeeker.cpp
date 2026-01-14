@@ -4,7 +4,7 @@
  * @since     Jun 22, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,23 +29,22 @@ void resetInputMode() {
 	tcsetattr(STDIN_FILENO, TCSANOW, &termInfo);
 }
 
-int main(int argc, char **argv) {
+int main(int, char **) {
 
 	cout <<
-		"Input Seeker v" PACKAGE_VERSION << endl <<
+		"Input Seeker v" PROJECT_VERSION << endl <<
 		"Part of LEDSpicer project" << endl <<
 		"This program will open all the system inputs and listen for events to easy the task of setting input plugins" << endl << endl <<
-		PACKAGE_STRING " " COPYRIGHT "\n\n"
-		"For more information visit <" PACKAGE_URL ">\n\n"
-		"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
-		PACKAGE_NAME " is free software under the GPL 3 license\n\n"
-		"See the GNU General Public License for more details <http://www.gnu.org/licenses/>." << endl << endl <<
+		PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
+		"For more information visit <" PROJECT_SITE ">\n\n"
+		"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
+		PROJECT_NAME " is free software under the GPL 3 license\n\n"
+		"See the GNU General Public License for more details <http://www.gnu.org/licenses/>" << endl << endl <<
 		"press q to exit" << endl << endl;
 
 	DIR *dir;
 	struct dirent *ent;
 	string name;
-	size_t pos;
 	if (not (dir = opendir(DEV_INPUT))) {
 		cerr << "Unable to read " DEV_INPUT << endl;
 		return EXIT_FAILURE;
@@ -86,9 +85,8 @@ int main(int argc, char **argv) {
 	while (running)
 		for (auto& l : listenEvents) {
 			input_event event;
-			char buffer[sizeof(event)];
 			while (running) {
-				ssize_t r = read(l.second, reinterpret_cast<void*>(&event), sizeof(event));
+				ssize_t r = read(l.second, &event, sizeof(event));
 				if (r < 1)
 					break;
 

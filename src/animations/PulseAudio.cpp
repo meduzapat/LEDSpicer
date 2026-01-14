@@ -4,7 +4,7 @@
  * @since     Dec 13, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,20 +24,16 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(PulseAudio)
-
 pa_threaded_mainloop* PulseAudio::tml = nullptr;
 pa_context* PulseAudio::context       = nullptr;
 pa_stream* PulseAudio::stream         = nullptr;
 uint8_t PulseAudio::instances         = 0;
-float PulseAudio::smoother            = 1;
-AudioActor::Values PulseAudio::top    {0, 0};
 string PulseAudio::source;
 std::mutex PulseAudio::mutex;
 
 vector<uint8_t> PulseAudio::rawData;
 
-PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
+PulseAudio::PulseAudio(StringUMap& parameters, Group* const group) :
 	AudioActor(parameters, group)
 {
 
@@ -51,14 +47,14 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 		return;
 	}
 
-	smoother = group->size() / TOP;
+	//smoother = group->size() / TOP;
 	tml = pa_threaded_mainloop_new();
 	if (not tml) {
 		LogError("Failed create pulseaudio main loop");
 		throw;
 	}
 
-	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PACKAGE_STRING);
+	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PROJECT_NAME PROJECT_VERSION);
 	if (not context) {
 		LogError("Failed to create pulseaudio context");
 		throw;
@@ -72,8 +68,7 @@ PulseAudio::PulseAudio(umap<string, string>& parameters, Group* const group) :
 PulseAudio::~PulseAudio() {
 	std::lock_guard<std::mutex> lock(mutex);
 	--instances;
-	if (instances == 0)
-		disconnect();
+	if (instances == 0) disconnect();
 }
 
 void PulseAudio::disconnect() {
@@ -111,7 +106,7 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 	switch (pa_context_get_state(context)) {
 	case PA_CONTEXT_CONNECTING:
 #ifdef DEVELOP
-		LogDebug("Connecting context.");
+		LogDebug("Connecting context");
 #endif
 		break;
 	case PA_CONTEXT_AUTHORIZING:
@@ -136,7 +131,7 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 					LogDebug("context event changed");
 #endif
 					// reset top value.
-					top = {0, 0};
+					// top = {0, 0};
 					onSinkInfo(context, nullptr, 0, userdata);
 				}
 			},
@@ -220,7 +215,7 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 	ba.fragsize  = sizeof(float) * CHANNELS;
 	ba.prebuf    = 0;
 	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0) {
-		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))))
+		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))));
 		throw;
 	}
 }
@@ -231,22 +226,23 @@ void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 
 #ifdef DEVELOP
 	case PA_STREAM_CREATING:
-		LogDebug("Creating stream.");
+		LogDebug("Creating stream");
 		break;
 
 	case PA_STREAM_TERMINATED:
-		LogDebug("Stream terminated.");
+		LogDebug("Stream terminated");
 		break;
 #endif
 
 	case PA_STREAM_READY:
-		LogInfo("Stream successfully created.");
+		LogInfo("Stream successfully created");
 		pa_stream_set_read_callback(stream, onStreamRead, userPref);
 		break;
 
 	case PA_STREAM_FAILED:
 		LogError("Connection to stream failed: " + string(pa_strerror(pa_context_errno(context))));
 		throw;
+	default: break;
 	}
 }
 
@@ -254,8 +250,7 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 
 	std::lock_guard<std::mutex> lock(mutex);
 	rawData.clear();
-	if (not length)
-		return;
+	if (not length) return;
 
 	// Read peaks.
 	const void *data;
@@ -272,13 +267,12 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 
 	// Parse data and convert to %.
 	const float* buffer = static_cast<const float*>(data);
-	for (size_t c = 0; c < length / sizeof(float); ++c) {
-		float v = buffer[c];
-		if (v < 0.0f)
-			v = 0.0f;
-		if (v > 1.0f)
-			v = 1.0f;
-		rawData.push_back(roundf(v * 100.0f));
+	size_t samples = length / sizeof(float);
+
+	for (size_t i = 0; i < samples; ++i) {
+		float v = fabsf(buffer[i]);
+		if (v > 1.0f) v = 1.0f;
+		rawData.push_back(roundf(v * 100.f));
 	}
 	pa_stream_drop(stream);
 }
@@ -290,23 +284,15 @@ void PulseAudio::calculateElements() {
 
 void PulseAudio::calcPeak() {
 	auto size(rawData.size());
+	value.l = value.r = 0;
 	for (size_t c = 0; c < size; ++c) {
 		uint8_t v = rawData[c];
 		// Even for left, odd for right.
 		if (c % CHANNELS) {
-			if (top.r >= smoother and v < top.r - smoother)
-				v = top.r - smoother;
-			top.r = v;
-			if (v > value.r)
-				value.r = v;
+			if (v > value.r) value.r = v;
 		}
 		else {
-			if (top.l >= smoother and v < top.l - smoother)
-				v = top.l - smoother;
-			top.l = v;
-			if (v > value.l)
-				value.l = v;
+			if (v > value.l) value.l = v;
 		}
 	}
 }
-

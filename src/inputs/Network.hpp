@@ -4,7 +4,7 @@
  * @since     Jul 24, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,10 +21,9 @@
  */
 
 #include "Input.hpp"
-#include "utility/Socks.hpp"
+#include "utilities/Socks.hpp"
 
-#ifndef INPUTSNETWORK_HPP_
-#define INPUTSNETWORK_HPP_ 1
+#pragma once
 
 #define DEFAULT_PORT "16162"
 
@@ -37,7 +36,7 @@ class Network: public Input {
 
 public:
 
-	Network(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+	Network(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 		Input(parameters, inputMaps) {}
 
 	virtual ~Network() = default;
@@ -52,6 +51,5 @@ protected:
 
 	static Socks sock;
 };
-} /* namespace */
 
-#endif /* INPUTSNETWORK_HPP_ */
+} // namespace

@@ -4,7 +4,7 @@
  * @since     Apr 15, 2024
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,19 +24,17 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Credits)
-
-Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+Credits::Credits(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 	Reader(parameters, inputMaps),
-	Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
+	Speed(parameters.exists("speed") ? parameters["speed"] : "Normal"),
 	frames(static_cast<uint8_t>(speed) * 3),
-	coinsPerCredit(Utility::parseNumber(parameters.count("coinsPerCredit") ? parameters["coinsPerCredit"] : DEFAULT_COINS, "Invalid numeric value ")),
-	mode((parameters.count("mode") ? parameters["mode"] : DEFAULT_MODE) == DEFAULT_MODE ? Modes::Multi : Modes::Single),
-	once(parameters.count("once") ? parameters["once"] == "True" : false),
-	alwaysOn(parameters.count("alwaysOn") ? parameters["alwaysOn"] == "True": false)
+	coinsPerCredit(Utility::parseNumber(parameters.exists("coinsPerCredit") ? parameters["coinsPerCredit"] : DEFAULT_COINS, "Invalid numeric value ")),
+	mode((parameters.exists("mode") ? parameters["mode"] : DEFAULT_MODE) == DEFAULT_MODE ? Modes::Multi : Modes::Single),
+	once(parameters.exists("once") ? parameters["once"] == "True" : false),
+	alwaysOn(parameters.exists("alwaysOn") ? parameters["alwaysOn"] == "True": false)
 {
 
-	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
+	string linkedTriggers = parameters.exists("linkedTriggers") ? parameters["linkedTriggers"] : "";
 
 	// Process list.
 	if (linkedTriggers.empty())
@@ -48,7 +46,7 @@ Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMa
 		// This is a list of two or more positions, separated by ID_SEPARATOR ex: 1,2,3.
 		auto groupMapIDs = Utility::explode(linkGroup, ID_SEPARATOR);
 		if (groupMapIDs.size() < 2) {
-			LogWarning("Ignoring group with less than two items.");
+			LogWarning("Ignoring group with less than two items");
 			continue;
 		}
 
@@ -61,7 +59,7 @@ Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMa
 			uint16_t mapCode = Utility::parseNumber(mapId, "Unable to parse map ID, is not a number");
 			string trigger;
 			// Find trigger by position from items map.
-			for (const auto& pair : itemsMap) {
+			for (const auto& pair : itemsUMap) {
 				if (pair.second->pos == mapCode) {
 					trigger = pair.first;
 					break;
@@ -71,7 +69,7 @@ Credits::Credits(umap<string, string>& parameters, umap<string, Items*>& inputMa
 				LogWarning("Ignoring invalid map ID " + mapId);
 				continue;
 			}
-			tempRecord.emplace_back(std::move(Record{trigger, mapIdx == 0, itemsMap[trigger]}));
+			tempRecord.emplace_back(std::move(Record{trigger, mapIdx == 0, itemsUMap[trigger]}));
 			// Update lookup table.
 			groupMapLookup.emplace(trigger, LookupMap{groupIdx, mapIdx++});
 		}
@@ -89,24 +87,20 @@ void Credits::process() {
 
 	blink();
 
-	if (not events.size())
-		return;
+	if (not events.size()) return;
 
 	for (auto &event : events) {
 
-		if (not event.value)
-			continue;
+		if (not event.value) continue;
 
-		if (not itemsMap.count(event.trigger))
-			continue;
+		if (not itemsUMap.exists(event.trigger)) continue;
 
 		// Lookup Trigger.
 		auto& lookupMap(groupMapLookup[event.trigger]);
 		// Pick record data.
 		Record& groupMap = groupsMaps[lookupMap.groupIdx][lookupMap.mapIdx];
 		// Not active, done.
-		if (not groupMap.active)
-			continue;
+		if (not groupMap.active) continue;
 
 		bool isCoin = lookupMap.mapIdx == 0;
 
@@ -115,9 +109,7 @@ void Credits::process() {
 			LogDebug("Coin inserted by " + groupMap.item->getName());
 			++coinCount[lookupMap.groupIdx];
 			// Check number of coins.
-			if (coinCount[lookupMap.groupIdx] < coinsPerCredit) {
-				continue;
-			}
+			if (coinCount[lookupMap.groupIdx] < coinsPerCredit) continue;
 			// Credit issued, reset coin count.
 			LogDebug("Credit issued by " + groupMap.item->getName());
 			coinCount[lookupMap.groupIdx] = 0;
@@ -150,8 +142,7 @@ void Credits::process() {
 					groupMap.active = false;
 			}
 
-			if (not record)
-				continue;
+			if (not record) continue;
 
 			// Set next Start on
 			record->active = true;
@@ -167,7 +158,7 @@ void Credits::process() {
 				// Set start back on.
 				Record& coin = groupsMaps[lookupMap.groupIdx][0];
 				coin.active = true;
-				if (not blinkingItems.count(coin.map)) {
+				if (not blinkingItems.exists(coin.map)) {
 					blinkingItems.emplace(coin.map, coin.item);
 					LogDebug("Credit: " + coin.item->getName() + " Active");
 				}
@@ -213,12 +204,12 @@ void Credits::drawConfig() const {
 		cout << endl;
 	}
 	Speed::drawConfig();
-	cout << "Mode: " << (mode == Modes::Single ? "Single" : "Multi") << endl
-	     << "Coins Per Credit: " << static_cast<int>(coinsPerCredit)             << endl
-	     << "Once: "             << (once ? "True" : "False")                    << endl
-	     << "Always On: "        << (alwaysOn ? "True" : "False")                << endl;
+	cout <<
+		"Mode: " << (mode == Modes::Single ? "Single" : "Multi") << endl <<
+		"Coins Per Credit: " << coinsPerCredit                   << endl <<
+		"Once: "             << (once ? "True" : "False")        << endl <<
+		"Always On: "        << (alwaysOn ? "True" : "False")    << endl;
 }
-
 
 void Credits::blink() {
 	if (frames == cframe) {

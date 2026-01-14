@@ -1,0 +1,69 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/**
+ * @file      Colors.hpp
+ * @since     Jul 20, 2019
+ * @author    Patricio A. Rossi (MeduZa)
+ *
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
+ *
+ * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @copyright LEDSpicer is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * @copyright You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "Utility.hpp"
+#include "Color.hpp"
+
+#pragma once
+
+namespace LEDSpicer::Utilities {
+
+/**
+ * LEDSpicer::Colors
+ *
+ * Extends with a list of colors.
+ */
+class Colors {
+
+public:
+
+	Colors() = delete;
+
+	/**
+	 * Creates a Colors object from a comma separated string of color names.
+	 *
+	 * @param colors Comma separated string of color names.
+	 */
+	Colors(const string& colors);
+
+	virtual ~Colors() = default;
+
+	/**
+	 * Draws a list of stored colors.
+	 */
+	void drawColors() const;
+
+protected:
+
+	/// Pull of colors.
+	vector<const Color*> colors;
+
+	/**
+	 * Creates an array of colors from a string of comma separated color names.
+	 *
+	 * @param colors
+	 */
+	void extractColors(const string& colors);
+
+};
+
+} // namespace

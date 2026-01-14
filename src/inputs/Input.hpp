@@ -4,7 +4,7 @@
  * @since     May 8, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,20 +22,13 @@
 
 #include "devices/Group.hpp"
 #include "devices/Element.hpp"
-#include "utility/Log.hpp"
-#include "utility/Utility.hpp"
+#include "utilities/Log.hpp"
+#include "utilities/Utility.hpp"
 
-using LEDSpicer::Devices::Element;
-using LEDSpicer::Devices::Items;
-using LEDSpicer::Devices::Group;
+using namespace LEDSpicer::Devices;
+using namespace LEDSpicer::Utilities;
 
-#ifndef INPUT_HPP_
-#define INPUT_HPP_ 1
-
-// The functions to create and destroy inputs.
-#define inputFactory(plugin) \
-	extern "C" Input* createInput(umap<string, string>& parameters, umap<string, Items*>& inputMaps) {return new plugin(parameters, inputMaps);} \
-	extern "C" void destroyInput(Input* instance) {delete instance;}
+#pragma once
 
 namespace LEDSpicer::Inputs {
 
@@ -47,9 +40,9 @@ class Input {
 public:
 
 	Input(
-		umap<string, string>& parameters,
-		umap<string, Items*>& inputMaps
-	) : itemsMap(std::move(inputMaps)) {}
+		StringUMap&,
+		ItemPtrUMap& inputMaps
+	) : itemsUMap(std::move(inputMaps)) {}
 
 	virtual ~Input();
 
@@ -57,7 +50,7 @@ public:
 	 * Returns a list of controlled items.
 	 * @return
 	 */
-	static const umap<string, Items*>& getControlledInputs();
+	static const ItemPtrUMap& getControlledInputs();
 
 	/**
 	 * Removes all input registered inputs.
@@ -89,10 +82,10 @@ public:
 protected:
 
 	/// List of elements that need to be Output, mapped items by trigger.
-	static umap<string, Items*> controlledItems;
+	static ItemPtrUMap controlledItems;
 
 	/// Input specific map. trigger -> Item.
-	umap<string, Items*> itemsMap;
+	ItemPtrUMap itemsUMap;
 
 	/**
 	 * @param name
@@ -108,6 +101,8 @@ protected:
 	static bool removeControlledItemByTrigger(const string& trigger);
 
 };
-} /* namespace */
 
-#endif /* INPUT_HPP_ */
+using InputPtrUMap = unordered_map<string, Input*>;
+using InputUMap    = unordered_map<string, Input>;
+
+} // namespace

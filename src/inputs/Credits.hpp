@@ -4,7 +4,7 @@
  * @since     Apr 15, 2024
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,11 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Speed.hpp"
+#include "utilities/Speed.hpp"
 #include "Reader.hpp"
 
-#ifndef CREDITS_HPP_
-#define CREDITS_HPP_ 1
+#pragma once
 
 #define DEFAULT_COINS "1"
 #define DEFAULT_MODE  "Multi"
@@ -56,7 +55,7 @@ public:
 		Multi
 	};
 
-	Credits(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+	Credits(StringUMap& parameters, ItemPtrUMap& inputMaps);
 
 	virtual ~Credits() = default;
 
@@ -101,18 +100,18 @@ protected:
 			mapIdx   = 0;
 	};
 
-	bool
-		once     = false,
-		alwaysOn = false,
-		/// Keeps the ON/OFF flag.
-		on       = false;
-
 	uint8_t
 		frames,
 		cframe = 0,
 		coinsPerCredit;
 
 	Modes mode = Modes::Multi;
+
+	bool
+		once     = false,
+		alwaysOn = false,
+		/// Keeps the ON/OFF flag.
+		on       = false;
 
 	/// Keep the number of coins inserted by groupId.
 	vector<uint8_t> coinCount;
@@ -121,14 +120,12 @@ protected:
 	vector<vector<Record>> groupsMaps;
 
 	/// Small lookup table by trigger, to avoid a loop every time we need to seek an item.
-	umap<string, LookupMap> groupMapLookup;
+	unordered_map<string, LookupMap> groupMapLookup;
 
 	/// Elements or Groups blinking.
-	umap<string, Items*> blinkingItems;
+	ItemPtrUMap blinkingItems;
 
 	void blink();
 
 };
-} /* namespace */
-
-#endif /* CREDITS_HPP_ */
+} // namespace

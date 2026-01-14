@@ -4,7 +4,7 @@
  * @since     Jun 25, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,58 +24,22 @@
 
 using namespace LEDSpicer::Devices;
 
-umap<string, Element::Item> Profile::temporaryAlwaysOnElements;
-umap<string, Group::Item>   Profile::temporaryAlwaysOnGroups;
+Profile* Profile::defaultProfile = nullptr;
+ElementItemUMap Profile::temporaryOnElements;
+GroupItemUMap   Profile::temporaryOnGroups;
 
-Profile::Profile(
-	const string& name,
-	const Color& backgroundColor,
-	const vector<Actor*>& startTransitions,
-	const vector<Actor*>& endTransitions,
-	const milliseconds startTransitionElementsOnAt,
-	const milliseconds endTransitionElementsOffAt
-):
-	name(name),
-	backgroundColor(backgroundColor),
-	startTransitions(startTransitions),
-	endTransitions(endTransitions),
-	currentActors(startTransitions.size() ? &this->startTransitions : &animations),
-	startTransitionElementsOnAt(startTransitionElementsOnAt),
-	endTransitionElementsOffAt(endTransitionElementsOffAt)
-{
+bool Profile::transitioning = false;
 
-	float
-		maxTime = 0,
-		time;
-	if (this->startTransitionElementsOnAt.count()) {
-		// Find the most time consuming actor.
-		for (auto st : this->startTransitions) {
-			if (st->getRunTime() > maxTime)
-				maxTime = st->getRunTime();
-		}
+Profile::~Profile() {
+#ifdef DEVELOP
+	cout << "Removing profile actors" << endl;
+#endif
+	for (auto a : animations) delete a;
 
-		// Calculate the time for the elements transition.
-		time = maxTime - (this->startTransitionElementsOnAt.count() / 1000.0f);
-		if (time < 1)
-			time = maxTime / 2;
-		// Calculate the step progress.
-		startStepProgress = 100.0f / (time * Actor::getFPS());
-	}
-
-	maxTime = 0;
-	if (this->endTransitionElementsOffAt.count()) {
-		for (auto st : this->endTransitions) {
-			if (st->getRunTime() > maxTime)
-				maxTime = st->getRunTime();
-		}
-
-		// Calculate the time for the elements transition.
-		time = this->endTransitionElementsOffAt.count() / 1000.0f;
-		if (time > maxTime)
-			time = maxTime;
-		// Calculate the step progress.
-		endStepProgress = 100.0f / (time * Actor::getFPS());
-	}
+#ifdef DEVELOP
+	cout << "Removing profile inputs" << endl;
+#endif
+	for (auto i : inputs) delete i;
 }
 
 void Profile::addAnimation(const vector<Actor*>& animation) {
@@ -86,39 +50,17 @@ void Profile::drawConfig() const {
 
 	cout << "* Background color: " << backgroundColor.getName() << endl;
 
-	if (startTransitions.size()) {
-		cout << endl << "* Start transitions:" << endl;
-		if (startTransitionElementsOnAt.count())
-			cout << "Show elements after: " << startTransitionElementsOnAt.count() << "ms" << endl;
-		for (auto a : startTransitions)
-			a->drawConfig();
-	}
-
-
-	if (endTransitions.size()) {
-		cout << endl << "* Ending transition:" << endl;
-		if (endTransitionElementsOffAt.count())
-			cout << "Hide elements after: " << endTransitionElementsOffAt.count() << "ms" << endl;
-		for (auto a : endTransitions)
-			a->drawConfig();
-	}
-
-
 	if (alwaysOnGroups.size()) {
 		cout << endl << "* Groups Overwrite Color: " << endl;
 		for (auto& g : alwaysOnGroups) {
-			cout << g.group->getName() << " ";
-			g.color->drawColor();
-			cout << endl;
+			cout << g.group->getName() << " " << g.color->getName() << endl;
 		}
 	}
 
 	if (alwaysOnElements.size()) {
 		cout << endl << "* Elements Overwrite Color: " << endl;
 		for (auto& e : alwaysOnElements) {
-			cout << e.element->getName() << " ";
-			e.color->drawColor();
-			cout << endl;
+			cout << e.element->getName() << " " << e.color->getName() << endl;
 		}
 	}
 
@@ -133,158 +75,78 @@ void Profile::drawConfig() const {
 
 	if (inputs.size()) {
 		cout << endl << "* Input plugins:" << endl;
-		for (Input* i : inputs)
-			i->drawConfig();
+		for (Input* i : inputs) i->drawConfig();
 		cout << SEPARATOR << endl;
 	}
 }
 
-void Profile::runFrame() {
+void Profile::runFrame(bool advanceFrame) {
 
-	Actor::newFrame();
+	if (advanceFrame) Actor::newFrame();
 
-	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) {
-		for (Input* i : inputs)
-			i->process();
-	}
-	// Keeps track of the current batch of actors (start, normal, or ending).
-	bool running = false;
+	// Reset elements.
+	for (const auto& e : Element::allElements)
+		if (e.second->isTimed())
+			e.second->checkTime();
+		else
+			e.second->setColor(backgroundColor);
 
-	if (currentActors) {
-		for (auto actor : *currentActors) {
-			// If the actor is running so draw it.
-			if (actor->isRunning()) {
-				running = true;
-				actor->draw();
-			}
-		}
-
-		// The current animation set finished.
-		if (not running) {
-			// Starting animation ended.
-			if (isStarting()) {
-				if (transitionEndTime) {
-					delete transitionEndTime;
-					transitionEndTime = nullptr;
-					elementProgress = 100;
-				}
-				reset();
-			}
-			else if (isTerminating()) {
-				// Ending animation ended.
-				if (transitionEndTime) {
-					delete transitionEndTime;
-					transitionEndTime = nullptr;
-					elementProgress = 0;
-				}
-				currentActors = nullptr;
-			}
-		}
-		else {
-			runAlwaysOnElements(false);
-		}
+	if (not transitioning and inputsEnabled) {
+		for (Input* i : inputs) i->process();
 	}
 
-	// Do not display elements and groups while the profile is transitioning.
-	if (not isTransiting() and currentActors) {
-		// Set always on groups from profile.
-		for (auto& gE : alwaysOnGroups) {
-			gE.process(50, nullptr);
-		}
+	if (animationsEnabled) {
+		// Draw current animations if any.
+		for (auto actor : animations) actor->draw();
+	}
 
-		// Set always on elements from profile.
-		runAlwaysOnElements(true);
+	// Set always on groups from profile.
+	for (auto& gE : alwaysOnGroups) {
+		gE.process(50, nullptr);
+	}
 
-		// Set always on groups from temporary requests.
-		for (auto& gE : temporaryAlwaysOnGroups) {
-			gE.second.process(50, nullptr);
-		}
+	// Set always on elements from profile.
+	for (auto& eE : alwaysOnElements) {
+		eE.process(50, nullptr);
+	}
 
-		// Set always on elements from temporary requests.
-		for (auto& eE : temporaryAlwaysOnElements) {
-			eE.second.process(50, nullptr);
-		}
+	// Set always on groups from temporary requests.
+	for (auto& gE : temporaryOnGroups) {
+		gE.second.process(50, nullptr);
+	}
 
-		// Set controlled items from input plugins.
-		for (auto& item : Input::getControlledInputs()) {
-			item.second->process(50, nullptr);
-		}
+	// Set always on elements from temporary requests.
+	for (auto& eE : temporaryOnElements) {
+		eE.second.process(50, nullptr);
+	}
+
+	// Set controlled items from input plugins.
+	for (auto& item : Input::getControlledInputs()) {
+		item.second->process(50, nullptr);
 	}
 }
 
 void Profile::reset() {
-
-	if (not (Utility::globalFlags & FLAG_NO_ANIMATIONS)) {
-		LogDebug("Running animations");
-		currentActors = &animations;
-		restartActors();
-	}
-	if (not (Utility::globalFlags & FLAG_NO_INPUTS)) {
-		for (Input* i : inputs)
-			i->activate();
-	}
+	if (animationsEnabled) for (auto actor : animations) actor->restart();
+	if (not transitioning) startInputs();
+	removeTemporaries();
 }
 
-void Profile::restart() {
-	if (startTransitions.size() and not (Utility::globalFlags & FLAG_NO_START_TRANSITIONS)) {
-		if (startTransitionElementsOnAt > std::chrono::milliseconds(0)) {
-			transitionEndTime = new time_point<std::chrono::system_clock>(std::chrono::system_clock::now() + startTransitionElementsOnAt);
-			elementProgress = 0;
-		}
-		LogDebug("Running starting transitions");
-		currentActors = &startTransitions;
-		restartActors();
-		return;
-	}
-	reset();
+void Profile::removeTemporaries() {
+	Profile::removeTemporaryOnGroups();
+	Profile::removeTemporaryOnElements();
+	Input::clearControlledInputs();
 }
 
-void Profile::stop() {
-	for (Input* i : inputs)
-		i->deactivate();
+void Profile::startInputs() {
+	if (inputsEnabled) for (Input* i : inputs) i->activate();
 }
 
-void Profile::terminate() {
-	stop();
-	if (endTransitions.size() and not (Utility::globalFlags & FLAG_NO_END_TRANSITIONS)) {
-		if (endTransitionElementsOffAt > std::chrono::milliseconds(0)) {
-			transitionEndTime = new time_point<std::chrono::system_clock>(std::chrono::system_clock::now() + endTransitionElementsOffAt);
-			elementProgress = 100;
-		}
-		LogDebug("Running ending transitions");
-		currentActors = &endTransitions;
-		restartActors();
-		return;
-	}
-	// This will provoke that the current profile get replaced.
-	currentActors = nullptr;
+void Profile::stopInputs() {
+	for (Input* i : inputs) i->deactivate();
 }
 
-void Profile::restartActors() {
-	for (auto actor : *currentActors)
-		actor->restart();
-}
-
-bool Profile::isTransiting() const {
-	if ((Utility::globalFlags & FLAG_NO_START_TRANSITIONS) and (Utility::globalFlags & FLAG_NO_END_TRANSITIONS)) {
-		return false;
-	}
-	return  (currentActors != &animations and (currentActors == &startTransitions or currentActors == &endTransitions));
-}
-
-bool Profile::isTerminating() const {
-	return (currentActors == &endTransitions);
-}
-
-bool Profile::isStarting() const {
-	return (currentActors == &startTransitions);
-}
-
-bool Profile::isRunning() const {
-	return (currentActors != nullptr);
-}
-
-const LEDSpicer::Color& Profile::getBackgroundColor() const {
+const Color& Profile::getBackgroundColor() const {
 	return backgroundColor;
 }
 
@@ -300,62 +162,71 @@ void Profile::addAlwaysOnGroup(Group* group, const Color& color, const Color::Fi
 	alwaysOnGroups.emplace_back(group, &color,filter);
 }
 
-void Profile::addTemporaryAlwaysOnElement(const string name, const Element::Item item) {
-	removeTemporaryAlwaysOnElement(name);
-	temporaryAlwaysOnElements.emplace(name, item);
+void Profile::addTemporaryOnElement(const string& name, const Element::Item item) {
+	removeTemporaryOnElement(name);
+	temporaryOnElements.emplace(name, std::move(item));
 }
 
-void Profile::removeTemporaryAlwaysOnElement(const string name) {
-	if (temporaryAlwaysOnElements.count(name))
-			temporaryAlwaysOnElements.erase(name);
+void Profile::removeTemporaryOnElement(const string& name) {
+	temporaryOnElements.erase(name);
 }
 
-void Profile::removeTemporaryAlwaysOnElements() {
-	temporaryAlwaysOnElements.clear();
+void Profile::removeTemporaryOnElements() {
+	temporaryOnElements.clear();
 }
 
-void Profile::addTemporaryAlwaysOnGroup(const string name, const Group::Item item) {
-	removeTemporaryAlwaysOnGroup(name);
-	temporaryAlwaysOnGroups.emplace(name, item);
+void Profile::addTemporaryOnGroup(const string& name, const Group::Item item) {
+	removeTemporaryOnGroup(name);
+	temporaryOnGroups.emplace(name, std::move(item));
 }
 
-void Profile::removeTemporaryAlwaysOnGroup(const string name) {
-	if (temporaryAlwaysOnGroups.count(name))
-			temporaryAlwaysOnGroups.erase(name);
+void Profile::removeTemporaryOnGroup(const string& name) {
+	temporaryOnGroups.erase(name);
 }
 
-void Profile::removeTemporaryAlwaysOnGroups() {
-	temporaryAlwaysOnGroups.clear();
+void Profile::removeTemporaryOnGroups() {
+	temporaryOnGroups.clear();
 }
 
 void Profile::addInput(Input* input) {
 	inputs.push_back(input);
 }
 
-void Profile::runAlwaysOnElements(bool force) {
-	Color::Filters filter(Color::Filters::Normal);
-	if (not force) {
-		if (not transitionEndTime)
-			return;
-		if (isStarting()) {
-			if (std::chrono::system_clock::now() < *transitionEndTime)
-				return;
-			elementProgress += startStepProgress;
-			elementProgress = elementProgress > 100 ? 100 : elementProgress;
-			LogDebug(to_string(elementProgress) + " / 100");
-		}
-		if (isTerminating()) {
-			if (std::chrono::system_clock::now() >= *transitionEndTime)
-				return;
-			elementProgress -= endStepProgress;
-			elementProgress = elementProgress < 0 ? 0 : elementProgress;
-			LogDebug(to_string(elementProgress) + " / 0");
-		}
-		filter = Color::Filters::Combine;
-	}
+vector<uint8_t*> Profile::collectUniqueLeds() const {
+	vector<uint8_t*> currentLeds;
+	unordered_set<uint8_t*> seen;
 
-	// Set always on elements from profile.
-	for (auto& eE : alwaysOnElements) {
-		eE.process(force ? 50 : elementProgress, &filter);
+	for (const auto actor : animations) {
+		const auto& leds = actor->getLeds();
+		for (auto* led : leds) {
+			if (seen.insert(led).second) { // true if newly inserted
+				currentLeds.push_back(led);
+			}
+		}
 	}
+	return currentLeds;
+}
+
+void Profile::setTransitioning(bool active) {
+	transitioning = active;
+}
+
+bool Profile::isTransitioning() {
+	return transitioning;
+}
+
+void Profile::enableAnimations(bool enable) {
+	animationsEnabled = enable;
+}
+
+bool Profile::hasAnimationsEnabled() const {
+	return animationsEnabled;
+}
+
+void Profile::enableInputs(bool enable) {
+	inputsEnabled = enable;
+}
+
+bool Profile::hasInputsEnabled() const {
+	return inputsEnabled;
 }

@@ -4,7 +4,7 @@
  * @since     Jun 25, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,21 +20,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <chrono>
-using std::chrono::milliseconds;
-using std::chrono::time_point;
-#include "animations/FrameActor.hpp"
-#include "utility/Color.hpp"
+#include "animations/Actor.hpp"
+#include "utilities/Color.hpp"
 #include "inputs/Input.hpp"
 
-#ifndef PROFILE_HPP_
-#define PROFILE_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_PROFILE {"backgroundColor"}
 
 namespace LEDSpicer::Devices {
 
-using Animations::FrameActor;
 using Animations::Actor;
 using Inputs::Input;
 
@@ -47,15 +42,17 @@ public:
 
 	Profile(
 		const string& name,
-		const Color& backgroundColor,
-		const vector<Actor*>& startTransitions,
-		const vector<Actor*>& endTransitions,
-		const milliseconds startTransitionElementsOnAt,
-		const milliseconds endTransitionElementsOffAt
-	);
+		const Color& backgroundColor
+	) :
+	name(name),
+	backgroundColor(backgroundColor) {}
 
-	virtual ~Profile() = default;
+	virtual ~Profile();
 
+	/**
+	 * Adds an animation into the profile.
+	 * @param animation
+	 */
 	void addAnimation(const vector<Actor*>& animation);
 
 	/**
@@ -65,48 +62,29 @@ public:
 
 	/**
 	 * Execute a frame.
+	 * @param advanceFrame
 	 */
-	void runFrame();
+	void runFrame(bool advanceFrame = true);
 
 	/**
-	 * Leave the actor ready to run (no start sequence).
+	 * Leave the actor and inputs ready to go.
 	 */
 	void reset();
 
 	/**
-	 * Leave the actor ready to run from the start sequence.
+	 * Clean up any temporary handled item (element input or group)
 	 */
-	void restart();
+	void removeTemporaries();
 
 	/**
-	 * Stop the the current profile (no end sequence).
+	 * Start inputs.
 	 */
-	void stop();
+	void startInputs();
 
 	/**
-	 * Initialize the ending sequence.
+	 * Stop the inputs.
 	 */
-	void terminate();
-
-	/**
-	 * @return true if the profile is transiting and the previous profile needs to draw.
-	 */
-	bool isTransiting() const;
-
-	/**
-	 * @return true if the profile is running the termination animation.
-	 */
-	bool isTerminating() const;
-
-	/**
-	 * @return true if the profile is running the stating animation.
-	 */
-	bool isStarting() const;
-
-	/**
-	 * @return true if the profile is running.
-	 */
-	bool isRunning() const;
+	void stopInputs();
 
 	/**
 	 * @return a read only reference to the background color.
@@ -121,25 +99,68 @@ public:
 	void addAlwaysOnElement(Element* element, const Color& color, const Color::Filters& filter);
 	void addAlwaysOnGroup(Group* group, const Color& color, const Color::Filters& filter);
 
-	static void addTemporaryAlwaysOnElement(const string name, const Element::Item item);
-	static void removeTemporaryAlwaysOnElement(const string name);
-	static void removeTemporaryAlwaysOnElements();
+	static void addTemporaryOnElement(const string& name, const Element::Item item);
+	static void removeTemporaryOnElement(const string& name);
+	static void removeTemporaryOnElements();
 
-	static void addTemporaryAlwaysOnGroup(const string name, const Group::Item item);
-	static void removeTemporaryAlwaysOnGroup(const string name);
-	static void removeTemporaryAlwaysOnGroups();
+	static void addTemporaryOnGroup(const string& name, const Group::Item item);
+	static void removeTemporaryOnGroup(const string& name);
+	static void removeTemporaryOnGroups();
 
 	/**
 	 * Adds an input plugin to this profile.
+	 * The Profile now owns the input.
 	 * @param input
 	 */
 	void addInput(Input* input);
 
+	/// Stores the default profile.
+	static Profile* defaultProfile;
+
 	/**
-	 * Sets the global flags pointer.
-	 * @param flags
+	 * Collect a distinct list of all LED pointers across all Actors.
+	 * Duplicates are removed, order of first encounter is preserved.
+	 *
+	 * @return a list containing unique LED pointers.
 	 */
-	static void setGlobalFlags(uint8_t* flags);
+	vector<uint8_t*> collectUniqueLeds() const;
+
+	/**
+	 * Sets system-wide transition mode.
+	 * When active, all profiles skip input processing.
+	 *
+	 * @param active
+	 */
+	static void setTransitioning(bool active);
+
+	/**
+	 * @return true if system is currently transitioning.
+	 */
+	static bool isTransitioning();
+
+	/**
+	 * Enables or disables animations for this profile.
+	 *
+	 * @param enable
+	 */
+	void enableAnimations(bool enable);
+
+	/**
+	 * @return true if animations are enabled.
+	 */
+	bool hasAnimationsEnabled() const;
+
+	/**
+	 * Enables or disables inputs for this profile.
+	 *
+	 * @param enable
+	 */
+	void enableInputs(bool enable);
+
+	/**
+	 * @return true if inputs are enabled.
+	 */
+	bool hasInputsEnabled() const;
 
 protected:
 
@@ -149,23 +170,8 @@ protected:
 	/// Color to use when cleaning up.
 	const Color& backgroundColor;
 
-	/// What the profile is doing.
-	vector<Actor*>* currentActors;
-
 	/// List of animations to run.
 	vector<Actor*> animations;
-
-	/// List of animations to run at start.
-	vector<Actor*> startTransitions;
-
-	/// Start transition time when always on elements are displayed.
-	milliseconds startTransitionElementsOnAt;
-
-	/// List of animations to run at end.
-	vector<Actor*> endTransitions;
-
-	/// End transition time when always on elements get hidden.
-	milliseconds endTransitionElementsOffAt;
 
 	/// Keeps a list of always on elements.
 	vector<Element::Item> alwaysOnElements;
@@ -173,34 +179,27 @@ protected:
 	/// Keeps a list of always on groups.
 	vector<Group::Item> alwaysOnGroups;
 
-	/// Input plugins
+	/// Input plugins.
 	vector<Input*> inputs;
 
-	/// Keeps the ending time milliseconds.
-	time_point<std::chrono::system_clock>* transitionEndTime = nullptr;
+	/// When true, all profiles skip input processing (during transitions).
+	static bool transitioning;
 
-	/// Keeps a list of temporary activated always on elements.
-	static umap<string, Element::Item> temporaryAlwaysOnElements;
+	/// When false, animations are skipped for this profile.
+	bool animationsEnabled = true;
 
-	/// Keeps a list of temporary activated always on groups.
-	static umap<string, Group::Item> temporaryAlwaysOnGroups;
+	/// When false, inputs are skipped for this profile.
+	bool inputsEnabled = true;
 
-private:
+	/// Keeps a list of temporary activated elements across profiles.
+	static ElementItemUMap temporaryOnElements;
 
-	/// To be used when there is a start or end transition and the elements needs to show up.
-	float
-		elementProgress   = 0,
-		startStepProgress = 0,
-		endStepProgress   = 0;
+	/// Keeps a list of temporary activated on groups across profiles.
+	static GroupItemUMap temporaryOnGroups;
 
-	/**
-	 * Restarts the profile actors.
-	 */
-	void restartActors();
-
-	void runAlwaysOnElements(bool force);
 };
 
-} /* namespace */
+using ProfilePtrUMap = unordered_map<string, Profile*>;
+using ProfileUMap    = unordered_map<string, Profile>;
 
-#endif /* PROFILE_HPP_ */
+} // namespace

@@ -4,7 +4,7 @@
  * @since     Jul 3, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,45 +24,53 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(Gradient)
-
-Gradient::Gradient(umap<string, string>& parameters, Group* const group) :
+Gradient::Gradient(StringUMap& parameters, Group* const group) :
 	StepActor(parameters, group, REQUIRED_PARAM_ACTOR_GRADIENT),
 	Colors(parameters["colors"]),
 	mode(str2mode(parameters["mode"])),
-	tones((parameters.count("tones") ? Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number") : DEFAULT_TONES) * static_cast<float>(speed) + 1)
+	tones(parameters.exists("tones") ? Utility::parseNumber(parameters["tones"], "Invalid tones value, it need to be a number") : DEFAULT_TONES)
 {
-	// Add the first color to the end so the gradient ends in the same color that started.
+	// Close the color loop by adding the first color at the end.
 	colors.push_back(colors.front());
 
-	// More speed less tones.
-	setTotalStepFrames(static_cast<float>(speed));
+	// Precalculate transitions with integer steps for precision.
+	// Each segment between colors has 'tones + 1' steps (including 0% and 100%).
+	size_t numSegments = colors.size() - 1;
+	precalc.reserve(numSegments * (tones + 1));
 
-	float increment = (100.0 / tones) - 0.01;
-
-	// Pre-calculate colors.
-	uint8_t lastColor = colors.size() -1, nextColor;
-	for (size_t color = 0; color < lastColor; ++color) {
-		nextColor = color + 1;
-		for (float percent = increment; percent < 100; percent += increment) {
-			precalc.push_back(colors[color]->transition(*colors[nextColor], percent));
+	for (size_t seg = 0; seg < numSegments; ++seg) {
+		const Color& start = *colors[seg];
+		const Color& end   = *colors[seg + 1];
+		for (uint8_t step = 0; step <= tones; ++step) {
+			float percent = static_cast<float>(step * 100.f) / tones;
+			precalc.push_back(start.transition(end, percent));
 		}
 	}
-	// Return the colors to its normal shape, colors are only necessary for Draws().
+
+	// Restore colors vector (remove looped end).
 	colors.pop_back();
-	precalc.shrink_to_fit();
-	totalFrames = precalc.size() - 1;
+	// Set total frames based on precalc size.
+	stepping.frames = precalc.size();
+	// Adjust pacing: Higher speed means slower animation (more delay per frame).
+	stepping.steps = static_cast<uint16_t>(speed);
 }
 
 void Gradient::calculateElements() {
-
 #ifdef DEVELOP
-	cout << "Gradient: " << DrawDirection(cDirection) << " Frame " << static_cast<uint>(currentFrame) << endl;
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout
+			<< "Gradient: " << DrawDirection(cDirection.getDirection())
+			<< " Frame "    << std::setw(2) << (stepping.frame + 1)
+			<< "/"          << std::setw(2) << stepping.frames
+			<< " Step "     << std::setw(1) << (stepping.step + 1)
+			<< "/"          << std::setw(1) << stepping.steps << endl;
+	}
 #endif
 
 	switch (mode) {
 	case Modes::All:
-		calculateSingle();
+		// Apply the same color to all elements.
+		changeElementsColor(precalc[stepping.frame], filter);
 		break;
 	case Modes::Cyclic:
 		calculateMultiple();
@@ -77,6 +85,7 @@ void Gradient::drawConfig() const {
 		"Tones: " << static_cast<int>(tones) << endl;
 	cout << "Colors: ";
 	Color::drawColors(colors);
+	cout << endl;
 	StepActor::drawConfig();
 }
 
@@ -99,21 +108,13 @@ string Gradient::mode2str(Modes mode) {
 	return "";
 }
 
-void Gradient::calculateSingle() {
-	// Paint all elements with the same color.
-	for (uint16_t c = 0; c < getNumberOfElements(); c++) {
-		changeElementColor(c, precalc[currentFrame], filter);
-	}
-}
-
 void Gradient::calculateMultiple() {
-	uint8_t frameT = currentFrame;
-	// Paint each element with a tone.
-	for (uint16_t c = 0; c < getNumberOfElements(); c++) {
-		changeElementColor(c, precalc[frameT], filter);
-		if (frameT == totalFrames)
-			frameT = 0;
-		else
-			frameT++;
+	// Distribute colors across elements, wrapping around the precalc.
+	size_t numElems = getNumberOfElements();
+	size_t frameIdx = stepping.frame;
+
+	for (size_t elem = 0; elem < numElems; ++elem) {
+		changeElementColor(elem, precalc[frameIdx], filter);
+		frameIdx = (frameIdx + 1) % precalc.size();
 	}
 }

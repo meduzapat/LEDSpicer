@@ -4,7 +4,7 @@
  * @since     May 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,15 +24,13 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Actions)
-
-Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps) :
+Actions::Actions(StringUMap& parameters, ItemPtrUMap& inputMaps) :
 	Reader(parameters, inputMaps),
-	Speed(parameters.count("speed") ? parameters["speed"] : "Normal"),
+	Speed(parameters.exists("speed") ? parameters["speed"] : "Normal"),
 	frames(static_cast<uint8_t>(speed) * 3),
-	doBlink(parameters.count("blink") ? (parameters["blink"] == "True") : true)
+	doBlink(parameters.exists("blink") ? (parameters["blink"] == "True") : true)
 {
-	string linkedTriggers = parameters.count("linkedTriggers") ? parameters["linkedTriggers"] : "";
+	string linkedTriggers = parameters.exists("linkedTriggers") ? parameters["linkedTriggers"] : "";
 
 	// Process list.
 	if (linkedTriggers.empty())
@@ -44,7 +42,7 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 		// This is a list of two or more positions, separated by ID_SEPARATOR ex: 1,2,3.
 		auto groupMapIDs = Utility::explode(linkGroup, ID_SEPARATOR);
 		if (groupMapIDs.size() < 2) {
-			LogWarning("Ignoring group with less than two items.");
+			LogWarning("Ignoring group with less than two items");
 			continue;
 		}
 		// Extract group info.
@@ -56,7 +54,7 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 			uint16_t mapCode = Utility::parseNumber(mapId, "Unable to parse map ID, is not a number");
 			string trigger;
 			// Find trigger by position from items map.
-			for (const auto& pair : itemsMap) {
+			for (const auto& pair : itemsUMap) {
 				if (pair.second->pos == mapCode) {
 					trigger = pair.first;
 					break;
@@ -66,7 +64,7 @@ Actions::Actions(umap<string, string>& parameters, umap<string, Items*>& inputMa
 				LogWarning("Ignoring invalid map ID " + mapId);
 				continue;
 			}
-			tempRecord.emplace_back(std::move(Record{trigger, mapIdx == 0, itemsMap[trigger], nullptr}));
+			tempRecord.emplace_back(std::move(Record{trigger, mapIdx == 0, itemsUMap[trigger], nullptr}));
 			// Update lookup table.
 			groupMapLookup.emplace(trigger, LookupMap{groupIdx, mapIdx++});
 		}
@@ -92,24 +90,21 @@ void Actions::process() {
 
 	for (auto& event : events) {
 
-		if (not event.value)
-			continue;
-
-		if (not itemsMap.count(event.trigger))
-			continue;
+		if (not event.value) continue;
+		if (not itemsUMap.exists(event.trigger)) continue;
 
 		// If the trigger already exist remove it so the next can be set
 		removeControlledItemByTrigger(event.trigger);
 
 		// Non Grouped elements.
-		if (not groupMapLookup.count(event.trigger)) {
-			if (blinkingItems.count(event.trigger)) {
-				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " stop blinking");
+		if (not groupMapLookup.exists(event.trigger)) {
+			if (blinkingItems.exists(event.trigger)) {
+				LogDebug("key: " + event.trigger + " for " + itemsUMap[event.trigger]->getName() + " stop blinking");
 				blinkingItems.erase(event.trigger);
 			}
 			else {
-				LogDebug("key: " + event.trigger + " for " + itemsMap[event.trigger]->getName() + " start blinking");
-				blinkingItems.emplace(event.trigger, itemsMap[event.trigger]);
+				LogDebug("key: " + event.trigger + " for " + itemsUMap[event.trigger]->getName() + " start blinking");
+				blinkingItems.emplace(event.trigger, itemsUMap[event.trigger]);
 			}
 			continue;
 		}
@@ -165,7 +160,7 @@ void Actions::drawConfig() const {
 void Actions::blink() {
 	if (not doBlink) {
 		for (auto& e : blinkingItems)
-			if (not controlledItems.count(e.first))
+			if (not controlledItems.exists(e.first))
 				controlledItems.emplace(e.first, e.second);
 		return;
 	}

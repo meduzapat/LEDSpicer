@@ -4,7 +4,7 @@
  * @since     Jul 5, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,45 +24,35 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(Random)
-
-Random::Random(umap<string, string>& parameters, Group* const group) :
+Random::Random(StringUMap& parameters, Group* const group) :
 	FrameActor(parameters, group, REQUIRED_PARAM_ACTOR_RANDOM),
-	Colors(parameters["colors"])
+	Colors(parameters.exists("colors") ? parameters["colors"] : "")
 {
-
-	oldColors.reserve(group->size());
-
-	for (uint16_t c = 0; c < getNumberOfElements(); ++c)
-		oldColors.push_back(&Color::getColor("Black"));
-
-	generateNewColors();
+	const Color* blackColor = &Color::Off;
+	oldColors.resize(group->size(), blackColor);
+	stepping.frames = calculateFramesBySpeed(speed);
 }
 
 void Random::calculateElements() {
 
-	uint8_t percent = PERCENT(currentFrame, totalFrames);
+	uint8_t percent = PERCENT(stepping.frame, stepping.frames);
 #ifdef DEVELOP
-	cout << "Random: F: " << std::setw(3) << to_string(currentFrame + 1) << std::setw(4) << to_string(percent) << "% ";
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << "Random: Frame: " << std::setw(3) << (stepping.frame + 1) << std::setw(4) << to_string(percent) << "%" << endl;
+	}
 #endif
 	for (uint16_t c = 0; c < getNumberOfElements(); ++c) {
 		changeElementColor(c, oldColors[c]->transition(*newColors[c], percent), filter);
-#ifdef DEVELOP
-	cout << " " << to_string(c + 1);
-#endif
 	}
 
-	if (percent == 100) {
+	if (isLastFrame()) {
 		oldColors = std::move(newColors);
 		generateNewColors();
 	}
-#ifdef DEVELOP
-	cout << endl;
-#endif
 }
 
 void Random::generateNewColors() {
-	newColors.reserve(getNumberOfElements());
+	newColors.clear();
 	for (uint16_t c = 0; c < getNumberOfElements(); ++c)
 		newColors.push_back(colors[std::rand() / ((RAND_MAX + 1u) / colors.size())]);
 }
@@ -73,4 +63,10 @@ void Random::drawConfig() const {
 	Color::drawColors(colors);
 	FrameActor::drawConfig();
 }
+
+void Random::restart() {
+	FrameActor::restart();
+	generateNewColors();
+}
+
 

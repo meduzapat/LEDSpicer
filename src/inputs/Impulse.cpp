@@ -4,7 +4,7 @@
  * @since     May 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,8 +24,6 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Impulse)
-
 void Impulse::drawConfig() const {
 	cout << SEPARATOR << endl << "Type: Impulse" << endl;
 	Reader::drawConfig();
@@ -39,15 +37,15 @@ void Impulse::process() {
 		return;
 
 	for (auto& event : events) {
-		if (itemsMap.count(event.trigger)) {
-			if (controlledItems.count(event.trigger)) {
+		if (itemsUMap.exists(event.trigger)) {
+			if (controlledItems.exists(event.trigger)) {
 				// released
 				if (not event.value)
 					controlledItems.erase(event.trigger);
 			}
 			else
 				// activated
-				controlledItems.emplace(event.trigger, itemsMap[event.trigger]);
+				controlledItems.emplace(event.trigger, itemsUMap[event.trigger]);
 		}
 	}
 }

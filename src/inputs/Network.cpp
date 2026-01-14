@@ -4,7 +4,7 @@
  * @since     Jul 24, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,13 +24,10 @@
 
 using namespace LEDSpicer::Inputs;
 
-inputFactory(Network)
-
-LEDSpicer::Socks Network::sock;
+Socks Network::sock;
 
 void Network::activate() {
-	if (sock.isConnected())
-		return;
+	if (sock.isConnected()) return;
 	sock.prepare(LOCALHOST, DEFAULT_PORT, true);
 }
 
@@ -40,28 +37,25 @@ void Network::deactivate() {
 
 void Network::process() {
 
-	if (not sock.isConnected())
-		activate();
+	if (not sock.isConnected()) activate();
 
 	string buffer;
-	if (not sock.recive(buffer))
-		return;
+	if (not sock.receive(buffer)) return;
 
 	Log::debug("Message received " + buffer);
-	if (buffer.empty())
-		return;
-	buffer = Utility::extractChars(buffer, '!', RECORD_SEPARATOR);
-	for (string& entry : Utility::explode(buffer, RECORD_SEPARATOR)) {
+	if (buffer.empty()) return;
+	buffer = Utility::extractChars(buffer, FIRST_CHARACTER, ID_GROUP_SEPARATOR); // space to |
+	for (string& entry : Utility::explode(buffer, ID_GROUP_SEPARATOR)) {
 #ifdef DEVELOP
 		LogDebug("Processing " + entry);
 #endif
-		if (itemsMap.count(entry)) {
+		if (itemsUMap.exists(entry)) {
 			if (removeControlledItemByTrigger(entry)) {
 				LogDebug("map " + entry +" Off");
 			}
 			else {
 				LogDebug("map " + entry +" On");
-				controlledItems.emplace(entry, itemsMap[entry]);
+				controlledItems.emplace(entry, itemsUMap[entry]);
 			}
 		}
 	}

@@ -21,14 +21,15 @@
  */
 
 #include "Device.hpp"
-#include "utility/Serial.hpp"
+#include "utilities/Serial.hpp"
 
-#ifndef DEVICESERIAL_HPP_
-#define DEVICESERIAL_HPP_ 1
+#pragma once
 
 #define SERIAL_MAX_BOARDS 128
 
 namespace LEDSpicer::Devices {
+
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Device::DeviceSerial
@@ -39,9 +40,9 @@ class DeviceSerial : public Serial, public Device {
 
 public:
 
-	DeviceSerial(umap<string, string>& options, const string& name) :
-		Device(Utility::parseNumber(options.count("leds") ? options["leds"] : "", "Invalid Value for number of LEDs"), name),
-		Serial(options.count("port") ? options["port"] : "") {}
+	DeviceSerial(StringUMap& options, const string& name) :
+		Serial(options.exists("port") ? options["port"] : ""),
+		Device(Utility::parseNumber(options.exists("leds") ? options["leds"] : "", "Invalid Value for number of LEDs"), name) {}
 
 	virtual ~DeviceSerial() = default;
 
@@ -54,6 +55,4 @@ protected:
 	void closeHardware() override;
 };
 
-} /* namespace */
-
-#endif /* DEVICESERIAL_HPP_ */
+} // namespace
