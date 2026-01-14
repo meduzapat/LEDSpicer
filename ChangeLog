@@ -1,3 +1,19 @@
+ledspicer (0.7.0) noble; urgency=medium
+
+  * Build system migrated from Autotools to CMake 3.10+.
+  * Added unit test suite with 27 GTest tests and DRY_RUN mode.
+  * Plugin restructure: animations and inputs now compiled into binary,
+    only devices remain as plugins.
+  * Transition system rewritten with new flexible architecture.
+  * New Filler animation curtain mode.
+  * Fixed ALSA audio plugin, updated PulseAudio for PipeWire.
+  * Improved serial communication reliability.
+  * Code modernization: C++17, extensive refactoring.
+  * Breaking: Direction system simplified to Forward/Backward + bouncer flag.
+  * Breaking: Data files now expect version 1.1.
+
+ -- Patricio Rossi <meduzapat@netscape.net>  Tue, 14 Jan 2026 12:00:00 -0500
+ 
 ledspicer (0.5.4) focal; urgency=medium
 
   * Adds colors to Filler and Pulse
