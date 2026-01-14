@@ -557,6 +557,9 @@ generate_cmake_command() {
 	cmd+=" -DCMAKE_INSTALL_PREFIX=$PREFIX"
 	cmd+=" -DCMAKE_INSTALL_SYSCONFDIR=$SYSCONFDIR"
 
+	# Optimizations.
+	cmd+=" -DCMAKE_CXX_FLAGS='-g0 -O3'"
+
 	# MiSTer mode
 	if [[ "$ENABLE_MISTER" == "ON" ]]; then
 		cmd+=" -DENABLE_MISTER=ON"
