@@ -184,7 +184,6 @@ set(LEDSPICER_SOURCES
 	src/animations/DirectionActor.cpp
 	src/animations/StepActor.cpp
 	src/animations/AudioActor.cpp
-	src/animations/AudioActor.cpp
 	src/animations/FileReader.cpp
 	src/animations/Filler.cpp
 	src/animations/Gradient.cpp
