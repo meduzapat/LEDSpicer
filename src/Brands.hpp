@@ -4,7 +4,7 @@
  * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,10 +20,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/// This header file defines the USB Vendor code for several brands used by the devices supported by LEDSpicer.
+/// This header defines the USB Vendor code for several brands used by USB devices.
 
-#ifndef BRANDS_HPP_
-#define BRANDS_HPP_ 1
+#pragma once
 
 /// Ultimarc USB vendor code.
 #define ULTIMARC_VENDOR 0xD209
@@ -34,4 +33,3 @@
 /// WolfWare Tech USB vendor code.
 #define WOLFWARETECH_VENDOR 0x03EB
 
-#endif /* BRANDS_HPP_ */

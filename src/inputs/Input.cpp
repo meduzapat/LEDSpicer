@@ -4,7 +4,7 @@
  * @since     May 8, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,15 +24,15 @@
 
 using namespace LEDSpicer::Inputs;
 
-umap<string, LEDSpicer::Devices::Items*> Input::controlledItems;
+ItemPtrUMap Input::controlledItems;
 
 Input::~Input() {
 	LogDebug("Releasing input maps...");
-	for (auto&p : itemsMap)
+	for (auto& p : itemsUMap)
 		delete p.second;
 }
 
-const umap<string, Items*>& Input::getControlledInputs() {
+const ItemPtrUMap& Input::getControlledInputs() {
 	return Input::controlledItems;
 }
 
@@ -42,11 +42,10 @@ void Input::clearControlledInputs() {
 
 void Input::drawConfig() const {
 
-	if (not itemsMap.size())
-		return;
+	if (not itemsUMap.size()) return;
 
 	cout << "Elements and Groups mapping:" << endl;
-	for (auto& e : itemsMap)
+	for (auto& e : itemsUMap)
 		cout <<
 			"Target: "  << e.second->getName()                 << endl <<
 			"Trigger: " << e.first                             << endl <<
@@ -55,15 +54,15 @@ void Input::drawConfig() const {
 }
 
 string Input::findItemMapByName(string& name) {
-	for (auto& eMap : itemsMap) {
+	for (auto& eMap : itemsUMap) {
 		if (eMap.second->getName() == name)
 			return eMap.first;
 	}
-	throw Error("Unable to find item named " + name);
+	throw Error("Unable to find item named ") << name;
 }
 
 bool Input::removeControlledItemByTrigger(const string& trigger) {
-	if (controlledItems.count(trigger)) {
+	if (controlledItems.exists(trigger)) {
 		controlledItems.erase(trigger);
 		return true;
 	}

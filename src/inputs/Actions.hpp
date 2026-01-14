@@ -4,7 +4,7 @@
  * @since     May 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,13 +20,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Speed.hpp"
+#include "utilities/Speed.hpp"
 #include "Reader.hpp"
 
-#ifndef ACTIONS_HPP_
-#define ACTIONS_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Inputs {
+
+using LEDSpicer::Utilities::Speed;
 
 /**
  * LEDSpicer::Inputs::Actions
@@ -37,7 +38,7 @@ class Actions: public Reader, public Speed {
 
 public:
 
-	Actions(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+	Actions(StringUMap& parameters, ItemPtrUMap& inputMaps);
 
 	virtual ~Actions() = default;
 
@@ -101,15 +102,13 @@ protected:
 	vector<vector<Record>> groupsMaps;
 
 	/// Small lookup table by trigger, to avoid a loop every time we need to seek an item.
-	umap<string, LookupMap> groupMapLookup;
+	unordered_map<string, LookupMap> groupMapLookup;
 
 	/// Elements or Groups blinking.
-	umap<string, Items*> blinkingItems;
+	ItemPtrUMap blinkingItems;
 
 	void blink();
 
 };
 
-} /* namespace */
-
-#endif /* ACTIONS_HPP_ */
+} // namespace

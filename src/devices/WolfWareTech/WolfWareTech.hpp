@@ -4,7 +4,7 @@
  * @since     Feb 5, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,8 +22,7 @@
 
 #include "devices/DeviceUSB.hpp"
 
-#ifndef WOLFWARETECH_HPP_
-#define WOLFWARETECH_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices::WolfWareTech {
 
@@ -48,6 +47,4 @@ protected:
 	void afterClaimInterface() override {}
 };
 
-} /* namespace */
-
-#endif /* WOLFWARETECH_HPP_ */
+} // namespace

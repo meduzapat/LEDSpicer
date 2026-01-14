@@ -1,36 +1,25 @@
-# IDE
+# IDEs
+# Anjuta (gnome IDE)
 .anjuta*
+# Eclipse
 .project
 .cproject
 .settings/
 .metadata/
+# VS Code
+.vscode/
+*.code-workspace
+.externalToolBuilders/
+.history/
+*.vsix
 
 # Common
 *~
 *.cache
 *.log
 Debug/
-
-# Autotools
-/stamp-h1
-/ltmain.sh
-/libtool
-/depcomp
-/config.sub
-/config.guess
-.autotools
-**/Makefile.in
-config.h.in
-*.m4
+build/
 Makefile
-*.status
-configure
-configure.scan
-install-sh
-config.h
-compile
-missing
-test-driver
 
 # Po
 *.Po
@@ -48,8 +37,14 @@ processLookup
 *.lo
 *.Plo
 *.o
-data/ledspicerd.service
-data/ledspicer.pc
+*.out
+*.make
+*.cmake
+**/CMakeFiles/*
+CMakeCache.txt
+#tests/tests*
+ledspicerd.service
+ledspicer.pc
 
 # Compiled Dynamic libraries
 *.so
@@ -66,3 +61,5 @@ doc/
 
 # Packages
 *.deb
+*.rpm
+*.gz*

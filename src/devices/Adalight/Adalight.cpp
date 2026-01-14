@@ -26,13 +26,11 @@
 using namespace LEDSpicer::Devices::Adalight;
 
 void Adalight::detectPort() {
-	for (const string& adaID : ADALIGHT_PRODUCT_IDS) {
+	for (const auto adaID : ADALIGHT_PRODUCT_IDS) {
 		port = findPortByUsbId(adaID);
-		if (not port.empty()) {
-			return;
-		}
+		if (not port.empty()) return;
 	}
-	throw Error("Unable to autodetect the serial port.");
+	throw Error("Unable to autodetect the serial port");
 }
 
 void Adalight::transfer() const {
@@ -64,11 +62,12 @@ void Adalight::transfer() const {
 
 	transferToConnection(serialData);
 	/* for testing:*/
-/*	auto data(transferFromConnection(512));
+	/*auto data(transferFromConnection(512));
 	string dataStr(data.begin(), data.end());
 	std::replace(dataStr.begin(), dataStr.end(), '\n', ' ');
 	dataStr.erase(std::remove(dataStr.begin(), dataStr.end(), '\r'), dataStr.end());
 	LogInfo("R: " + dataStr);*/
+	tcflush(fd, TCIFLUSH);
 
 }
 

@@ -4,7 +4,7 @@
  * @since     Feb 15, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,10 +35,10 @@ void RaspberryPi::resetLeds() {
 void RaspberryPi::openHardware() {
 
 	if (initialized)
-		throw Error(getFullName() + " device can only be loaded once");
+		throw Error(getFullName()) << " device can only be loaded once";
 
 	if (gpioInitialise() < 0) {
-		throw Error("Failed to initialized " + getFullName());
+		throw Error("Failed to initialized ") << getFullName();
 	}
 
 	// Only handle used element's LEDs.

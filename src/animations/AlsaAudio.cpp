@@ -4,7 +4,7 @@
  * @since     Oct 6, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,12 +24,12 @@
 
 using namespace LEDSpicer::Animations;
 
-actorFactory(AlsaAudio)
+using LEDSpicer::Devices::Group;
 
 snd_pcm_t* AlsaAudio::pcm    = nullptr;
 uint8_t AlsaAudio::instances = 0;
 
-AlsaAudio::AlsaAudio(umap<string, string>& parameters, Group* const group) :
+AlsaAudio::AlsaAudio(StringUMap& parameters, Group* const group) :
 	AudioActor(parameters, group) {
 
 	++instances;
@@ -41,52 +41,91 @@ AlsaAudio::AlsaAudio(umap<string, string>& parameters, Group* const group) :
 		return;
 	}
 
-	string PCM = parameters.count("pcm") ? parameters["pcm"] : "default";
+	string PCM = parameters.exists("pcm") ? parameters["pcm"] : "default";
 
 	int err;
-	if ((err = snd_pcm_open(&pcm, PCM.c_str(), SND_PCM_STREAM_CAPTURE, 0)) < 0)
-		throw Error("Unable to open " + PCM + ": " + string(snd_strerror(err)));
+	// Open with non-blocking flag
+	if ((err = snd_pcm_open(&pcm, PCM.c_str(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK)) < 0)
+		throw Error("Unable to open ") << PCM << ": " << snd_strerror(err);
 
+	// Calculate latency based on FPS
+	// Frame time = 1000ms / FPS
+	uint32_t frameTimeMs = 1000 / getFPS();
+	// Buffer should be 2-3x frame time to prevent underruns
+	uint32_t bufferLatencyUs = frameTimeMs * 2500;
+
+	// Set basic parameters with appropriate latency
 	if ((err = snd_pcm_set_params(
 		pcm,
 		SND_PCM_FORMAT_S16_LE,
 		SND_PCM_ACCESS_RW_INTERLEAVED,
-		2,
-		48000,
-		1,
-		0
+		CHANNELS,
+		SAMPLE_RATE,
+		0,  // No resampling
+		bufferLatencyUs
 	)) < 0)
 		throw Error("Unable to set parameters for " + PCM + ": " + string(snd_strerror(err)));
+	// Explicitly prepare the PCM
+	if ((err = snd_pcm_prepare(pcm)) < 0)
+		throw Error("Unable to prepare PCM: " + string(snd_strerror(err)));
+
+	// Start capture
+	if ((err = snd_pcm_start(pcm)) < 0)
+		throw Error("Unable to start PCM: " + string(snd_strerror(err)));
 
 	LogInfo("ALSA connected");
 }
 
 AlsaAudio::~AlsaAudio() {
 	--instances;
-	if (instances > 0)
-		return;
+	if (instances > 0) return;
 
 	LogInfo("Closing ALSA");
-	snd_pcm_close (pcm);
+	snd_pcm_drop(pcm);
+	snd_pcm_close(pcm);
+	pcm = nullptr;
 }
 
 void AlsaAudio::calcPeak() {
-	int16_t buffer[PEAKS * 2];
-	if (snd_pcm_readi(pcm, buffer, PEAKS) != PEAKS)
-		return;
+	// Calculate how many samples we need based on FPS
+	// This gives us "fresh" audio data matching our update rate
+	static const uint16_t samplesNeeded = (SAMPLE_RATE / getFPS()); // e.g., 48000/30 = 1600 samples
 
-	for (uint8_t c = 0; c < 64; ++c) {
-		float v = (buffer[c] / static_cast<float>(INT16_MAX)) * UINT8_MAX;
-		if (v < 0)
-			v *= -1;
-		// Even for left, odd for right.
-		if (c % 2) {
-			if (v > value.r)
-				value.r = v;
+	int16_t buffer[samplesNeeded * CHANNELS]; // *2 for stereo
+	snd_pcm_sframes_t frames = snd_pcm_readi(pcm, buffer, samplesNeeded);
+
+	// No new data
+	if (frames == -EAGAIN || frames == 0) return;
+
+	// Handle underruns quickly and silently (common in audio apps)
+	if (frames == -EPIPE) {
+#ifdef DEVELOP
+		LogDebug("ALSA underrun, recovering");
+#endif
+		// Silent recovery
+		snd_pcm_recover(pcm, frames, 1);
+		return;
+	}
+
+	// Bail on other errors
+	if (frames < 0) {
+		LogInfo("ALSA error: " + string(snd_strerror(frames)));
+		return;
+	}
+
+	// Reset peak values for this frame
+	value.l = value.r = 0;
+
+	// Process actual samples received (frames * 2 for stereo)
+	uint16_t samples = frames * 2;
+	for (uint16_t c = 0; c < samples; ++c) {
+		float v = static_cast<float>(std::abs(buffer[c])) / MAX_AMP * 100.0f;
+		// Even indices = left, odd = right
+		if (c % CHANNELS) {
+			if (v > value.r) value.r = v;
 		}
 		else {
-			if (v > value.l)
-				value.l = v;
+			if (v > value.l) value.l = v;
 		}
 	}
 }

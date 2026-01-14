@@ -4,7 +4,7 @@
  * @since     Sep 27, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,8 +22,7 @@
 
 #include "devices/DeviceUSB.hpp"
 
-#ifndef ULTIMARC_HPP_
-#define ULTIMARC_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Devices::Ultimarc {
 
@@ -46,6 +45,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* ULTIMARC_HPP_ */
+} // namespace

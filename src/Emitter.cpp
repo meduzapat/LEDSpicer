@@ -4,7 +4,7 @@
  * @since     Jul 8, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,8 +21,6 @@
  */
 
 #include "Emitter.hpp"
-
-using namespace LEDSpicer;
 
 using pclose_type = int (*)(FILE*);
 
@@ -53,7 +51,7 @@ int main(int argc, char **argv) {
 		if (commandline == "-h" or commandline == "--help") {
 			cout <<
 				"Emitter command line usage:\n"
-				"Emitter <options> <command>\n\n"
+				"emitter <options> <command>\n\n"
 				"command:\n" <<
 				Message::type2str(Message::Types::LoadProfile) <<
 				" profile1 profile2 ... profileX  Attempts to load the first valid profile from a list of profiles.\n" <<
@@ -83,14 +81,12 @@ int main(int argc, char **argv) {
 				"-r or --replace               Same as REPLACE flag.\n"
 				"-f <flags> or --flags <flags> Send extra flags to LEDSPicer, pipe separated surrounded by quotes.\n"
 				"  Available Flags:\n"
-				"  * NO_ANIMATIONS        The animations of the profile will be ignored.\n"
-				"  * NO_INPUTS            The inputs of the profile will be ignored.\n"
-				"  * NO_START_TRANSITIONS The stating animations of the profile will be ignored.\n"
-				"  * NO_END_TRANSITIONS   The ending animations of the current profile will be ignored.\n"
-				"  * NO_TRANSITIONS       Same as NO_START_TRANSITIONS and NO_END_TRANSITIONS together.\n"
-				"  * NO_ROTATOR           Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
-				"  * FORCE_RELOAD         The profile will be load from the file instead of using cache.\n"
-				"  * REPLACE              Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator)\n"
+				"  * NO_ANIMATIONS  The animations of the profile will be ignored.\n"
+				"  * NO_INPUTS      The inputs of the profile will be ignored.\n"
+				"  * NO_TRANSITIONS Transitions will be ignored.\n"
+				"  * NO_ROTATOR     Avoid trigger rotators (only used when LoadProfileByEmulator).\n"
+				"  * FORCE_RELOAD   The profile will be load from the file instead of using cache.\n"
+				"  * REPLACE        Replace the previous profile if possible (only used with LoadProfile or LoadProfileByEmulator)\n"
 				"  example: -f \"NO_ANIMATIONS|NO_INPUTS|FORCE_RELOAD\"\n"
 				"If -c or --config is not provided, emitter will use " CONFIG_FILE
 				<< endl;
@@ -101,12 +97,12 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				"Emitter is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " " COPYRIGHT "\n\n"
-				"For more information visit <" PACKAGE_URL ">\n\n"
-				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
-				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"Emitter is part of " PROJECT_NAME PROJECT_VERSION << endl <<
+				PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
+				"For more information visit <" PROJECT_SITE ">\n\n"
+				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
+				PROJECT_NAME " is free software under the GPL 3 license\n\n"
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -182,25 +178,25 @@ int main(int argc, char **argv) {
 	try {
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");
-		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
+		StringUMap configValues = XMLHelper::processNode(config.getRoot());
 
 		// Set log level.
-		if (configValues.count("logLevel"))
+		if (configValues.exists("logLevel"))
 			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
 
 		// Set craft profile mode.
-		if (configValues.count("craftProfile"))
+		if (configValues.exists("craftProfile"))
 			craftProfile = configValues["craftProfile"] == "true";
 
 		// Set use colors file.
-		if (configValues.count("colorsFile")) {
+		if (configValues.exists("colorsFile")) {
 			ignoreMissingColors = configValues["colorsFile"] == "strict";
 			useColors = ignoreMissingColors or configValues["colorsFile"] == "true";
-			LogDebug(ignoreMissingColors ? "ignoreMissingColors active" : "ignoreMissingColors inactive");
+			LogDebug(ignoreMissingColors ? "ignoreMissingColors ON" : "ignoreMissingColors OFF");
 		}
 
 		// Port.
-		if (configValues.count("port"))
+		if (configValues.exists("port"))
 			port = configValues["port"];
 		else
 			throw Error("Missing port attribute");
@@ -228,7 +224,7 @@ int main(int argc, char **argv) {
 			if (data[1] == ARCADE_SYSTEM) {
 
 				// Set data source, default to file.
-				if (configValues.count(PARAM_DATA_SOURCE))
+				if (configValues.exists(PARAM_DATA_SOURCE))
 					dataSource = Utility::explode(configValues[PARAM_DATA_SOURCE], ',');
 				else
 					dataSource = {DATA_SOURCE_FILE};
@@ -254,8 +250,7 @@ int main(int argc, char **argv) {
 						LogDebug("Error: " + e.getMessage());
 						continue;
 					}
-					if (gd.players == "0")
-						continue;
+					if (gd.players == "0") continue;
 					LogDebug("got " + gd.players + " players data from " + ds);
 				}
 				if (gd.players == "0") {
@@ -327,17 +322,17 @@ GameRecord parseMameDataFile(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " no player data found.");
+		throw Error("Game ") << rom << " no player data found";
 
 	LogDebug("Game data: " + output);
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
-		throw Error("Invalid games data file" + output);
+		throw Error("Invalid games data file") << output;
 
 	tinyxml2::XMLElement* element = xml.RootElement();
 	if (not element)
-		throw Error("Missing input node for " + rom);
+		throw Error("Missing input node for ") << rom;
 
 	return parseMameData(rom, element, true);
 }
@@ -358,15 +353,15 @@ GameRecord parseMame(const string& rom) {
 		output += buffer.data();
 
 	if (not output.size())
-		throw Error("Game " + rom + " no player data found.");
+		throw Error("Game ") << rom << " no player data found";
 
 	tinyxml2::XMLDocument xml;
 	if (xml.Parse(output.c_str(), output.size()) != tinyxml2::XML_SUCCESS)
-		throw Error("Invalid games data file" + output);
+		throw Error("Invalid games data file") << output;
 
 	tinyxml2::XMLElement* element = xml.RootElement()->FirstChildElement(MAME_MACHINE_NODE)->FirstChildElement(MAME_INPUT_NODE);
 	if (not element)
-		throw Error("Missing input node for " + rom);
+		throw Error("Missing input node for ") << rom;
 
 	return parseMameData(rom, element, false);
 }
@@ -439,10 +434,10 @@ GameRecord parseControlsIni(const string& rom) {
 	}
 	uint8_t ps = Utility::parseNumber(tempData.players, "Invalid player number");
 	if (not ps)
-		throw Error("Game " + rom + " no player data found.");
+		throw Error("Game ") << rom << " no player data found";
 
 	if (not mirror and controls.size() != ps)
-		throw Error("Game " + rom + " with " + to_string(ps) + " players, invalid mirrored value or missing players information");
+		throw Error("Game ") << rom << " with " << ps << " players, invalid mirrored value or missing players information";
 
 	for (uint8_t pIx = 0 ; pIx < ps ; ++pIx) {
 		string player = to_string(pIx + 1);
@@ -458,7 +453,7 @@ GameRecord parseControlsIni(const string& rom) {
 		}
 	}
 	tempData.coins = alter ? "1" : tempData.players;
-	LogDebug("Controller data for game " + rom + " found.");
+	LogDebug("Controller data for game " + rom + " found");
 	return tempData;
 }
 
@@ -466,21 +461,21 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 
 	GameRecord tempData;
 
-	umap<string, string> tempAttr = XMLHelper::processNode(inputNode);
+	StringUMap tempAttr = XMLHelper::processNode(inputNode);
 
 	string target = compressed ? PLAYERS : CPLAYERS;
-	if (not tempAttr.count(target))
-		throw Error("Missing players attribute for " + rom);
+	if (not tempAttr.exists(target))
+		throw Error("Missing players attribute for ") << rom;
 
 	tempData.players = tempAttr[target];
 
 	target = compressed ? COINS : CCOINS;
-	if (tempAttr.count(target))
+	if (tempAttr.exists(target))
 		tempData.coins = tempAttr[target];
 
 	tinyxml2::XMLElement*element = inputNode->FirstChildElement(compressed ? CONTROL : CCONTROL);
 	if (not element)
-		throw Error("Missing control section " + rom);
+		throw Error("Missing control section ") << rom;
 
 	target = compressed ? TYPE : CTYPE;
 	string ways = compressed ? WAYS : CWAYS;
@@ -488,12 +483,11 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 	for (; element; element = element->NextSiblingElement()) {
 
 		tempAttr = XMLHelper::processNode(element);
-		if (not tempAttr.count(target))
-			continue;
+		if (not tempAttr.exists(target)) continue;
 
 		string target2 = compressed ? PLAYER : CPLAYER;
 		string player;
-		if (tempAttr.count(target2))
+		if (tempAttr.exists(target2))
 			player = tempAttr[target2];
 		else
 			player = "1";
@@ -506,23 +500,23 @@ GameRecord parseMameData(const string& rom, tinyxml2::XMLElement* inputNode, boo
 			pd.ways.push_back("analog");
 		pd.controllers.push_back(mameController2ledspicer(tempAttr[target]));
 
-		if (tempAttr.count(ways))
+		if (tempAttr.exists(ways))
 			pd.ways.push_back(tempAttr[ways]);
 
 		target2 = compressed ? BUTTONS : CBUTTONS;
-		if (tempAttr.count(target2))
+		if (tempAttr.exists(target2))
 			pd.buttons = tempAttr[target2];
 
-		if ((tempAttr[target] == "doublejoy" or tempAttr[target] == "triplejoy") and tempAttr.count(ways + "2")) {
+		if ((tempAttr[target] == "doublejoy" or tempAttr[target] == "triplejoy") and tempAttr.exists(ways + "2")) {
 			pd.ways.push_back(tempAttr[ways + "2"]);
 			pd.controllers.push_back(JOYSTICK);
 		}
-		if (tempAttr[target] == "triplejoy" and tempAttr.count(ways + "3")) {
+		if (tempAttr[target] == "triplejoy" and tempAttr.exists(ways + "3")) {
 			pd.ways.push_back(tempAttr[ways + "3"]);
 			pd.controllers.push_back(JOYSTICK);
 		}
 	}
-	LogDebug("Controller data for game " + rom + " found.");
+	LogDebug("Controller data for game " + rom + " found");
 	return tempData;
 }
 
@@ -702,10 +696,10 @@ void GameRecord::rotate(const string& extraParameters) {
 	for (auto& pd : playersData)
 		command += pd.second.rotate();
 	if (command == "rotator ") {
-		LEDSpicer::Log::debug("No rotating information found");
+		LogDebug("No rotating information found");
 		return;
 	}
-	LEDSpicer::Log::debug("Running: " + command);
+	LogDebug("Running: " + command);
 	if (system(command.c_str()) != EXIT_SUCCESS)
 		LogWarning("Failed to execute " + command);
 }
@@ -727,7 +721,7 @@ string PlayerData::toString() {
 		}
 		con += to_string(cIx);
 
-		if (controlColors.count(con)) {
+		if (controlColors.exists(con)) {
 			p += con + GROUP_SEPARATOR + controlColors[con] + FIELD_SEPARATOR;
 		}
 		else if (not ignoreMissingColors) {
@@ -740,11 +734,15 @@ string PlayerData::toString() {
 		}
 	}
 
-	// Process buttons.
-	uint8_t bTo = Utility::parseNumber(buttons, "");
+	// Process buttons, assume no buttons if none or error.
+	uint8_t bTo(0);
+	try {
+		bTo = Utility::parseNumber(buttons, "");
+	}
+	catch (...) {}
 	for (uint8_t c = 0; c < bTo; ++c) {
 		string but = "P" + player + "_BUTTON" + to_string(c + 1);
-		if (buttonColors.count(but)) {
+		if (buttonColors.exists(but)) {
 			p += but + GROUP_SEPARATOR + buttonColors[but] + FIELD_SEPARATOR;
 		}
 		else if (not ignoreMissingColors) {

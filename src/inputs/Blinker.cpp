@@ -4,7 +4,7 @@
  * @since     Aug 17, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,8 +23,6 @@
 #include "Blinker.hpp"
 
 using namespace LEDSpicer::Inputs;
-
-inputFactory(Blinker)
 
 void Blinker::process() {
 
@@ -45,13 +43,13 @@ void Blinker::process() {
 		if (not event.value)
 			continue;
 
-		if (itemsMap.count(event.trigger)) {
-			LogDebug("key: " + event.trigger + " adds: " + to_string(times) + " times to element: " + itemsMap[event.trigger]->getName());
+		if (itemsUMap.exists(event.trigger)) {
+			LogDebug("key: " + event.trigger + " adds: " + to_string(times) + " times to element: " + itemsUMap[event.trigger]->getName());
 			// switch
-			if (blinkingItems.count(event.trigger))
+			if (blinkingItems.exists(event.trigger))
 				blinkingItems[event.trigger].times = 0;
 			else
-				blinkingItems.emplace(event.trigger, Times{itemsMap[event.trigger], 0});
+				blinkingItems.emplace(event.trigger, Times{itemsUMap[event.trigger], 0});
 		}
 	}
 }

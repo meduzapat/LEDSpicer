@@ -4,7 +4,7 @@
  * @since     Jun 22, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,28 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "Defaults.hpp"
+
+// To handle terminal IO.
 #include <termios.h>
-#include <string>
-using std::string;
-// To handle IO stream.
-#include <iostream>
-using std::cout;
-using std::endl;
-using std::cerr;
 #include <dirent.h>
 #include <linux/input.h>
 #include <fcntl.h>
-#include <unistd.h>
-
-// To handle unordered map.
-#include <unordered_map>
-#ifndef umap
-	#define umap std::unordered_map
-#endif
-
-#ifndef INPUTSEEKER_HPP_
-#define INPUTSEEKER_HPP_ 1
 
 #define DEV_INPUT "/dev/input/by-id/"
 
@@ -50,10 +35,8 @@ namespace LEDSpicer {
 /**
  * list of input device and their resource.
  */
-umap<string, int> listenEvents;
+unordered_map<string, int> listenEvents;
 
 int main(int argc, char **argv);
 
 }
-
-#endif /* INPUTSEEKER_HPP_ */

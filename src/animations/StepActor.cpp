@@ -4,7 +4,7 @@
  * @since     Jul 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,128 +23,71 @@
 #include "StepActor.hpp"
 
 using namespace LEDSpicer::Animations;
-StepActor::StepActor(
-	umap<string, string>& parameters,
-	Group* const group,
-	const vector<string>& requiredParameters
-) :
-	DirectionActor(parameters, group, requiredParameters)
-{
-	totalFrames = group->size() - 1;
-	// Default frames calculation.
-	switch (speed) {
-	case Speeds::VeryFast:
-		setTotalStepFrames(0);
-		break;
-	case Speeds::Fast:
-		setTotalStepFrames(FPS * 0.2);
-		break;
-	case Speeds::Normal:
-		setTotalStepFrames(FPS * 0.4);
-		break;
-	case Speeds::Slow:
-		setTotalStepFrames(FPS * 0.6);
-		break;
-	case Speeds::VerySlow:
-		setTotalStepFrames(FPS * 0.8);
-		break;
-	}
-}
-
-void StepActor::drawConfig() const {
-	cout << "Steps: " << static_cast<uint>(totalStepFrames) << endl;
-	DirectionActor::drawConfig();
-}
-
-uint16_t StepActor::getCurrentStep() const {
-	if (not totalStepFrames)
-		return currentFrame;
-	if (currentFrame)
-		return (currentFrame * totalStepFrames) - currentStepFrame;
-	return 0;
-}
-
-void StepActor::advanceFrame() {
-	if (currentStepFrame == totalStepFrames) {
-		currentStepFrame = 0;
-		DirectionActor::advanceFrame();
-		return;
-	}
-	++currentStepFrame;
-}
-
-void StepActor::restart() {
-	currentStepFrame = 0;
-	DirectionActor::restart();
-}
-
-bool StepActor::isFirstFrame() const {
-	if (totalStepFrames)
-		return (not currentStepFrame and DirectionActor::isFirstFrame());
-	return DirectionActor::isFirstFrame();
-}
-
-bool StepActor::isLastFrame() const {
-	if (totalStepFrames)
-		return (currentStepFrame == totalStepFrames and DirectionActor::isLastFrame());
-	return DirectionActor::isLastFrame();
-}
 
 void StepActor::changeFrameElement(uint16_t index, const Color& color, Directions direction) {
 
-	float percent = stepPercent * currentStepFrame;
-
-	if (direction == Directions::Backward)
-		percent = 100 - percent;
+	float percent = stepPercent * stepping.step;
+	if (direction == Directions::Backward) percent = 100 - percent;
 
 #ifdef DEVELOP
-	cout << "Element " << static_cast<uint16_t>(index) << " faded " << percent << "%";
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout << "Element " << index + 1 << " faded " << percent << "%" << endl;
+	}
 #endif
 
 	changeElementColor(index, color.fade(percent), filter);
 }
 
 void StepActor::changeFrameElement(const Color& color, Directions direction) {
-	changeFrameElement(currentFrame, color, direction);
+	changeFrameElement(stepping.frame, color, direction);
 }
 
 void StepActor::changeFrameElement(const Color& color, bool fade, Directions direction) {
-
-	float percent = stepPercent * currentStepFrame;
-	uint16_t next = nextOf(cDirection, currentFrame, direction, totalFrames);
-
-#ifdef DEVELOP
-	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
-#endif
-
-	if (fade)
-		changeElementColor(currentFrame, color.fade(100 - percent), filter);
-	else
-		changeElementColor(currentFrame, color, filter);
-
-	changeElementColor(next, color.fade(percent), filter);
+	auto [percent, next] = changeFrameElementCommon(direction);
+	if (fade) {
+		changeElementColor(stepping.frame, color.fade(100 - percent), filter);
+		changeElementColor(next, color.fade(percent), filter);
+	}
+	else {
+		changeElementColor(stepping.frame, color, filter);
+	}
 }
 
 void StepActor::changeFrameElement(const Color& color, const Color& colorNext, Directions direction) {
-
-	float percent = stepPercent * currentStepFrame;
-	uint16_t next = nextOf(cDirection, currentFrame, direction, totalFrames);
-
-#ifdef DEVELOP
-	cout << "Frame " << to_string(currentFrame) << " to " << to_string(next) << " " << percent << "%" << endl;
-#endif
-
-	changeElementColor(currentFrame, colorNext.transition(color, percent), filter);
+	auto [percent, next] = changeFrameElementCommon(direction);
+	changeElementColor(stepping.frame, colorNext.transition(color, percent), filter);
 	changeElementColor(next, colorNext.fade(percent), filter);
 }
 
-void StepActor::setTotalStepFrames(uint16_t totalStepFrames) {
-	this->totalStepFrames = totalStepFrames;
-	stepPercent = totalStepFrames ? PERCENT(1.0, totalStepFrames) : 0;
+void StepActor::calculateStepPercent() {
+	stepPercent = stepping.steps ? PERCENT(1.0f, stepping.steps) : 0;
 }
 
-const uint16_t StepActor::getFullFrames() const {
-	if (totalStepFrames)
-		return totalStepFrames * totalFrames * (1 + isBouncer());
-	return (totalFrames * (1 + isBouncer()));
+StepActor::FrameTransition StepActor::changeFrameElementCommon(const Directions& direction) const {
+
+	float percent = stepPercent * stepping.step;
+	// This is fake.
+	uint16_t next = nextOf(cDirection, stepping.frame, direction, stepping.frames - 1);
+	// Next is fake and will bounce late due to incorrect direction.
+	if (isBouncer() and (
+			(stepping.frame == 0    and cDirection.isBackward()) or
+			(stepping.isLastFrame() and cDirection.isForward())
+		)
+	) {
+		percent = 100;
+		next    = stepping.frame;
+	}
+
+#ifdef DEVELOP
+	if (Log::isLogging(LOG_DEBUG)) {
+		cout
+			<< "Frame " << std::setw(2) << static_cast<uint16_t>(stepping.frame + 1)
+			<< " to "   << std::setw(2) << static_cast<uint16_t>(next + 1)
+			<< " Step " << std::setw(1) << static_cast<uint16_t>(stepping.step + 1)
+			<< " to "   << std::setw(1) << static_cast<uint16_t>(stepping.steps)
+			<< " "      << std::setw(6) << std::fixed << std::setprecision(2) << percent << "%" << endl;
+	}
+#endif
+	return {percent, next};
 }
+

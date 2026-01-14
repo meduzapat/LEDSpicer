@@ -4,7 +4,7 @@
  * @since     Nov 14, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,25 +20,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "StepActor.hpp"
+#include "DirectionActor.hpp"
 
-#ifndef FILEREADER_HPP_
-#define FILEREADER_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_ACTOR_FILEREADER {"speed", "direction", "filename", "format"}
+
+using stringMatrixColorsUmap = unordered_map<string, vector<vector<LEDSpicer::Utilities::Color>>>;
 
 namespace LEDSpicer::Animations {
 
 /**
  * LEDSpicer::FileReader
  */
-class FileReader : public StepActor {
+class FileReader : public DirectionActor {
 
 public:
 
 	enum class Formats : uint8_t {rgba};
 
-	FileReader(umap<string, string>& parameters, Group* const layout);
+	FileReader(StringUMap& parameters, Group* const layout);
 
 	virtual ~FileReader() {}
 
@@ -55,10 +56,10 @@ protected:
 private:
 
 	/// Iterator to the pair
-	umap<string, vector<vector<Color>>>::iterator frames;
+	stringMatrixColorsUmap::iterator frames;
 
 	/// All files on memory data by filename.
-	static umap<string, vector<vector<Color>>> fileData;
+	static stringMatrixColorsUmap fileData;
 
 	/**
 	 * Loads into memory a RGBA file, an animation file that stores data in RGB values divided into frames.
@@ -68,6 +69,4 @@ private:
 
 };
 
-} /* namespace */
-
-#endif /* FILEREADER_HPP_ */
+} // namespace

@@ -5,7 +5,7 @@
  * @since     Jun 7, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,24 +25,21 @@
 
 using namespace LEDSpicer::Devices;
 
+DevicePrs Device::devices;
+
 void Device::initialize() {
-
-	if (dumpMode)
-		return;
-
 	LogDebug("Initializing Device " + getFullName());
 	openHardware();
 	resetLeds();
+	initialized = true;
 }
 
 void Device::terminate() {
-
-	if (dumpMode)
-		return;
-
+	if (not initialized) return;
 	LogDebug("Disconnect Device " + getFullName());
 	resetLeds();
 	closeHardware();
+	initialized = false;
 }
 
 Device* Device::setLed(uint16_t led, uint8_t intensity) {
@@ -73,7 +70,7 @@ void Device::registerElement(
 	uint8_t brightness
 ) {
 	validateLed(led);
-	elementsByName.emplace(name, Element(name, &LEDs[led], defaultColor, timeOn, brightness));
+	elementsByName.emplace(name, Element{name, &LEDs[led], defaultColor, timeOn, brightness});
 }
 
 void Device::registerElement(
@@ -87,12 +84,12 @@ void Device::registerElement(
 	validateLed(led1);
 	validateLed(led2);
 	validateLed(led3);
-	elementsByName.emplace(name, Element(
+	elementsByName.emplace(name, Element{
 		name,
 		&LEDs[led1], &LEDs[led2], &LEDs[led3],
 		defaultColor,
 		brightness
-	));
+	});
 }
 
 void Device::registerElement(
@@ -108,12 +105,12 @@ void Device::registerElement(
 		leds.push_back(&LEDs[led]);
 	}
 
-	elementsByName.emplace(name, Element(
+	elementsByName.emplace(name, Element{
 		name,
 		leds,
 		defaultColor,
 		brightness
-	));
+	});
 }
 
 Element* Device::getElement(const string& name) {
@@ -127,7 +124,7 @@ void Device::resetLeds() {
 
 void Device::validateLed(uint16_t led) const {
 	if (led >= LEDs.size())
-		throw Error("Invalid led number " + to_string(led + 1));
+		throw Error("Invalid led number ") << (led + 1);
 }
 
 uint16_t Device::getNumberOfElements() const {
@@ -139,11 +136,10 @@ uint16_t Device::getNumberOfLeds() const {
 }
 
 void Device::packData() {
+	// If nothing changed do not send data.
 	if (LEDs == oldLEDs) {
-#ifdef DEVELOP
-	#ifdef SHOW_OUTPUT
+#ifdef SHOW_OUTPUT
 	LogDebug("No changes, data not sent for " + getFullName());
-	#endif
 #endif
 		return;
 	}
@@ -151,7 +147,7 @@ void Device::packData() {
 	oldLEDs = LEDs;
 }
 
-umap<string, Element>* Device::getElements() {
+ElementUMap* Device::getElements() {
 	return &elementsByName;
 }
 
