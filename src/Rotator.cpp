@@ -4,7 +4,7 @@
  * @since     Aug 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,18 +22,16 @@
 
 #include "Rotator.hpp"
 
-using namespace LEDSpicer;
-
-umap<string, uint8_t> processPlayerNode(tinyxml2::XMLElement* restrictor) {
-	umap<string, uint8_t> playerData;
+Uint8UMap processPlayerNode(tinyxml2::XMLElement* restrictor) {
+	Uint8UMap playerData;
 	tinyxml2::XMLElement* element = restrictor->FirstChildElement(PLAYER_MAP);
 	if (not element)
 		return playerData;
 	for (; element; element = element->NextSiblingElement(PLAYER_MAP)) {
-		umap<string, string> playerAttr = XMLHelper::processNode(element);
+		StringUMap playerAttr = XMLHelper::processNode(element);
 		Utility::checkAttributes(REQUIRED_PARAM_MAP, playerAttr, PLAYER_MAP);
 		uint8_t n = Utility::parseNumber(playerAttr["id"], "Invalid value for ID");
-		if (not Utility::verifyValue(n, uint8_t(1), uint8_t(UINT8_MAX), false))
+		if (not Utility::verifyValue<uint8_t>(n, 1, UINT8_MAX, false))
 			throw Error("ID must be greater than 0");
 		playerData.emplace(playerAttr["player"] + "_" + playerAttr["joystick"], n);
 	}
@@ -50,7 +48,7 @@ int main(int argc, char **argv) {
 
 	Log::initialize(true);
 
-	umap<string, Restrictor::Ways> playersRequestedData, availablePlayersData;
+	WaysUMap playersRequestedData, availablePlayersData;
 
 	for (int i = 1; i < argc; i++) {
 
@@ -87,12 +85,12 @@ int main(int argc, char **argv) {
 		if (commandline == "-v" or commandline == "--version") {
 			cout
 				<< endl <<
-				"Rotator is part of " PACKAGE_STRING << endl <<
-				PACKAGE_STRING " " COPYRIGHT "\n\n"
-				"For more information visit <" PACKAGE_URL ">\n\n"
-				"To report errors or bugs visit <" PACKAGE_BUGREPORT ">\n"
-				PACKAGE_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>."
+				"Rotator is part of " PROJECT_NAME PROJECT_VERSION << endl <<
+				PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
+				"For more information visit <" PROJECT_SITE ">\n\n"
+				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
+				PROJECT_NAME " is free software under the GPL 3 license\n\n"
+				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
 				<< endl;
 			return EXIT_SUCCESS;
 		}
@@ -131,24 +129,24 @@ int main(int argc, char **argv) {
 
 		// Read Configuration.
 		XMLHelper config(configFile, "Configuration");
-		umap<string, string> configValues = XMLHelper::processNode(config.getRoot());
+		StringUMap configValues = XMLHelper::processNode(config.getRoot());
 
 		// Set log level.
-		if (configValues.count("logLevel"))
+		if (configValues.exists("logLevel"))
 			Log::setLogLevel(Log::str2level(configValues["logLevel"]));
 
 		// Process restrictors.
 		tinyxml2::XMLElement* element = config.getRoot()->FirstChildElement(RESTRICTORS);
 		if (not element)
-			throw Error("No restrictors section detected.");
+			throw Error("No restrictors section detected");
 
 		element = element->FirstChildElement(RESTRICTOR);
 		if (not element)
-			throw Error("No restrictors found.");
+			throw Error("No restrictors found");
 
 		for (; element; element = element->NextSiblingElement(RESTRICTOR)) {
-			umap<string, string> restrictorAttr(XMLHelper::processNode(element));
-			umap<string, uint8_t> configPlayersData(std::move(processPlayerNode(element)));
+			StringUMap restrictorAttr(XMLHelper::processNode(element));
+			Uint8UMap configPlayersData(processPlayerNode(element));
 			if (configPlayersData.empty())
 				continue;
 			Utility::checkAttributes(REQUIRED_PARAM_RESTRICTOR, restrictorAttr, RESTRICTOR);
@@ -179,7 +177,7 @@ int main(int argc, char **argv) {
 
 			for (const auto& pd : configPlayersData) {
 				// Set Rotations.
-				if (playersRequestedData.size() and playersRequestedData.count(pd.first)) {
+				if (playersRequestedData.size() and playersRequestedData.exists(pd.first)) {
 					availablePlayersData.emplace(pd.first, playersRequestedData.at(pd.first));
 				}
 				// Reset all.
@@ -199,7 +197,7 @@ int main(int argc, char **argv) {
 			availablePlayersData.clear();
 			restrictor->terminate();
 			delete restrictor;
-			std::this_thread::sleep_for(std::chrono::milliseconds(250));
+			sleep_for(std::chrono::milliseconds(250));
 		}
 
 	}

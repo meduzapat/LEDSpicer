@@ -4,7 +4,7 @@
  * @since     May 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,10 +23,8 @@
 #include "Input.hpp"
 #include <linux/input.h>
 #include <fcntl.h>
-#include <unistd.h>
 
-#ifndef READER_HPP_
-#define READER_HPP_ 1
+#pragma once
 
 #define DEV_INPUT "/dev/input/by-id/"
 
@@ -41,7 +39,7 @@ class Reader: public Input {
 
 public:
 
-	Reader(umap<string, string>& parameters, umap<string, Items*>& inputMaps);
+	Reader(StringUMap& parameters, ItemPtrUMap& inputMaps);
 
 	virtual ~Reader() = default;
 
@@ -73,7 +71,7 @@ protected:
 	/**
 	 * list of input device with their resource and index.
 	 */
-	static umap<string, ListenEventData> listenEvents;
+	static unordered_map<string, ListenEventData> listenEvents;
 
 	/**
 	 * Reads all the events.
@@ -82,6 +80,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* READER_HPP_ */
+} // namespace

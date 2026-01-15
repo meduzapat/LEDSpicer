@@ -21,10 +21,9 @@
  */
 
 #include "devices/DeviceSerial.hpp"
-#include "utility/Utility.hpp"
+#include "utilities/Utility.hpp"
 
-#ifndef ADALIGHT_HPP_
-#define ADALIGHT_HPP_ 1
+#pragma once
 
 #define ADALIGHT_NAME        "Adalight"
 #define ADALIGHT_MAGIC       "Ada"
@@ -35,13 +34,13 @@ namespace LEDSpicer::Devices::Adalight {
 /**
  * LEDSpicer::Devices::Adalight
  *
- * Adalight smart led controller (using WLED firmware on ESP8266)
+ * Adalight smart led controller protocol.
  */
 class Adalight : public DeviceSerial {
 
 public:
 
-	Adalight(umap<string, string>& options) :
+	Adalight(StringUMap& options) :
 	DeviceSerial(
 		options,
 		ADALIGHT_NAME
@@ -60,7 +59,5 @@ protected:
 
 deviceFactory(Adalight)
 
-} /* namespace */
+} // namespace
 
-
-#endif /* ADALIGHT_HPP_ */

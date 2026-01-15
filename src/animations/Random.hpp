@@ -4,7 +4,7 @@
  * @since     Jul 5, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,13 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Colors.hpp"
+#include "utilities/Colors.hpp"
 #include "FrameActor.hpp"
 
-#ifndef RANDOM_HPP_
-#define RANDOM_HPP_ 1
+#pragma once
 
-#define REQUIRED_PARAM_ACTOR_RANDOM {"speed", "colors"}
+#define REQUIRED_PARAM_ACTOR_RANDOM {"speed"}
 
 namespace LEDSpicer::Animations {
 
@@ -37,7 +36,7 @@ class Random: public FrameActor, public Colors {
 
 public:
 
-	Random(umap<string, string>& parameters, Group* const group);
+	Random(StringUMap& parameters, Group* const group);
 
 	virtual ~Random() = default;
 
@@ -45,6 +44,8 @@ public:
 	 * @see Actor::drawConfig()
 	 */
 	void drawConfig() const override;
+
+	void restart() override;
 
 protected:
 
@@ -63,6 +64,4 @@ private:
 	void generateNewColors();
 };
 
-} /* namespace */
-
-#endif /* RANDOM_HPP_ */
+} // namespace

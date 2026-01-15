@@ -4,7 +4,7 @@
  * @since     Jul 7, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,16 +20,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Hardware.hpp"
+#include "utilities/Hardware.hpp"
 
-#ifndef RESTRICTORS_ROTATOR_HPP_
-#define RESTRICTORS_ROTATOR_HPP_ 1
+#pragma once
 
 #define REQUIRED_PARAM_RESTRICTOR {"name"}
 #define REQUIRED_PARAM_MAP        {"player", "joystick"}
 #define RESTRICTOR_SINGLE_ID      1
 
 namespace LEDSpicer::Restrictors {
+
+using LEDSpicer::Utilities::Hardware;
+using LEDSpicer::Utilities::Log;
 
 /**
  * LEDSpicer::Restrictor::Restrictor
@@ -42,15 +44,15 @@ public:
 	enum class Ways : uint8_t {invalid, w2, w2v, w4, w4x, w8, w16, w49, analog, mouse, rotary8, rotary12};
 
 	Restrictor(
-		umap<string, uint8_t>& playerData,
+		Uint8UMap& playerData,
 		const string& name
 	) : Hardware(name), players(playerData) {}
 
 	virtual ~Restrictor() = default;
 
-	void initialize();
+	void initialize() override;
 
-	void terminate();
+	void terminate() override;
 
 	/**
 	 * @return the number of players a hardware supports.
@@ -61,7 +63,7 @@ public:
 	 * Executes the rotation.
 	 * @param playersData
 	 */
-	virtual void rotate(const umap<string, Ways>& playersData) = 0;
+	virtual void rotate(const unordered_map<string, Ways>& playersData) = 0;
 
 	/**
 	 * Convert human readable strings into joystick positions.
@@ -82,14 +84,14 @@ public:
 	 * @param strWays
 	 * @return
 	 */
-	static const Ways strWays2Ways(const std::string& strWays);
+	static Ways strWays2Ways(const std::string& strWays);
 
 	/**
 	 * Converts ways into its string representation.
 	 * @param ways
 	 * @return
 	 */
-	static const string ways2StrWays(Ways ways);
+	static string ways2StrWays(Ways ways);
 
 	/**
 	 * @param ways
@@ -107,10 +109,11 @@ public:
 protected:
 
 	/// Supported players for this restrictor in the form of P_J => id (player_joystick)
-	umap<string, uint8_t> players;
+	Uint8UMap players;
 
 };
 
-} /* namespace */
+using WaysUMap = unordered_map<string, Restrictor::Ways>;
 
-#endif /* RESTRICTORS_ROTATOR_HPP_ */
+} // namespace
+

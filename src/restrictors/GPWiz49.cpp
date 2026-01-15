@@ -4,7 +4,7 @@
  * @since     Aug 11, 2020
  * @author    Patricio A. Rossi (MeduZa) & GPWiz49 related code Chris Newton (mahuti)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,7 +24,7 @@
 
 using namespace LEDSpicer::Restrictors;
 
-void GPWiz49::rotate(const umap<string, Ways>& playersData) {
+void GPWiz49::rotate(const WaysUMap& playersData) {
 
 	Ways way = playersData.begin()->second;
 	if (way == Ways::invalid)
@@ -44,23 +44,23 @@ void GPWiz49::rotate(const umap<string, Ways>& playersData) {
 
 	switch (way) {
 	case Ways::w2:
-		LogDebug("Rotating " + getFullName() + " to 2 way horizontal.");
+		LogDebug("Rotating " + getFullName() + " to 2 way horizontal");
 		data[1]= 6;
 		break;
 	case Ways::w2v:
-		LogDebug("Rotating " + getFullName() + " to 2 way vertical.");
+		LogDebug("Rotating " + getFullName() + " to 2 way vertical");
 		data[1]= 7;
 		break;
 	case Ways::w4:
-		LogDebug("Rotating " + getFullName() + " to 4 ways.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways");
 		data[1]= 4;
 		break;
 	case Ways::w4x:
-		LogDebug("Rotating " + getFullName() + " to 4 ways diagonal.");
+		LogDebug("Rotating " + getFullName() + " to 4 ways diagonal");
 		data[1]= 5;
 		break;
 	case Ways::w16:
-		LogDebug("Rotating " + getFullName() + " to 16 ways with large dead zone in center.");
+		LogDebug("Rotating " + getFullName() + " to 16 ways with large dead zone in center");
 		data[1]= 8;
 		break;
 	case Ways::w49:
@@ -73,7 +73,7 @@ void GPWiz49::rotate(const umap<string, Ways>& playersData) {
 		data[1]= 1;
 		break;
 	default:
-		LogDebug("Rotating " + getFullName() + " to 8 ways.");
+		LogDebug("Rotating " + getFullName() + " to 8 ways");
 		data[1] = 3;
 	}
 

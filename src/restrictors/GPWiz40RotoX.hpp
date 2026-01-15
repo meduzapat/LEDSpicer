@@ -4,7 +4,7 @@
  * @since     Aug 11, 2020
  * @author    Patricio A. Rossi (MeduZa) & GPWiz40RotoX related code Chris Newton (mahuti)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,8 +22,7 @@
 
 #include "RestrictorUSB.hpp"
 
-#ifndef RESTRICTORS_GPWIZ40ROTOX_HPP_
-#define RESTRICTORS_GPWIZ40ROTOX_HPP_ 1
+#pragma once
 
 #define GPWIZ40ROTOX_NAME       "GPWiz40RotoX"
 #define GPWIZ40ROTOX_FULLNAME   "GroovyGameGear GP-Wiz40 RotoX"
@@ -40,6 +39,8 @@
 
 namespace LEDSpicer::Restrictors {
 
+using namespace LEDSpicer::Utilities;
+
 /**
  * LEDSpicer::Restrictor::GPWiz40RotoX
  */
@@ -47,7 +48,7 @@ class GPWiz40RotoX : public RestrictorUSB {
 
 public:
 
-	GPWiz40RotoX(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	GPWiz40RotoX(StringUMap& options, Uint8UMap& playerData) :
 	RestrictorUSB(
 		playerData,
 		GPWIZ40ROTOX_WVALUE,
@@ -57,13 +58,13 @@ public:
 		GPWIZ40ROTOX_FULLNAME
 	),
 	speedOn(
-		options.count(SPEED_ON) ? Utility::parseNumber(
+		options.exists(SPEED_ON) ? Utility::parseNumber(
 			options.at(SPEED_ON),
 			"Invalid value for " SPEED_ON
 		)  : DEFAULT_SPEED
 	),
 	speedOff(
-		options.count(SPEED_OFF) ? Utility::parseNumber(
+		options.exists(SPEED_OFF) ? Utility::parseNumber(
 			options.at(SPEED_OFF),
 			"Invalid value for " SPEED_OFF
 		) : DEFAULT_SPEED
@@ -71,13 +72,13 @@ public:
 
 	virtual ~GPWiz40RotoX() = default;
 
-	virtual void rotate(const umap<string, Ways>& playersData);
+	void rotate(const WaysUMap& playersData) override;
 
-	virtual uint16_t getVendor() const;
+	uint16_t getVendor() const override;
 
-	virtual uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
-	virtual uint8_t getMaxIds() const;
+	uint8_t getMaxIds() const override;
 
 protected:
 
@@ -89,6 +90,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* RESTRICTORS_GPWIZ40ROTOX_HPP_ */
+} // namespace

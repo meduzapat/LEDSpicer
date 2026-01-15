@@ -4,7 +4,7 @@
  * @since     Sep 19, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,6 +61,6 @@ uint16_t PacDrive::getProduct() const {
 	return PAC_DRIVE_PRODUCT;
 }
 
-const bool PacDrive::isProductBasedId() const {
+bool PacDrive::isProductBasedId() const {
 	return false;
 }

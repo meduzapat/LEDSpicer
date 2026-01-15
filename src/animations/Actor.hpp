@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,32 +20,21 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For ints.
-#include <cstdint>
-
-// To handle dynamic arrays.
-#include <vector>
-using std::vector;
-
 #include "devices/Group.hpp"
-#include "utility/Color.hpp"
-#include "utility/Utility.hpp"
-#include "utility/Time.hpp"
+#include "utilities/Utility.hpp"
+#include "utilities/Time.hpp"
+#include "utilities/Log.hpp"
 
-#ifndef ACTOR_HPP_
-#define ACTOR_HPP_ 1
+#pragma once
 
+/// Required parameters for Actor constructor.
 #define REQUIRED_PARAM_ACTOR {"type", "group", "filter"}
 
 namespace LEDSpicer::Animations {
 
-// The functions to create and destroy actors.
-#define actorFactory(plugin) \
-	extern "C" Actor* createActor(umap<string, string>& parameters, LEDSpicer::Devices::Group* const group) { return new plugin(parameters, group); } \
-	extern "C" void destroyActor(Actor* instance) { delete instance; }
-
-using Devices::Group;
-using Devices::Element;
+using LEDSpicer::Devices::Group;
+using LEDSpicer::Devices::Element;
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Animation
@@ -55,20 +44,27 @@ class Actor {
 public:
 
 	/**
-	 * Create a new actor object
-	 * @param parameters A list of parameters from the animation file.
-	 * @param group the group where the actors will act.
-	 * @param requiredParameters A list of mandatory parameters.
+	 * Creates a new actor object.
+	 *
+	 * @param parameters Parameters from the animation file.
+	 * @param group The group where the actor will act.
+	 * @param requiredParameters Mandatory parameters to validate.
+	 * @throws Error If parameters are invalid.
 	 */
 	Actor(
-		umap<string, string>& parameters,
-		Group* const group,
+		StringUMap&           parameters,
+		Group* const          group,
 		const vector<string>& requiredParameters
 	);
 
 	Actor() = delete;
 
 	virtual ~Actor() = default;
+
+	/**
+	 * @return The group.
+	 */
+	Group& getGroup() const;
 
 	/**
 	 * Draws actor contents.
@@ -81,12 +77,13 @@ public:
 	virtual void drawConfig() const;
 
 	/**
-	 * Reset the animation back to begin.
+	 * Reset the actor back to begin.
+	 * it activates timers.
 	 */
 	virtual void restart();
 
 	/**
-	 * @return Return true if the actor is running.
+	 * @return Return true if the actor is running animations and reading input.
 	 */
 	virtual bool isRunning();
 
@@ -117,74 +114,9 @@ public:
 	}
 
 	/**
-	 * Change the start time.
-	 * @param seconds
-	 */
-	void setStartTime(uint16_t seconds);
-
-	/**
-	 * Change the end time.
-	 * @param seconds
-	 */
-	void setEndTime(uint16_t seconds);
-
-	/**
-	 * Change the start cycles.
-	 * @param cycles
-	 */
-	virtual void setStartCycles(uint8_t cycles) {}
-
-	/**
-	 * Change the end cycles.
-	 * @param cycles
-	 */
-	virtual void setEndCycles(uint8_t seconds)  {}
-
-	/**
-	 * Function called when a new frame begins.
+	 * Increments the frame counter, resetting at FPS limit.
 	 */
 	static void newFrame();
-
-	/**
-	 * Returns the total calculated amount of frames.
-	 * @return
-	 */
-	virtual const uint16_t getFullFrames() const = 0;
-
-	/**
-	 * @return Returns the amount of time to finish (or 0 if never finishes)
-	 */
-	virtual const float getRunTime() const = 0;
-
-protected:
-
-	/// How the color information will be draw back.
-	Color::Filters filter = Color::Filters::Normal;
-
-	/// Hardware frames per second.
-	static uint8_t FPS;
-
-	/// Current frame
-	static uint8_t frame;
-
-	uint16_t
-		/// Number of seconds to wait until start processing this actor.
-		secondsToStart = 0,
-		/// Number of seconds to wait to stop this actor.
-		secondsToEnd   = 0;
-
-	/// Start time clock for this actor.
-	Time* startTime = nullptr;
-
-	/// End time clock for this actor.
-	Time* endTime = nullptr;
-
-	/**
-	 * Do the elements calculation.
-	 *
-	 * Every Actor will do their magic here.
-	 */
-	virtual void calculateElements() = 0;
 
 	/**
 	 * @return the number of elements on the animation's group.
@@ -211,18 +143,67 @@ protected:
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	/**
-	 * Mark all elements to the desired state.
+	 * Returns the total calculated amount of frames.
+	 * @return
+	 */
+	virtual uint16_t getFullFrames() const = 0;
+
+	/**
+	 * @return Returns the amount of time to finish (or 0 if never finishes)
+	 */
+	virtual float getRunTime() const = 0;
+
+	/**
+	 * @return a reference to the hardware internal LEDs for the group.
+	 */
+	const vector<uint8_t*>& getLeds() const;
+
+protected:
+
+	/// Hardware frames per second.
+	static uint8_t FPS;
+
+	/// Current frame (starting from 1)
+	static uint8_t frame;
+
+	/// Color filter applied to elements.
+	Color::Filters filter = Color::Filters::Normal;
+
+	uint16_t
+		/// Number of seconds to wait until start processing this actor.
+		secondsToStart = 0,
+		/// Number of seconds to wait to stop this actor.
+		secondsToEnd   = 0;
+
+	Time
+		/// Start time clock for this actor.
+		* startTime = nullptr,
+		/// End time clock for this actor.
+		* endTime = nullptr;
+
+	/**
+	 * Do the elements calculation.
 	 *
-	 * @param value
+	 * Every Actor will do their magic here.
+	 */
+	virtual void calculateElements() = 0;
+
+	/**
+	 * Marks all elements as affected or unaffected.
+	 *
+	 * @param value True to mark as affected, false otherwise (default).
 	 */
 	void affectAllElements(bool value = false);
 
 	/**
-	 * @return true if an element got affected (dirty/changed) on this frame.
+	 * Checks if an element was affected in the current frame.
+	 *
+	 * @param index The element index.
+	 * @return true if affected.
 	 */
 	bool isElementAffected(uint16_t index) const;
 
-  /**
+	/**
 	 * Checks if the actor will repeat.
 	 * @return true if the actor will repeat.
 	 */
@@ -236,13 +217,12 @@ private:
 	/// A pointer to the real group of elements.
 	Group* const group;
 
-
-		/// If this actor will repeat, default 0, repeat for ever.
-	uint8_t	const repeat;
-		/// Times repeated.
-	uint8_t	repeated  = 0;
+	/// If this actor will repeat, default 0 to repeat for ever.
+	const uint8_t repeat;
+	/// Times repeated.
+	uint8_t	repeated = 1;
 };
 
-} /* namespace */
+using ActorPtrsUmap = unordered_map<string, vector<Actor*>>;
 
-#endif /* ACTOR_HPP_ */
+} // namespace

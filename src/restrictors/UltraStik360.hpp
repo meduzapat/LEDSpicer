@@ -4,7 +4,7 @@
  * @since     Jul 10, 2020
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,8 +23,7 @@
 #include <fstream>
 #include "RestrictorUSB.hpp"
 
-#ifndef RESTRICTORS_ULTRASTIK360_HPP_
-#define RESTRICTORS_ULTRASTIK360_HPP_ 1
+#pragma once
 
 // NOTE: for old ultrastiks before 2015 product is 0x0501 and interface is 0
 #define ULTRASTIK_NAME       "UltraStik360"
@@ -35,10 +34,12 @@
 #define ULTRASTIK_MAX_BOARDS 4
 #define ULTRASTIK_DATA_SIZE  4
 
-#define UM_FILES_DIR PACKAGE_DATA_DIR "umaps/"
+#define UM_FILES_DIR PROJECT_DATA_DIR "/umaps/"
 #define DEFAULT_MAP_BORDERS {30,58,86,114,142,170,198,226}
 
 namespace LEDSpicer::Restrictors {
+
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Rotators::UltraStik360
@@ -54,7 +55,7 @@ class UltraStik360: public RestrictorUSB {
 
 public:
 
-	UltraStik360(umap<string, string>& options, umap<string, uint8_t>& playerData) :
+	UltraStik360(StringUMap& options, Uint8UMap& playerData) :
 	RestrictorUSB(
 		playerData,
 		ULTRASTIK_WVALUE,
@@ -63,16 +64,16 @@ public:
 		ULTRASTIK_MAX_BOARDS,
 		ULTRASTIK_FULLNAME
 	),
-	handleRestrictor(options.count("hasRestrictor") ? options["hasRestrictor"] == "True" : false),
-	handleMouse(options.count("handleMouse") ? options["handleMouse"] == "True" : false) {}
+	handleRestrictor(options.exists("hasRestrictor") ? options["hasRestrictor"] == "True" : false),
+	handleMouse(options.exists("handleMouse") ? options["handleMouse"] == "True" : false) {}
 
 	virtual ~UltraStik360() = default;
 
-	virtual void rotate(const umap<string, Ways>& playersData);
+	void rotate(const WaysUMap& playersData) override;
 
-	virtual uint16_t getVendor() const;
+	uint16_t getVendor() const override;
 
-	virtual uint16_t getProduct() const;
+	uint16_t getProduct() const override;
 
 protected:
 
@@ -80,14 +81,12 @@ protected:
 		handleRestrictor,
 		handleMouse;
 
-	static umap<Ways, vector<uint8_t>> umdataCache;
+	static unordered_map<Ways, vector<uint8_t>> umdataCache;
 
-	umap<string, vector<uint8_t>> processUmFile(const string& file);
+	unordered_map<string, vector<uint8_t>> processUmFile(const string& file);
 
 	string ways2file(Ways ways);
 
 };
 
-} /* namespace */
-
-#endif /* RESTRICTORS_ULTRASTIK360_HPP_ */
+} // namespace

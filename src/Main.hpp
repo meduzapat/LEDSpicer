@@ -5,7 +5,7 @@
  *
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,12 +27,10 @@
 
 #include "MainBase.hpp"
 
-#ifndef MAIN_HPP_
-#define MAIN_HPP_ 1
-
 namespace LEDSpicer {
 
 using Devices::Device;
+using namespace Transitions;
 
 /**
  * LEDSpicer::main
@@ -49,14 +47,34 @@ public:
 	void run();
 
 	/**
-	 * Executes the current profile.
-	 */
-	void runCurrentProfile();
-
-	/**
 	 * Stops the main loop.
 	 */
 	static void terminate();
+
+protected:
+
+	/**
+	 * Attempts to load profiles from a list of names.
+	 * @param data a list of profiles to try.
+	 * @return the new loaded profile, nullptr if all failed.
+	 */
+	Profile* tryProfiles(const vector<string>& data);
+
+	/**
+	 * Attempts create a profile with the values provided.
+	 * Will check cache for an existing profile first.
+	 * @param name
+	 * @return the new crafted profile or null if failed.
+	 */
+	Profile* craftProfile(const string& name, const string& elements, const string& groups);
+
+	/**
+	 * Initiates the process or replacing the current profile.
+	 *
+	 * @param to
+	 * @param store if true will store the profile in the profiles stack.
+	 */
+	void changeProfile(Profile* to, bool store);
 
 };
 
@@ -70,6 +88,4 @@ public:
  */
 int main(int argc, char **argv);
 
-} /* namespace LEDSpicer */
-
-#endif /* MAIN_HPP_ */
+} // namespace

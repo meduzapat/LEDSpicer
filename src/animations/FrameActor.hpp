@@ -4,7 +4,7 @@
  * @since     Jul 18, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,22 +21,71 @@
  */
 
 #include "Actor.hpp"
-#include "utility/Speed.hpp"
+#include "utilities/Speed.hpp"
 
-#ifndef FRAMEACTOR_HPP_
-#define FRAMEACTOR_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Animations {
 
+using LEDSpicer::Utilities::Speed;
+
 /**
  * LEDSpicer::FrameActor
+ *
+ * Adds Speed and Frames to the Actor class.
  */
 class FrameActor : public Actor, public Speed {
 
 public:
 
+	struct Stepping {
+		uint16_t
+		/// Total number of frames, always bigger than zero and zero based.
+		frames = 0,
+		/// The current frame (zero based).
+		frame  = 0,
+		/// Number of system frames to advance an actor frame (handles speed) zero for none.
+		steps  = 0,
+		/// Current speed step (zero based).
+		step   = 0;
+
+		void advanceFrame() {
+			++frame;
+			if (frame == frames) {
+				frame = 0;
+			}
+		}
+
+		void advanceStep() {
+			if (shouldMoveFrame()) advanceFrame();
+		}
+
+		bool shouldMoveFrame() {
+			if (not steps) return true;
+			if (isLastStep()) {
+				step = 0;
+				return true;
+			}
+			++step;
+			return false;
+		}
+
+		uint16_t getLastFrame() const {
+			return frames - 1;
+		}
+
+		bool isLastFrame() const {
+			return frame == getLastFrame();
+		}
+
+		bool isLastStep() const {
+			// zero steps mean no stepping.
+			return not steps or step == steps - 1;
+		}
+	};
+
 	FrameActor(
-		umap<string, string>& parameters,
+		StringUMap& parameters,
 		Group* const group,
 		const vector<string>& requiredParameters
 	);
@@ -54,15 +103,28 @@ public:
 	virtual bool isFirstFrame() const;
 
 	/**
-	 * @return true if the current frame is the last frame,
+	 * @return true if the current frame is the first frame including the first step.
+	 */
+	virtual bool isStartOfCycle() const;
+
+	/**
+	 * @return true if the current frame is the last frame including last step (not cycle).
 	 */
 	virtual bool isLastFrame() const;
+
+	/**
+	 * @return true if the current frame is the very last of the cycle (not frame).
+	 */
+	virtual bool isEndOfCycle() const;
 
 	/**
 	 * @see Actor::draw()
 	 */
 	void draw() override;
 
+	/**
+	 * @see Actor::restart();
+	 */
 	void restart() override;
 
 	bool isRunning() override;
@@ -71,36 +133,35 @@ public:
 		return true;
 	}
 
-	/**
-	 * Change the start cycles.
-	 * @param cycles
-	 */
-	virtual void setStartCycles(uint8_t cycles);
+	uint16_t getFullFrames() const override;
+
+	float getRunTime() const override;
 
 	/**
-	 * Change the end cycles.
-	 * @param cycles
+	 * Calculates the stepping based on the speed.
+	 * @param speed
+	 * @return the total steps for this speed.
 	 */
-	virtual void setEndCycles(uint8_t seconds);
+	static uint16_t calculateStepsBySpeed(Speeds speed);
 
-	const uint16_t getFullFrames() const override;
-
-	const float getRunTime() const override;
+	/**
+	 * Calculates the numbers of frames based on speed.
+	 * @param speed
+	 * @return the total number of frames based on speed and FPS.
+	 */
+	static uint16_t calculateFramesBySpeed(Speeds speed);
 
 protected:
 
-	uint16_t
-		/// Total number of frames.
-		totalFrames  = 0,
-		/// The current frame.
-		currentFrame = 0,
-		/// The percent of the animation to start.
-		startAt      = 0;
+	Stepping stepping;
+
 	uint8_t
-		/// Number of cycles to run.
-		cycles       = 0,
-		/// Current cycles.
-		cycle        = 0;
+		/// The percent of the animation to start.
+		startAt = 0,
+		/// Will run for this number of cycles.
+		cycles  = 0,
+		/// Current cycle.
+		cycle   = 0;
 
 	/**
 	 * Advances the system frame forward.
@@ -109,6 +170,5 @@ protected:
 
 };
 
-} /* namespace */
+} // namespace
 
-#endif /* FRAMEACTOR_HPP_ */

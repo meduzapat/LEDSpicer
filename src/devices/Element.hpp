@@ -4,7 +4,7 @@
  * @since     Jun 22, 2018
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,57 +20,23 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// For ints.
-#include <cstdint>
+#include "Items.hpp"
+#include "utilities/Time.hpp"
 
-// To handle dynamic arrays.
-#include <vector>
-using std::vector;
-
-#include "utility/Color.hpp"
-#include "utility/Error.hpp"
-
-#include <chrono>
-using std::chrono::system_clock;
-
-#ifndef ELEMENT_HPP_
-#define ELEMENT_HPP_ 1
+#pragma once
 
 #define SINGLE_LED 0
 
 namespace LEDSpicer::Devices {
 
-/**
- * Helper base class to unify elements and groups.
- */
-struct Items {
-
-	/// Stores the position in a list if necessary.
-	const uint16_t pos;
-
-	/// Stores the desired color.
-	const Color* color;
-
-	/// Stores the filter to be used when applying the color.
-	const Color::Filters filter;
-
-	Items() = delete;
-	Items(const Color* color, Color::Filters filter, uint16_t pos) : color(color), filter(filter), pos(pos) {}
-	Items(const Items& item)  : color(item.color), filter(item.filter), pos(item.pos) {}
-	Items(Items&& item) : color(std::move(item.color)), filter(std::move(item.filter)), pos(std::move(item.pos)) {}
-
-	virtual ~Items() = default;
-
-	virtual string getName() const = 0;
-	virtual void process(uint8_t percent, Color::Filters* filterOverride) const = 0;
-};
+using namespace LEDSpicer::Utilities;
 
 /**
  * LEDSpicer::Devices::Element
  * Represent an Element that handles LEDs, single color or RGB, solenoids or motors.
  * Each LEDs value is stored into the hardware that owns this element.
  */
-class Element {
+class Element : public Time {
 
 public:
 
@@ -93,7 +59,6 @@ public:
 		leds{led},
 		defaultColor(defaultColor),
 		timeOn(timeOn),
-		// Only calculates brightness if is not 0 or 100.
 		brightness(brightness)
 	{}
 
@@ -117,7 +82,6 @@ public:
 		name(name),
 		leds{ledR, ledG, ledB},
 		defaultColor(defaultColor),
-		// Only calculates brightness if is not 0 or 100.
 		brightness(brightness)
 	{}
 
@@ -137,19 +101,7 @@ public:
 		name(name),
 		leds(leds),
 		defaultColor(defaultColor),
-		// Only calculates brightness if is not 0 or 100.
 		brightness(brightness)
-	{}
-
-	/**
-	 * Copy from other Element.
-	 * @param other
-	 */
-	Element(Element* other) :
-		name(other->name),
-		leds(other->leds.size(), nullptr),
-		defaultColor(other->defaultColor),
-		brightness(other->brightness)
 	{}
 
 	/**
@@ -161,6 +113,13 @@ public:
 
 		Item() = delete;
 
+		/**
+		 * Constructs an Item for an Element with specified properties.
+		 * @param element Pointer to the associated Element.
+		 * @param color Pointer to the desired color.
+		 * @param filter Color filter to apply.
+		 * @param pos Position in a list (default 0).
+		 */
 		Item(Element* element, const Color* color, Color::Filters filter, uint16_t pos = 0) :
 			Items(color, filter, pos),
 			element(element) {}
@@ -220,7 +179,7 @@ public:
 	 * @param led
 	 * @return
 	 */
-	uint8_t* const getLed(uint16_t led) const;
+	uint8_t* getLed(uint16_t led) const;
 
 	/**
 	 * Returns a reference to the internal led(s).
@@ -253,13 +212,17 @@ public:
 
 	/**
 	 * Check if the time is over and turn the element off.
+	 * @returns true if the time is running false if not.
 	 */
 	void checkTime();
 
 	/**
 	 * Draws information about this element.
 	 */
-	void draw();
+	void draw() const;
+
+	/// Global map of all elements, indexed by name, for lookup purposes.
+	static unordered_map<string, Element*> allElements;
 
 protected:
 
@@ -278,10 +241,9 @@ protected:
 	/// Custom Brightness 1 to 99.
 	const uint8_t brightness;
 
-	/// A point in time to know when the timeOn is completed.
-	system_clock::time_point clockTime;
 };
 
-} /* namespace */
+using ElementUMap     = unordered_map<string, Element>;
+using ElementItemUMap = unordered_map<string, Element::Item>;
 
-#endif /* ELEMENT_HPP_ */
+} // namespace

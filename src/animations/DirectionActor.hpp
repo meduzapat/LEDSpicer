@@ -4,7 +4,7 @@
  * @since     Jul 18, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,17 +20,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility/Direction.hpp"
+#include "utilities/Direction.hpp"
 #include "FrameActor.hpp"
 
-#include <string>
-
-using std::string;
-
-#ifndef DIRECTIONACTOR_HPP_
-#define DIRECTIONACTOR_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Animations {
+
+using LEDSpicer::Utilities::Direction;
 
 /**
  * LEDSpicer::DirectionActor
@@ -40,17 +37,26 @@ class DirectionActor : public FrameActor, public Direction {
 public:
 
 	DirectionActor(
-		umap<string, string>& parameters,
+		StringUMap& parameters,
 		Group* const group,
 		const vector<string>& requiredParameters
-	);
+	) :
+		FrameActor(parameters, group, requiredParameters),
+		Direction(parameters["direction"], parameters["bouncer"] == "True"),
+		cDirection(direction, false)
+	{}
 
 	virtual ~DirectionActor() = default;
 
 	/**
-	 * Draws the actor configuration.
+	 * @see FrameActor::draw()
 	 */
 	void drawConfig() const override;
+
+	/**
+	 * @see FrameActor::restart();
+	 */
+	void restart() override;
 
 	/**
 	 * @return true if the animation is on the bouncing period.
@@ -58,65 +64,62 @@ public:
 	bool isBouncing() const;
 
 	/**
-	 * @return true if the animation is a bouncer.
-	 */
-	bool isBouncer() const;
-
-	/**
-	 * @return true if the current frame is the first frame.
+	 * @return true same as frame actor but includes direction and bouncing effect.
 	 */
 	bool isFirstFrame() const override;
 
 	/**
-	 * @return true if the current frame is the last frame,
+	 * @return true same as frame actor but includes direction and bouncing effect.
+	 */
+	bool isStartOfCycle() const override;
+
+	/**
+	 * @return true if the current frame is the last frame including last step (not cycle).
 	 */
 	bool isLastFrame() const override;
 
 	/**
-	 * @return true if the direction is forward or forward with bouncing.
+	 * @return true if the current frame is the very last of the cycle (not frame).
 	 */
-	virtual bool isDirectionForward() const;
+	bool isEndOfCycle() const override;
 
-	/**
-	 * @return true if the direction is backward or backward with bouncing.
-	 */
-	virtual bool isDirectionBackward() const;
-
-	/**
-	 * @return Returns the opposite direction for current direction.
-	 */
-	virtual Directions getOppositeDirection() const;
-
-	/**
-	 * @see Actor::restart()
-	 */
-	void restart() override;
-
-	const uint16_t getFullFrames() const override;
+	uint16_t getFullFrames() const override;
 
 	/**
 	 * Will calculate the next index for a group of items, based on the direction and the current position.
 	 * @param [out] currentDirection will be updated with the new direction.
-	 * @param index the element index from 1.
-	 * @param direction
-	 * @param amount
+	 * @param index the item index from 0.
+	 * @param direction the direction to use.
+	 * @param last the last valid item.
 	 * @return the next element.
 	 */
-	static uint16_t calculateNextOf(Directions& currentDirection, uint16_t index, Directions direction, uint16_t amount);
+	static uint16_t calculateNextOf(
+		Direction&      currentDirection,
+		const uint16_t  index,
+		const Direction direction,
+		const uint16_t  last
+	);
 
 	/**
+	 * Will calculate the next index for a group of items, based on the direction and the current position.
+	 * But will not change direction.
 	 * @param currentDirection
-	 * @param element
+	 * @param index
 	 * @param direction
-	 * @param totalElements
+	 * @param last
 	 * @return the next element based on direction and item's position.
 	 */
-	static uint16_t nextOf(Directions currentDirection, uint16_t index, Directions direction, uint16_t amount);
+	static uint16_t nextOf(
+		Direction       currentDirection,
+		const uint16_t  index,
+		const Direction direction,
+		const uint16_t  last
+	);
 
 protected:
 
-	/// Current Direction
-	Directions cDirection;
+	/// Dynamic state for current direction and bouncing.
+	Direction cDirection;
 
 	/**
 	 * Moves the frame to the next one (forward or backward).
@@ -125,6 +128,4 @@ protected:
 
 };
 
-} /* namespace */
-
-#endif /* DIRECTIONACTOR_HPP_ */
+} // namespace

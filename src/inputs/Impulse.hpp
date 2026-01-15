@@ -4,7 +4,7 @@
  * @since     May 23, 2019
  * @author    Patricio A. Rossi (MeduZa)
  *
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  *
  * @copyright LEDSpicer is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,8 +22,7 @@
 
 #include "Reader.hpp"
 
-#ifndef IMPULSE_HPP_
-#define IMPULSE_HPP_ 1
+#pragma once
 
 namespace LEDSpicer::Inputs {
 
@@ -42,6 +41,4 @@ public:
 
 	void process() override;
 };
-} /* namespace */
-
-#endif /* IMPULSE_HPP_ */
+} // namespace

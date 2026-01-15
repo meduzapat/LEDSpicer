@@ -3,14 +3,12 @@
  * @file      PacLed64.hpp
  * @since     Feb 2, 2019
  * @author    Patricio A. Rossi (MeduZa)
- * @copyright Copyright © 2018 - 2025 Patricio A. Rossi (MeduZa)
+ * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
  */
 
 #include "FF00SharedCode.hpp"
 
-#ifndef PACLED64_HPP_
-#define PACLED64_HPP_ 1
-
+#pragma once
 
 #define PAC_LED64_NAME       "Ultimarc PacLed 64"
 #define PAC_LED64_PRODUCT    0x1401
@@ -28,7 +26,7 @@ class PacLed64: public FF00SharedCode {
 
 public:
 
-	PacLed64(umap<string, string>& options) :
+	PacLed64(StringUMap& options) :
 	FF00SharedCode(
 		PAC_LED64_WVALUE,
 		0, // to be defined.
@@ -48,6 +46,4 @@ public:
 
 deviceFactory(PacLed64)
 
-} /* namespace */
-
-#endif /* PACLED64_HPP_ */
+} // namespace
