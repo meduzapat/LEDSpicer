@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(LEDSpicer VERSION 0.7.0 LANGUAGES CXX)
+project(LEDSpicer VERSION 0.7.2 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -11,6 +11,7 @@ set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
 set(COPYRIGHT         "Copyright © 2018 - 2026 Patricio A. Rossi")
+set(MAINTAINER_EMAIL  "meduzapat@netscape.net")
 set(DATA_VERSION      "1.1")
 
 # Set C++ standard

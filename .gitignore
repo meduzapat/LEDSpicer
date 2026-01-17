@@ -63,3 +63,7 @@ doc/
 *.deb
 *.rpm
 *.gz*
+
+# Generated logs and other files
+packaging/arch/.SRCINFO
+

@@ -749,6 +749,7 @@ run_build() {
 
 	print_step "Running CMake..."
 	echo -e "${YELLOW}$cmake_cmd${NC}"
+	rm -f build/CMakeCache.txt
 	eval "$cmake_cmd"
 
 	print_step "Building ${PROJECT_NAME} ${VERSION}..."
