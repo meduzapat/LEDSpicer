@@ -1,0 +1,3 @@
+usr/include/ledspicer/
+usr/lib/*/libledspicer.so
+usr/lib/*/pkgconfig/ledspicer.pc
