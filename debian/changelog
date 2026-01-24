@@ -1,0 +1,9 @@
+ledspicer (0.7.2-1) unstable; urgency=medium
+
+- Add packaging support for Arch (AUR), Fedora (COPR), Debian/Ubuntu (PPA)
+- Split packages: base daemon + separate plugin per device
+- Add CHANGELOG.md (Keep a Changelog format)
+- Add generate-changelogs.sh (single source of truth from CMakeLists.txt)
+- Add install.sh interactive installer
+
+ -- Patricio A. Rossi <meduzapat@netscape.net>  Fri, 23 Jan 2026 23:52:37 -0500

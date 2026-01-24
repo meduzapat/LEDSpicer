@@ -1,0 +1,125 @@
+Source: ledspicer
+Section: misc
+Priority: optional
+Maintainer: Patricio A. Rossi (MeduZa) <meduzapat@netscape.net>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake (>= 3.10),
+ pkg-config,
+ libtinyxml2-dev (>= 6.0),
+ libusb-1.0-0-dev (>= 1.0.22),
+ libpulse-dev (>= 0.9),
+ libasound2-dev (>= 0.2)
+Standards-Version: 4.6.0
+Homepage: https://github.com/meduzapat/LEDSpicer
+Vcs-Browser: https://github.com/meduzapat/LEDSpicer
+Vcs-Git: https://github.com/meduzapat/LEDSpicer.git
+Rules-Requires-Root: no
+
+Package: ledspicer
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends}
+Recommends:
+ ledspicer-doc
+Suggests:
+ ledspicer-nanoled,
+ ledspicer-pacdrive,
+ ledspicer-pacled64,
+ ledspicer-ultimateio,
+ ledspicer-ledwiz32,
+ ledspicer-howler,
+ ledspicer-adalight
+Description: LED controller daemon for arcade cabinets and RGB lighting
+ LEDSpicer is a robust linear LED controller daemon engineered to manage
+ both single-color and RGB LEDs across a wide range of devices.
+ .
+ This solution enables the seamless execution of sophisticated animations
+ and profiles, delivering a visually striking and dynamic user experience.
+ .
+ Install device plugin packages separately based on your hardware.
+
+Package: ledspicer-nanoled
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Ultimarc NanoLed
+ LEDSpicer device plugin for Ultimarc NanoLed LED controllers.
+
+Package: ledspicer-pacdrive
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Ultimarc PacDrive
+ LEDSpicer device plugin for Ultimarc PacDrive LED controllers.
+
+Package: ledspicer-pacled64
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Ultimarc PacLed64
+ LEDSpicer device plugin for Ultimarc PacLed64 LED controllers.
+
+Package: ledspicer-ultimateio
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Ultimarc Ultimate I/O
+ LEDSpicer device plugin for Ultimarc Ultimate I/O boards.
+
+Package: ledspicer-ledwiz32
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Groovy Game Gear LedWiz32
+ LEDSpicer device plugin for Groovy Game Gear LedWiz32 LED controllers.
+
+Package: ledspicer-howler
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for WolfWareTech Howler
+ LEDSpicer device plugin for WolfWareTech Howler LED controllers.
+
+Package: ledspicer-adalight
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: LEDSpicer plugin for Adalight serial LEDs
+ LEDSpicer device plugin for Adalight-compatible serial LED strips.
+
+Package: ledspicer-dev
+Section: libdevel
+Architecture: any
+Depends:
+ ledspicer (= ${binary:Version}),
+ ${misc:Depends}
+Description: LEDSpicer development files
+ This package contains the development headers and pkg-config file
+ for building applications that use the LEDSpicer library.
+
+Package: ledspicer-doc
+Section: doc
+Architecture: all
+Depends:
+ ${misc:Depends}
+Recommends:
+ ledspicer
+Description: LEDSpicer documentation and examples
+ This package contains documentation, example configuration files,
+ and sample profiles for LEDSpicer.
