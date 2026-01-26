@@ -20,7 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "restrictors/Restrictor.hpp"
 #include "restrictors/UltraStik360.hpp"
 #include "restrictors/ServoStik.hpp"
 #include "restrictors/GPWiz49.hpp"
