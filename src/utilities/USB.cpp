@@ -45,35 +45,75 @@ void USB::connect() {
 
 	if (handle) return;
 
-	libusb_device** list;
-	libusb_device* device = nullptr;
-	libusb_get_device_list(usbSession, &list);
-	for (size_t idx = 0; list[idx] != nullptr; idx++) {
-		device = list[idx];
-		libusb_device_descriptor desc;
-		libusb_get_device_descriptor(device, &desc);
+	libusb_device** list = nullptr;
+	libusb_device*  device = nullptr;
 
-		if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
-			// For ID by product only check the vendor and product.
-			if (isProductBasedId()) {
-				break;
+	libusb_get_device_list(usbSession, &list);
+
+	if (isNonBasedId()) {
+		// Devices with no unique identifier need topology-based sorting for stable ordering.
+		struct Candidate {
+			libusb_device*       dev;
+			uint8_t              bus;
+			std::vector<uint8_t> ports;
+		};
+		std::vector<Candidate> candidates;
+
+		for (size_t idx = 0; list[idx] != nullptr; ++idx) {
+			libusb_device_descriptor desc;
+			if (libusb_get_device_descriptor(list[idx], &desc) != 0) continue;
+			if (desc.idVendor != getVendor() or desc.idProduct != getProduct()) continue;
+
+			Candidate c;
+			c.dev = list[idx];
+			c.bus = libusb_get_bus_number(list[idx]);
+			uint8_t portBuf[8];
+			int n = libusb_get_port_numbers(list[idx], portBuf, sizeof(portBuf));
+			if (n > 0) {
+				c.ports.assign(portBuf, portBuf + n);
 			}
-			// For hardware that have no order use the position on the list.
-			else if (isNonBasedId() and idx + 1 == boardId) {
-				break;
-			}
-			// For independent hardware check device ID.
-			else if (desc.bcdDevice == boardId) {
-				break;
-			}
+			candidates.push_back(std::move(c));
 		}
-		device = nullptr;
+
+		std::sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) {
+			if (a.bus != b.bus) {
+				return a.bus < b.bus;
+			}
+			return a.ports < b.ports;
+		});
+
+		if (boardId <= candidates.size()) device = candidates[boardId - 1].dev;
 	}
+	else {
+		for (size_t idx = 0; list[idx] != nullptr; ++idx) {
+			device = list[idx];
+			libusb_device_descriptor desc;
+			libusb_get_device_descriptor(device, &desc);
+
+			if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
+				// For ID by product only check the vendor and product.
+				if (isProductBasedId()) {
+					break;
+				}
+				// For independent hardware check device ID.
+				else if (desc.bcdDevice == boardId) {
+					break;
+				}
+			}
+			device = nullptr;
+		}
+	}
+
+	int rc = LIBUSB_ERROR_NO_DEVICE;
+	if (device) rc = libusb_open(device, &handle);
+
 	libusb_free_device_list(list, 1);
-	if (device and libusb_open(device, &handle) == LIBUSB_SUCCESS) {
+
+	if (rc == LIBUSB_SUCCESS) {
 		libusb_set_auto_detach_kernel_driver(handle, true);
 		return;
 	}
+
 	throw Error("Failed to open device ")  <<
 			Utility::hex2str(getVendor())  << ":" <<
 			Utility::hex2str(getProduct()) << " id " << getId();
