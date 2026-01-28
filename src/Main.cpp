@@ -299,6 +299,7 @@ int main(int argc, char **argv) {
 				"Data dir:     " PROJECT_DATA_DIR "\n"
 				"Devices dir:  " DEVICES_DIR "\n"
 				"Projects dir: " << Utility::getConfigDir() << PROJECTS_DIR "\n"
+				"Please note that if the program runs as different user id, the projects dir will be different\n"
 				"If -c or --config is not provided " PROJECT_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;

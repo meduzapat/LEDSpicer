@@ -122,9 +122,11 @@ const string Utility::extractChars(const string& str, char from, char to) {
 	return result;
 }
 
-const string Utility::getHomeDir() {
-	const char* homeDir = getenv("HOME");
-	if (homeDir) return string(homeDir);
+const std::string Utility::getHomeDir() {
+	struct passwd* pw = getpwuid(geteuid());
+	if (pw && pw->pw_dir) {
+		return std::string(pw->pw_dir);
+	}
 	return "/root";
 }
 

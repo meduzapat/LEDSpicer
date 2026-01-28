@@ -54,6 +54,9 @@ using std::vector;
 // for setenv, close, daemonization and uid/gid.
 #include <unistd.h>
 
+// To get home dir.
+#include <pwd.h>
+
 // To handle strings
 #include <string>
 using std::string;
