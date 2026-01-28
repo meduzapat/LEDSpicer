@@ -34,7 +34,7 @@
 #define ULTRASTIK_MAX_BOARDS 4
 #define ULTRASTIK_DATA_SIZE  4
 
-#define UM_FILES_DIR PROJECT_DATA_DIR "/umaps/"
+#define UM_FILES_DIR PROJECT_DATA_DIR "umaps/"
 #define DEFAULT_MAP_BORDERS {30,58,86,114,142,170,198,226}
 
 namespace LEDSpicer::Restrictors {

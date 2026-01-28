@@ -109,9 +109,8 @@ const string Utility::hex2str(const int number) {
 }
 
 const string Utility::removeChar(const string& str, char c) {
-	string result;
-	for (char currentChar : str)
-		if (currentChar != c) result += currentChar;
+	string result(str);
+	result.erase(std::remove(result.begin(), result.end(), c), result.end());
 	return result;
 }
 
@@ -130,6 +129,6 @@ const string Utility::getHomeDir() {
 }
 
 const string Utility::getConfigDir() {
-	return string(getHomeDir() + "/.local/share/" PROJECT_NAME);
+	return string(getHomeDir() + "/.local/share/" PROJECT_NAME "/");
 }
 

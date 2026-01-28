@@ -170,7 +170,7 @@ void MainBase::dumpConfiguration() {
 }
 
 void MainBase::dumpProfile() {
-	cout << endl << "Default Profile:" << Profile::defaultProfile->getName() << endl;
+	cout << endl << "Default Profile: " << Profile::defaultProfile->getName() << endl;
 	Profile::defaultProfile->drawConfig();
 	DataLoader::getTransitionFromCache(Profile::defaultProfile)->drawConfig();
 	cout << endl;

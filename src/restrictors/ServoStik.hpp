@@ -32,7 +32,8 @@
 #define SERVOSTIK_INTERFACE  0
 #define SERVOSTIK_WVALUE     0x0200
 #define SERVOSTIK_MAX_BOARDS 4
-#define SERVOSTIK_DATA(name) "/servostik_" + name + ".dat"
+#define SERVOSTIK_DIR        "servostik/"
+#define SERVOSTIK_DATA(name) "last_" + name + ".dat"
 
 namespace LEDSpicer::Restrictors {
 

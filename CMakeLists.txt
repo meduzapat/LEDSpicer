@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 # Project details
 set(PROJECT_NAME      "${CMAKE_PROJECT_NAME}")
 set(PROJECT_VERSION   "${CMAKE_PROJECT_VERSION}")
-set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer")
+set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/")
 set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
@@ -442,6 +442,8 @@ file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/ledspicerd\n"
 	"Restart=always\n"
 	"RestartSec=5s\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n"
 )
 
 # Add PulseAudio environment variable if enabled.
@@ -470,6 +472,8 @@ file(WRITE ${CMAKE_BINARY_DIR}/processlookup.service
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/processLookup\n"
 	"Restart=always\n"
 	"RestartSec=5s\n\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n\n"
 
 	"[Install]\n"
 	"WantedBy=multi-user.target\n"

@@ -51,10 +51,11 @@
 #pragma once
 
 // data files location
-#define ACTOR_DIR   "/animations/"
-#define PROFILE_DIR "/profiles/"
-#define INPUT_DIR   "/inputs/"
-#define MAXIMUM_FPS 60
+#define PROJECTS_DIR "projects/"
+#define ACTOR_DIR    "animations/"
+#define PROFILE_DIR  "profiles/"
+#define INPUT_DIR    "inputs/"
+#define MAXIMUM_FPS  60
 
 #define PARAM_FPS             "fps"
 #define PARAM_COLORS          "colors"
@@ -75,6 +76,7 @@
 #define PARAM_POSITIONS       "positions"
 #define PARAM_COLORFORMAT     "colorFormat"
 #define PARAM_DEFAULT_PROFILE "defaultProfile"
+#define PARAM_DEFAULT_PROJECT "defaultProject"
 #define PARAM_USER_ID         "userId"
 #define PARAM_GROUP_ID        "groupId"
 #define PARAM_FILTER          "filter"
@@ -127,19 +129,19 @@ class DataLoader: public XMLHelper {
 
 public:
 
+	/// Running modes.
 	enum class Modes : uint8_t {
-		/// Do not detach from head.
-		Foreground,
-		/// Dump Config and exit.
-		Dump,
-		/// Dump Profile and exit.
-		Profile,
-		/// Run as a daemon.
-		Normal,
-		/// Run LEDs test.
-		TestLed,
-		/// Run Elements test.
-		TestElement
+		Foreground, /// Do not detach from head.
+		Dump,       /// Dump Config and exit.
+		Profile,    /// Dump Profile and exit.
+		Normal,     /// Run as a daemon.
+		TestLed,    /// Run LEDs test.
+		TestElement /// Run Elements test.
+	};
+
+	struct LayoutProperties {
+		string project;
+		string profile;
 	};
 
 	using XMLHelper::XMLHelper;
@@ -149,9 +151,15 @@ public:
 	/**
 	 * Reads and process the configuration file.
 	 *
-	 * @param testProfile if set will load this profile instead of the default one.
+	 * @param projectDir if set, overrides the default directory where projects are stored.
+	 * @param project    if set, overrides the project defined in the configuration file.
+	 * @param profile    if set, overrides the profile defined in the configuration file.
 	 */
-	void readConfiguration(const string& testProfile);
+	void readConfiguration(
+		const string& projectDir,
+		const string& project,
+		const string& profile
+	);
 
 	/**
 	 * Check if a profile exists in the cache.
@@ -235,6 +243,18 @@ public:
 	 */
 	static void destroyCache();
 
+	/**
+	 * @return Returns the base directory where the current project is stored.
+	 */
+	static string getProjectDir();
+
+	/**
+	 * Sets the base directory where the current project is stored.
+	 * @param path
+	 * @param project
+	 */
+	static void setProjectDir(const string& path, const string& project);
+
 /* Storage */
 
 	/// Port number to use for listening.
@@ -250,6 +270,9 @@ protected:
 
 	/// Keeps references to profiles.
 	static ProfilePtrUMap profilesCache;
+
+	/// Stores the location where the project is stored.
+	static string projectDir;
 
 	/// Stores the transitions for each unique profile.
 	static unordered_map<Profile*, Transition*> transitions;
@@ -274,9 +297,9 @@ protected:
 
 	/**
 	 * Reads the layout and group sections from config.
-	 * @return the default profile name.
+	 * @return the default layout properties.
 	 */
-	const string processLayout();
+	const LayoutProperties processLayout();
 
 	/**
 	 * Reads elements from groups.
