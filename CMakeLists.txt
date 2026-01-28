@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
-project(LEDSpicer VERSION 0.7.2 LANGUAGES CXX)
+
+project(LEDSpicer VERSION 0.7.3 LANGUAGES CXX)
+
 
 include(GNUInstallDirs)
 
-# Metadata (for substitutions and compile definitions)
+# Project details
 set(PROJECT_NAME      "${CMAKE_PROJECT_NAME}")
 set(PROJECT_VERSION   "${CMAKE_PROJECT_VERSION}")
-set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer")
+set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/")
 set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
@@ -21,8 +23,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-# Devices installation directory
-set(DEVICES_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ledspicer/devices")
+# Devices plugin installation directory
+set(DEVICES_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ledspicer/devices" CACHE PATH "default devices plugin install directory")
+
+# Systemd unit install directory (arch independed)
+set(SYSTEMD_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/system" CACHE PATH "systemd unit install directory")
+
+# Pkg-config file install directory
+set(PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "pkg-config file install directory")
+
+# Docs installation directory
+set(INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/ledspicer" CACHE PATH "documentation and examples install directory")
 
 # Global compile definitions (for source code)
 add_compile_definitions(
@@ -124,17 +135,14 @@ add_library(ledspicer SHARED
 	src/utilities/Colorful.cpp
 	src/utilities/Socks.cpp
 	src/utilities/Time.cpp
+	src/utilities/Message.cpp
+	src/utilities/Messages.cpp
 	src/utilities/Monochromatic.cpp
-	src/restrictors/Restrictor.cpp
-	src/restrictors/RestrictorUSB.cpp
-	src/restrictors/RestrictorSerial.cpp
 	src/devices/Element.cpp
 	src/devices/Group.cpp
 	src/devices/Device.cpp
 	src/devices/DeviceSerial.cpp
 	src/devices/DeviceUSB.cpp
-	src/utilities/Message.cpp
-	src/utilities/Messages.cpp
 )
 
 if(ENABLE_DRY_RUN)
@@ -147,10 +155,31 @@ endif()
 
 set_target_properties(ledspicer PROPERTIES VERSION 1.1.0 SOVERSION 1)
 install(TARGETS ledspicer LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ledspicer
+
+# Headers.
+install(
+	DIRECTORY src/utilities/
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ledspicer/utilities
 	FILES_MATCHING PATTERN "*.hpp"
 	PATTERN "CMakeFiles" EXCLUDE
 )
+install(
+	FILES
+		src/devices/Element.hpp
+		src/devices/Group.hpp
+		src/devices/Device.hpp
+		src/devices/DeviceSerial.hpp
+		src/devices/DeviceUSB.hpp
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ledspicer/devices
+)
+
+# Pkgconfig file.
+configure_file(data/ledspicer.pc.in ledspicer.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/ledspicer.pc DESTINATION ${PKGCONFIG_DIR})
+
+##########
+# Macros #
+##########
 
 # Define a macro to create generic plugins
 macro(add_plugin PLUGIN_NAME PLUGIN_SRC PLUGIN_DIR)
@@ -189,7 +218,6 @@ set(LEDSPICER_SOURCES
 	src/animations/Filler.cpp
 	src/animations/Gradient.cpp
 	src/animations/Pulse.cpp
-	src/animations/PulseAudio.cpp
 	src/animations/Random.cpp
 	src/animations/Serpentine.cpp
 	src/inputs/Input.cpp
@@ -224,7 +252,6 @@ if(ENABLE_PULSEAUDIO)
 	list(APPEND LEDSPICER_DEFINES PRIVATE PULSEAUDIO=1)
 	list(APPEND LEDSPICER_INCLUDE_DIRS ${LIBPULSE_INCLUDE_DIRS})
 	list(APPEND LEDSPICER_LIBS ${LIBPULSE_LIBRARIES})
-#	add_compile_definitions(PULSEAUDIO=1)
 endif()
 
 # ALSA audio animation (conditional)
@@ -233,11 +260,10 @@ if(ENABLE_ALSAAUDIO)
 	list(APPEND LEDSPICER_DEFINES PRIVATE ALSAAUDIO=1)
 	list(APPEND LEDSPICER_INCLUDE_DIRS ${LIBALSA_INCLUDE_DIRS})
 	list(APPEND LEDSPICER_LIBS ${LIBALSA_LIBRARIES})
-#	add_compile_definitions(ALSAAUDIO=1)
 endif()
 
 add_executable(ledspicerd ${LEDSPICER_SOURCES})
-target_compile_definitions(ledspicerd ${LEDSPICER_DEFINES})
+target_compile_definitions(ledspicerd PRIVATE ${LEDSPICER_DEFINES})
 
 if(NOT ENABLE_DRY_RUN)
 	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
@@ -261,6 +287,9 @@ install(TARGETS emitter RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Rotator utility
 add_executable(rotator
+	src/restrictors/Restrictor.cpp
+	src/restrictors/RestrictorUSB.cpp
+	src/restrictors/RestrictorSerial.cpp
 	src/restrictors/ServoStik.cpp
 	src/restrictors/UltraStik360.cpp
 	src/restrictors/GPWiz49.cpp
@@ -360,50 +389,26 @@ if(ENABLE_ADALIGHT)
 	)
 endif()
 
-# Documentation and examples.
-install(FILES README.md COPYING DESTINATION ${CMAKE_INSTALL_DOCDIR})
+##############################
+# Documentation and examples #
+##############################
+
+install(FILES README.md COPYING DESTINATION ${INSTALL_DOCDIR})
+
 install(FILES
 	data/21-ledspicer.rules
 	data/ledspicer.conf
-	DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples
+	DESTINATION ${INSTALL_DOCDIR}/examples
 )
 
-# Pkgconfig file.
-configure_file(data/ledspicer.pc.in ledspicer.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/ledspicer.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-# Get systemd unit directory from pkg-config
-execute_process(
-	COMMAND ${PKG_CONFIG_EXECUTABLE} systemd --variable=systemdsystemunitdir
-	OUTPUT_VARIABLE SYSTEMD_UNIT_DIR
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-##########################
-# Custom install targets #
-##########################
-
-add_custom_target(install-services
-	COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_BINARY_DIR}/ledspicerd.service
-		${SYSTEMD_UNIT_DIR}/ledspicerd.service
-	COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_BINARY_DIR}/processlookup.service
-		${SYSTEMD_UNIT_DIR}/processlookup.service
-	COMMENT "Installing service files"
-)
-
-add_custom_target(install-config
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_SOURCE_DIR}/data/ledspicer.conf
-		${CMAKE_INSTALL_SYSCONFDIR}/ledspicer.conf
-	COMMENT "Installing configuration file"
-)
+#########################
+# Custom install target #
+#########################
 
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -E echo "Checking for install manifest..."
 	COMMAND test -f ${CMAKE_BINARY_DIR}/install_manifest.txt || (echo "Error: install_manifest.txt not found. Run 'make install' first." && exit 1)
-	COMMAND xargs rm -f < ${CMAKE_BINARY_DIR}/install_manifest.txt
+	COMMAND xargs rm -fv < ${CMAKE_BINARY_DIR}/install_manifest.txt
 	COMMAND ${CMAKE_COMMAND} -E echo "Uninstall complete."
 	COMMENT "Uninstalling LEDSpicer"
 )
@@ -412,28 +417,11 @@ add_custom_target(uninstall
 # systemd services #
 ####################
 
-# Fallback if pkg-config fails
-if(NOT SYSTEMD_UNIT_DIR)
-	set(SYSTEMD_UNIT_DIR "/usr/lib/systemd/system")
-endif()
-
 # Base service file top part.
 file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"[Unit]\n"
 	"Description=LEDSpicer Daemon\n"
-	"After=network.target"
-)
-
-# Add PulseAudio or PipeWire dependencies if enabled.
-if(ENABLE_PULSEAUDIO)
-	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		" pulseaudio.service"
-	)
-endif()
-
-# Continue base service file.
-file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-	"\n"
+	"After=network.target sound.target\n"
 	"StartLimitIntervalSec=60s\n"
 	"StartLimitBurst=3\n\n"
 
@@ -442,12 +430,14 @@ file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/ledspicerd\n"
 	"Restart=always\n"
 	"RestartSec=5s\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n"
 )
 
-# Add PulseAudio environment variable if enabled.
+# Optional PulseAudio support
 if(ENABLE_PULSEAUDIO)
 	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		"ExecStartPre=/bin/sh -c 'for i in {1..30}; do [ -S /run/user/1000/pulse/native ] && exit 0; sleep 1; done; exit 1'\n"
+		"# Optional PulseAudio socket hint (daemon reconnects if unavailable) remember to change 1000 with the used ID if different\n"
 		"Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native\n"
 	)
 endif()
@@ -469,11 +459,16 @@ file(WRITE ${CMAKE_BINARY_DIR}/processlookup.service
 	"Type=forking\n"
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/processLookup\n"
 	"Restart=always\n"
-	"RestartSec=5s\n\n"
+	"RestartSec=5s\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n\n"
 
 	"[Install]\n"
 	"WantedBy=multi-user.target\n"
 )
+
+install(FILES ${CMAKE_BINARY_DIR}/ledspicerd.service DESTINATION ${SYSTEMD_DIR})
+install(FILES ${CMAKE_BINARY_DIR}/processlookup.service DESTINATION ${SYSTEMD_DIR})
 
 ###################
 # Test and report #

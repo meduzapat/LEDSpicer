@@ -5,7 +5,7 @@
 %global debug_package %{nil}
 
 Name:           ledspicer
-Version:        0.7.2
+Version:        0.7.3
 Release:        1%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
@@ -26,6 +26,11 @@ Requires:       libusb1 >= 1.0.22
 Requires:       pulseaudio-libs >= 0.9
 Requires:       alsa-lib >= 0.2
 
+Requires:       tinyxml2 >= 6.0
+Requires:       libusb1 >= 1.0.22
+Requires:       pulseaudio-libs >= 0.9
+Requires:       alsa-lib >= 0.2
+
 # Note: RaspberryPi plugin not available on Fedora (pigpio not packaged)
 
 %description
@@ -36,6 +41,15 @@ This solution enables the seamless execution of sophisticated animations
 and profiles, delivering a visually striking and dynamic user experience.
 
 Install device plugin packages separately based on your hardware.
+
+%post
+%systemd_post ledspicerd.service processlookup.service
+
+%preun
+%systemd_preun ledspicerd.service processlookup.service
+
+%postun
+%systemd_postun_with_restart ledspicerd.service processlookup.service
 
 # =============================================================================
 # Device Plugin Subpackages
@@ -115,7 +129,7 @@ that use the LEDSpicer library.
 %build
 %cmake \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="-g0 -O3" \
+    -DCMAKE_CXX_FLAGS="-g0 -O3 -fPIC" \
     -DENABLE_PULSEAUDIO=ON \
     -DENABLE_ALSAAUDIO=ON \
     -DENABLE_NANOLED=ON \
@@ -132,36 +146,14 @@ that use the LEDSpicer library.
 %install
 %cmake_install
 
-# Install udev rules
-install -Dm644 data/21-ledspicer.rules \
-    %{buildroot}%{_udevrulesdir}/21-ledspicer.rules
-
-# =============================================================================
-# Scripts
-# =============================================================================
-
-%post
-%systemd_post ledspicerd.service
-/sbin/ldconfig
-udevadm control --reload-rules 2>/dev/null || :
-udevadm trigger 2>/dev/null || :
-
-%preun
-%systemd_preun ledspicerd.service
-
-%postun
-%systemd_postun_with_restart ledspicerd.service
-/sbin/ldconfig
-
 # =============================================================================
 # File Lists
 # =============================================================================
 
 %files
-%license COPYING
-%doc README.md
-%doc %{_docdir}/%{name}/examples/
-%config(noreplace) %{_sysconfdir}/ledspicer.conf
+%license %{_docdir}/ledspicer/COPYING
+%doc %{_docdir}/ledspicer/README.md
+%doc %{_docdir}/ledspicer/examples/
 %{_bindir}/ledspicerd
 %{_bindir}/emitter
 %{_bindir}/rotator
@@ -172,7 +164,7 @@ udevadm trigger 2>/dev/null || :
 %dir %{_libdir}/ledspicer/devices
 %{_datadir}/ledspicer/
 %{_unitdir}/ledspicerd.service
-%{_udevrulesdir}/21-ledspicer.rules
+%{_unitdir}/processlookup.service
 
 %files nanoled
 %{_libdir}/ledspicer/devices/UltimarcNanoLed.so
@@ -205,5 +197,15 @@ udevadm trigger 2>/dev/null || :
 # =============================================================================
 
 %changelog
-* Fri Jan 23 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.2-1
-
+* Wed Jan 28 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.3-1
+- Added
+  - Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options).
+  - `LayoutProperties` struct for layout handling.
+  - Unit tests for core utilities and device handling.
+- Fixed
+  - Servostiks board works in multi-board setups.
+  - Pulseaudio actor now reconnects automatically and avoids fatal failures.
+- Changed
+  - Centralized path handling ensures consistent trailing slashes.
+  - Systemd service files improved: graceful shutdown, optional Pulseaudio support for daemons.
+  - `Utility::getHomeDir()` now resolves the correct home directory after privilege drops.

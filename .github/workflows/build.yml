@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            libtinyxml2-dev \
+            libpulse-dev \
+            libasound2-dev \
+            libusb-1.0-0-dev
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DENABLE_NANOLED=ON \
+            -DENABLE_PACDRIVE=ON \
+            -DENABLE_PACLED64=ON \
+            -DENABLE_ULTIMATEIO=ON \
+            -DENABLE_LEDWIZ32=ON \
+            -DENABLE_HOWLER=ON \
+            -DENABLE_ADALIGHT=ON \
+            -DENABLE_ALSAAUDIO=ON \
+            -DENABLE_PULSEAUDIO=ON \
+            -DENABLE_TESTS=OFF \
+            -DENABLE_DRY_RUN=OFF
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+

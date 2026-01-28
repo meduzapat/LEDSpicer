@@ -6,36 +6,40 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3183/badge)](https://bestpractices.coreinfrastructure.org/projects/3183)
 [![Static Badge](https://img.shields.io/badge/Donations_are_welcome-gray?logo=paypal&labelColor=rgb(255%2C%20209%2C%2064))](https://www.paypal.com/donate/?hosted_button_id=LVNVCXN4NKWP8)
 [![Static Badge](https://img.shields.io/badge/OH-rgb(90%2C%2042%2C%20130)?label=Project%20Summary&labelColor=gray)](https://openhub.net/p/ledspicer)
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/meduzapat/ledspicer/package/ledspicer/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/meduzapat/ledspicer/package/ledspicer/)
 
-## LEDSpicer Overview: Advanced LED and Joystick Control for Enhanced Projects
+## LEDSpicer: LED and Joystick Control Daemon
 
-LEDSpicer is a robust linear LED controller daemon engineered to manage both single-color and RGB LEDs across a wide range of devices.
+LEDSpicer is a Linux daemon for controlling single-color and RGB LEDs across multiple hardware devices. It executes animations and lighting profiles that can be triggered by user commands, network events, or running applications, with native support for MAME game events.
 
-This solution enables the seamless execution of sophisticated animations and profiles, delivering a visually striking and dynamic user experience. Designed for flexibility, LEDSpicer integrates effortlessly with user inputs, offering responsive and interactive LED control. Its standout feature lies in its ability to activate profiles based on a variety of triggers, such as user commands, network events, or specific game titles. With full compatibility for MAME events, it provides precise LED synchronization tied to in-game activities.
+### Key Features
 
-Beyond illumination, LEDSpicer extends its functionality to include support for joystick restrictors and rotators. This enhances gaming applications by combining precise mechanical control with high-quality visual output, ensuring a cohesive and immersive experience.
+- **Multi-device support** for a wide range of LED controllers
+- **Profile-based activation** triggered by games, commands, or network events
+- **MAME integration** for LED synchronization with in-game activity
+- **Joystick restrictor and rotator control** for arcade applications
 
-Elevate your project’s aesthetic appeal and interactivity with LEDSpicer—a powerful tool that merges advanced LED management with intuitive design, while expanding its capabilities to include joystick control solutions.
-
-> *Optimized software for enhancing arcade and interactive projects.*
+LEDSpicer combines responsive LED management with mechanical control, making it well-suited for arcade cabinets and interactive projects.
 
 ## Getting Started
 
-You can get the program installed using the [PPA](https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer) (I'm working on getting LEDSpicer into the repositories).
+### Installation
 
-Or In the [project wiki](https://github.com/meduzapat/LEDSpicer/wiki/) you will find 
-all the information you need to compile and install the program yourself.
+LEDSpicer is available through package repositories for major Linux distributions:
+
+- **Ubuntu/Debian**: [PPA](https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer)
+- **Fedora**: [COPR](https://copr.fedorainfracloud.org/coprs/meduzapat/LEDSpicer/)
+- **Arch Linux**: [AUR](https://aur.archlinux.org/packages/ledspicer)
+
+For manual compilation and detailed configuration, see the [project wiki](https://github.com/meduzapat/LEDSpicer/wiki/).
 
 ## Contacts, Content and Media.
-
-[![Project Email](https://img.shields.io/badge/MeduZaPaT-meduzapat@users.sourceforge.net-orange.svg?logo=minutemailer&logoColor=White)](mailto:meduzapat@users.sourceforge.net)
 
 [![Facebook Page](https://img.shields.io/badge/Visit%20the-Facebook%20page-blue?logo=facebook)](https://www.facebook.com/LEDSpicer-2393969390678210)
 
 [![Youtube Channel](https://img.shields.io/badge/Visit%20the-Youtube%20Channel-red?logo=youtube)](https://www.youtube.com/playlist?list=PLKqGl2gHvQPSnCl0zcyKkzd4-E6xux-Zi)
 
-[![Discord Channel](https://img.shields.io/discord/1187485303313809528?logo=discord&logoColor=%235865F2&label=Discord%20Channel)](https://discord.gg/m4D2QVXqm6
-)
+[![Discord Channel](https://img.shields.io/discord/1187485303313809528?logo=discord&logoColor=%235865F2&label=Discord%20Channel)](https://discord.gg/m4D2QVXqm6)
 
 ## Some sample videos
 

@@ -33,7 +33,7 @@
 #define DATA_SOURCE_CONTROLSINI "controls.ini"
 
 // dataSource fields.
-#define CONTROLLERS_FILE PROJECT_DATA_DIR "/gameData.xml"
+#define CONTROLLERS_FILE PROJECT_DATA_DIR "gameData.xml"
 #define CONTROL "C"
 #define PLAYERS "ps"
 #define PLAYER  "p"
@@ -54,7 +54,7 @@
 #define CCOINS   "coins"
 
 // controls.ini fields.
-#define CONTROLINI_FILE PROJECT_DATA_DIR "/controls.ini"
+#define CONTROLINI_FILE PROJECT_DATA_DIR "controls.ini"
 
 // Controllers
 #define MOUSE      "MOUSE"
@@ -66,7 +66,7 @@
 #define POSITIONAL "POSITIONAL"
 #define JOYSTICK   "JOYSTICK"
 
-#define COLORINI_FILE PROJECT_DATA_DIR "/colors.ini"
+#define COLORINI_FILE PROJECT_DATA_DIR "colors.ini"
 
 bool ignoreMissingColors = false;
 

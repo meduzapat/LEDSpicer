@@ -46,6 +46,17 @@ ENABLE_ALSAAUDIO=OFF
 ENABLE_MISTER=OFF
 ENABLE_RASPBERRYPI=OFF
 
+# Additional globals for modifications
+comment_pulse_lines=false
+PULSE_USER_ID=1000
+IS_DAEMON=false
+
+# Sudo variables for different contexts
+SUDO=""            # For system operations (packages, ldconfig, udev, systemd)
+SUDO_INSTALL=""    # For make install (depends on PREFIX)
+SUDO_CONF=""       # For config file operations (depends on SYSCONFDIR)
+IS_SYSTEM_INSTALL=false  # True if installing to system paths (needs ldconfig, systemd, etc.)
+
 # =============================================================================
 # Utility Functions
 # =============================================================================
@@ -110,6 +121,44 @@ check_root() {
 		SUDO=""
 	else
 		SUDO="sudo"
+	fi
+}
+
+# Check if a path requires sudo to write to
+# Returns 0 (true) if sudo is needed, 1 (false) if not
+path_needs_sudo() {
+	local path="$1"
+
+	# If running as root, never need sudo
+	[[ $EUID -eq 0 ]] && return 1
+
+	# Find the first existing directory in the path
+	local check_path="$path"
+	while [[ ! -e "$check_path" && "$check_path" != "/" ]]; do
+		check_path=$(dirname "$check_path")
+	done
+
+	# Check if writable
+	[[ -w "$check_path" ]] && return 1
+
+	return 0
+}
+
+# Update sudo variables based on installation paths
+# Call this after paths are configured
+update_sudo_for_paths() {
+	if path_needs_sudo "$PREFIX"; then
+		SUDO_INSTALL="sudo"
+		IS_SYSTEM_INSTALL=true
+	else
+		SUDO_INSTALL=""
+		IS_SYSTEM_INSTALL=false
+	fi
+
+	if path_needs_sudo "$SYSCONFDIR"; then
+		SUDO_CONF="sudo"
+	else
+		SUDO_CONF=""
 	fi
 }
 
@@ -262,7 +311,7 @@ detect_existing_cmake_settings() {
 
 	# Ask user if they want to use existing settings
 	if ! whiptail --title "${PROJECT_NAME} ${VERSION} - Existing Build Found" \
-		--yesno "Found existing CMake configuration in '$BUILD_DIR'.\n\nWould you like to load these settings?" 10 60; then
+		--yesno "We found an existing build configuration in the '$BUILD_DIR' directory.\n\nWould you like to reuse these settings for this installation?" 12 60; then
 		return 1
 	fi
 
@@ -320,7 +369,7 @@ configure_user() {
 
 	local input
 	input=$(whiptail --title "${PROJECT_NAME} ${VERSION} - User Configuration" \
-		--inputbox "Enter the username that will run LEDSpicer daemons:\n\n(User ID: $USER_ID, Group ID: $GROUP_ID)" 12 60 \
+		--inputbox "Please enter the username that will run the LEDSpicer program:\n\n(Current detection: User ID $USER_ID, Group ID $GROUP_ID)" 12 60 \
 		"$RUN_USER" \
 		3>&1 1>&2 2>&3) || return 0
 
@@ -328,7 +377,7 @@ configure_user() {
 		# Validate user exists
 		if ! id "$input" &>/dev/null; then
 			whiptail --title "${PROJECT_NAME} ${VERSION} - Error" \
-				--msgbox "User '$input' does not exist.\n\nUsing default: $RUN_USER" 10 50
+				--msgbox "The user '$input' does not exist on this system.\n\nWe'll stick with the default: $RUN_USER" 10 50
 			return 0
 		fi
 
@@ -390,7 +439,7 @@ select_platform() {
 
 	local platform
 	platform=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Platform Selection" \
-		--radiolist "Detected architecture: $ARCH\n\nSelect target platform:" 16 70 4 \
+		--radiolist "We've detected your system architecture as: $ARCH\n\nPlease select the target platform for this build:" 16 70 4 \
 		"${options[@]}" \
 		3>&1 1>&2 2>&3) || exit 1
 
@@ -448,7 +497,7 @@ select_devices() {
 
 	local selected
 	selected=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Device Selection" \
-		--checklist "Select the LED controllers you want to enable:\n(Space to select, Enter to confirm)" 20 70 8 \
+		--checklist "Which LED controllers would you like to enable support for?\n(Use spacebar to select/deselect, then Enter to confirm)" 20 70 8 \
 		"${options[@]}" \
 		3>&1 1>&2 2>&3) || exit 1
 
@@ -466,7 +515,7 @@ select_devices() {
 
 	if [[ ${#DEVICES[@]} -eq 0 ]]; then
 		if ! whiptail --title "${PROJECT_NAME} ${VERSION} - Warning" \
-			--yesno "No devices selected!\n\nAre you sure you want to continue without any LED controllers?" 10 60; then
+			--yesno "You haven't selected any devices.\n\nAre you sure you want to proceed without enabling any LED controllers?" 10 60; then
 			select_devices
 		fi
 	fi
@@ -482,7 +531,7 @@ select_audio() {
 	if [[ "$IS_MISTER" == true ]]; then
 		# MiSTer: ALSA only
 		whiptail --title "${PROJECT_NAME} ${VERSION} - Audio Backend" \
-			--msgbox "MiSTer platform detected.\n\nOnly ALSA audio is available on MiSTer.\nALSA will be enabled automatically." 12 60
+			--msgbox "MiSTer platform detected.\n\nOnly ALSA audio is supported on MiSTer, so it will be enabled automatically." 12 60
 		ENABLE_ALSAAUDIO=ON
 		ENABLE_PULSEAUDIO=OFF
 	else
@@ -490,12 +539,12 @@ select_audio() {
 		[[ "$ENABLE_PULSEAUDIO" == "ON" ]] && sel_pulse=ON
 		[[ "$ENABLE_ALSAAUDIO" == "ON" ]] && sel_alsa=ON
 
-		options+=("PULSEAUDIO" "PulseAudio (recommended for desktop)" $sel_pulse)
-		options+=("ALSAAUDIO" "ALSA (direct hardware access)" $sel_alsa)
+		options+=("PULSEAUDIO" "PulseAudio (recommended for desktop environments)" $sel_pulse)
+		options+=("ALSAAUDIO" "ALSA (for direct hardware access)" $sel_alsa)
 
 		local selected
 		selected=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Audio Backend" \
-			--checklist "Select audio backends for audio-reactive animations:\n(Space to select, Enter to confirm)" 14 70 3 \
+			--checklist "Which audio backends would you like to enable for audio-reactive features?\n(Use spacebar to select/deselect, then Enter to confirm)" 14 70 3 \
 			"${options[@]}" \
 			3>&1 1>&2 2>&3) || exit 1
 
@@ -519,14 +568,14 @@ select_audio() {
 configure_paths() {
 	# Ask if user wants to change defaults
 	if ! whiptail --title "${PROJECT_NAME} ${VERSION} - Installation Paths" \
-		--yesno "Current installation paths:\n\n  Prefix:     $PREFIX\n  Config dir: $SYSCONFDIR\n\nWould you like to change these?" 14 60; then
+		--yesno "Current installation paths:\n\n  Prefix:     $PREFIX\n  Config dir: $SYSCONFDIR\n\nWould you like to customize these paths?" 14 60; then
 		return
 	fi
 
 	# Prefix
 	local new_prefix
 	new_prefix=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Installation Prefix" \
-		--inputbox "Enter installation prefix:\n(binaries go to PREFIX/bin, libraries to PREFIX/lib, etc.)" 12 70 \
+		--inputbox "Enter the installation prefix:\n(This is where binaries, libraries, etc., will be placed)" 12 70 \
 		"$PREFIX" \
 		3>&1 1>&2 2>&3) || return
 
@@ -537,7 +586,7 @@ configure_paths() {
 	# Config dir
 	local new_sysconfdir
 	new_sysconfdir=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Configuration Directory" \
-		--inputbox "Enter configuration directory:\n(ledspicer.conf will be installed here)" 12 70 \
+		--inputbox "Enter the configuration directory:\n(This is where ledspicer.conf will be installed)" 12 70 \
 		"$SYSCONFDIR" \
 		3>&1 1>&2 2>&3) || return
 
@@ -593,6 +642,14 @@ show_summary() {
 	[[ "$ENABLE_ALSAAUDIO" == "ON" ]] && audio_list+="ALSA "
 	[[ -z "$audio_list" ]] && audio_list="(none)"
 
+	# Build sudo/install type info
+	local install_type
+	if [[ "$IS_SYSTEM_INSTALL" == true ]]; then
+		install_type="System (sudo required, ldconfig/systemd enabled)"
+	else
+		install_type="Local (no sudo, ldconfig/systemd skipped)"
+	fi
+
 	local summary="
 Platform:     $ARCH
 MiSTer mode:  $ENABLE_MISTER
@@ -602,6 +659,7 @@ Audio:        $audio_list
 
 Prefix:       $PREFIX
 Config dir:   $SYSCONFDIR
+Install type: $install_type
 
 CMake command:
 $cmake_cmd
@@ -609,7 +667,7 @@ $cmake_cmd
 
 	whiptail --title "${PROJECT_NAME} ${VERSION} - Configuration Summary" \
 		--scrolltext \
-		--yesno "$summary\n\nProceed with build?" 30 78
+		--yesno "$summary\n\nDoes this look correct? Proceed with the build?" 32 78
 }
 
 # =============================================================================
@@ -633,6 +691,7 @@ check_and_install_dependencies() {
 		fi
 	done
 
+	# Add build-essential/base-devel if make or g++ missing
 	if [[ "$need_build_tools" == true ]]; then
 		missing_packages+=("build-essential")
 	fi
@@ -646,11 +705,6 @@ check_and_install_dependencies() {
 			all_deps_info+="  * $cmd\n"
 		fi
 	done
-
-	# Add build-essential/base-devel if make or g++ missing
-	if [[ "$need_build_tools" == true ]]; then
-		missing_packages+=("build-essential")
-	fi
 
 	# --- Required libraries (always needed) ---
 	local required_libs=(
@@ -712,14 +766,14 @@ check_and_install_dependencies() {
 		if [[ -z "$PKG_MANAGER" ]]; then
 			# No package manager - show what to install manually
 			whiptail --title "${PROJECT_NAME} ${VERSION} - Dependencies" \
-				--msgbox "$msg\n\nNo supported package manager found.\nPlease install the missing packages manually." 24 78
+				--msgbox "$msg\n\nWe couldn't detect a supported package manager.\nPlease install the missing packages manually using your system's tools." 24 78
 			echo ""
 			echo "Required packages (install manually):"
 			printf "  %s\n" $display_packages
 			echo ""
 			read -p "Press Enter after installing the packages to continue..."
 		elif whiptail --title "${PROJECT_NAME} ${VERSION} - Dependencies" \
-			--yesno "$msg\n\nInstall missing packages now using $PKG_MANAGER?" 24 78; then
+			--yesno "$msg\n\nWould you like us to install the missing packages now using $PKG_MANAGER?" 24 78; then
 			install_packages "${missing_packages[@]}"
 		else
 			print_error "Cannot continue without required dependencies."
@@ -749,7 +803,7 @@ run_build() {
 
 	print_step "Running CMake..."
 	echo -e "${YELLOW}$cmake_cmd${NC}"
-	rm -f build/CMakeCache.txt
+	rm -f CMakeCache.txt
 	eval "$cmake_cmd"
 
 	print_step "Building ${PROJECT_NAME} ${VERSION}..."
@@ -764,15 +818,15 @@ run_build() {
 
 run_install() {
 	if whiptail --title "${PROJECT_NAME} ${VERSION} - Install" \
-		--yesno "Build completed successfully!\n\nWould you like to install LEDSpicer now?\n\n(This will require sudo privileges if installing to system directories)" 14 70; then
+		--yesno "The build is complete!\n\nWould you like to install LEDSpicer now?\n\n(Note: This may require administrative privileges for system directories)" 14 70; then
 
 		print_step "Installing ${PROJECT_NAME} ${VERSION}..."
 		cd "$BUILD_DIR"
-		$SUDO make install
+		$SUDO_INSTALL make install
 		cd ..
 
-		# Refresh library cache
-		if command -v ldconfig &>/dev/null; then
+		# Refresh library cache (only for system installs)
+		if [[ "$IS_SYSTEM_INSTALL" == true ]] && command -v ldconfig &>/dev/null; then
 			print_step "Updating library cache..."
 			$SUDO ldconfig
 		fi
@@ -792,14 +846,23 @@ run_install() {
 		echo ""
 		echo "Next steps:"
 		echo "  1. Edit configuration: $SYSCONFDIR/ledspicer.conf"
-		echo "  2. Start the daemon:   sudo systemctl start ledspicerd"
-		echo "  3. Enable at boot:     sudo systemctl enable ledspicerd"
+		if [[ "$IS_DAEMON" == true ]]; then
+			echo "  2. Start the daemon:   sudo systemctl start ledspicerd"
+			echo "  3. Enable at boot:     sudo systemctl enable ledspicerd"
+		else
+			echo "  2. Start the program manually: ledspicerd"
+			echo "     (You may need to log out and back in for permission changes to take effect)"
+		fi
 		echo ""
 		echo "Documentation: https://github.com/meduzapat/LEDSpicer/wiki"
 	else
 		echo ""
 		echo "Build completed. To install later, run:"
-		echo "  cd $BUILD_DIR && sudo make install"
+		if [[ -n "$SUDO_INSTALL" ]]; then
+			echo "  cd $BUILD_DIR && sudo make install"
+		else
+			echo "  cd $BUILD_DIR && make install"
+		fi
 	fi
 }
 
@@ -824,60 +887,123 @@ get_device_xml_name() {
 }
 
 post_install_configuration() {
-	# Configure user first
-	configure_user
+	detect_user
+
+	# For non-system installs, skip daemon/service configuration entirely
+	if [[ "$IS_SYSTEM_INSTALL" == false ]]; then
+		print_step "Local install detected - skipping system service configuration."
+
+		# Only offer config file creation
+		if [[ ! -f "$SYSCONFDIR/ledspicer.conf" ]]; then
+			if whiptail --title "${PROJECT_NAME} ${VERSION} - Configuration" \
+				--yesno "Would you like to create a basic configuration file?\n\nLocation: $SYSCONFDIR/ledspicer.conf" 10 60; then
+				IS_DAEMON=false
+				configure_user
+				create_skeleton_config
+			fi
+		fi
+		return
+	fi
+
+	print_step "Configuring run mode..."
+
+	if whiptail --title "${PROJECT_NAME} ${VERSION} - Daemon Run Mode" \
+		--yesno "Would you like the ledspicerd daemon to run as root (system service)?\n\n- Yes: Runs automatically as a system daemon (recommended for most users)\n- No: Runs manually as a regular user (for custom or testing setups)" 14 70; then
+		IS_DAEMON=true
+		RUN_USER="root"
+		USER_ID=0
+		GROUP_ID=0
+		comment_pulse_lines=false
+		PULSE_USER_ID=1000
+		if [[ "$ENABLE_PULSEAUDIO" == "ON" ]]; then
+			if whiptail --title "${PROJECT_NAME} ${VERSION} - PulseAudio Configuration" \
+				--yesno "Is your PulseAudio session running under a different user than root?\n\n(This is common in desktop environments; select Yes if unsure)" 14 70; then
+				PULSE_USER_ID=$(whiptail --inputbox "Enter the user ID for the PulseAudio session:\n\n(Usually your main user's ID, like 1000 - enter to confirm)" 14 70 "1000" 3>&1 1>&2 2>&3)
+				if [[ -z "$PULSE_USER_ID" ]]; then PULSE_USER_ID=1000; fi
+			else
+				comment_pulse_lines=true
+			fi
+		fi
+	else
+		IS_DAEMON=false
+		configure_user
+	fi
 
 	# Build options dynamically based on system state
 	local options=()
 
 	# Config file (only if missing)
 	if [[ ! -f "$SYSCONFDIR/ledspicer.conf" ]]; then
-		options+=("config" "Create skeleton configuration file" ON)
+		options+=("config" "Create a basic configuration file template" ON)
 	fi
 
-	# Service update (only if UID differs from default 1000)
-	if [[ "$USER_ID" != "1000" ]]; then
-		options+=("ledspicerd" "Update ledspicerd service (UID: $USER_ID)" ON)
+	# Service update (system installs only)
+	if [[ "$IS_DAEMON" == true && ("$PULSE_USER_ID" != "1000" || "$comment_pulse_lines" == true) ]]; then
+		options+=("ledspicerd" "Update ledspicerd service (PulseAudio settings)" ON)
 	fi
 
-	# Udev rules (if missing or different)
+	# Udev rules (system installs only)
 	local rules_src="${PREFIX}/share/doc/${PROJECT_NAME}/examples/21-ledspicer.rules"
 	local rules_dst="/etc/udev/rules.d/21-ledspicer.rules"
+	local udev_desc="Install udev rules (for USB device permissions)"
+	if [[ -f "$rules_dst" ]]; then
+		udev_desc="Update udev rules (for USB device permissions)"
+	fi
 
-	if [[ ! -f "$rules_dst" ]] || ! diff -q "$rules_src" "$rules_dst" &>/dev/null 2>&1; then
-		options+=("udev" "Install udev rules (USB permissions)" ON)
+	if [[ "$IS_DAEMON" == false || ! -f "$rules_dst" ]] || ! diff -q "$rules_src" "$rules_dst" &>/dev/null; then
+		options+=("udev" "$udev_desc" ON)
 	fi
 
 	# Skip if nothing to configure
 	if [[ ${#options[@]} -eq 0 ]]; then
 		print_step "No additional configuration needed."
-		return
+	else
+		# Show checklist
+		local selected
+		selected=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Post-Install Configuration" \
+			--checklist "Please select the configuration tasks you'd like to perform:\n\nRun user: $RUN_USER (UID: $USER_ID, GID: $GROUP_ID)" 18 70 4 \
+			"${options[@]}" \
+			3>&1 1>&2 2>&3) || return
+
+		# Track if we need to reload systemd
+		local need_daemon_reload=false
+
+		# Execute selected tasks
+		for item in $selected; do
+			item="${item//\"/}"
+			case "$item" in
+				config)      create_skeleton_config ;;
+				ledspicerd)  update_ledspicerd_service && need_daemon_reload=true ;;
+				udev)        install_udev_rules ;;
+			esac
+		done
+
+		# Single daemon-reload at end if needed
+		if [[ "$need_daemon_reload" == true ]] && command -v systemctl &>/dev/null; then
+			print_step "Reloading systemd daemon..."
+			$SUDO systemctl daemon-reload
+		fi
 	fi
 
-	# Show checklist
-	local selected
-	selected=$(whiptail --title "${PROJECT_NAME} ${VERSION} - Post-Install Configuration" \
-		--checklist "Select additional configuration tasks:\n\nUser: $RUN_USER (UID: $USER_ID, GID: $GROUP_ID)" 18 70 4 \
-		"${options[@]}" \
-		3>&1 1>&2 2>&3) || return
+	# Handle service enable/disable (system installs only)
+	if command -v systemctl &>/dev/null; then
+		if [[ "$IS_DAEMON" == true ]]; then
+			if whiptail --title "${PROJECT_NAME} ${VERSION} - Enable Service" \
+				--yesno "Would you like to enable the ledspicerd service to start automatically at boot?" 10 60; then
+				print_step "Enabling ledspicerd service..."
+				$SUDO systemctl enable ledspicerd
+			fi
+		else
+			if $SUDO systemctl is-enabled ledspicerd &>/dev/null; then
+				print_step "Disabling ledspicerd service (since running in non-daemon mode)..."
+				$SUDO systemctl disable ledspicerd
+			fi
+		fi
+	fi
 
-	# Track if we need to reload systemd
-	local need_daemon_reload=false
-
-	# Execute selected tasks
-	for item in $selected; do
-		item="${item//\"/}"
-		case "$item" in
-			config)      create_skeleton_config ;;
-			ledspicerd)  update_ledspicerd_service && need_daemon_reload=true ;;
-			udev)        install_udev_rules ;;
-		esac
-	done
-
-	# Single daemon-reload at end if needed
-	if [[ "$need_daemon_reload" == true ]] && command -v systemctl &>/dev/null; then
-		print_step "Reloading systemd daemon..."
-		$SUDO systemctl daemon-reload
+	# Configure user groups for non-daemon mode
+	if [[ "$IS_DAEMON" == false && -n "$RUN_USER" && "$RUN_USER" != "root" ]]; then
+		configure_user_groups "$RUN_USER"
 	fi
 }
 
@@ -885,7 +1011,7 @@ create_skeleton_config() {
 	# Backup existing config if present
 	if [[ -f "$SYSCONFDIR/ledspicer.conf" ]]; then
 		print_step "Backing up existing config..."
-		$SUDO cp "$SYSCONFDIR/ledspicer.conf" "$SYSCONFDIR/ledspicer.conf.bak.$(date +%Y%m%d%H%M%S)"
+		$SUDO_CONF cp "$SYSCONFDIR/ledspicer.conf" "$SYSCONFDIR/ledspicer.conf.bak.$(date +%Y%m%d%H%M%S)"
 	fi
 
 	print_step "Creating skeleton configuration file..."
@@ -921,25 +1047,23 @@ create_skeleton_config() {
 	<restrictors>
 	</restrictors>
 	<devices>
-$(echo -e "$devices_xml")	</devices>
+		$devices_xml
+	</devices>
 	<layout defaultProfile=\"default\">
 	</layout>
 </LEDSpicer>"
 
-	echo "$config_content" | $SUDO tee "$SYSCONFDIR/ledspicer.conf" > /dev/null
+	echo "$config_content" | $SUDO_CONF tee "$SYSCONFDIR/ledspicer.conf" > /dev/null
 
 	print_step "Configuration file created at $SYSCONFDIR/ledspicer.conf"
 }
 
 update_ledspicerd_service() {
-	print_step "Updating ledspicerd service file with user ID ${USER_ID}..."
+	print_step "Updating ledspicerd service file..."
 
-	# Get systemd unit directory (same logic as CMake)
 	local service_dir
 	service_dir=$(pkg-config systemd --variable=systemdsystemunitdir 2>/dev/null)
-	if [[ -z "$service_dir" ]]; then
-		service_dir="/usr/lib/systemd/system"
-	fi
+	[[ -z "$service_dir" ]] && service_dir="/usr/lib/systemd/system"
 
 	local service_file="$service_dir/ledspicerd.service"
 
@@ -949,8 +1073,12 @@ update_ledspicerd_service() {
 		return 1
 	fi
 
-	# Replace default 1000 with actual UID in the service file
-	$SUDO sed -i "s|/run/user/1000/|/run/user/${USER_ID}/|g" "$service_file"
+	if [[ "$comment_pulse_lines" == true ]]; then
+		$SUDO sed -i "/^ExecStartPre=\/bin\/sh -c 'for i in {1..30}; do \[ -S \/run\/user\/.*pulse\/native \] && exit 0; sleep 1; done; exit 1'/s/^/#/" "$service_file"
+		$SUDO sed -i "/^Environment=PULSE_SERVER=unix:\/run\/user\/.*pulse\/native/s/^/#/" "$service_file"
+	else
+		$SUDO sed -i "s|/run/user/1000/|/run/user/${PULSE_USER_ID}/|g" "$service_file"
+	fi
 
 	print_step "Service file updated."
 	return 0
@@ -977,6 +1105,99 @@ install_udev_rules() {
 		print_warning "You may need to replug USB devices for changes to take effect."
 	else
 		print_step "Udev rules installed."
+	fi
+
+	return 0
+}
+
+configure_user_groups() {
+	local target_user="$1"
+	local groups_added=()
+	local groups_skipped=()
+	local groups_missing=()
+
+	print_step "Checking group membership for user '$target_user'..."
+
+	# Define required groups based on selected devices
+	local required_groups=()
+
+	# USB device access (always needed for USB devices)
+	local has_usb_device=false
+	for dev in "${DEVICES[@]}"; do
+		case "$dev" in
+			NANOLED|PACDRIVE|PACLED64|ULTIMATEIO|LEDWIZ32|HOWLER)
+				has_usb_device=true
+				break
+				;;
+		esac
+	done
+
+	if [[ "$has_usb_device" == true ]]; then
+		required_groups+=("users:USB device access")
+		required_groups+=("input:USB device access")
+	fi
+
+	# Serial devices (Adalight)
+	for dev in "${DEVICES[@]}"; do
+		if [[ "$dev" == "ADALIGHT" ]]; then
+			required_groups+=("dialout:serial device access (Adalight)")
+			break
+		fi
+	done
+
+	# Raspberry Pi GPIO
+	for dev in "${DEVICES[@]}"; do
+		if [[ "$dev" == "RASPBERRYPI" ]]; then
+			required_groups+=("gpio:Raspberry Pi GPIO access")
+			break
+		fi
+	done
+
+	# No groups needed
+	if [[ ${#required_groups[@]} -eq 0 ]]; then
+		echo "  No special group membership required for selected devices."
+		return 0
+	fi
+
+	# Check and add each group
+	for entry in "${required_groups[@]}"; do
+		local group="${entry%%:*}"
+		local reason="${entry##*:}"
+
+		# Check if group exists
+		if ! getent group "$group" &>/dev/null; then
+			groups_missing+=("$group ($reason)")
+			continue
+		fi
+
+		# Check if user is already in group
+		if id -nG "$target_user" 2>/dev/null | grep -qw "$group"; then
+			groups_skipped+=("$group")
+		else
+			# Add user to group
+			if $SUDO usermod -aG "$group" "$target_user" 2>/dev/null; then
+				groups_added+=("$group")
+			else
+				groups_missing+=("$group (failed to add)")
+			fi
+		fi
+	done
+
+	# Report results
+	if [[ ${#groups_added[@]} -gt 0 ]]; then
+		echo -e "  ${GREEN}Added to groups:${NC} ${groups_added[*]}"
+	fi
+
+	if [[ ${#groups_skipped[@]} -gt 0 ]]; then
+		echo "  Already member of: ${groups_skipped[*]}"
+	fi
+
+	if [[ ${#groups_missing[@]} -gt 0 ]]; then
+		echo -e "  ${YELLOW}Groups not available:${NC} ${groups_missing[*]}"
+	fi
+
+	if [[ ${#groups_added[@]} -gt 0 ]]; then
+		print_warning "You must log out and back in for group changes to take effect."
 	fi
 
 	return 0
@@ -1009,6 +1230,9 @@ main() {
 	select_devices
 	select_audio
 	configure_paths
+
+	# Update sudo requirements based on selected paths
+	update_sudo_for_paths
 
 	# Show summary and confirm
 	if ! show_summary; then

@@ -23,6 +23,7 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/error.h>
 #include <mutex>
+#include <atomic>
 
 #include "AudioActor.hpp"
 
@@ -31,6 +32,9 @@
 #define STREAM_NAME "Peek Reader"
 #define SAMPLE_FORMAT PA_SAMPLE_FLOAT32
 #define RATE 60
+
+/// Seconds to wait between reconnection attempts.
+#define RECONNECT_WAIT 3
 
 namespace LEDSpicer::Animations {
 
@@ -56,7 +60,6 @@ protected:
 
 	static uint8_t instances;
 
-
 	static string source;
 
 	/// To avoid updating when is reading the buffer.
@@ -65,7 +68,32 @@ protected:
 	/// Raw peak data.
 	static vector<uint8_t> rawData;
 
+	/// Connection state.
+	enum class State : uint8_t {
+		Disconnected, /// Nothing initialized.
+		Connecting,   /// First connection in progress.
+		Connected,    /// Stream ready, processing audio.
+		Reconnecting, /// Background thread retrying connection.
+		ShuttingDown  /// Destructor signaled, stop reconnecting.
+	};
+	static std::atomic<State> state;
+
+	/**
+	 * Establishes the connection to PulseAudio.
+	 * Extracted from constructor to allow reconnection.
+	 */
+	static void connect();
+
+	/**
+	 * Closes the connection to PulseAudio.
+	 */
 	static void disconnect();
+
+	/**
+	 * Schedules a reconnection attempt in a background thread.
+	 * Will retry until connected or shutdown.
+	 */
+	static void scheduleReconnect();
 
 	/**
 	 * Callback function for when the context state is set.
@@ -90,7 +118,7 @@ protected:
 	static void onStreamRead(pa_stream* stream, size_t length, void* userdata);
 
 	/**
-	 * Callback function for when the silk into is ready.
+	 * Callback function for when the sink info is ready.
 	 * @param context
 	 * @param info
 	 * @param eol
@@ -100,9 +128,8 @@ protected:
 
 	void calcPeak() override;
 
-	void calculateElements();
+	void calculateElements() override;
 
 };
 
 } // namespace
-

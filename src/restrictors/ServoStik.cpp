@@ -96,7 +96,7 @@ bool ServoStik::isNonBasedId() const {
 
 void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 
-	string configDir = Utility::getConfigDir();
+	string configDir = Utility::getConfigDir() + SERVOSTIK_DIR;
 	// Check if the directory exists, if not, create it
 	struct stat st;
 	if (stat(configDir.c_str(), &st) != 0) {
@@ -122,7 +122,7 @@ void ServoStik::storeWays(const string& profile, const Ways& ways) const {
 }
 
 Restrictor::Ways ServoStik::retrieveWays(const string& profile) const {
-	std::string filePath(Utility::getConfigDir() + SERVOSTIK_DATA(profile));
+	std::string filePath(Utility::getConfigDir() + SERVOSTIK_DIR SERVOSTIK_DATA(profile));
 	std::ifstream inputFile(filePath);
 	if (inputFile.is_open()) {
 		LogDebug("Reading " + filePath);

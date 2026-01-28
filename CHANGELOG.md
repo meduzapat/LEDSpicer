@@ -5,6 +5,22 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3] - 2026-01-28
+
+### Added
+- Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options).
+- `LayoutProperties` struct for layout handling.
+- Unit tests for core utilities and device handling.
+
+### Fixed
+- Servostiks board works in multi-board setups.
+- Pulseaudio actor now reconnects automatically and avoids fatal failures.
+
+### Changed
+- Centralized path handling ensures consistent trailing slashes.
+- Systemd service files improved: graceful shutdown, optional Pulseaudio support for daemons.
+- `Utility::getHomeDir()` now resolves the correct home directory after privilege drops.
+
 ## [0.7.2] - 2026-01-24
 
 ### Added

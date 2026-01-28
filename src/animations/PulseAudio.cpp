@@ -30,53 +30,69 @@ pa_stream* PulseAudio::stream         = nullptr;
 uint8_t PulseAudio::instances         = 0;
 string PulseAudio::source;
 std::mutex PulseAudio::mutex;
+std::atomic<PulseAudio::State> PulseAudio::state{State::Disconnected};
 
 vector<uint8_t> PulseAudio::rawData;
 
 PulseAudio::PulseAudio(StringUMap& parameters, Group* const group) :
 	AudioActor(parameters, group)
 {
-
 	++instances;
 
-	LogInfo("Connecting to pulseaudio");
+	LogInfo("Connecting to PulseAudio");
 
-	// If not connected to PA do it.
-	if (tml) {
-		LogInfo("Reusing Pulseaudio connection");
+	// If already connected or connecting, reuse.
+	if (state.load() != State::Disconnected) {
+		LogInfo("Reusing PulseAudio connection");
 		return;
 	}
 
-	//smoother = group->size() / TOP;
-	tml = pa_threaded_mainloop_new();
-	if (not tml) {
-		LogError("Failed create pulseaudio main loop");
-		throw;
-	}
-
-	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PROJECT_NAME PROJECT_VERSION);
-	if (not context) {
-		LogError("Failed to create pulseaudio context");
-		throw;
-	}
-	pa_context_set_state_callback(context, PulseAudio::onContextSetState, &userPref);
-	pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-	pa_threaded_mainloop_start(tml);
-	LogDebug("Pulseaudio connected");
+	connect();
 }
 
 PulseAudio::~PulseAudio() {
 	std::lock_guard<std::mutex> lock(mutex);
 	--instances;
-	if (instances == 0) disconnect();
+	if (instances == 0) {
+		// Signal reconnect thread to stop and wait for it.
+		State expected = State::Reconnecting;
+		if (state.compare_exchange_strong(expected, State::ShuttingDown)) {
+			while (state.load() == State::ShuttingDown) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+		}
+		disconnect();
+		state.store(State::Disconnected);
+	}
+}
+
+void PulseAudio::connect() {
+
+	state.store(State::Connecting);
+
+	tml = pa_threaded_mainloop_new();
+	if (not tml)
+		throw Error("Failed to create PulseAudio main loop");
+
+	context = pa_context_new(pa_threaded_mainloop_get_api(tml), PROJECT_NAME " " PROJECT_VERSION);
+	if (not context) {
+		pa_threaded_mainloop_free(tml);
+		tml = nullptr;
+		throw Error("Failed to create PulseAudio context");
+	}
+
+	pa_context_set_state_callback(context, PulseAudio::onContextSetState, nullptr);
+	pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+	pa_threaded_mainloop_start(tml);
+	LogDebug("PulseAudio connection initiated");
 }
 
 void PulseAudio::disconnect() {
 
-	LogInfo("Closing pulseaudio connection");
+	LogInfo("Closing PulseAudio connection");
 
-	pa_signal_done();
-	pa_threaded_mainloop_stop(tml);
+	if (tml)
+		pa_threaded_mainloop_stop(tml);
 
 	if (stream) {
 		pa_stream_disconnect(stream);
@@ -96,12 +112,50 @@ void PulseAudio::disconnect() {
 	}
 }
 
+void PulseAudio::scheduleReconnect() {
+
+	// Prevent multiple reconnection threads.
+	State expected = State::Connecting;
+	if (not state.compare_exchange_strong(expected, State::Reconnecting)) {
+		// Also try from Connected state (in case of mid-operation failure).
+		expected = State::Connected;
+		if (not state.compare_exchange_strong(expected, State::Reconnecting))
+			return;
+	}
+
+	std::thread([] {
+		while (state.load() == State::Reconnecting) {
+			LogInfo("Retrying PulseAudio connection in " + to_string(RECONNECT_WAIT) + " seconds...");
+			std::this_thread::sleep_for(std::chrono::seconds(RECONNECT_WAIT));
+
+			// Check if shutdown was requested.
+			if (state.load() != State::Reconnecting) break;
+
+			try {
+				disconnect();
+				connect();
+				// connect() sets state to Connecting, stream callback will set Connected.
+				return;
+			}
+			catch (Error& e) {
+				LogWarning("PulseAudio reconnection failed: " + e.getMessage());
+				state.store(State::Reconnecting);
+			}
+			catch (...) {
+				LogWarning("PulseAudio reconnection failed");
+				state.store(State::Reconnecting);
+			}
+		}
+		state.store(State::Disconnected);
+	}).detach();
+}
+
 void PulseAudio::drawConfig() const {
-	cout << "Type: Pulseaudio" << endl;
+	cout << "Type: PulseAudio" << endl;
 	AudioActor::drawConfig();
 }
 
-void PulseAudio::onContextSetState(pa_context* context, void* channels) {
+void PulseAudio::onContextSetState(pa_context* context, void* userdata) {
 
 	switch (pa_context_get_state(context)) {
 	case PA_CONTEXT_CONNECTING:
@@ -109,12 +163,13 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 		LogDebug("Connecting context");
 #endif
 		break;
+
 	case PA_CONTEXT_AUTHORIZING:
 	case PA_CONTEXT_SETTING_NAME:
 		break;
 
 	case PA_CONTEXT_READY:
-		LogDebug("Connection to pulseaudio context established");
+		LogDebug("Connection to PulseAudio context established");
 		pa_operation_unref(pa_context_get_server_info(
 			context,
 			[] (pa_context* context, const pa_server_info* info, void* userdata) {
@@ -128,10 +183,8 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 			[] (pa_context* context, pa_subscription_event_type_t type, uint32_t idx, void* userdata) {
 				if (type == PA_SUBSCRIPTION_EVENT_CHANGE) {
 #ifdef DEVELOP
-					LogDebug("context event changed");
+					LogDebug("Context event changed");
 #endif
-					// reset top value.
-					// top = {0, 0};
 					onSinkInfo(context, nullptr, 0, userdata);
 				}
 			},
@@ -141,17 +194,18 @@ void PulseAudio::onContextSetState(pa_context* context, void* channels) {
 		break;
 
 	case PA_CONTEXT_TERMINATED:
-		LogDebug("Pulseaudio context terminated");
+		LogDebug("PulseAudio context terminated");
 		break;
 
 	case PA_CONTEXT_FAILED:
 	default:
-		LogError("Pulseaudio Context failed: " + string(pa_strerror(pa_context_errno(context))));
-		throw;
+		LogWarning("PulseAudio context failed: " + string(pa_strerror(pa_context_errno(context))));
+		scheduleReconnect();
+		break;
 	}
 }
 
-void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eol, void* userPref) {
+void PulseAudio::onSinkInfo(pa_context* context, const pa_sink_info* info, int eol, void* userdata) {
 
 	if (not info)
 		return;
@@ -165,7 +219,7 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 
 	if (source.compare(info->name) != 0) {
 #ifdef DEVELOP
-	LogDebug("Not found");
+		LogDebug("Not found");
 #endif
 		return;
 	}
@@ -184,15 +238,16 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 
 	pa_sample_spec ss = {SAMPLE_FORMAT, RATE, CHANNELS};
 
-	if (not (stream = pa_stream_new(context, STREAM_NAME, &ss, &info->channel_map))) {
-		LogError("Failed to create stream: " + string(pa_strerror(pa_context_errno(context))));
-		throw;
+	stream = pa_stream_new(context, STREAM_NAME, &ss, &info->channel_map);
+	if (not stream) {
+		LogWarning("Failed to create stream: " + string(pa_strerror(pa_context_errno(context))));
+		scheduleReconnect();
+		return;
 	}
 
-	pa_stream_set_state_callback(stream, onStreamSetState, userPref);
+	pa_stream_set_state_callback(stream, onStreamSetState, userdata);
 
 #ifdef DEVELOP
-	// underflows
 	pa_stream_set_underflow_callback(
 		stream,
 		[](pa_stream* stream, void* userdata) {
@@ -200,11 +255,10 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 		},
 		nullptr
 	);
-	// overflows
 	pa_stream_set_overflow_callback(
 		stream,
 		[](pa_stream* stream, void* userdata) {
-			LogDebug("overflow");
+			LogDebug("Overflow");
 		},
 		nullptr
 	);
@@ -215,12 +269,12 @@ void PulseAudio::onSinkInfo(pa_context* condex, const pa_sink_info* info, int eo
 	ba.fragsize  = sizeof(float) * CHANNELS;
 	ba.prebuf    = 0;
 	if (pa_stream_connect_record(stream, info->monitor_source_name, &ba, PA_STREAM_PEAK_DETECT) < 0) {
-		LogError("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))));
-		throw;
+		LogWarning("Failed to connect to output stream: " + string(pa_strerror(pa_context_errno(context))));
+		scheduleReconnect();
 	}
 }
 
-void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
+void PulseAudio::onStreamSetState(pa_stream* stream, void* userdata) {
 
 	switch (pa_stream_get_state(stream)) {
 
@@ -235,14 +289,18 @@ void PulseAudio::onStreamSetState(pa_stream* stream, void* userPref) {
 #endif
 
 	case PA_STREAM_READY:
-		LogInfo("Stream successfully created");
-		pa_stream_set_read_callback(stream, onStreamRead, userPref);
+		LogInfo("PulseAudio stream ready");
+		pa_stream_set_read_callback(stream, onStreamRead, userdata);
+		state.store(State::Connected);
 		break;
 
 	case PA_STREAM_FAILED:
-		LogError("Connection to stream failed: " + string(pa_strerror(pa_context_errno(context))));
-		throw;
-	default: break;
+		LogWarning("Connection to stream failed: " + string(pa_strerror(pa_context_errno(context))));
+		scheduleReconnect();
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -253,9 +311,9 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 	if (not length) return;
 
 	// Read peaks.
-	const void *data;
+	const void* data;
 	if (pa_stream_peek(stream, &data, &length) < 0) {
-		LogError("Stream peek failed: " + string(pa_strerror(pa_context_errno(context))));
+		LogWarning("Stream peek failed: " + string(pa_strerror(pa_context_errno(context))));
 		return;
 	}
 
@@ -278,6 +336,9 @@ void PulseAudio::onStreamRead(pa_stream* stream, size_t length, void* userdata) 
 }
 
 void PulseAudio::calculateElements() {
+	// Skip processing if not connected.
+	if (state.load() != State::Connected) return;
+
 	std::lock_guard<std::mutex> lock(mutex);
 	AudioActor::calculateElements();
 }

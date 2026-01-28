@@ -272,7 +272,9 @@ int main(int argc, char **argv) {
 	string
 		commandline,
 		profile,
-		configFile = "";
+		configFile = "",
+		projectDir = "",
+		project    = "";
 
 	for (int i = 1; i < argc; i++) {
 
@@ -288,12 +290,16 @@ int main(int argc, char **argv) {
 				"-f or --foreground\t\t\tRun on foreground\n"
 				"-d or --dump\t\t\t\tDump configuration files and quit\n"
 				"-p <profile> or --profile <profile>\tDump a profile by name and quit\n"
+				"-j <project> or --project <project>\tReplace the default project (or set if none)\n"
+				"-J <path> or --projects-dir <path>\tOverride projects base directory\n"
 				"-l or --leds\t\t\t\tTest LEDs.\n"
 				"-e or --elements\t\t\tTest registered elements.\n"
 				"-v or --version\t\t\t\tDisplay version information\n"
 				"-h or --help\t\t\t\tDisplay this help screen.\n"
-				"Data dir:    " PROJECT_DATA_DIR "\n"
-				"Devices dir: " DEVICES_DIR "\n"
+				"Data dir:     " PROJECT_DATA_DIR "\n"
+				"Devices dir:  " DEVICES_DIR "\n"
+				"Projects dir: " << Utility::getConfigDir() << PROJECTS_DIR "\n"
+				"Please note that if the program runs as different user id, the projects dir will be different\n"
 				"If -c or --config is not provided " PROJECT_NAME " will use " CONFIG_FILE
 				<< endl;
 			return EXIT_SUCCESS;
@@ -315,6 +321,18 @@ int main(int argc, char **argv) {
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
 			configFile = argv[++i];
+			continue;
+		}
+
+		// Select project.
+		if (commandline == "-j" or commandline == "--project") {
+			project = argv[++i];
+			continue;
+		}
+
+		// Override projects base directory.
+		if (commandline == "-J" or commandline == "--projects-dir") {
+			projectDir = argv[++i];
 			continue;
 		}
 
@@ -356,6 +374,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	commandline.clear();
+
 	Log::initialize(DataLoader::getMode() != DataLoader::Modes::Normal);
 
 	if (configFile.empty()) configFile = CONFIG_FILE;
@@ -379,7 +399,11 @@ int main(int argc, char **argv) {
 
 		// Read Configuration.
 		DataLoader config(configFile, "Configuration");
-		config.readConfiguration(profile);
+		config.readConfiguration(projectDir, project, profile);
+		projectDir.clear();
+		project.clear();
+		profile.clear();
+		configFile.clear();
 
 #ifdef DEVELOP
 	// force debug mode logging.
