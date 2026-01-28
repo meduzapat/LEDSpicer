@@ -31,6 +31,7 @@ string            DataLoader::portNumber;
 milliseconds      DataLoader::waitTime;
 DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
 unordered_map<Profile*, Transition*> DataLoader::transitions;
+string DataLoader::projectDir;
 
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
@@ -40,7 +41,11 @@ void DataLoader::setMode(Modes mode) {
 	DataLoader::mode = mode;
 }
 
-void DataLoader::readConfiguration(const string& testProfile) {
+void DataLoader::readConfiguration(
+	const string& projectDir,
+	const string& project,
+	const string& profile
+) {
 
 	// Process Root.
 	StringUMap tempAttr = processNode(root);
@@ -61,14 +66,14 @@ void DataLoader::readConfiguration(const string& testProfile) {
 	portNumber = tempAttr[PARAM_PORT];
 
 	// Read Colors.
-	processColorFile(createFilename("/" + tempAttr[PARAM_COLORS]));
+	processColorFile(PROJECT_DATA_DIR + createFilename(tempAttr[PARAM_COLORS]));
 	auto cs = Utility::explode(tempAttr.exists(PARAM_RANDOM_COLORS) ? tempAttr[PARAM_RANDOM_COLORS] : "", ',');
 	for (auto& c : cs) Utility::trim(c);
 	Color::setRandomColors(cs);
 
 	processDevices();
 
-	string defaultProfile(processLayout());
+	LayoutProperties defaultLayoutProperties(processLayout());
 
 	// Initialize Devices.
 	if (mode != Modes::Dump and mode != Modes::Profile) {
@@ -81,8 +86,19 @@ void DataLoader::readConfiguration(const string& testProfile) {
 		static_cast<gid_t>(Utility::parseNumber(tempAttr[PARAM_GROUP_ID], invalidValueFor("group ID")))
 	);
 
+	// Load the requested project or the default.
+	string defaultProject(project.empty() ? defaultLayoutProperties.project : project);
+	// if the project is not set, use system dir or provided.
+	if (defaultProject.empty()) {
+		setProjectDir(projectDir.empty() ? PROJECT_DATA_DIR : projectDir, "");
+	}
+	// Otherwise use the dir and project.
+	else {
+		setProjectDir(projectDir, defaultProject);
+	}
+
 	// Load the requested profile or the default.
-	Profile::defaultProfile = processProfile(mode == Modes::Profile ? testProfile : defaultProfile);
+	Profile::defaultProfile = processProfile(mode == Modes::Profile ? profile : defaultLayoutProperties.profile);
 	// Create ending transition at 0
 	transitions.emplace(nullptr, new FadeOutIn("Normal", Color::Off));
 }
@@ -316,7 +332,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 			LogInfo("LED " + to_string(led + 1) + " is not set for " + device->getFullName());
 }
 
-const string DataLoader::processLayout() {
+const DataLoader::LayoutProperties DataLoader::processLayout() {
 
 	StringUMap tempAttr;
 
@@ -326,7 +342,9 @@ const string DataLoader::processLayout() {
 
 	tempAttr = processNode(layoutNode);
 	Utility::checkAttributes(REQUIRED_PARAM_LAYOUT, tempAttr, NODE_LAYOUT);
-	string defaultProfile(tempAttr[PARAM_DEFAULT_PROFILE]);
+	string
+		defaultProfile(tempAttr[PARAM_DEFAULT_PROFILE]),
+		defaultProject(tempAttr[PARAM_DEFAULT_PROJECT]);
 
 	tinyxml2::XMLElement* xmlElement = layoutNode->FirstChildElement(NODE_GROUP);
 	if (xmlElement)
@@ -355,7 +373,7 @@ const string DataLoader::processLayout() {
 		group.shrinkToFit();
 		Group::layout.emplace("All", group);
 	}
-	return defaultProfile;
+	return {defaultProject, defaultProfile};
 }
 
 void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& group) {
@@ -398,7 +416,7 @@ Profile* DataLoader::getProfileFromCache(const string& name) {
 
 Profile* DataLoader::processProfile(const string& name, const string& extra) {
 
-	XMLHelper profile(createFilename(PROFILE_DIR + name), "Profile");
+	XMLHelper profile(getProjectDir() + createFilename(PROFILE_DIR + name), "Profile");
 	StringUMap tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
 	string
@@ -563,7 +581,7 @@ void DataLoader::removeTransitionFromCache(Profile* profile, bool deleteTransiti
 vector<Actor*> DataLoader::processAnimation(const string& file, const string& extra) {
 
 	string name(file + extra);
-	XMLHelper animation(createFilename(ACTOR_DIR + file), "Animation");
+	XMLHelper animation(getProjectDir() + createFilename(ACTOR_DIR + file), "Animation");
 	StringUMap actorData;
 	tinyxml2::XMLElement* element = animation.getRoot()->FirstChildElement(NODE_ACTOR);
 	if (not element) throw Utilities::Error("No actors found");
@@ -618,7 +636,7 @@ Actor* DataLoader::createAnimation(StringUMap& actorData) {
 
 void DataLoader::processInput(Profile* profile, const string& file) {
 
-	XMLHelper inputFile(createFilename(INPUT_DIR + file), "Input");
+	XMLHelper inputFile(getProjectDir() + createFilename(INPUT_DIR + file), "Input");
 	StringUMap inputAttr = processNode(inputFile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, inputAttr, file);
 	string inputName = inputAttr[PARAM_NAME];
@@ -730,11 +748,9 @@ Input* DataLoader::createInput(StringUMap& inputData, ItemPtrUMap& inputMaps) {
 }
 
 string DataLoader::createFilename(const string& name) {
-	return (
-		string(PROJECT_DATA_DIR)
-			.append(Utility::removeChar(name, '.'))
-			.append(".xml")
-	);
+	string r(Utility::removeChar(name, '.'));
+	r.append(".xml");
+	return r;
 }
 
 void DataLoader::dropRootPrivileges(uid_t uid, gid_t gid) {
@@ -776,4 +792,16 @@ void DataLoader::destroyCache() {
 #ifdef DEVELOP
 		LogDebug("Transitions deleted");
 #endif
+}
+
+string DataLoader::getProjectDir() {
+	return projectDir;
+}
+
+void DataLoader::setProjectDir(const string& path, const string& project) {
+	string basePath = path.empty() ? Utility::getConfigDir() + PROJECTS_DIR : path;
+	// User may omit trailing slash
+	if (basePath.back() != '/') basePath += '/';
+	projectDir = basePath + project;
+	if (projectDir.back() != '/') projectDir +='/';
 }

@@ -28,7 +28,8 @@
 
 #pragma once
 
-#define CONFIG_FILE PROJECT_CONF_DIR "/ledspicer.conf"
+// No better place that makes sense for config file
+#define CONFIG_FILE  PROJECT_CONF_DIR "/ledspicer.conf"
 #define XML_FILE_FOREIGN ""
 
 namespace LEDSpicer::Utilities {

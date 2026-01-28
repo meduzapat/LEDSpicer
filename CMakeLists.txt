@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 # Project details
 set(PROJECT_NAME      "${CMAKE_PROJECT_NAME}")
 set(PROJECT_VERSION   "${CMAKE_PROJECT_VERSION}")
-set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer")
+set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/")
 set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
@@ -421,19 +421,7 @@ add_custom_target(uninstall
 file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"[Unit]\n"
 	"Description=LEDSpicer Daemon\n"
-	"After=network.target"
-)
-
-# Add PulseAudio or PipeWire dependencies if enabled.
-if(ENABLE_PULSEAUDIO)
-	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		" pulseaudio.service"
-	)
-endif()
-
-# Continue base service file.
-file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-	"\n"
+	"After=network.target sound.target\n"
 	"StartLimitIntervalSec=60s\n"
 	"StartLimitBurst=3\n\n"
 
@@ -442,12 +430,14 @@ file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/ledspicerd\n"
 	"Restart=always\n"
 	"RestartSec=5s\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n"
 )
 
-# Add PulseAudio environment variable if enabled.
+# Optional PulseAudio support
 if(ENABLE_PULSEAUDIO)
 	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		"ExecStartPre=/bin/sh -c 'for i in {1..30}; do [ -S /run/user/1000/pulse/native ] && exit 0; sleep 1; done; exit 1'\n"
+		"# Optional PulseAudio socket hint (daemon reconnects if unavailable) remember to change 1000 with the used ID if different\n"
 		"Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native\n"
 	)
 endif()
@@ -469,7 +459,9 @@ file(WRITE ${CMAKE_BINARY_DIR}/processlookup.service
 	"Type=forking\n"
 	"ExecStart=${CMAKE_INSTALL_PREFIX}/bin/processLookup\n"
 	"Restart=always\n"
-	"RestartSec=5s\n\n"
+	"RestartSec=5s\n"
+	"ExecStop=/bin/kill -TERM $MAINPID\n"
+	"TimeoutStopSec=15s\n\n"
 
 	"[Install]\n"
 	"WantedBy=multi-user.target\n"
