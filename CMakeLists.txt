@@ -152,7 +152,6 @@ else()
 	target_link_libraries(ledspicer PUBLIC ${LIBUSB_LIBRARIES})
 endif()
 
-
 set_target_properties(ledspicer PROPERTIES VERSION 1.1.0 SOVERSION 1)
 install(TARGETS ledspicer LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -263,7 +262,7 @@ if(ENABLE_ALSAAUDIO)
 endif()
 
 add_executable(ledspicerd ${LEDSPICER_SOURCES})
-target_compile_definitions(ledspicerd ${LEDSPICER_DEFINES})
+target_compile_definitions(ledspicerd PRIVATE ${LEDSPICER_DEFINES})
 
 if(NOT ENABLE_DRY_RUN)
 	list(APPEND LEDSPICER_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})

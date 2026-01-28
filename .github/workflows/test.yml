@@ -43,6 +43,5 @@ jobs:
 
       - name: Run unit tests
         run: |
-          cd build/tests
-          ctest --output-on-failure
+          ctest --test-dir build/tests
 

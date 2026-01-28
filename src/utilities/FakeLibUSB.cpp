@@ -134,3 +134,25 @@ int libusb_set_auto_detach_kernel_driver(libusb_device_handle*, int) {
 const char* libusb_error_name(int) {
 	return "FAKE_ERROR";
 }
+
+uint8_t libusb_get_bus_number(libusb_device*) {
+	return 1; // stable fake value
+}
+
+uint8_t libusb_get_device_address(libusb_device*) {
+	return 1; // stable fake value
+}
+
+int libusb_get_port_numbers(
+	libusb_device* /*dev*/,
+	uint8_t* port_numbers,
+	int port_numbers_len
+) {
+	if (!port_numbers || port_numbers_len <= 0) {
+		return LIBUSB_ERROR_IO;
+	}
+
+	// Fake a simple USB topology: bus → port 1
+	port_numbers[0] = 1;
+	return 1; // number of ports written
+}

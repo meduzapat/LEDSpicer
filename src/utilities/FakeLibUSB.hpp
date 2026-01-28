@@ -38,8 +38,22 @@ struct libusb_device_descriptor {
 };
 
 // Constants (copied from real libusb for compatibility).
-#define LIBUSB_SUCCESS             0
-#define LIBUSB_ERROR_IO           -1
+enum {
+	LIBUSB_SUCCESS = 0,
+	LIBUSB_ERROR_IO = -1,
+	LIBUSB_ERROR_INVALID_PARAM = -2,
+	LIBUSB_ERROR_ACCESS = -3,
+	LIBUSB_ERROR_NO_DEVICE = -4,
+	LIBUSB_ERROR_NOT_FOUND = -5,
+	LIBUSB_ERROR_BUSY = -6,
+	LIBUSB_ERROR_TIMEOUT = -7,
+	LIBUSB_ERROR_OVERFLOW = -8,
+	LIBUSB_ERROR_PIPE = -9,
+	LIBUSB_ERROR_INTERRUPTED = -10,
+	LIBUSB_ERROR_NO_MEM = -11,
+	LIBUSB_ERROR_NOT_SUPPORTED = -12,
+	LIBUSB_ERROR_OTHER = -99
+};
 #define LIBUSB_ENDPOINT_OUT        0x00
 #define LIBUSB_REQUEST_TYPE_CLASS  0x20
 #define LIBUSB_RECIPIENT_INTERFACE 0x01
@@ -92,4 +106,13 @@ int libusb_interrupt_transfer(
 int libusb_set_option(libusb_context* ctx, int option, ...);
 int libusb_set_auto_detach_kernel_driver(libusb_device_handle* dev_handle, int enable);
 const char* libusb_error_name(int errcode);
+
+uint8_t libusb_get_bus_number(libusb_device* dev);
+uint8_t libusb_get_device_address(libusb_device* dev);
+
+int libusb_get_port_numbers(
+	libusb_device *dev,
+	uint8_t *port_numbers,
+	int port_numbers_len
+);
 // Add more stubs as needed (e.g., set_auto_detach_kernel_driver).
