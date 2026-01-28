@@ -102,7 +102,7 @@ generate_debian() {
 	changes=$(extract_changes "$VERSION")
 
 	cat > "$outfile" << EOF
-ledspicer (${VERSION}-${RELEASE}) unstable; urgency=medium
+ledspicer (${VERSION}-${RELEASE}) stable; urgency=medium
 
 ${changes}
 

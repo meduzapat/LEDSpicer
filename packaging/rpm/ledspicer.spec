@@ -197,7 +197,15 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Sun Jan 25 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.3-1
-- Add multi-distribution packaging infrastructure
-- Fix PIC build for Fedora aarch64
-- Initial Fedora/COPR release
+* Wed Jan 28 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.3-1
+- Added
+  - Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options).
+  - `LayoutProperties` struct for layout handling.
+  - Unit tests for core utilities and device handling.
+- Fixed
+  - Servostiks board works in multi-board setups.
+  - Pulseaudio actor now reconnects automatically and avoids fatal failures.
+- Changed
+  - Centralized path handling ensures consistent trailing slashes.
+  - Systemd service files improved: graceful shutdown, optional Pulseaudio support for daemons.
+  - `Utility::getHomeDir()` now resolves the correct home directory after privilege drops.
