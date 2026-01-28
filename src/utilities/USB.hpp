@@ -109,10 +109,8 @@ protected:
 	uint16_t wValue = 0;
 
 	uint8_t
-		/// Interface number
-		interface = 0,
-		/// Board ID
-		boardId   = 0;
+		interface = 0, /// Interface number
+		boardId   = 0; /// Board ID (1 = 1st)
 
 	/// App wide libusb session.
 	static libusb_context *usbSession;
