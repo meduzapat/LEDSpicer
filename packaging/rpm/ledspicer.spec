@@ -6,7 +6,7 @@
 
 Name:           ledspicer
 Version:        0.7.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
 URL:            https://github.com/meduzapat/LEDSpicer

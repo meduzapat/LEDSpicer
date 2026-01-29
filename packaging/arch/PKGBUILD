@@ -21,7 +21,7 @@ if [[ "$CARCH" == "aarch64" || "$CARCH" == "armv7h" ]]; then
 fi
 
 pkgver=0.7.3
-pkgrel=1
+pkgrel=2
 pkgdesc="LED controller daemon for arcade cabinets and RGB lighting"
 arch=('x86_64' 'aarch64' 'armv7h')
 url="https://github.com/meduzapat/LEDSpicer"
