@@ -6,7 +6,7 @@
 
 Name:           ledspicer
 Version:        0.7.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
 URL:            https://github.com/meduzapat/LEDSpicer
@@ -196,15 +196,15 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Wed Jan 28 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.3-2
+* Thu Jan 29 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.3-1
 - Added
-  - Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options)
-  - `LayoutProperties` struct for layout handling
-  - Unit tests for core utilities and device handling
+  - Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options).
+  - `LayoutProperties` struct for layout handling.
+  - Unit tests for core utilities and device handling.
 - Fixed
-  - Servostiks board works in multi-board setups
-  - Pulseaudio actor now reconnects automatically and avoids fatal failures
+  - Servostiks board works in multi-board setups.
+  - Pulseaudio actor now reconnects automatically and avoids fatal failures.
 - Changed
-  - Centralized path handling ensures consistent trailing slashes
-  - Systemd service files improved: graceful shutdown, optional Pulseaudio support
-  - `Utility::getHomeDir()` now resolves the correct home directory after privilege drops
+  - Centralized path handling ensures consistent trailing slashes.
+  - Systemd service files improved: graceful shutdown, optional Pulseaudio support for daemons.
+  - `Utility::getHomeDir()` now resolves the correct home directory after privilege drops.

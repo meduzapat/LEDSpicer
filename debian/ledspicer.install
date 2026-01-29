@@ -4,3 +4,5 @@ usr/bin/rotator
 usr/bin/inputseeker
 usr/bin/processLookup
 usr/share/ledspicer/
+usr/lib/systemd/system/ledspicerd.service
+usr/lib/systemd/system/processlookup.service
