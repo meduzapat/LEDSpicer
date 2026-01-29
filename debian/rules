@@ -23,11 +23,5 @@ CMAKE_OPTS = \
 override_dh_auto_configure:
 	dh_auto_configure -- $(CMAKE_OPTS)
 
-override_dh_install:
-	dh_install
-	# Install udev rules to main package
-	install -Dm644 data/21-ledspicer.rules \
-		debian/ledspicer/lib/udev/rules.d/21-ledspicer.rules
-
 override_dh_installsystemd:
-	dh_installsystemd --name=ledspicerd
+	dh_installsystemd --name=ledspicerd --no-start
