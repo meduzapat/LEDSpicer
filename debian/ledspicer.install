@@ -3,5 +3,4 @@ usr/bin/emitter
 usr/bin/rotator
 usr/bin/inputseeker
 usr/bin/processLookup
-usr/lib/*/libledspicer.so.*
 usr/share/ledspicer/

@@ -55,7 +55,7 @@ fi
 # Package release is always 1 (reset on each new version)
 RELEASE="1"
 
-DATE=$(date -R)
+LC_ALL=C DATE="$(date -R)"
 
 # =============================================================================
 # Find CHANGELOG.md
@@ -78,7 +78,7 @@ fi
 extract_changes() {
 	local version="$1"
 	awk -v ver="$version" '
-		/^## \[/ {
+		/^## \[[0-9]/ {
 			if (found) exit
 			if ($0 ~ "\\[" ver "\\]") found=1
 			next
