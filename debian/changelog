@@ -1,16 +1,21 @@
-ledspicer (0.7.3-1) stable; urgency=medium
+ledspicer (0.7.3-1ubuntu1) UNRELEASED; urgency=medium
 
-  * Added
+  * Fixed Debian errors
+
+ -- Patricio Rossi <meduza@Desktop01>  Wed, 28 Jan 2026 21:51:56 -0500
+
+ledspicer (0.7.3-1) Resolute Noble Jammy; urgency=medium
+
+  * Added:
     - Support for separate project directories (`-j/--project` and `-J/--projects-dir` CLI options).
-    - `LayoutProperties` struct for layout handling.
+    - LayoutProperties struct for layout handling.
     - Unit tests for core utilities and device handling.
-  * Fixed
+  * Fixed:
     - Servostiks board works in multi-board setups.
     - Pulseaudio actor now reconnects automatically and avoids fatal failures.
-  * Changed
+  * Changed:
     - Centralized path handling ensures consistent trailing slashes.
     - Systemd service files improved: graceful shutdown, optional Pulseaudio support for daemons.
-    - `Utility::getHomeDir()` now resolves the correct home directory after privilege drops.
+    - Utility::getHomeDir() now resolves the correct home directory after privilege drops.
 
  -- Patricio A. Rossi <meduzapat@netscape.net>  Wed, 28 Jan 2026 16:46:20 -0500
- 
