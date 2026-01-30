@@ -6,7 +6,9 @@ set -e
 source "$(dirname "$0")/common.sh"
 
 AUR_PACKAGE="ledspicer"
-ARCHITECTURES=("x86_64" "aarch64")
+ARCHITECTURES=("x86_64")
+
+# Architecture "aarch64" is missing, archlinux:latest does not publish an official arm64 Docker image
 
 test_arch_linux() {
 	local arch=$1 container_name="ledspicer-aur-test-${arch}"
