@@ -33,14 +33,17 @@ Actor::Actor(
 	const vector<string>& requiredParameters
 ) :
 	filter(Color::str2filter(parameters.exists("filter") ? parameters["filter"] : "Normal")),
-	secondsToStart(parameters.exists("startTime") ? Utility::parseNumber(parameters["startTime"], "Invalid Value for start time") : 0),
-	secondsToEnd(parameters.exists("endTime") ? Utility::parseNumber(parameters["endTime"], "Invalid Value for end time") : 0),
+	secondsToStart(parameters.exists("startTime")     ? Utility::parseNumber(parameters["startTime"],   "Invalid Value for start time")   : 0),
+	secondsToEnd(parameters.exists("endTime")         ? Utility::parseNumber(parameters["endTime"],     "Invalid Value for end time")     : 0),
+	secondsToRestart(parameters.exists("restartTime") ? Utility::parseNumber(parameters["restartTime"], "Invalid Value for restart time") : 0),
 	affectedElements(group->size(), false),
 	group(group),
 	repeat(parameters.exists("repeat") ? Utility::parseNumber(parameters["repeat"], "Invalid Value for repeat") : 0)
 {
 	affectedElements.shrink_to_fit();
 	Utility::checkAttributes(requiredParameters, parameters, "actor");
+	if (secondsToRestart and not secondsToEnd)
+		LogWarning("restartTime has no effect without endTime");
 }
 
 Group& Actor::getGroup() const {
@@ -49,7 +52,8 @@ Group& Actor::getGroup() const {
 
 void Actor::draw() {
 
-	if (not isRunning()) return;
+	wasRunning = isRunning();
+	if (not wasRunning) return;
 
 	// Reset Affected.
 	affectAllElements();
@@ -65,19 +69,23 @@ void Actor::draw() {
 }
 
 void Actor::drawConfig() const {
+
 	cout <<
-		"Group: " << group->getName() << endl <<
+		"Group: "  << group->getName()          << endl <<
 		"Filter: " << Color::filter2str(filter) << endl;
+
 	if (secondsToStart)
-		cout << "Start After: "     << secondsToStart << " sec"   << endl;
+		cout << "Start After: "   << secondsToStart   << " sec"   << endl;
 	if (secondsToEnd)
-		cout << "Stop After: "      << secondsToEnd   << " sec"   << endl;
+		cout << "Stop After: "    << secondsToEnd     << " sec"   << endl;
+	if (secondsToRestart)
+		cout << "Restart After: " << secondsToRestart << " sec"   << endl;
 	if (repeat)
-		cout << "Will repeat for: " << repeat         << " times" << endl;
-	if (acceptCycles()) {
-		cout << "Frames: " << getFullFrames() << " (" << getFullFrames() / FPS << " sec)" << endl;
-	}
-	cout << "Total running time: " << (getRunTime() ? to_string(getRunTime()) : "∞") << " sec" << endl
+		cout << "Will repeat: "   << repeat           << " times" << endl;
+
+	auto rt {getRunTime()};
+	cout << "Total running time: " << (rt > 0.0f ? to_string(rt) : "∞")
+		 << " sec"    << endl
 		 << SEPARATOR << endl;
 }
 
@@ -90,6 +98,11 @@ void Actor::restart() {
 		endTime = nullptr;
 	}
 
+	if (restartTime) {
+		delete restartTime;
+		restartTime = nullptr;
+	}
+
 	if (secondsToStart) {
 		if (startTime) delete startTime;
 		startTime = new Time(secondsToStart);
@@ -100,26 +113,50 @@ void Actor::restart() {
 }
 
 bool Actor::isRunning() {
+
 	if (startTime) {
+		// Start time is running (actor off).
 		if (not startTime->isTime()) return false;
+		// Start time is over (actor on)
 		delete startTime;
 		startTime = nullptr;
 #ifdef DEVELOP
 		LogDebug("Starting Actor by time after " + to_string(secondsToStart) + " seconds");
 #endif
+		// Set end clock.
 		if (secondsToEnd) endTime = new Time(secondsToEnd);
 	}
 
 	if (endTime and endTime->isTime()) {
+		// End time (actor off).
 		delete endTime;
 		endTime = nullptr;
 #ifdef DEVELOP
 		LogDebug("Ended Actor by time after " + to_string(secondsToEnd) + " seconds");
 #endif
+		// Set restart clock if any.
+		if (secondsToRestart) {
+			restartTime = new Time(secondsToRestart);
+		}
+		return false;
+	}
+
+	if (restartTime) {
+		// Restart clock running.
+		if (not restartTime->isTime()) return false;
+		// Restart time reached, check repeats.
+		delete restartTime;
+		restartTime = nullptr;
+	#ifdef DEVELOP
+		LogDebug("Restarting Actor after " + to_string(secondsToRestart) + " seconds");
+	#endif
+		checkRepeats();
+		return false;
 	}
 
 	if (not endTime and secondsToEnd) {
-		return checkRepeats();
+		checkRepeats();
+		return endTime;
 	}
 	return true;
 }
@@ -134,7 +171,10 @@ uint8_t Actor::getFPS() {
 }
 
 void Actor::newFrame() {
-	if (frame == FPS) frame = 0;
+	if (frame == FPS) {
+		frame = 0;
+		Time::setFrameTime();
+	}
 	++frame;
 }
 
@@ -166,8 +206,8 @@ bool Actor::isElementAffected(uint16_t index) const {
 }
 
 bool Actor::checkRepeats() {
-	if (not repeat or repeat == 1 or repeated == repeat) return false;
-	++repeated;
+	if (repeat == 1 or (repeat and repeated == repeat)) return false;
+	if (repeat) ++repeated;
 	restart();
 	return true;
 }

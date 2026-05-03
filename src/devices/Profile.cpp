@@ -85,11 +85,12 @@ void Profile::runFrame(bool advanceFrame) {
 	if (advanceFrame) Actor::newFrame();
 
 	// Reset elements.
-	for (const auto& e : Element::allElements)
+	for (const auto& e : Element::allElements) {
 		if (e.second->isTimed())
 			e.second->checkTime();
 		else
 			e.second->setColor(backgroundColor);
+	}
 
 	if (not transitioning and inputsEnabled) {
 		for (Input* i : inputs) i->process();

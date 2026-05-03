@@ -94,7 +94,7 @@ void Serpentine::calculateElements() {
 		if (tailData[i].position == stepping.frame) {
 #ifdef DEVELOP
 			if (Log::isLogging(LOG_DEBUG)) {
-				cout << std::setw(2) << static_cast<uint16_t>(data.position + 1) << "=--% ";
+				cout << std::setw(2) << static_cast<uint16_t>(tailData[i].position + 1) << "=--% ";
 			}
 #endif
 			continue;

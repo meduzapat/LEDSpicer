@@ -24,14 +24,20 @@
 
 using namespace LEDSpicer::Utilities;
 
-Time::Time(uint16_t seconds) {
-	timeOnExpiration = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
+Time::Time(float seconds) {
+	timeOnExpiration = frameTime + std::chrono::duration_cast<std::chrono::nanoseconds>(
+		std::chrono::duration<float>(seconds)
+	);
 }
 
-void Time::reset(uint16_t milliseconds) {
+void Time::reset(uint milliseconds) {
 	timeOnExpiration = std::chrono::system_clock::now() + std::chrono::milliseconds(milliseconds);
 }
 
 bool Time::isTime() const {
 	return (std::chrono::system_clock::now() > timeOnExpiration);
+}
+
+void Time::setFrameTime() {
+	frameTime = system_clock::now();
 }

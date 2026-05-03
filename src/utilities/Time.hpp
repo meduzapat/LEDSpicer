@@ -44,7 +44,7 @@ public:
 	 * Creates an object using seconds
 	 * @param seconds
 	 */
-	Time(uint16_t seconds);
+	Time(float seconds);
 
 	virtual ~Time() = default;
 
@@ -57,9 +57,17 @@ public:
 	 * Resets the clock to milliseconds.
 	 * @param milliseconds
 	 */
-	void reset(uint16_t milliseconds);
+	void reset(uint milliseconds);
+
+	/**
+	 * Sets the point where a frame started.
+	 */
+	static void setFrameTime();
 
 protected:
+
+	/// Shared frame anchor — all timers use this as their "now".
+	inline static system_clock::time_point frameTime = system_clock::now();
 
 	/// Calculated timepoint to finish.
 	system_clock::time_point timeOnExpiration = {};

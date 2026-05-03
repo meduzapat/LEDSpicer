@@ -25,14 +25,24 @@
 
 using namespace LEDSpicer::Utilities;
 
-TEST(TimeTest, ConstructorZeroSeconds) {
+class TimeTest : public ::testing::Test {
+
+protected:
+	void SetUp() override {
+		Time::setFrameTime();
+	}
+};
+
+TEST_F(TimeTest, ConstructorZeroSeconds) {
+	Time::setFrameTime();
 	// Immediate expiration.
 	EXPECT_TRUE(Time(0).isTime());
 	Time time;
 	EXPECT_TRUE(time.isTime());
 }
 
-TEST(TimeTest, IsTimeExpiration) {
+TEST_F(TimeTest, IsTimeExpiration) {
+	Time::setFrameTime();
 	// 2 seconds.
 	Time timeObj(2);
 	EXPECT_FALSE(timeObj.isTime()); // Not yet.
@@ -44,7 +54,8 @@ TEST(TimeTest, IsTimeExpiration) {
 	EXPECT_TRUE(timeObj.isTime());
 }
 
-TEST(TimeTest, MultipleTimersIndependent) {
+TEST_F(TimeTest, MultipleTimersIndependent) {
+	Time::setFrameTime();
 	Time timeShort(1);
 	Time timeLong(3);
 	sleep_for(std::chrono::milliseconds(1500)); // Wait 1.5s.
@@ -54,7 +65,8 @@ TEST(TimeTest, MultipleTimersIndependent) {
 	EXPECT_TRUE(timeLong.isTime());
 }
 
-TEST(TimeTest, ResetTimer) {
+TEST_F(TimeTest, ResetTimer) {
+	Time::setFrameTime();
 	Time timeObj(1);
 	sleep_for(std::chrono::milliseconds(500));
 	timeObj.reset(1000);

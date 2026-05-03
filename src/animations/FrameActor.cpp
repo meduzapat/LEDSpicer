@@ -31,16 +31,13 @@ FrameActor::FrameActor(
 ) :
 	Actor(parameters, group, requiredParameters),
 	Speed(parameters["speed"]),
-	startAt(parameters.exists("startAt") ? Utility::parseNumber(parameters["startAt"], "Invalid Value for start at") : 0),
-	cycles(parameters.exists("cycles")   ? Utility::parseNumber(parameters["cycles"],  "Invalid Value for cycles")   : 0)
+	startAt(parameters.exists("startAt") ? Utility::parseNumber(parameters["startAt"], "Invalid Value for start at") : 0)
 {
 	Utility::verifyValue<uint8_t>(startAt, 0, 100);
 }
 
 void FrameActor::drawConfig() const {
 	Speed::drawConfig();
-	if (cycles)
-		cout << "Will run for: " << to_string(cycles) << " Cycles" << endl;
 	if (startAt)
 		cout << "Start at Frame: " << to_string(startAt) << endl;
 	Actor::drawConfig();
@@ -64,7 +61,7 @@ bool FrameActor::isEndOfCycle() const {
 
 void FrameActor::draw() {
 	Actor::draw();
-	advanceFrame();
+	if (wasRunning) advanceFrame();
 }
 
 void FrameActor::restart() {
@@ -78,30 +75,7 @@ void FrameActor::restart() {
 	else {
 		stepping.frame = 0;
 	}
-	cycle         = 0;
 	stepping.step = 0;
-}
-
-bool FrameActor::isRunning() {
-
-	if (not Actor::isRunning()) return false;
-
-	if (cycles) {
-		// Avoids repeating log messages.
-		if (cycle > cycles) return checkRepeats();
-
-		if (cycle == cycles) {
-#ifdef DEVELOP
-			LogDebug("Actor completed after " + to_string(cycles) + " cycles");
-#endif
-			// Increase it by one so the debug message does not repeat.
-			++cycle;
-			return checkRepeats();
-		}
-		if (isEndOfCycle()) ++cycle;
-	}
-
-	return true;
 }
 
 uint16_t FrameActor::getFullFrames() const {
@@ -109,9 +83,8 @@ uint16_t FrameActor::getFullFrames() const {
 }
 
 float FrameActor::getRunTime() const {
-	float baseTime    = cycles ? (static_cast<float>(getFullFrames() * cycles) / FPS) : secondsToEnd;
 	float startAtTime = (startAt * getFullFrames()) / (100.0f * FPS);
-	return baseTime + secondsToStart + startAtTime;
+	return secondsToEnd + secondsToStart + startAtTime;
 }
 
 uint16_t FrameActor::calculateStepsBySpeed(Speeds speed) {
@@ -139,5 +112,3 @@ uint16_t FrameActor::calculateFramesBySpeed(Speeds speed) {
 void FrameActor::advanceFrame() {
 	stepping.advanceStep();
 }
-
-

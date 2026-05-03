@@ -99,21 +99,6 @@ public:
 	static uint8_t getFPS();
 
 	/**
-	 *
-	 * @return true If the actor can be handled by time.
-	 */
-	virtual bool acceptTime() {
-		return true;
-	}
-
-	/**
-	 * @return true If the actor can be handled by cycles.
-	 */
-	virtual bool acceptCycles() const {
-		return false;
-	}
-
-	/**
 	 * Increments the frame counter, resetting at FPS limit.
 	 */
 	static void newFrame();
@@ -169,17 +154,24 @@ protected:
 	/// Color filter applied to elements.
 	Color::Filters filter = Color::Filters::Normal;
 
-	uint16_t
+	float
 		/// Number of seconds to wait until start processing this actor.
-		secondsToStart = 0,
+		secondsToStart   = 0,
 		/// Number of seconds to wait to stop this actor.
-		secondsToEnd   = 0;
+		secondsToEnd     = 0,
+		/// Number of seconds to wait after endTime before restarting.
+		secondsToRestart = 0;
 
 	Time
 		/// Start time clock for this actor.
-		* startTime = nullptr,
+		* startTime   = nullptr,
 		/// End time clock for this actor.
-		* endTime = nullptr;
+		* endTime     = nullptr,
+		/// Restart delay clock, armed after endTime expires.
+		* restartTime = nullptr;
+
+	/// Set by draw(), true if the actor was running during the last draw call.
+	bool wasRunning = false;
 
 	/**
 	 * Do the elements calculation.
@@ -218,9 +210,9 @@ private:
 	Group* const group;
 
 	/// If this actor will repeat, default 0 to repeat for ever.
-	const uint8_t repeat;
+	const uint16_t repeat;
 	/// Times repeated.
-	uint8_t	repeated = 1;
+	uint16_t repeated = 1;
 };
 
 using ActorPtrsUmap = unordered_map<string, vector<Actor*>>;
