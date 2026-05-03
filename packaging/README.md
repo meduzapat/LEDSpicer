@@ -1,80 +1,168 @@
-# LEDSpicer Distribution Packaging
-
-This directory contains packaging files for distributing LEDSpicer across different Linux distributions.
-
-## Single Source of Truth
-
-Everything comes from `CMakeLists.txt`:
-
-| Data | CMake Variable |
-|------|----------------|
-| **Version** | `project(LEDSpicer VERSION x.y.z)` |
-| **URL** | `PROJECT_SITE` |
-| **Data Version** | `DATA_VERSION` |
-| **Maintainer** | `COPYRIGHT` (name parsed from end) |
-| **Email** | `MAINTAINER_EMAIL` |
-
-Changes are documented in `CHANGELOG.md` (Keep a Changelog format).
-
-## Release Workflow
-
-1. Update version in `CMakeLists.txt`
-2. Update `CHANGELOG.md` with your changes
-3. Run `./packaging/generate-changelogs.sh`
-4. Review generated files
-5. Commit, tag, push
-6. Push to launchpad `git push launchpad master` (or the branch to use)
-
-The script reads version from CMakeLists.txt and generates:
-- `debian/changelog` - Debian format (uses `unstable`, not Ubuntu codenames)
-- `arch/.SRCINFO` - AUR metadata
-- Updates version in `PKGBUILD` and `.spec`
-- RPM changelog entry (printed to console)
+# Development and Release Workflow
 
 ## Repository Structure
 
 ```
 LEDSpicer/
-├── CMakeLists.txt            ← All metadata here (version, url, maintainer, email)
-├── CHANGELOG.md              ← Changes in Keep a Changelog format
+├── CMakeLists.txt                ← Single source of truth (version, url, maintainer, email)
+├── CHANGELOG.md                  ← Changes in Keep a Changelog format
 ├── debian/
-│   ├── changelog         ← Generated
+│   ├── changelog                 ← Generated
 │   ├── control
 │   ├── rules
 │   ├── copyright
 │   ├── source/format
 │   └── *.install
-├── src/
-├── data/
-├── tests/
 └── packaging/
+    ├── README.md                 ← this file
     ├── generate-changelogs.sh
     ├── arch/
-    │   ├── PKGBUILD
+    │   ├── PKGBUILD              ← Updated by generate-changelogs.sh
     │   ├── ledspicer.install
-    │   └── .SRCINFO          ← Generated
+    │   └── .SRCINFO              ← Generated (hidden file, do not forget)
     └── rpm/
-        └── ledspicer.spec
+        └── ledspicer.spec        ← Updated by generate-changelogs.sh
 ```
 
-**Benefits of integration:**
-- Version synced with git tags
-- CI/CD can build packages automatically
-- Contributors can fix packaging issues
-- `CHANGELOG.md` at repo root is standard practice
+---
 
-## Package Structure
+## Branch Strategy
 
-| Package | Contents |
-|---------|----------|
-| `ledspicer` | Daemon, utilities, library, data files, systemd service, udev rules |
-| `ledspicer-nanoled` | Ultimarc NanoLed plugin (`UltimarcNanoLed.so`) |
-| `ledspicer-pacdrive` | Ultimarc PacDrive plugin (`UltimarcPacDrive.so`) |
-| `ledspicer-pacled64` | Ultimarc PacLed64 plugin (`UltimarcPacLed64.so`) |
-| `ledspicer-ultimateio` | Ultimarc Ultimate I/O plugin (`UltimarcUltimate.so`) |
-| `ledspicer-ledwiz32` | Groovy Game Gear LedWiz32 plugin (`LedWiz32.so`) |
-| `ledspicer-howler` | WolfWareTech Howler plugin (`Howler.so`) |
-| `ledspicer-adalight` | Adalight serial LED plugin (`Adalight.so`) |
-| `ledspicer-raspberrypi` | Raspberry Pi GPIO plugin (`RaspberryPi.so`) - **ARM only, not builded due to missing pigpio library** |
-| `ledspicer-dev` | Development headers (`*.hpp`), pkgconfig file |
-| `ledspicer-doc` | Documentation and example configurations |
+```
+master  ←  development  ←  feature branches
+```
+
+- `master` and `development` are protected — no direct pushes.
+- All changes go through pull requests on GitHub.
+- Any PR targeting `master` triggers the automated unit test suite.
+
+---
+
+## Development Cycle
+
+Repeat this cycle for each task or fix before a release.
+
+1. Pick a task or issue to work on.
+
+2. Create a feature branch off `development`:
+   ```bash
+   git checkout development
+   git checkout -b feature/my-task
+   ```
+
+3. Code the changes.
+
+4. Test manually.
+
+5. Run the automated test suite:
+   ```bash
+   cmake -S . -B build -DENABLE_TESTS=ON -DENABLE_DRY_RUN=ON
+   cmake --build build/tests -j$(nproc)
+   ctest --test-dir build/tests
+   ```
+
+6. Commit and push the branch:
+   ```bash
+   git add -A
+   git commit -m "Short description of change"
+   git push origin feature/my-task
+   ```
+
+7. Open a pull request on GitHub: `feature/my-task` → `development` and merge it there.
+
+Repeat until the set of changes is ready to ship.
+
+---
+
+## Release
+
+### 1. Prepare
+
+1. Update the version in `CMakeLists.txt`:
+   ```
+   project(LEDSpicer VERSION x.y.z ...)
+   ```
+
+2. Add a new section to `CHANGELOG.md` summarising all changes since the last release.
+
+3. Run the changelog generator:
+   ```bash
+   ./packaging/generate-changelogs.sh
+   ```
+   This updates:
+   - `debian/changelog`
+   - `packaging/arch/PKGBUILD` (version + checksum)
+   - `packaging/arch/.SRCINFO`
+   - `packaging/rpm/ledspicer.spec` (version + changelog entry)
+
+4. Review the generated files, then commit, tag, and push:
+   ```bash
+   git add -A
+   git commit -m "Release x.y.z"
+   git tag x.y.z
+   git push
+   git push --tags
+   ```
+
+5. Open a pull request on GitHub: `development` → `master`. This triggers the automated unit
+   test suite — merge only after it passes.
+
+### 2. PPA (Ubuntu / Debian)
+
+**Option A — Launchpad git remote** (triggers build automatically):
+```bash
+git push launchpad master
+```
+
+**Option B — dput**:
+```bash
+dput ppa:meduzapat/ledspicer ../ledspicer_VERSION_source.changes
+```
+
+Monitor at https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer
+
+### 3. AUR (Arch Linux)
+
+The generator already updated `PKGBUILD` and `.SRCINFO` — both must be pushed.
+
+First-time clone:
+```bash
+git clone ssh://aur@aur.archlinux.org/ledspicer.git ~/aur/ledspicer
+```
+
+Copy and push:
+```bash
+cd ~/aur/ledspicer
+cp /path/to/LEDSpicer/packaging/arch/PKGBUILD .
+cp /path/to/LEDSpicer/packaging/arch/.SRCINFO .
+git add PKGBUILD .SRCINFO
+git commit -m "Update to x.y.z"
+git push
+```
+
+Verify at https://aur.archlinux.org/packages/ledspicer
+
+### 4. COPR (Fedora / RPM)
+
+The generator already updated `packaging/rpm/ledspicer.spec`. Build the SRPM:
+
+```bash
+VERSION=x.y.z
+rm ~/rpmbuild/SOURCES/*
+cp packaging/rpm/ledspicer.spec ~/rpmbuild/SPECS/
+git archive --format=tar.gz --prefix=LEDSpicer-${VERSION}/ HEAD \
+    > ~/rpmbuild/SOURCES/LEDSpicer-${VERSION}.tar.gz
+rpmbuild -bs ~/rpmbuild/SPECS/ledspicer.spec
+```
+
+This produces `~/rpmbuild/SRPMS/ledspicer-VERSION*.src.rpm`. Submit it with either:
+
+**Option A — Web UI**: go to https://copr.fedorainfracloud.org/coprs/meduzapat/ledspicer/ →
+New Build → Upload SRPM.
+
+**Option B — copr-cli**:
+```bash
+copr-cli build meduzapat/ledspicer ~/rpmbuild/SRPMS/ledspicer-VERSION*.src.rpm
+```
+Requires one-time setup: install `copr-cli` and place your API token in `~/.config/copr`
+(available at https://copr.fedorainfracloud.org/api/).
