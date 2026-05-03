@@ -37,35 +37,25 @@ namespace LEDSpicer::Animations {
  * Minimal derived class for testing FrameActor.
  */
 class TestFrameActor : public FrameActor {
+
 public:
+
 	TestFrameActor(
 		StringUMap&           parameters,
 		Group* const          group,
 		const vector<string>& requiredParameters
 	) : FrameActor(parameters, group, requiredParameters) {}
 
-	/**
-	 * @param stepping the stepping to test.
-	 */
 	void setStepping(FrameActor::Stepping stepping) {
 		this->stepping = stepping;
 	}
 
-	/**
-	 * @return the stepping.
-	 */
 	FrameActor::Stepping  getStepping() {
 		return stepping;
 	}
 
-	/**
-	 * @return the current cycle.
-	 */
-	uint8_t getCycle() {
-		return cycle;
-	}
-
 protected:
+
 	void calculateElements() override {
 		affectAllElements(true);
 	}
@@ -81,14 +71,12 @@ TEST(FrameActorTest, Constructor) {
 		{"group",   "TestGroup"},
 		{"filter",  "Normal"},
 		{"speed",   "Normal"},
-		{"startAt", "10"},
-		{"cycles",  "2"}
+		{"startAt", "10"}
 	};
 	const vector<string> required = {"type", "group", "filter"};
 	TestFrameActor actor(params, &group, required);
 	EXPECT_EQ(actor.getStepping().frames, 0);
 	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_EQ(actor.getCycle(), 0);
 }
 
 TEST(FrameActorTest, SpeedVariations) {
@@ -124,83 +112,6 @@ TEST(FrameActorTest, StartAt) {
 	actor.setStepping(stepping);
 	actor.restart();
 	EXPECT_EQ(actor.getStepping().frame, 29); // (60 * (50-1)) / 100 = 29.4 -> 29
-}
-
-TEST(FrameActorTest, Cycles) {
-	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",   "Test"},
-		{"group",  "TestGroup"},
-		{"filter", "Normal"},
-		{"speed",  "VeryFast"},
-		{"cycles", "2"}
-	};
-	const vector<string> required = {"type", "group", "filter"};
-	TestFrameActor actor(params, &group, required);
-	// 20 Frames.
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::VeryFast);
-	actor.setStepping(stepping);
-	actor.restart();
-	EXPECT_TRUE(actor.isRunning());
-	EXPECT_EQ(actor.getCycle(), 0);
-
-	// Simulate one cycle + 1 (20 frames from 0 to 0)
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_TRUE(actor.isRunning());
-	EXPECT_EQ(actor.getCycle(), 1);
-
-	// Simulate second cycle
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_EQ(actor.getCycle(), 2);
-	EXPECT_FALSE(actor.isRunning());
-	// this will be 3 instead of 2 due to the log protector.
-	EXPECT_EQ(actor.getCycle(), 3);
-}
-
-// New test case for Cycles and Repeats
-TEST(FrameActorTest, CyclesAndRepeats) {
-	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",   "Test"},
-		{"group",  "TestGroup"},
-		{"filter", "Normal"},
-		{"speed",  "VeryFast"},
-		{"cycles", "2"},
-		{"repeat", "2"}
-	};
-	const vector<string> required = {"type", "group", "filter"};
-	TestFrameActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::VeryFast);
-	actor.setStepping(stepping);
-	actor.restart();
-	// Simulate one cycle + 1 (20 frames from 0 to 0)
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_TRUE(actor.isRunning());
-	EXPECT_EQ(actor.getCycle(), 1);
-
-	// Simulate second cycle
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_EQ(actor.getCycle(), 2);
-	EXPECT_TRUE(actor.isRunning());
-
-	// Simulate first cycle of second repeat
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_EQ(actor.getCycle(), 1);
-	EXPECT_TRUE(actor.isRunning());
-
-	// Simulate second cycle of second repeat
-	for (int i = 0; i < 20; ++i) actor.draw();
-	EXPECT_EQ(actor.getStepping().frame, 0);
-	EXPECT_EQ(actor.getCycle(), 2);
-	// At this point it ran 4 times 2x2.
-	EXPECT_FALSE(actor.isRunning());
 }
 
 TEST(FrameActorTest, FrameAdvance) {
@@ -282,7 +193,6 @@ TEST(FrameActorTest, RunTime) {
 		{"filter",    "Normal"},
 		{"speed",     "Normal"},
 		{"startAt",   "50"},
-		{"cycles",    "2"},
 		{"startTime", "1"},
 		{"endTime",   "2"}
 	};
@@ -292,8 +202,8 @@ TEST(FrameActorTest, RunTime) {
 	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
 	actor.setStepping(stepping);
 	actor.restart();
-	// Run time = (cycles * frames / FPS) + startTime + (startAt * frames / (100 * FPS))
-	// = (2 * 60 / 60) + 1 + (50 * 60 / (100 * 60)) = 2 + 1 + 0.5 = 3.5
+	// Run time = startTime + endTime + (startAt * frames) / (100 * FPS)
+	// = 1 + 2 + (50 * 60) / (100 * 60) = 3 + 0.5 = 3.5
 	EXPECT_FLOAT_EQ(actor.getRunTime(), 3.5f);
 }
 
@@ -304,8 +214,7 @@ TEST(FrameActorTest, DrawConfig) {
 		{"group",   "TestGroup"},
 		{"filter",  "Normal"},
 		{"speed",   "Fast"},
-		{"startAt", "10"},
-		{"cycles",  "3"}
+		{"startAt", "10"}
 	};
 	const vector<string> required = {"type", "group", "filter"};
 	TestFrameActor actor(params, &group, required);
@@ -316,9 +225,8 @@ TEST(FrameActorTest, DrawConfig) {
 	Log::setLogLevel(LOG_ERR);
 	actor.drawConfig();
 	string output = testing::internal::GetCapturedStdout();
-	EXPECT_NE(output.find("Speed: Fast"),            string::npos);
-	EXPECT_NE(output.find("Will run for: 3 Cycles"), string::npos);
-	EXPECT_NE(output.find("Start at Frame: 10"),     string::npos);
+	EXPECT_NE(output.find("Speed: Fast"),        string::npos);
+	EXPECT_NE(output.find("Start at Frame: 10"), string::npos);
 }
 
 int main(int argc, char **argv) {

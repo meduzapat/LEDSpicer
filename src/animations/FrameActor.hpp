@@ -127,12 +127,6 @@ public:
 	 */
 	void restart() override;
 
-	bool isRunning() override;
-
-	bool acceptCycles() const override {
-		return true;
-	}
-
 	uint16_t getFullFrames() const override;
 
 	float getRunTime() const override;
@@ -155,13 +149,8 @@ protected:
 
 	Stepping stepping;
 
-	uint8_t
-		/// The percent of the animation to start.
-		startAt = 0,
-		/// Will run for this number of cycles.
-		cycles  = 0,
-		/// Current cycle.
-		cycle   = 0;
+	/// The percent of the animation to start.
+	uint8_t startAt = 0;
 
 	/**
 	 * Advances the system frame forward.
@@ -171,4 +160,3 @@ protected:
 };
 
 } // namespace
-
