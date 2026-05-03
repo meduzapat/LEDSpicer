@@ -37,7 +37,9 @@ namespace LEDSpicer::Animations {
  * Minimal derived class for testing Actor.
  */
 class TestActor : public Actor {
+
 public:
+
 	TestActor(
 		StringUMap&           parameters,
 		Group* const          group,
@@ -53,6 +55,7 @@ public:
 	}
 
 protected:
+
 	void calculateElements() override {
 		affectAllElements(true);
 	}
@@ -85,13 +88,18 @@ TEST(ActorTest, Constructor) {
 	EXPECT_EQ(actor.getGroup().getName(), "TestGroup");
 	EXPECT_EQ(actor.getNumberOfElements(), 0);
 	// Activate actor
+	Time::setFrameTime();
 	actor.restart();
-	// False due to to seconds start.
 	EXPECT_FALSE(actor.isRunning());
+
 	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
 	EXPECT_TRUE(actor.isRunning());
+
 	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
 	EXPECT_FALSE(actor.isRunning());
+
 	// Test LEDs.
 	EXPECT_EQ(actor.getLeds().size(), 0);
 }
@@ -210,16 +218,35 @@ TEST(ActorTest, RepeatFunctionality) {
 	};
 	const vector<string> required = {"type", "group", "filter"};
 	TestActor actor(params, &group, required);
+
+	Time::setFrameTime();
 	actor.restart();
 	// Wait for startTime (0s, immediate start)
 	EXPECT_TRUE(actor.isRunning());
-	// Wait for endTime (1s)
-	sleep_for(std::chrono::milliseconds(1001));
-	// First repeat should trigger restart
+
+	// First loop.
+	sleep_for(std::chrono::milliseconds(900));
+	Time::setFrameTime();
 	EXPECT_TRUE(actor.isRunning());
+
+	// Wait for endTime (0.1s) not running
+	sleep_for(std::chrono::milliseconds(100));
+	Time::setFrameTime();
+	EXPECT_FALSE(actor.isRunning());
+
+	// First repeat should trigger restart.
+	sleep_for(std::chrono::milliseconds(900));
+	Time::setFrameTime();
+	EXPECT_TRUE(actor.isRunning());
+
 	// Wait for endTime again (1s)
 	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
+	EXPECT_FALSE(actor.isRunning());
+
 	// No more repeats, should stop
+	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
 	EXPECT_FALSE(actor.isRunning());
 }
 
@@ -260,11 +287,11 @@ TEST(ActorTest, DrawConfig) {
 	Log::setLogLevel(LOG_ERR);
 	actor.drawConfig();
 	string output = testing::internal::GetCapturedStdout();
-	EXPECT_NE(output.find("Group: TestGroup"),         string::npos);
-	EXPECT_NE(output.find("Filter: Combine"),          string::npos);
-	EXPECT_NE(output.find("Start After: 2 sec"),       string::npos);
-	EXPECT_NE(output.find("Stop After: 10 sec"),       string::npos);
-	EXPECT_EQ(output.find("Will repeat for: 3 times"), string::npos);
+	EXPECT_NE(output.find("Group: TestGroup"),     string::npos);
+	EXPECT_NE(output.find("Filter: Combine"),      string::npos);
+	EXPECT_NE(output.find("Start After: 2 sec"),   string::npos);
+	EXPECT_NE(output.find("Stop After: 10 sec"),   string::npos);
+	EXPECT_NE(output.find("Will repeat: 3 times"), string::npos);
 }
 
 TEST(ActorTest, AffectAllElementsWithMask) {
@@ -320,6 +347,50 @@ TEST(ActorTest, AffectAllElementsWithMask) {
 	actor2.draw();
 	EXPECT_EQ(ledValue1, 124);
 	EXPECT_EQ(ledValue2, 0);
+}
+
+TEST(ActorTest, RestartTimeInfinite) {
+	Group group(
+		"TestGroup",
+		DEFAULT_COLOR
+	);
+	StringUMap params = {
+		{"type",        "Test"},
+		{"group",       "TestGroup"},
+		{"filter",      "Normal"},
+		{"endTime",     "1"},
+		{"restartTime", "1"}
+	};
+
+	const vector<string> required = {"type", "group", "filter"};
+	TestActor actor(params, &group, required);
+	Time::setFrameTime();
+	actor.restart();
+
+	// Cycle 1: running.
+	EXPECT_TRUE(actor.isRunning());
+	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
+
+	// endTime fired → paused.
+	EXPECT_FALSE(actor.isRunning());
+	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
+
+	// restartTime fired → cycle 2 running.
+	EXPECT_FALSE(actor.isRunning()); // this kicks restart
+	EXPECT_TRUE(actor.isRunning());
+	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
+
+	// endTime fired → paused again.
+	EXPECT_FALSE(actor.isRunning());
+	sleep_for(std::chrono::milliseconds(1001));
+	Time::setFrameTime();
+
+	// restartTime fired → cycle 3 still running (infinite).
+	EXPECT_FALSE(actor.isRunning()); // this kicks restart
+	EXPECT_TRUE(actor.isRunning());
 }
 
 int main(int argc, char **argv) {

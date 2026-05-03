@@ -5,6 +5,25 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.4] - 2026-05-03
+
+### Added
+- `restartTime` parameter for actors: delay before restarting after `endTime` expires
+- Time is now frame-based, syncing multiple actors to the same point in time
+
+### Changed
+- Time and duration values now accept decimals (e.g. `1.5` seconds)
+- Repeat limit increased from 255 to 65535
+- Improved actor runtime validation
+- `checkRepeats()` infinite repeat behavior corrected
+
+### Removed
+- `cycles` parameter from FrameActor, replaced by `endTime`
+
+### Fixed
+- Serpentine animation debug log showed wrong position
+- Element reset loop applied incorrectly in some cases
+
 ## [0.7.3] - 2026-01-28
 
 ### Added
