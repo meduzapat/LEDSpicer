@@ -69,7 +69,7 @@ StepActor::FrameTransition StepActor::changeFrameElementCommon(const Directions&
 	// This is fake.
 	uint16_t next = nextOf(*this, stepping.frame, direction, stepping.frames - 1);
 	// Next is fake and will bounce late due to incorrect direction.
-	if (isBouncer() and (
+	if (initDir.isBouncer() and (
 			(stepping.frame == 0    and isBackward()) or
 			(stepping.isLastFrame() and isForward())
 		)

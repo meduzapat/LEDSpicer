@@ -39,10 +39,6 @@ void DirectionActor::restart() {
 	}
 }
 
-bool DirectionActor::isBouncing() const {
-	return isBouncer() and (getDirection() != initDir.getDirection());
-}
-
 bool DirectionActor::isFirstFrame() const {
 	return (
 		(isForward()  and FrameActor::isFirstFrame()) or
@@ -53,14 +49,14 @@ bool DirectionActor::isFirstFrame() const {
 bool DirectionActor::isStartOfCycle() const {
 
 	if (FrameActor::isStartOfCycle()) {
-		if (isBouncer()) {
+		if (initDir.isBouncer()) {
 			if (isBouncing() and isBackward()) return true;
 		}
 		if (isForward()) return true;
 		if (isStopped()) return true;
 	}
 	else if (FrameActor::isLastFrame() and stepping.step == 0) {
-		if (isBouncer()) {
+		if (initDir.isBouncer()) {
 			if (isBouncing() and isForward()) return true;
 		}
 		if (isBackward()) return true;
@@ -78,7 +74,7 @@ bool DirectionActor::isLastFrame() const {
 
 bool DirectionActor::isEndOfCycle() const {
 	if (not stepping.isLastStep()) return false;
-	if (not isBouncer()) return isLastFrame();
+	if (not initDir.isBouncer()) return isLastFrame();
 	return isBouncing() and isLastFrame();
 }
 
@@ -117,5 +113,5 @@ void DirectionActor::advanceFrame() {
 }
 
 uint16_t DirectionActor::getFullFrames() const {
-	return (FrameActor::getFullFrames() * (1 + isBouncer()));
+	return (FrameActor::getFullFrames() * (1 + initDir.isBouncer()));
 }

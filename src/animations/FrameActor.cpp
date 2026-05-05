@@ -84,10 +84,9 @@ void FrameActor::restart() {
 }
 
 bool FrameActor::isRunning() {
-	// Always evaluate timer logic so restarts fire even after cycles exhaust.
-	bool timerRunning = Actor::isRunning();
+	if (not Actor::isRunning()) return false;
 	if (cycles and cycle >= cycles) return false;
-	return timerRunning;
+	return true;
 }
 
 uint16_t FrameActor::getFullFrames() const {

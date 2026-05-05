@@ -47,10 +47,9 @@ public:
 	{}
 
 	/**
-	 * @return true if the actor is configured to bounce at the endpoints.
-	 * Shadows Direction::isBouncer() to read from the const config object.
+	 * @return true if the animation is on the bouncing period.
 	 */
-	bool isBouncer() const { return initDir.isBouncer(); }
+	bool isBouncing() const { return isBouncer(); }
 
 	virtual ~DirectionActor() = default;
 
@@ -63,11 +62,6 @@ public:
 	 * @see FrameActor::restart();
 	 */
 	void restart() override;
-
-	/**
-	 * @return true if the animation is on the bouncing period.
-	 */
-	bool isBouncing() const;
 
 	/**
 	 * @return true same as frame actor but includes direction and bouncing effect.
@@ -126,6 +120,12 @@ protected:
 
 	/// Immutable direction config read from the animation file.
 	const Direction initDir;
+
+	/**
+	 * @return true if the animation is currently in the bounce-return phase.
+	 * Protected: external code uses the public isBouncing() wrapper.
+	 */
+	bool isBouncer() const { return initDir.isBouncer() and (getDirection() != initDir.getDirection()); }
 
 	/**
 	 * Moves the frame to the next one (forward or backward).
