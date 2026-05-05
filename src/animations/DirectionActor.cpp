@@ -32,6 +32,7 @@ void DirectionActor::drawConfig() const {
 void DirectionActor::restart() {
 	FrameActor::restart();
 	setDirection(initDir.getDirection());
+	setBouncer(false);
 	if (initDir.isBackward()) {
 		stepping.frame = startAt
 			? (stepping.frames * (100 - startAt)) / 100
@@ -110,6 +111,13 @@ uint16_t DirectionActor::nextOf(
 void DirectionActor::advanceFrame() {
 	if (stepping.shouldMoveFrame())
 		stepping.frame = calculateNextOf(*this, stepping.frame, initDir, stepping.frames - 1);
+	if (cycles and isEndOfCycle()) {
+		++cycle;
+#ifdef DEVELOP
+		if (cycle == cycles)
+			LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
+#endif
+	}
 }
 
 uint16_t DirectionActor::getFullFrames() const {
