@@ -192,14 +192,14 @@ TEST(FrameActorTest, CyclesStopsAfterOne) {
 	actor.setStepping(stepping);
 	actor.restart();
 
-	// Run through one full cycle.
+	// Run until one draw before the last frame.
 	EXPECT_TRUE(actor.isRunning());
-	for (uint16_t i = 0; i < stepping.frames - 1; ++i) actor.draw();
+	for (uint16_t i = 0; i < stepping.frames - 2; ++i) actor.draw();
 	EXPECT_TRUE(actor.isRunning());
 
-	// Last draw completes the cycle.
+	// This draw advances to the last frame, completing the cycle.
 	actor.draw();
-	// cycle == cycles → stopped.
+	// cycle >= cycles → stopped.
 	EXPECT_FALSE(actor.isRunning());
 	EXPECT_FALSE(actor.isRunning());
 }
@@ -212,13 +212,15 @@ TEST(FrameActorTest, CyclesStopsAfterTwo) {
 	actor.setStepping(stepping);
 	actor.restart();
 
-	// Cycle 1.
+	// Cycle 1: frames-1 draws advance to last frame (cycle=1), then 1 wrap draw.
 	for (uint16_t i = 0; i < stepping.frames; ++i) actor.draw();
+	EXPECT_TRUE(actor.isRunning()); // cycle=1, frame=0
+
+	// Cycle 2: run until one draw before the last frame.
+	for (uint16_t i = 0; i < stepping.frames - 2; ++i) actor.draw();
 	EXPECT_TRUE(actor.isRunning());
 
-	// Cycle 2.
-	for (uint16_t i = 0; i < stepping.frames - 1; ++i) actor.draw();
-	EXPECT_TRUE(actor.isRunning());
+	// This draw advances to the last frame, completing cycle 2.
 	actor.draw();
 
 	// Stopped after 2 cycles.
