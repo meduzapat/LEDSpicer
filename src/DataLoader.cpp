@@ -26,13 +26,6 @@
 
 using namespace LEDSpicer;
 
-ProfilePtrUMap    DataLoader::profilesCache;
-string            DataLoader::portNumber;
-milliseconds      DataLoader::waitTime;
-DataLoader::Modes DataLoader::mode = DataLoader::Modes::Normal;
-unordered_map<Profile*, Transition*> DataLoader::transitions;
-string DataLoader::projectDir;
-
 DataLoader::Modes DataLoader::getMode() {
 	return mode;
 }
@@ -73,7 +66,7 @@ void DataLoader::readConfiguration(
 
 	processDevices();
 
-	LayoutProperties defaultLayoutProperties(processLayout());
+	defaultLayoutProperties = processLayout();
 
 	// Initialize Devices.
 	if (mode != Modes::Dump and mode != Modes::Profile) {
@@ -804,4 +797,8 @@ void DataLoader::setProjectDir(const string& path, const string& project) {
 	if (basePath.back() != '/') basePath += '/';
 	projectDir = basePath + project;
 	if (projectDir.back() != '/') projectDir +='/';
+}
+
+DataLoader::LayoutProperties DataLoader::getLayoutProperties() noexcept {
+	return defaultLayoutProperties;
 }

@@ -219,7 +219,7 @@ public:
 	/**
 	 * Draws information about this element.
 	 */
-	void draw() const;
+	void drawConfig() const;
 
 	/// Global map of all elements, indexed by name, for lookup purposes.
 	static unordered_map<string, Element*> allElements;

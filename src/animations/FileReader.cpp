@@ -42,15 +42,14 @@ FileReader::FileReader(StringUMap& parameters, Group* const group) :
 		LogDebug("File " + parameters["filename"] + " already in memory");
 		frames = found;
 	}
-	stepping.frames = frames->second.size() - 1;
+	stepping.frames = frames->second.size();
 	stepping.steps  = calculateStepsBySpeed(speed);
 }
 
 void FileReader::drawConfig() const {
-	cout <<
-		"Type: FileReader "       << endl <<
-		"File: " << frames->first << endl;
+	cout << "FileReader" << endl;
 	DirectionActor::drawConfig();
+	cout << "File: " << frames->first << endl;
 }
 
 string FileReader::Format2str(const Formats format) {
@@ -118,7 +117,7 @@ void FileReader::processRGBA(const string& filename) {
 
 void FileReader::calculateElements() {
 #ifdef DEVELOP
-	cout << "FileReader: " << DrawDirection(cDirection.getDirection()) << " F: " << (stepping.frame + 1) << endl;
+	cout << "FileReader: " << DrawDirection(getDirection()) << " F: " << (stepping.frame + 1) << endl;
 #endif
 	for (uint16_t c = 0; c < frames->second[stepping.frame].size(); ++c) {
 #ifdef DEVELOP

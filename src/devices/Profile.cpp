@@ -24,11 +24,8 @@
 
 using namespace LEDSpicer::Devices;
 
-Profile* Profile::defaultProfile = nullptr;
 ElementItemUMap Profile::temporaryOnElements;
 GroupItemUMap   Profile::temporaryOnGroups;
-
-bool Profile::transitioning = false;
 
 Profile::~Profile() {
 #ifdef DEVELOP
@@ -47,37 +44,46 @@ void Profile::addAnimation(const vector<Actor*>& animation) {
 }
 
 void Profile::drawConfig() const {
-
-	cout << "* Background color: " << backgroundColor.getName() << endl;
+	cout << endl << Utility::cage("Profile " + name) << endl;
+	cout << "Background color: " << backgroundColor.getName() << endl;
+	cout <<
+			"Animations: " << animations.size() << endl <<
+			"Inputs: "     << inputs.size()     << endl;
 
 	if (alwaysOnGroups.size()) {
-		cout << endl << "* Groups Overwrite Color: " << endl;
+		cout << endl << Utility::cage(" Groups Overwrite Color ") << endl;
 		for (auto& g : alwaysOnGroups) {
 			cout << g.group->getName() << " " << g.color->getName() << endl;
 		}
 	}
 
 	if (alwaysOnElements.size()) {
-		cout << endl << "* Elements Overwrite Color: " << endl;
+		cout << endl << Utility::cage(" Elements Overwrite Color ") << endl;
 		for (auto& e : alwaysOnElements) {
 			cout << e.element->getName() << " " << e.color->getName() << endl;
 		}
 	}
 
 	if (animations.size()) {
-		cout << endl << "* Animation Actors:" << endl;
+		cout << endl << Utility::cage("   Animation Actors   ") << endl;
 		uint count = 1;
 		for(auto actor : animations) {
-			cout << "Actor " << count++ << ":" << endl;
+			cout << "Actor " << count++ << ": ";
 			actor->drawConfig();
+			cout << SEPARATOR1  << endl;
 		}
 	}
 
 	if (inputs.size()) {
-		cout << endl << "* Input plugins:" << endl;
-		for (Input* i : inputs) i->drawConfig();
-		cout << SEPARATOR << endl;
+		cout << endl << Utility::cage("     Input plugins    ") << endl;
+		uint count = 1;
+		for (Input* i : inputs) {
+			cout << "Input " << count++ << ": ";
+			i->drawConfig();
+			cout << endl << SEPARATOR1 << endl;
+		}
 	}
+	cout << endl;
 }
 
 void Profile::runFrame(bool advanceFrame) {
@@ -98,7 +104,9 @@ void Profile::runFrame(bool advanceFrame) {
 
 	if (animationsEnabled) {
 		// Draw current animations if any.
-		for (auto actor : animations) actor->draw();
+		for (auto actor : animations)
+			if (actor->isRunning())
+				actor->draw();
 	}
 
 	// Set always on groups from profile.

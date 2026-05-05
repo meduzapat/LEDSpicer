@@ -127,7 +127,9 @@ public:
 	 */
 	void restart() override;
 
-	uint16_t getFullFrames() const override;
+	bool isRunning() override;
+
+	virtual uint16_t getFullFrames() const;
 
 	float getRunTime() const override;
 
@@ -149,13 +151,20 @@ protected:
 
 	Stepping stepping;
 
-	/// The percent of the animation to start.
-	uint8_t startAt = 0;
+	uint16_t
+		/// The percent of the animation to start.
+		startAt = 0,
+		/// Will run for this number of cycles.
+		cycles  = 0,
+		/// Current cycle.
+		cycle   = 0;
 
 	/**
 	 * Advances the system frame forward.
 	 */
 	virtual void advanceFrame();
+
+	uint16_t calculateStartFrame() const noexcept;
 
 };
 

@@ -58,10 +58,11 @@ void Random::generateNewColors() {
 }
 
 void Random::drawConfig() const {
-	cout << "Type: Random " << endl;
+	cout << "Random" << endl;
+	FrameActor::drawConfig();
 	cout << "Colors: ";
 	Color::drawColors(colors);
-	FrameActor::drawConfig();
+	cout << endl;
 }
 
 void Random::restart() {

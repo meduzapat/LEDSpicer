@@ -38,7 +38,6 @@ public:
 	virtual ~Impulse() = default;
 
 	void drawConfig() const override;
-
-	void process() override;
+	void process()          override;
 };
 } // namespace

@@ -25,7 +25,7 @@
 using namespace LEDSpicer::Inputs;
 
 void Impulse::drawConfig() const {
-	cout << SEPARATOR << endl << "Type: Impulse" << endl;
+	cout << "Impulse" << endl;
 	Reader::drawConfig();
 }
 

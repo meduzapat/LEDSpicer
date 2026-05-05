@@ -41,11 +41,10 @@ public:
 
 	virtual ~Network() = default;
 
-	void activate() override;
-
-	void deactivate() override;
-
-	void process() override;
+	void drawConfig() const override;
+	void activate()         override;
+	void deactivate()       override;
+	void process()          override;
 
 protected:
 
