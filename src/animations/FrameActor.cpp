@@ -95,10 +95,11 @@ uint16_t FrameActor::getFullFrames() const {
 
 float FrameActor::getRunTime() const {
 	float
-		actorTime  = Actor::getRunTime(),
-		fullFrames = static_cast<float>(getFullFrames()),
-		baseTime   = cycles ? (fullFrames * cycles / FPS) : fullFrames / FPS;
-	return baseTime > actorTime ? actorTime : baseTime;
+		actorTime = Actor::getRunTime(),
+		baseTime  = cycles ? (static_cast<float>(getFullFrames()) * cycles / FPS) : 0;
+	if (not baseTime) return actorTime;
+	if (not actorTime) return baseTime;
+	return baseTime < actorTime ? baseTime : actorTime;
 }
 
 uint16_t FrameActor::calculateStepsBySpeed(Speeds speed) {

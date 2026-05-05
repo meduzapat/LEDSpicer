@@ -51,9 +51,14 @@ public:
 		stepping = s;
 	}
 
-	/// Returns the current direction state.
+	/// Returns the current runtime direction state (inherited Direction base).
 	Direction getCurrentDirection() const {
-		return cDirection;
+		return static_cast<const Direction&>(*this);
+	}
+
+	/// Returns whether the actor is configured as a bouncer (immutable config).
+	bool isBouncerConfig() const {
+		return initDir.isBouncer();
 	}
 
 	/// Returns the current frame.
@@ -130,7 +135,7 @@ TEST(DirectionActorTest, ConstructorBouncer) {
 	actor.restart();
 	EXPECT_TRUE(actor.isForward());
 	EXPECT_FALSE(actor.isBackward());
-	EXPECT_TRUE(actor.isBouncer());
+	EXPECT_TRUE(actor.isBouncerConfig());
 	EXPECT_EQ(actor.getCurrentFrame(), 0);
 	// Bouncer doubles the frame count.
 	EXPECT_EQ(actor.getFullFrames(), 120);

@@ -268,11 +268,11 @@ TEST(FrameActorTest, RunTimeNoCycles) {
 
 	// endTime shorter than cycleTime * cycles → endTime wins.
 	{
-		auto actor   = makeActor(group, "Normal", 0, 5, 1.5f);
+		auto actor   = makeActor(group, "Normal", 0, 5, 3.0f);
 		auto stepping = makeNormalStepping();
 		actor.setStepping(stepping);
-		// cycleTime * 5 = 5.0s, endTime = 1.5s → min = 1.5s
-		EXPECT_FLOAT_EQ(actor.getRunTime(), 1.5f);
+		// cycleTime * 5 = 5.0s, endTime = 3s → min = 3.0s
+		EXPECT_FLOAT_EQ(actor.getRunTime(), 3.0f);
 	}
 
 	// endTime longer than cycleTime * cycles → cycles win.
