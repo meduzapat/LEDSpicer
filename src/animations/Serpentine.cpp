@@ -144,21 +144,20 @@ void Serpentine::calculateTailPosition() {
 }
 
 void Serpentine::drawConfig() const {
+	cout << "Serpentine" << endl;
+	StepActor::drawConfig();
 	cout <<
-		"Type: Serpentine "          << endl <<
 		"Color: " << this->getName() << endl <<
-		"Tail: ";
+		"Tail:";
 	if (not tailData.size()) {
-		cout << "No Tail" << endl;
+		cout << "  No Tail" << endl;
 	}
 	else {
-		cout <<
-			" Color: "      << tailColor.getName()               <<
-			", Length: "    << static_cast<int>(tailData.size()) <<
-			", Intensity: " << (tailData.front().percent + 0)    <<
-			"%" << endl;
+		cout << endl <<
+			" Color:     " << tailColor.getName()               << endl <<
+			" Length:    " << static_cast<int>(tailData.size()) << endl <<
+			" Intensity: " << (tailData.front().percent + 0)    << "%"  << endl;
 	}
-	StepActor::drawConfig();
 }
 
 void Serpentine::restart() {

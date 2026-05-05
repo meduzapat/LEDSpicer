@@ -25,13 +25,17 @@
 using namespace LEDSpicer::Animations;
 
 void DirectionActor::drawConfig() const {
-	Direction::drawConfig();
 	FrameActor::drawConfig();
+	Direction::drawConfig();
 }
 
 void DirectionActor::restart() {
 	FrameActor::restart();
-	if (isBackward()) stepping.frame = stepping.getLastFrame();
+	if (isBackward()) {
+		stepping.frame = startAt
+			? (stepping.frames * (100 - startAt)) / 100
+			: stepping.getLastFrame();
+	}
 }
 
 bool DirectionActor::isBouncing() const {

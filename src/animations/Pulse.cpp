@@ -53,12 +53,11 @@ void Pulse::calculateElements() {
 }
 
 void Pulse::drawConfig() const {
-	cout <<
-		"Type: Pulse " << endl <<
-		"Colors: ";
-	this->drawColors();
-	cout << endl << "Mode: " << mode2str(mode) << endl;
+	cout << "Pulse" << endl;
 	DirectionActor::drawConfig();
+	cout << "Colors: ";
+	this->drawColors();
+	cout << endl << "Mode:   " << mode2str(mode) << endl;
 }
 
 string Pulse::mode2str(const Modes mode) {

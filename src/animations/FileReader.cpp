@@ -47,10 +47,9 @@ FileReader::FileReader(StringUMap& parameters, Group* const group) :
 }
 
 void FileReader::drawConfig() const {
-	cout <<
-		"Type: FileReader "       << endl <<
-		"File: " << frames->first << endl;
+	cout << "FileReader" << endl;
 	DirectionActor::drawConfig();
+	cout << "File: " << frames->first << endl;
 }
 
 string FileReader::Format2str(const Formats format) {

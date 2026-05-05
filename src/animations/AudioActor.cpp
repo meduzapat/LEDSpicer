@@ -403,15 +403,16 @@ void AudioActor::restart() {
 }
 
 void AudioActor::drawConfig() const {
-	cout <<
-		"mode: "        << mode2str(userPref.mode)       << endl <<
-		"channel: "     << channel2str(userPref.channel) << endl <<
-		"Colors: Off: " << userPref.off.getName()        <<
-		", Low: "       << userPref.c00.getName()        <<
-		", Mid: "       << userPref.c50.getName()        <<
-		", High: "      << userPref.c75.getName()        << endl <<
-		"Direction: "   << (direction == Direction::Directions::Forward ? "Inward" : "Outward") << endl;
 	Actor::drawConfig();
+	cout <<
+		"mode:    " << mode2str(userPref.mode)       << endl <<
+		"channel: " << channel2str(userPref.channel) << endl <<
+		"Colors:  " << endl <<
+		" Off:  " << userPref.off.getName() << endl <<
+		" Low:  " << userPref.c00.getName() << endl <<
+		" Mid:  " << userPref.c50.getName() << endl <<
+		" High: " << userPref.c75.getName() << endl <<
+		"Direction: "   << (direction == Direction::Directions::Forward ? "Inward" : "Outward") << endl;
 }
 
 AudioActor::Modes AudioActor::str2mode(const string& mode) {
@@ -450,10 +451,6 @@ string AudioActor::channel2str(Channels channel) {
 	case Channels::Mono:  return "Mono";
 	}
 	return "";
-}
-
-uint16_t AudioActor::getFullFrames() const {
-	return 0;
 }
 
 float AudioActor::getRunTime() const {

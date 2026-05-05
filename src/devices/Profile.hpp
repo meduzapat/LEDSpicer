@@ -115,7 +115,7 @@ public:
 	void addInput(Input* input);
 
 	/// Stores the default profile.
-	static Profile* defaultProfile;
+	inline static Profile* defaultProfile = nullptr;
 
 	/**
 	 * Collect a distinct list of all LED pointers across all Actors.
@@ -183,7 +183,7 @@ protected:
 	vector<Input*> inputs;
 
 	/// When true, all profiles skip input processing (during transitions).
-	static bool transitioning;
+	inline static bool transitioning = false;
 
 	/// When false, animations are skipped for this profile.
 	bool animationsEnabled = true;

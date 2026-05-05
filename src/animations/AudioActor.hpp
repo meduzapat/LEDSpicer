@@ -68,8 +68,6 @@ public:
 
 	void restart() override;
 
-	uint16_t getFullFrames() const override;
-
 	float getRunTime() const override;
 
 protected:

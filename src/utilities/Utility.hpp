@@ -39,6 +39,12 @@ public:
 	static uint8_t globalFlags;
 
 	/**
+	 * @param text
+	 * @return  Returns a string wrapped in a heavy box, sized to content.
+	 */
+	static string cage(const string& text) noexcept;
+
+	/**
 	 * Attempts to extract a number from a string.
 	 * @param number A string representing a number.
 	 * @param errorMessage The message to display in case of error.

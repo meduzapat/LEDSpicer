@@ -79,14 +79,14 @@ void Gradient::calculateElements() {
 }
 
 void Gradient::drawConfig() const {
+	cout << "Gradient" << endl;
+	StepActor::drawConfig();
 	cout <<
-		"Type: Gradient"                     << endl <<
-		"Mode: "  << mode2str(mode)          << endl <<
-		"Tones: " << static_cast<int>(tones) << endl;
+		"Mode:   " << mode2str(mode)          << endl <<
+		"Tones:  " << static_cast<int>(tones) << endl;
 	cout << "Colors: ";
 	Color::drawColors(colors);
 	cout << endl;
-	StepActor::drawConfig();
 }
 
 Gradient::Modes Gradient::str2mode(const string& mode) {

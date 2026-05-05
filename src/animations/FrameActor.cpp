@@ -31,16 +31,20 @@ FrameActor::FrameActor(
 ) :
 	Actor(parameters, group, requiredParameters),
 	Speed(parameters["speed"]),
-	startAt(parameters.exists("startAt") ? Utility::parseNumber(parameters["startAt"], "Invalid Value for start at") : 0)
+	startAt(parameters.exists("startAt") ? Utility::parseNumber(parameters["startAt"], "Invalid Value for start at") : 0),
+	cycles(parameters.exists("cycles")   ? Utility::parseNumber(parameters["cycles"],  "Invalid Value for cycles")   : 0)
 {
-	Utility::verifyValue<uint8_t>(startAt, 0, 100);
+	Utility::verifyValue<uint16_t>(startAt, 0, 100);
 }
 
 void FrameActor::drawConfig() const {
-	Speed::drawConfig();
-	if (startAt)
-		cout << "Start at Frame: " << to_string(startAt) << endl;
 	Actor::drawConfig();
+	cout << "Frame time:     " << std::fixed << std::setprecision(2) << (getFullFrames() / FPS) << " sec" << endl;
+	if (cycles)
+		cout << "Will run for:   " << cycles << " Cycles" << endl;
+	if (startAt)
+		cout << "Start at Frame: " << calculateStartFrame() << " (" << startAt << "%)" << endl;
+	Speed::drawConfig();
 }
 
 bool FrameActor::isFirstFrame() const {
@@ -61,21 +65,45 @@ bool FrameActor::isEndOfCycle() const {
 
 void FrameActor::draw() {
 	Actor::draw();
-	if (wasRunning) advanceFrame();
+	advanceFrame();
 }
 
 void FrameActor::restart() {
 	Actor::restart();
 	if (startAt) {
-		stepping.frame = (stepping.frames * (startAt - 1)) / 100.00f;
-	#ifdef DEVELOP
-			LogDebug("Starting Actor from frame " + to_string(stepping.frame));
-	#endif
+		stepping.frame = calculateStartFrame();
+#ifdef DEVELOP
+		LogDebug("Starting Actor" + std::to_string(actorNumber) + " from frame " + to_string(stepping.frame));
+#endif
 	}
 	else {
 		stepping.frame = 0;
 	}
+	cycle         = 0;
 	stepping.step = 0;
+}
+
+bool FrameActor::isRunning() {
+
+	// Check timers.
+	if (not Actor::isRunning()) return false;
+
+	// Check cycles, whatever kicks 1st.
+	if (cycles) {
+		// Avoids repeating log messages.
+		if (cycle > cycles) return false;
+
+		if (cycle == cycles) {
+#ifdef DEVELOP
+			LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
+#endif
+			// Increase it by one so the debug message does not repeat.
+			++cycle;
+			return false;
+		}
+		if (isEndOfCycle()) ++cycle;
+	}
+	return true;
 }
 
 uint16_t FrameActor::getFullFrames() const {
@@ -83,8 +111,11 @@ uint16_t FrameActor::getFullFrames() const {
 }
 
 float FrameActor::getRunTime() const {
-	float startAtTime = (startAt * getFullFrames()) / (100.0f * FPS);
-	return secondsToEnd + secondsToStart + startAtTime;
+	float
+		actorTime  = Actor::getRunTime(),
+		fullFrames = static_cast<float>(getFullFrames()),
+		baseTime   = cycles ? (fullFrames * cycles / FPS) : fullFrames / FPS;
+	return baseTime > actorTime ? actorTime : baseTime;
 }
 
 uint16_t FrameActor::calculateStepsBySpeed(Speeds speed) {
@@ -111,4 +142,8 @@ uint16_t FrameActor::calculateFramesBySpeed(Speeds speed) {
 
 void FrameActor::advanceFrame() {
 	stepping.advanceStep();
+}
+
+uint16_t FrameActor::calculateStartFrame()  const noexcept {
+	return (stepping.frames * (startAt - 1)) / 100.00f;
 }

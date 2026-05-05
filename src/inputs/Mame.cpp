@@ -25,7 +25,7 @@
 using namespace LEDSpicer::Inputs;
 
 void Mame::drawConfig() const {
-	cout << SEPARATOR << endl << "Type: Mame" << endl;
+	cout << "Mame" << endl;
 	Input::drawConfig();
 }
 

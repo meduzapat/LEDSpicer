@@ -234,13 +234,13 @@ void Filler::fillElementsCurtain() {
 }
 
 void Filler::drawConfig() const {
+	cout << "Filler" << endl;
+	StepActor::drawConfig();
 	cout <<
-		"Type: Filler"                   << endl <<
-		"Mode: "       << mode2str(mode) << endl <<
+		"Mode:   " << mode2str(mode) << endl <<
 		"Colors: ";
 	this->drawColors();
 	cout << endl;
-	StepActor::drawConfig();
 }
 
 string Filler::mode2str(const Modes mode) {
