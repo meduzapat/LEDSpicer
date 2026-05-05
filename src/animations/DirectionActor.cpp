@@ -31,6 +31,7 @@ void DirectionActor::drawConfig() const {
 
 void DirectionActor::restart() {
 	FrameActor::restart();
+	cDirection.setDirection(direction);
 	if (isBackward()) {
 		stepping.frame = startAt
 			? (stepping.frames * (100 - startAt)) / 100
@@ -39,7 +40,7 @@ void DirectionActor::restart() {
 }
 
 bool DirectionActor::isBouncing() const {
-	return cDirection.isBouncer();
+	return isBouncer() and (cDirection.getDirection() != direction);
 }
 
 bool DirectionActor::isFirstFrame() const {

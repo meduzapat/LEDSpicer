@@ -90,18 +90,14 @@ bool FrameActor::isRunning() {
 
 	// Check cycles, whatever kicks 1st.
 	if (cycles) {
-		// Avoids repeating log messages.
-		if (cycle > cycles) return false;
-
-		if (cycle == cycles) {
-#ifdef DEVELOP
-			LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
-#endif
-			// Increase it by one so the debug message does not repeat.
+		if (cycle >= cycles) return false;
+		if (isEndOfCycle()) {
 			++cycle;
-			return false;
+#ifdef DEVELOP
+			if (cycle == cycles)
+				LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
+#endif
 		}
-		if (isEndOfCycle()) ++cycle;
 	}
 	return true;
 }
