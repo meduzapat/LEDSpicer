@@ -148,7 +148,7 @@ void Filler::fillElementsRandom() {
 		changeFrameElement(currentRandom, *color, getDirection());
 
 	if (stepping.isLastStep()) {
-		if (isLastFrame() and not isBouncer())
+		if (isLastFrame() and not initDir.isBouncer())
 			std::fill(previousFrameAffectedElements.begin(), previousFrameAffectedElements.end(), false);
 		else
 			previousFrameAffectedElements[currentRandom] = not isBouncing();

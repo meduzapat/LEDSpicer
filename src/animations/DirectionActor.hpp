@@ -46,11 +46,6 @@ public:
 		initDir(direction, parameters["bouncer"] == "True")
 	{}
 
-	/**
-	 * @return true if the animation is on the bouncing period.
-	 */
-	bool isBouncing() const { return isBouncer(); }
-
 	virtual ~DirectionActor() = default;
 
 	/**
@@ -82,6 +77,11 @@ public:
 	 * @return true if the current frame is the very last of the cycle (not frame).
 	 */
 	bool isEndOfCycle() const override;
+
+	/**
+	 * @return true if the animation is on the bouncing period.
+	 */
+	bool isBouncing() const { return bounce; }
 
 	uint16_t getFullFrames() const override;
 
@@ -116,16 +116,14 @@ public:
 		const uint16_t  last
 	);
 
+	const Direction& getConfigDirection() const { return initDir; };
+
 protected:
 
 	/// Immutable direction config read from the animation file.
 	const Direction initDir;
 
-	/**
-	 * @return true if the animation is currently in the bounce-return phase.
-	 * Protected: external code uses the public isBouncing() wrapper.
-	 */
-	bool isBouncer() const { return initDir.isBouncer() and (getDirection() != initDir.getDirection()); }
+	bool isBouncer() const = delete;
 
 	/**
 	 * Moves the frame to the next one (forward or backward).

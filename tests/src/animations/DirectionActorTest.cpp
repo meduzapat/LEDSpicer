@@ -38,6 +38,7 @@ namespace LEDSpicer::Animations {
  * Minimal derived class for testing DirectionActor.
  */
 class TestDirectionActor : public DirectionActor {
+
 public:
 
 	TestDirectionActor(
