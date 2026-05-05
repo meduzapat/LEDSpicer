@@ -42,9 +42,14 @@ public:
 		const vector<string>& requiredParameters
 	) :
 		FrameActor(parameters, group, requiredParameters),
-		Direction(parameters["direction"], parameters["bouncer"] == "True"),
-		cDirection(direction, false)
+		Direction(parameters["direction"], false),
+		initDir(direction, parameters["bouncer"] == "True")
 	{}
+
+	/**
+	 * @return true if the animation is on the bouncing period.
+	 */
+	bool isBouncing() const { return isBouncer(); }
 
 	virtual ~DirectionActor() = default;
 
@@ -57,11 +62,6 @@ public:
 	 * @see FrameActor::restart();
 	 */
 	void restart() override;
-
-	/**
-	 * @return true if the animation is on the bouncing period.
-	 */
-	bool isBouncing() const;
 
 	/**
 	 * @return true same as frame actor but includes direction and bouncing effect.
@@ -118,8 +118,14 @@ public:
 
 protected:
 
-	/// Dynamic state for current direction and bouncing.
-	Direction cDirection;
+	/// Immutable direction config read from the animation file.
+	const Direction initDir;
+
+	/**
+	 * @return true if the animation is currently in the bounce-return phase.
+	 * Protected: external code uses the public isBouncing() wrapper.
+	 */
+	bool isBouncer() const { return initDir.isBouncer() and (getDirection() != initDir.getDirection()); }
 
 	/**
 	 * Moves the frame to the next one (forward or backward).
