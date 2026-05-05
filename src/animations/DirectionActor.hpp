@@ -42,9 +42,15 @@ public:
 		const vector<string>& requiredParameters
 	) :
 		FrameActor(parameters, group, requiredParameters),
-		Direction(parameters["direction"], parameters["bouncer"] == "True"),
-		cDirection(direction, false)
+		Direction(parameters["direction"], false),
+		initDir(direction, parameters["bouncer"] == "True")
 	{}
+
+	/**
+	 * @return true if the actor is configured to bounce at the endpoints.
+	 * Shadows Direction::isBouncer() to read from the const config object.
+	 */
+	bool isBouncer() const { return initDir.isBouncer(); }
 
 	virtual ~DirectionActor() = default;
 
@@ -118,8 +124,8 @@ public:
 
 protected:
 
-	/// Dynamic state for current direction and bouncing.
-	Direction cDirection;
+	/// Immutable direction config read from the animation file.
+	const Direction initDir;
 
 	/**
 	 * Moves the frame to the next one (forward or backward).

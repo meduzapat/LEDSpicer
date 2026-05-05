@@ -84,22 +84,10 @@ void FrameActor::restart() {
 }
 
 bool FrameActor::isRunning() {
-
-	// Check timers.
-	if (not Actor::isRunning()) return false;
-
-	// Check cycles, whatever kicks 1st.
-	if (cycles) {
-		if (cycle >= cycles) return false;
-		if (isEndOfCycle()) {
-			++cycle;
-#ifdef DEVELOP
-			if (cycle == cycles)
-				LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
-#endif
-		}
-	}
-	return true;
+	// Always evaluate timer logic so restarts fire even after cycles exhaust.
+	bool timerRunning = Actor::isRunning();
+	if (cycles and cycle >= cycles) return false;
+	return timerRunning;
 }
 
 uint16_t FrameActor::getFullFrames() const {
@@ -138,6 +126,13 @@ uint16_t FrameActor::calculateFramesBySpeed(Speeds speed) {
 
 void FrameActor::advanceFrame() {
 	stepping.advanceStep();
+	if (cycles and isEndOfCycle()) {
+		++cycle;
+#ifdef DEVELOP
+		if (cycle == cycles)
+			LogDebug("Actor " + std::to_string(actorNumber) + " completed after " + to_string(cycles) + " cycles");
+#endif
+	}
 }
 
 uint16_t FrameActor::calculateStartFrame()  const noexcept {

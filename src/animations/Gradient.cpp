@@ -59,7 +59,7 @@ void Gradient::calculateElements() {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
 		cout
-			<< "Gradient: " << DrawDirection(cDirection.getDirection())
+			<< "Gradient: " << DrawDirection(getDirection())
 			<< " Frame "    << std::setw(2) << (stepping.frame + 1)
 			<< "/"          << std::setw(2) << stepping.frames
 			<< " Step "     << std::setw(1) << (stepping.step + 1)

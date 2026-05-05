@@ -42,7 +42,7 @@ void Pulse::calculateElements() {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
 	cout <<
-		"Pulse: " << DrawDirection(cDirection.getDirection())  <<
+		"Pulse: " << DrawDirection(getDirection())  <<
 		" Frame " << (stepping.frame + 1)                      <<
 		" = "     << PERCENT(c, stepping.frames)               <<
 		"% "      << color->getName()                          << endl;

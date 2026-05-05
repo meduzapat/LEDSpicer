@@ -26,13 +26,13 @@ using namespace LEDSpicer::Animations;
 
 void DirectionActor::drawConfig() const {
 	FrameActor::drawConfig();
-	Direction::drawConfig();
+	initDir.drawConfig();
 }
 
 void DirectionActor::restart() {
 	FrameActor::restart();
-	cDirection.setDirection(direction);
-	if (isBackward()) {
+	setDirection(initDir.getDirection());
+	if (initDir.isBackward()) {
 		stepping.frame = startAt
 			? (stepping.frames * (100 - startAt)) / 100
 			: stepping.getLastFrame();
@@ -40,13 +40,13 @@ void DirectionActor::restart() {
 }
 
 bool DirectionActor::isBouncing() const {
-	return isBouncer() and (cDirection.getDirection() != direction);
+	return isBouncer() and (getDirection() != initDir.getDirection());
 }
 
 bool DirectionActor::isFirstFrame() const {
 	return (
-		(cDirection.isForward()  and FrameActor::isFirstFrame()) or
-		(cDirection.isBackward() and FrameActor::isLastFrame())
+		(isForward()  and FrameActor::isFirstFrame()) or
+		(isBackward() and FrameActor::isLastFrame())
 	);
 }
 
@@ -54,25 +54,25 @@ bool DirectionActor::isStartOfCycle() const {
 
 	if (FrameActor::isStartOfCycle()) {
 		if (isBouncer()) {
-			if (isBouncing() and cDirection.isBackward()) return true;
+			if (isBouncing() and isBackward()) return true;
 		}
-		if (cDirection.isForward()) return true;
-		if (cDirection.isStopped()) return true;
+		if (isForward()) return true;
+		if (isStopped()) return true;
 	}
 	else if (FrameActor::isLastFrame() and stepping.step == 0) {
 		if (isBouncer()) {
-			if (isBouncing() and cDirection.isForward()) return true;
+			if (isBouncing() and isForward()) return true;
 		}
-		if (cDirection.isBackward()) return true;
-		if (cDirection.isStopped()) return true;
+		if (isBackward()) return true;
+		if (isStopped()) return true;
 	}
 	return false;
 }
 
 bool DirectionActor::isLastFrame() const {
 	return (
-		(FrameActor::isFirstFrame() and cDirection.isBackward()) or
-		(FrameActor::isLastFrame()  and cDirection.isForward())
+		(FrameActor::isFirstFrame() and isBackward()) or
+		(FrameActor::isLastFrame()  and isForward())
 	);
 }
 
@@ -113,7 +113,7 @@ uint16_t DirectionActor::nextOf(
 
 void DirectionActor::advanceFrame() {
 	if (stepping.shouldMoveFrame())
-		stepping.frame = calculateNextOf(cDirection, stepping.frame, *this, stepping.frames -1);
+		stepping.frame = calculateNextOf(*this, stepping.frame, initDir, stepping.frames - 1);
 }
 
 uint16_t DirectionActor::getFullFrames() const {

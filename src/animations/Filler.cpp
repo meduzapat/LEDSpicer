@@ -40,8 +40,7 @@ Filler::Filler(StringUMap& parameters, Group* const group) :
 	}
 	if (mode == Modes::Random) {
 		previousFrameAffectedElements.resize(stepping.frames, false);
-		direction = Directions::Forward;
-		cDirection.setDirection(Directions::Forward);
+		setDirection(Directions::Forward);
 	}
 	stepping.steps = calculateStepsBySpeed(speed);
 	calculateStepPercent();
@@ -72,7 +71,7 @@ void Filler::calculateElements() {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
 		cout <<
-			"Filler: " << DrawDirection(cDirection.getDirection());
+			"Filler: " << DrawDirection(getDirection());
 			if (mode == Modes::Wave) {
 				if (isBouncing())
 					cout << (stepping.frame >= stepping.frames / 2 ? " Filling" : " Emptying");
@@ -121,7 +120,7 @@ void Filler::fillElementsLinear() {
 
 	// Fill in between
 	uint16_t begin, end;
-	if (isForward()) {
+	if (initDir.isForward()) {
 		begin = 0;
 		end   = stepping.frame;
 	}
@@ -146,7 +145,7 @@ void Filler::fillElementsRandom() {
 	if (speed == Speeds::VeryFast)
 		changeElementColor(currentRandom, *color, filter);
 	else
-		changeFrameElement(currentRandom, *color, cDirection.getDirection());
+		changeFrameElement(currentRandom, *color, getDirection());
 
 	if (stepping.isLastStep()) {
 		if (isLastFrame() and not isBouncer())
@@ -165,19 +164,19 @@ void Filler::fillElementsWave() {
 
 	auto setEmptyingParams = [&]() {
 		frame = frames - (stepping.frames - stepping.frame);
-		dir   = cDirection.getOppositeDirection();
+		dir   = getOppositeDirection();
 		begin = frame;
 		end   = frames;
 	};
 
 	auto setFillingParams = [&]() {
 		frame = stepping.frame;
-		dir   = cDirection.getDirection();
+		dir   = getDirection();
 		begin = 0;
 		end   = frame;
 	};
 
-	if (isForward()) {
+	if (initDir.isForward()) {
 		isEmptying = stepping.frame >= frames;
 		if (isEmptying) setEmptyingParams();
 		else setFillingParams();
@@ -217,7 +216,7 @@ void Filler::fillElementsCurtain() {
 	}
 
 	// Fill in between based on direction
-	if (isForward()) {
+	if (initDir.isForward()) {
 		// Inward: fill from edges to current positions
 		for (uint16_t c = 0; c < stepping.frame; ++c) {
 			uint16_t mirror = getNumberOfElements() - 1 - c;
@@ -269,12 +268,12 @@ void Filler::restart() {
 		std::fill(previousFrameAffectedElements.begin(), previousFrameAffectedElements.end(), false);
 		break;
 	case Modes::Curtain:
-		if (isBackward()) stepping.frame = stepping.frames - 1;
+		if (initDir.isBackward()) stepping.frame = stepping.frames - 1;
 		break;
 	default: break;
 	}
 }
 
 Direction::Directions Filler::getFadeEffectDirection() const {
-	return isForward() ? cDirection.getDirection() : cDirection.getOppositeDirection();
+	return initDir.isForward() ? getDirection() : getOppositeDirection();
 }

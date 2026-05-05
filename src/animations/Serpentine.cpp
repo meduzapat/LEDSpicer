@@ -60,7 +60,7 @@ Serpentine::Serpentine(StringUMap& parameters, Group* const group) :
 
 		tailData[i].percent = intensity;
 
-		if (cDirection.isForward())
+		if (initDir.isForward())
 			tailData[i].position = 0;
 		else
 			tailData[i].position = stepping.getLastFrame();
@@ -71,7 +71,7 @@ void Serpentine::calculateElements() {
 
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
-		cout << "Serpentine: " << DrawDirection(cDirection.getDirection()) << " ";
+		cout << "Serpentine: " << DrawDirection(getDirection()) << " ";
 	}
 #endif
 
