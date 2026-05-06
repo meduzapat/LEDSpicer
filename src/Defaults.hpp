@@ -109,7 +109,14 @@ public:
 #define WAYS_INDICATOR "WAYS"
 
 /// Separators.
-#define SEPARATOR "------------------------------"
+#define SEPARATOR1 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+#define SEPARATOR2 "──────────────────────────────"
+#define B_0 "━"
+#define B_1 "┏"
+#define B_2 "┓"
+#define B_3 "┗"
+#define B_4 "┛"
+#define B_5 "┃"
 constexpr char GROUP_SEPARATOR    = 29;  // Group Separator (GS)
 constexpr char FIELD_SEPARATOR    = 30;  // Record Separator (RS)
 constexpr char RECORD_SEPARATOR   = 31;  // Unit Separator (US)

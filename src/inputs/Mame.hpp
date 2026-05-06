@@ -44,12 +44,9 @@ public:
 	virtual ~Mame() = default;
 
 	void drawConfig() const override;
-
-	void process() override;
-
-	void activate() override;
-
-	void deactivate() override;
+	void process()          override;
+	void activate()         override;
+	void deactivate()       override;
 
 protected:
 

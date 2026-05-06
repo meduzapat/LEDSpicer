@@ -151,7 +151,7 @@ void PulseAudio::scheduleReconnect() {
 }
 
 void PulseAudio::drawConfig() const {
-	cout << "Type: PulseAudio" << endl;
+	cout << "PulseAudio" << endl;
 	AudioActor::drawConfig();
 }
 

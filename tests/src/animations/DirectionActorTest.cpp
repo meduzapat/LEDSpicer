@@ -28,7 +28,7 @@ using namespace LEDSpicer::Devices;
 using LEDSpicer::Utilities::Color;
 using LEDSpicer::Utilities::Direction;
 
-// Global default color for tests.
+/// Global default color for tests.
 const Color DEFAULT_COLOR(255, 255, 255);
 
 namespace LEDSpicer::Animations {
@@ -38,37 +38,37 @@ namespace LEDSpicer::Animations {
  * Minimal derived class for testing DirectionActor.
  */
 class TestDirectionActor : public DirectionActor {
+
 public:
+
 	TestDirectionActor(
 		StringUMap&           parameters,
 		Group* const          group,
 		const vector<string>& requiredParameters
 	) : DirectionActor(parameters, group, requiredParameters) {}
 
-	/**
-	 * @param stepping the stepping to test.
-	 */
-	void setStepping(FrameActor::Stepping stepping) {
-		this->stepping = stepping;
+	/// Sets stepping for testing.
+	void setStepping(FrameActor::Stepping s) {
+		stepping = s;
 	}
 
-	/**
-	 * Gets the current direction state.
-	 * @return
-	 */
+	/// Returns the current runtime direction state (inherited Direction base).
 	Direction getCurrentDirection() const {
-		return cDirection;
+		return static_cast<const Direction&>(*this);
 	}
 
-	/**
-	 * Gets the current frame.
-	 * @return
-	 */
+	/// Returns whether the actor is configured as a bouncer (immutable config).
+	bool isBouncerConfig() const {
+		return initDir.isBouncer();
+	}
+
+	/// Returns the current frame.
 	uint16_t getCurrentFrame() const {
 		return stepping.frame;
 	}
 
 protected:
+
 	void calculateElements() override {
 		affectAllElements(true);
 	}
@@ -76,21 +76,38 @@ protected:
 
 } // namespace
 
-TEST(DirectionActorTest, ConstructorForward) {
-	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
+/// Shared stepping setup helper.
+static FrameActor::Stepping makeNormalStepping() {
+	FrameActor::Stepping s;
+	s.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
+	return s;
+}
+
+/// Shared actor factory.
+static TestDirectionActor makeActor(
+	Group&             group,
+	const string&      direction,
+	bool               bouncer = false,
+	uint8_t            startAt = 0
+) {
+	StringUMap params {
 		{"type",      "Test"},
 		{"group",     "TestGroup"},
 		{"filter",    "Normal"},
 		{"speed",     "Normal"},
-		{"direction", "Forward"}
+		{"direction", direction},
 	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
+	if (bouncer) params["bouncer"] = "True";
+	if (startAt) params["startAt"] = to_string(startAt);
+	const vector<string> required {"type", "group", "filter", "speed", "direction"};
+	return TestDirectionActor(params, &group, required);
+}
+
+TEST(DirectionActorTest, ConstructorForward) {
 	Actor::setFPS(60);
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
-	actor.setStepping(stepping);
+	Group group("TestGroup", DEFAULT_COLOR);
+	auto  actor = makeActor(group, "Forward");
+	actor.setStepping(makeNormalStepping());
 	EXPECT_TRUE(actor.isForward());
 	EXPECT_FALSE(actor.isBackward());
 	EXPECT_FALSE(actor.isBouncing());
@@ -99,19 +116,10 @@ TEST(DirectionActorTest, ConstructorForward) {
 }
 
 TEST(DirectionActorTest, ConstructorBackward) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Backward"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
-	actor.setStepping(stepping);
+	auto  actor = makeActor(group, "Backward");
+	actor.setStepping(makeNormalStepping());
 	actor.restart();
 	EXPECT_FALSE(actor.isForward());
 	EXPECT_TRUE(actor.isBackward());
@@ -121,277 +129,282 @@ TEST(DirectionActorTest, ConstructorBackward) {
 }
 
 TEST(DirectionActorTest, ConstructorBouncer) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"},
-		{"bouncer",   "True"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
-	actor.setStepping(stepping);
+	auto  actor = makeActor(group, "Forward", true);
+	actor.setStepping(makeNormalStepping());
 	actor.restart();
 	EXPECT_TRUE(actor.isForward());
 	EXPECT_FALSE(actor.isBackward());
-	EXPECT_TRUE(actor.isBouncer());
+	EXPECT_TRUE(actor.isBouncerConfig());
 	EXPECT_EQ(actor.getCurrentFrame(), 0);
-	// Doubled due to bouncer
+	// Bouncer doubles the frame count.
 	EXPECT_EQ(actor.getFullFrames(), 120);
 }
 
 TEST(DirectionActorTest, ConstructorInvalidParams) {
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
+	StringUMap params {
 		{"type",   "Test"},
 		{"group",  "TestGroup"},
 		{"filter", "Normal"},
-		{"speed",  "Normal"}
+		{"speed",  "Normal"},
 		// Missing "direction"
 	};
-	const vector<string> required = {"type", "group", "filter", "speed"};
+	const vector<string> required {"type", "group", "filter", "speed", "direction"};
 	EXPECT_THROW(TestDirectionActor(params, &group, required), Error);
+}
+
+TEST(DirectionActorTest, StartAtForward) {
+	Actor::setFPS(60);
+	Group group("TestGroup", DEFAULT_COLOR);
+	auto  actor = makeActor(group, "Forward", false, 50);
+	actor.setStepping(makeNormalStepping());
+	actor.restart();
+	// startAt=50%: (60 * (50 - 1)) / 100 = 29
+	EXPECT_EQ(actor.getCurrentFrame(), 29);
+}
+
+TEST(DirectionActorTest, StartAtBackward) {
+	Actor::setFPS(60);
+	Group group("TestGroup", DEFAULT_COLOR);
+	auto  actor = makeActor(group, "Backward", false, 50);
+	actor.setStepping(makeNormalStepping());
+	actor.restart();
+	// startAt=50% mirrored: (60 * (100 - 50)) / 100 = 30
+	EXPECT_EQ(actor.getCurrentFrame(), 30);
+}
+
+TEST(DirectionActorTest, StartAtBouncer) {
+	Actor::setFPS(60);
+	Group group("TestGroup", DEFAULT_COLOR);
+	auto  actor = makeActor(group, "Forward", true, 50);
+	actor.setStepping(makeNormalStepping());
+	actor.restart();
+	// Bouncer starts forward, same as forward startAt.
+	EXPECT_EQ(actor.getCurrentFrame(), 29);
+	EXPECT_TRUE(actor.getCurrentDirection().isForward());
 }
 
 TEST(DirectionActorTest, StartOfCycle) {
 	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
 
-	// Forward direction
-	StringUMap paramsForward = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"}
-	};
-	TestDirectionActor actorForward(paramsForward, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
-	stepping.steps  = 2; // Set steps to 2 to test step progression
-	actorForward.setStepping(stepping);
-	actorForward.restart();
-	EXPECT_TRUE(actorForward.isStartOfCycle()); // frame == 0, step == 0
-	EXPECT_TRUE(actorForward.isFirstFrame());
-	EXPECT_TRUE(actorForward.getCurrentDirection().isForward());
-	actorForward.draw();
-	EXPECT_FALSE(actorForward.isStartOfCycle()); // frame == 0, step == 1
-	EXPECT_TRUE(actorForward.isFirstFrame());
-	EXPECT_TRUE(actorForward.getCurrentDirection().isForward());
+	// Forward.
+	{
+		auto actor = makeActor(group, "Forward");
+		auto stepping = makeNormalStepping();
+		stepping.steps = 2;
+		actor.setStepping(stepping);
+		actor.restart();
+		EXPECT_TRUE(actor.isStartOfCycle());   // frame == 0, step == 0
+		EXPECT_TRUE(actor.isFirstFrame());
+		actor.draw();
+		EXPECT_FALSE(actor.isStartOfCycle());  // frame == 0, step == 1
+	}
 
-	// Backward direction
-	StringUMap paramsBackward = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Backward"}
-	};
-	TestDirectionActor actorBackward(paramsBackward, &group, required);
-	actorBackward.setStepping(stepping);
-	actorBackward.restart();
-	EXPECT_TRUE(actorBackward.isStartOfCycle()); // frame == 59, step == 0
-	EXPECT_TRUE(actorBackward.isFirstFrame());
-	EXPECT_TRUE(actorBackward.getCurrentDirection().isBackward());
-	actorBackward.draw();
-	EXPECT_FALSE(actorBackward.isStartOfCycle()); // frame == 59, step == 1
-	EXPECT_TRUE(actorBackward.isFirstFrame());
-	EXPECT_TRUE(actorBackward.getCurrentDirection().isBackward());
+	// Backward.
+	{
+		auto actor = makeActor(group, "Backward");
+		auto stepping = makeNormalStepping();
+		stepping.steps = 2;
+		actor.setStepping(stepping);
+		actor.restart();
+		EXPECT_TRUE(actor.isStartOfCycle());   // frame == 59, step == 0
+		EXPECT_TRUE(actor.isFirstFrame());
+		actor.draw();
+		EXPECT_FALSE(actor.isStartOfCycle());  // frame == 59, step == 1
+	}
 
-	// Bouncer mode (Forward start)
-	StringUMap paramsBouncer = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"},
-		{"bouncer",   "True"}
-	};
-	TestDirectionActor actorBouncer(paramsBouncer, &group, required);
-	actorBouncer.setStepping(stepping);
-	actorBouncer.restart();
-	EXPECT_TRUE(actorBouncer.isStartOfCycle()); // frame == 0, step == 0
-	EXPECT_TRUE(actorBouncer.isFirstFrame());
-	EXPECT_TRUE(actorBouncer.getCurrentDirection().isForward());
-	// Advance to last frame
-	for (int i = 0; i < 59 * 2; ++i) actorBouncer.draw(); // 59 frames * 2 steps
-	EXPECT_FALSE(actorBouncer.isStartOfCycle()); // frame == 59, step == 0
-	EXPECT_TRUE(actorBouncer.isLastFrame());
-	EXPECT_TRUE(actorBouncer.getCurrentDirection().isForward());
-	actorBouncer.draw(); // Bounce: frame == 59, step == 1
-	actorBouncer.draw(); // frame == 59, step == 0, direction backward
-	EXPECT_TRUE(actorBouncer.isStartOfCycle()); // frame == 59, step == 0, backward
-	EXPECT_TRUE(actorBouncer.isFirstFrame());
-	EXPECT_TRUE(actorBouncer.getCurrentDirection().isBackward());
+	// Bouncer — start of cycle at frame 0 going forward, and at frame 59 going backward.
+	{
+		auto actor = makeActor(group, "Forward", true);
+		auto stepping = makeNormalStepping();
+		stepping.steps = 2;
+		actor.setStepping(stepping);
+		actor.restart();
+		EXPECT_TRUE(actor.isStartOfCycle());   // frame == 0, step == 0, forward
+		EXPECT_TRUE(actor.isFirstFrame());
+		EXPECT_TRUE(actor.getCurrentDirection().isForward());
+		// Advance to bounce point.
+		for (uint16_t i = 0; i < stepping.frames * stepping.steps; ++i) actor.draw();
+		EXPECT_TRUE(actor.isStartOfCycle());   // frame == 59, step == 0, backward
+		EXPECT_TRUE(actor.getCurrentDirection().isBackward());
+	}
+}
+
+TEST(DirectionActorTest, IsLastFrameOverride) {
+	Actor::setFPS(60);
+	Group group("TestGroup", DEFAULT_COLOR);
+
+	// Forward: last frame is FrameActor::isLastFrame().
+	{
+		auto actor = makeActor(group, "Forward");
+		actor.setStepping(makeNormalStepping());
+		actor.restart();
+		EXPECT_FALSE(actor.isLastFrame());
+		for (uint16_t i = 0; i < 59; ++i) actor.draw();
+		EXPECT_TRUE(actor.isLastFrame());
+	}
+
+	// Backward: last frame is FrameActor::isFirstFrame() (frame == 0).
+	{
+		auto actor = makeActor(group, "Backward");
+		actor.setStepping(makeNormalStepping());
+		actor.restart();
+		EXPECT_FALSE(actor.isLastFrame());
+		for (uint16_t i = 0; i < 59; ++i) actor.draw();
+		EXPECT_TRUE(actor.isLastFrame());
+	}
+}
+
+TEST(DirectionActorTest, IsEndOfCycle) {
+	Actor::setFPS(60);
+	Group group("TestGroup", DEFAULT_COLOR);
+
+	// Forward non-bouncer: end of cycle at last frame + last step.
+	{
+		auto actor   = makeActor(group, "Forward");
+		auto stepping = makeNormalStepping();
+		stepping.steps = 2;
+		actor.setStepping(stepping);
+		actor.restart();
+		EXPECT_FALSE(actor.isEndOfCycle());
+		const uint16_t totalDraws = (stepping.frames * stepping.steps) - 1;
+		for (uint16_t i = 0; i < totalDraws; ++i) actor.draw();
+		EXPECT_TRUE(actor.isEndOfCycle());
+	}
+
+	// Bouncer: end of cycle only when bouncing back to start.
+	{
+		auto actor   = makeActor(group, "Forward", true);
+		auto stepping = makeNormalStepping();
+		actor.setStepping(stepping);
+		actor.restart();
+		// At the midpoint (end of forward leg) not yet end of cycle.
+		for (uint16_t i = 0; i < stepping.frames - 1; ++i) actor.draw();
+		EXPECT_FALSE(actor.isEndOfCycle());
+	}
 }
 
 TEST(DirectionActorTest, ForwardFrameAdvance) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
+	auto  actor    = makeActor(group, "Forward");
+	auto  stepping = makeNormalStepping();
 	actor.setStepping(stepping);
 	actor.restart();
 	EXPECT_EQ(actor.getCurrentFrame(), 0);
-	actor.draw(); // Advances frame
+	actor.draw();
 	EXPECT_EQ(actor.getCurrentFrame(), 1);
-	for (int i = 0; i < 57; ++i) actor.draw();
+	for (uint16_t i = 0; i < 57; ++i) actor.draw();
 	EXPECT_EQ(actor.getCurrentFrame(), 58);
 	EXPECT_FALSE(actor.isLastFrame());
 	actor.draw();
 	EXPECT_TRUE(actor.isLastFrame());
 	actor.draw();
-	// Wraps around
+	// Wraps around.
 	EXPECT_EQ(actor.getCurrentFrame(), 0);
 }
 
 TEST(DirectionActorTest, BackwardFrameAdvance) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Backward"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
+	auto  actor   = makeActor(group, "Backward");
+	auto  stepping = makeNormalStepping();
 	actor.setStepping(stepping);
 	actor.restart();
 	EXPECT_EQ(actor.getCurrentFrame(), 59);
-	// Advances frame
 	actor.draw();
 	EXPECT_EQ(actor.getCurrentFrame(), 58);
-	// advance a full cycle.
-	for (int i = 0; i < 57; ++i) actor.draw();
-	// one before the last frame.
+	for (uint16_t i = 0; i < 57; ++i) actor.draw();
 	EXPECT_EQ(actor.getCurrentFrame(), 1);
 	EXPECT_FALSE(actor.isLastFrame());
-	// Last.
 	actor.draw();
 	EXPECT_TRUE(actor.isLastFrame());
 	actor.draw();
-	// Wraps around
+	// Wraps around.
 	EXPECT_EQ(actor.getCurrentFrame(), 59);
 }
 
 TEST(DirectionActorTest, BouncerFrameAdvance) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"},
-		{"bouncer",   "True"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
-	FrameActor::Stepping stepping;
-	stepping.frames = FrameActor::calculateFramesBySpeed(Speed::Speeds::Normal);
+	auto  actor   = makeActor(group, "Forward", true);
+	auto  stepping = makeNormalStepping();
 	actor.setStepping(stepping);
 	actor.restart();
 	EXPECT_TRUE(actor.getCurrentDirection().isForward());
 	EXPECT_EQ(actor.getCurrentFrame(), 0);
-	// Move to last frame
-	for (int i = 0; i < 59; ++i) actor.draw();
-	EXPECT_EQ(actor.getCurrentFrame(), 59);
+	const uint16_t lastFrame = stepping.frames - 1;
+	for (uint16_t i = 0; i < lastFrame; ++i) actor.draw();
+	EXPECT_EQ(actor.getCurrentFrame(), lastFrame);
 	EXPECT_TRUE(actor.isLastFrame());
 	actor.draw();
-	// Direction reverses
+	// Direction reverses, stays at last frame.
 	EXPECT_FALSE(actor.getCurrentDirection().isForward());
-	// Stays at 60 due to bounce
-	EXPECT_EQ(actor.getCurrentFrame(), 59);
+	EXPECT_EQ(actor.getCurrentFrame(), lastFrame);
 	actor.draw();
-	// Moves backward
-	EXPECT_EQ(actor.getCurrentFrame(), 58);
+	EXPECT_EQ(actor.getCurrentFrame(), lastFrame - 1);
 }
 
 TEST(DirectionActorTest, CalculateNextOf) {
-	Direction direction(Direction::Directions::Forward, true); // Bouncer
+	Direction direction(Direction::Directions::Forward, true);
 	Direction currentDirection(Direction::Directions::Forward);
-	uint16_t index;
+	uint16_t  index;
 
-	// Forward, non-boundary
+	// Forward, non-boundary.
 	index = DirectionActor::calculateNextOf(currentDirection, 5, direction, 9);
 	EXPECT_EQ(index, 6);
 	EXPECT_TRUE(currentDirection.isForward());
 	EXPECT_FALSE(currentDirection.isBouncer());
 
-	// Forward, at end, bouncer
+	// Forward, at end, bouncer — reverses.
 	index = DirectionActor::calculateNextOf(currentDirection, 9, direction, 9);
 	EXPECT_EQ(index, 9);
-	// Reverses.
 	EXPECT_FALSE(currentDirection.isForward());
-	// Is bouncing.
 	EXPECT_TRUE(currentDirection.isBouncer());
 
-	// Backward, non-boundary
+	// Backward, non-boundary.
 	index = DirectionActor::calculateNextOf(currentDirection, 5, direction, 9);
 	EXPECT_EQ(index, 4);
 	EXPECT_FALSE(currentDirection.isForward());
 
-	// Backward, at start, bouncer
+	// Backward, at start, bouncer — reverses.
 	index = DirectionActor::calculateNextOf(currentDirection, 0, direction, 9);
 	EXPECT_EQ(index, 0);
-	EXPECT_TRUE(currentDirection.isForward()); // Reverses
+	EXPECT_TRUE(currentDirection.isForward());
 }
 
 TEST(DirectionActorTest, NextOf) {
-	Direction direction(Direction::Directions::Forward, true); // Bouncer
+	Direction direction(Direction::Directions::Forward, true);
 	Direction currentDirection(Direction::Directions::Forward);
-	uint16_t index;
+	uint16_t  index;
 
-	// Forward, non-boundary
+	// Forward, non-boundary.
 	index = DirectionActor::nextOf(currentDirection, 5, direction, 9);
 	EXPECT_EQ(index, 6);
 
-	// Forward, at end, bouncer
+	// Forward, at end, bouncer.
 	index = DirectionActor::nextOf(currentDirection, 9, direction, 9);
 	EXPECT_EQ(index, 9);
 
-	// Backward, non-boundary
+	// Backward, non-boundary.
 	currentDirection = Direction::Directions::Backward;
 	index = DirectionActor::nextOf(currentDirection, 5, direction, 9);
 	EXPECT_EQ(index, 4);
 
-	// Backward, at start, bouncer
+	// Backward, at start, bouncer.
 	index = DirectionActor::nextOf(currentDirection, 0, direction, 9);
 	EXPECT_EQ(index, 0);
 }
 
 TEST(DirectionActorTest, DrawConfig) {
+	Actor::setFPS(60);
 	Group group("TestGroup", DEFAULT_COLOR);
-	StringUMap params = {
-		{"type",      "Test"},
-		{"group",     "TestGroup"},
-		{"filter",    "Normal"},
-		{"speed",     "Normal"},
-		{"direction", "Forward"},
-		{"bouncer",   "True"}
-	};
-	const vector<string> required = {"type", "group", "filter", "speed", "direction"};
-	TestDirectionActor actor(params, &group, required);
+	auto  actor = makeActor(group, "Forward", true);
 	actor.restart();
-	Log::logToStdTerm();
-	Log::setLogLevel(LOG_DEBUG);
 	testing::internal::CaptureStdout();
-	Log::setLogLevel(LOG_ERR);
 	actor.drawConfig();
 	string output = testing::internal::GetCapturedStdout();
 	EXPECT_NE(output.find("Direction: Forward Bouncer"), string::npos);

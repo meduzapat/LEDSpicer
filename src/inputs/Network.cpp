@@ -35,6 +35,11 @@ void Network::deactivate() {
 	sock.disconnect();
 }
 
+void Network::drawConfig() const {
+	cout << "Network" << endl;
+	Input::drawConfig();
+}
+
 void Network::process() {
 
 	if (not sock.isConnected()) activate();
