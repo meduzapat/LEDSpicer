@@ -170,13 +170,12 @@ void MainBase::dumpConfiguration() {
 }
 
 void MainBase::dumpProfile() {
-	cout                                                                 << endl <<
-		Utility::cage("LEDSpicer")                                       << endl <<
-		"Project name:    " << DataLoader::getLayoutProperties().project << endl <<
-		"Default Profile: " << Profile::defaultProfile->getName()        << endl;
-
-	Profile::defaultProfile->drawConfig();
+	cout                                                            << endl <<
+		Utility::cage("LEDSpicer")                                  << endl <<
+		"Project:    " << DataLoader::getLayoutProperties().project << endl <<
+		"Profile:    " << Profile::defaultProfile->getName()        << endl;
 	DataLoader::getTransitionFromCache(Profile::defaultProfile)->drawConfig();
+	Profile::defaultProfile->drawConfig();
 	cout << endl;
 }
 
