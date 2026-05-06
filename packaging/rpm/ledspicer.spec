@@ -5,7 +5,7 @@
 %global debug_package %{nil}
 
 Name:           ledspicer
-Version:        0.7.4
+Version:        0.7.4.1
 Release:        1%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
@@ -196,17 +196,9 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Sun May 03 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.4-1
-- Added
-  - `restartTime` parameter for actors: delay before restarting after `endTime` expires
-  - Time is now frame-based, syncing multiple actors to the same point in time
-- Changed
-  - Time and duration values now accept decimals (e.g. `1.5` seconds)
-  - Repeat limit increased from 255 to 65535
-  - Improved actor runtime validation
-  - `checkRepeats()` infinite repeat behavior corrected
-- Removed
-  - `cycles` parameter from FrameActor, replaced by `endTime`
+* Tue May 05 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.4.1-1
 - Fixed
-  - Serpentine animation debug log showed wrong position
-  - Element reset loop applied incorrectly in some cases
+  - Several actor behaviors broken by the removal of `cycles` in 0.7.4
+  - `restartTime` causing inconsistent actor behavior
+  - `startAt` not working correctly when running in backward direction
+  - `repeat` not working correctly

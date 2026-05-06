@@ -44,13 +44,13 @@ void Input::drawConfig() const {
 
 	if (not itemsUMap.size()) return;
 
-	cout << "Elements and Groups mapping:" << endl;
+	cout << "Elements and Groups mapping:";
 	for (auto& e : itemsUMap)
-		cout <<
-			"Target: "  << e.second->getName()                 << endl <<
+		cout  << endl << SEPARATOR2 << endl <<
+			"Target:  " << e.second->getName()                 << endl <<
 			"Trigger: " << e.first                             << endl <<
-			"Color: "   << e.second->color->getName()          << endl <<
-			"Filter: "  << Color::filter2str(e.second->filter) << endl << endl;
+			"Color:   " << e.second->color->getName()          << endl <<
+			"Filter:  " << Color::filter2str(e.second->filter);
 }
 
 string Input::findItemMapByName(string& name) {

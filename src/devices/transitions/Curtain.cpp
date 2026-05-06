@@ -25,12 +25,13 @@
 using namespace LEDSpicer::Devices::Transitions;
 
 bool Curtain::run() {
+	if (not actor->isRunning()) return false;
 	if (actor->isBouncing())
 		to->runFrame();
 	else
 		current->runFrame();
 	actor->draw();
-	return actor->isRunning();
+	return true;
 }
 
 void Curtain::drawConfig() const {

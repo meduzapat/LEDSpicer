@@ -26,6 +26,16 @@ using namespace LEDSpicer::Utilities;
 
 uint8_t Utility::globalFlags = 0;
 
+string Utility::cage(const string& text) noexcept {
+	string bar;
+	for (size_t i = 0; i < text.size() + 2; ++i)
+		bar += B_0;
+	return
+		B_1 + bar + B_2 "\n"
+		B_5 " "   + text + " " B_5 "\n"
+		B_3 + bar + B_4;
+}
+
 int Utility::parseNumber(const string& number, const string& errorMessage) {
 	try {
 		return std::stoi(number);

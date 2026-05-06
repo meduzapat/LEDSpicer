@@ -59,7 +59,7 @@ public:
 
 	Actor() = delete;
 
-	virtual ~Actor() = default;
+	virtual ~Actor();
 
 	/**
 	 * @return The group.
@@ -128,15 +128,9 @@ public:
 	void changeElementsColor(const Color& color, Color::Filters filter, uint8_t percent = 50);
 
 	/**
-	 * Returns the total calculated amount of frames.
-	 * @return
+	 * @return Returns the amount of time an actor will be active or 0 if never finishes
 	 */
-	virtual uint16_t getFullFrames() const = 0;
-
-	/**
-	 * @return Returns the amount of time to finish (or 0 if never finishes)
-	 */
-	virtual float getRunTime() const = 0;
+	virtual float getRunTime() const;
 
 	/**
 	 * @return a reference to the hardware internal LEDs for the group.
@@ -145,16 +139,22 @@ public:
 
 protected:
 
-	/// Hardware frames per second.
-	static uint8_t FPS;
+	inline static uint8_t
+		/// Hardware frames per second.
+		FPS   = 0,
+		/// Current frame (starting from 1)
+		frame = 0;
 
-	/// Current frame (starting from 1)
-	static uint8_t frame;
+	/// Keep truck of actors
+	const uint32_t actorNumber;
+
+	/// Actor counter.
+	inline static uint32_t actorCount = 0;
 
 	/// Color filter applied to elements.
 	Color::Filters filter = Color::Filters::Normal;
 
-	float
+	const float
 		/// Number of seconds to wait until start processing this actor.
 		secondsToStart   = 0,
 		/// Number of seconds to wait to stop this actor.
@@ -170,8 +170,10 @@ protected:
 		/// Restart delay clock, armed after endTime expires.
 		* restartTime = nullptr;
 
-	/// Set by draw(), true if the actor was running during the last draw call.
-	bool wasRunning = false;
+	/// If this actor will repeat, default -1 to repeat forever.
+	const int16_t repeat;
+	/// Times repeated.
+	uint16_t repeated = 0;
 
 	/**
 	 * Do the elements calculation.
@@ -195,12 +197,6 @@ protected:
 	 */
 	bool isElementAffected(uint16_t index) const;
 
-	/**
-	 * Checks if the actor will repeat.
-	 * @return true if the actor will repeat.
-	 */
-	bool checkRepeats();
-
 private:
 
 	/// Array with a list of affected elements.
@@ -209,10 +205,6 @@ private:
 	/// A pointer to the real group of elements.
 	Group* const group;
 
-	/// If this actor will repeat, default 0 to repeat for ever.
-	const uint16_t repeat;
-	/// Times repeated.
-	uint16_t repeated = 1;
 };
 
 using ActorPtrsUmap = unordered_map<string, vector<Actor*>>;

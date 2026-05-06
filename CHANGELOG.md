@@ -5,6 +5,14 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.4.1] - 2026-05-06
+
+### Fixed
+- Several actor behaviors broken by the removal of `cycles` in 0.7.4
+- `restartTime` causing inconsistent actor behavior
+- `startAt` not working correctly when running in backward direction
+- `repeat` not working correctly
+
 ## [0.7.4] - 2026-05-03
 
 ### Added

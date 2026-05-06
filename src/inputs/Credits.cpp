@@ -191,8 +191,7 @@ void Credits::deactivate() {
 }
 
 void Credits::drawConfig() const {
-	cout << SEPARATOR << endl << "Type: Credits" << endl;
-	Reader::drawConfig();
+	cout << "Credits" << endl;
 	cout << "Linked Items: " << endl;
 	for (auto& g : groupsMaps) {
 		for (size_t i = 0; i < g.size(); ++i) {
@@ -203,12 +202,13 @@ void Credits::drawConfig() const {
 		}
 		cout << endl;
 	}
-	Speed::drawConfig();
 	cout <<
 		"Mode: " << (mode == Modes::Single ? "Single" : "Multi") << endl <<
 		"Coins Per Credit: " << coinsPerCredit                   << endl <<
 		"Once: "             << (once ? "True" : "False")        << endl <<
 		"Always On: "        << (alwaysOn ? "True" : "False")    << endl;
+	Speed::drawConfig();
+	Reader::drawConfig();
 }
 
 void Credits::blink() {

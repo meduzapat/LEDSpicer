@@ -59,7 +59,7 @@ void Gradient::calculateElements() {
 #ifdef DEVELOP
 	if (Log::isLogging(LOG_DEBUG)) {
 		cout
-			<< "Gradient: " << DrawDirection(cDirection.getDirection())
+			<< "Gradient: " << DrawDirection(getDirection())
 			<< " Frame "    << std::setw(2) << (stepping.frame + 1)
 			<< "/"          << std::setw(2) << stepping.frames
 			<< " Step "     << std::setw(1) << (stepping.step + 1)
@@ -79,14 +79,14 @@ void Gradient::calculateElements() {
 }
 
 void Gradient::drawConfig() const {
+	cout << "Gradient" << endl;
+	StepActor::drawConfig();
 	cout <<
-		"Type: Gradient"                     << endl <<
-		"Mode: "  << mode2str(mode)          << endl <<
-		"Tones: " << static_cast<int>(tones) << endl;
+		"Mode:   " << mode2str(mode)          << endl <<
+		"Tones:  " << static_cast<int>(tones) << endl;
 	cout << "Colors: ";
 	Color::drawColors(colors);
 	cout << endl;
-	StepActor::drawConfig();
 }
 
 Gradient::Modes Gradient::str2mode(const string& mode) {

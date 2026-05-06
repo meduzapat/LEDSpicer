@@ -143,8 +143,7 @@ void Actions::deactivate() {
 }
 
 void Actions::drawConfig() const {
-	cout << SEPARATOR << endl << "Type: Actions" << endl;
-	Reader::drawConfig();
+	cout << "Actions" << endl;
 	if (groupsMaps.size()) {
 		cout << "Linked Items: " << endl;
 		for (auto& g : groupsMaps) {
@@ -155,6 +154,7 @@ void Actions::drawConfig() const {
 	}
 	cout << "Blink: " << (doBlink ? "True" : "False") << endl;
 	Speed::drawConfig();
+	Reader::drawConfig();
 }
 
 void Actions::blink() {

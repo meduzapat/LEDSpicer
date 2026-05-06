@@ -258,24 +258,28 @@ public:
 /* Storage */
 
 	/// Port number to use for listening.
-	static string portNumber;
+	inline static string portNumber {};
 
 	/// Keeps the milliseconds to wait.
-	static milliseconds waitTime;
+	inline static milliseconds waitTime {};
+
+	static LayoutProperties getLayoutProperties() noexcept;
 
 protected:
 
 	/// Stores the running mode.
-	static Modes mode;
+	inline static Modes mode = Modes::Normal;
 
 	/// Keeps references to profiles.
-	static ProfilePtrUMap profilesCache;
+	inline static ProfilePtrUMap profilesCache {};
 
 	/// Stores the location where the project is stored.
-	static string projectDir;
+	inline static string projectDir {};
 
 	/// Stores the transitions for each unique profile.
-	static unordered_map<Profile*, Transition*> transitions;
+	inline static unordered_map<Profile*, Transition*> transitions {};
+
+	inline static LayoutProperties defaultLayoutProperties {};
 
 	/**
 	 * Loads the color File

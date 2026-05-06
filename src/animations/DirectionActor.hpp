@@ -42,8 +42,8 @@ public:
 		const vector<string>& requiredParameters
 	) :
 		FrameActor(parameters, group, requiredParameters),
-		Direction(parameters["direction"], parameters["bouncer"] == "True"),
-		cDirection(direction, false)
+		Direction(parameters["direction"], false),
+		initDir(direction, parameters["bouncer"] == "True")
 	{}
 
 	virtual ~DirectionActor() = default;
@@ -57,11 +57,6 @@ public:
 	 * @see FrameActor::restart();
 	 */
 	void restart() override;
-
-	/**
-	 * @return true if the animation is on the bouncing period.
-	 */
-	bool isBouncing() const;
 
 	/**
 	 * @return true same as frame actor but includes direction and bouncing effect.
@@ -82,6 +77,11 @@ public:
 	 * @return true if the current frame is the very last of the cycle (not frame).
 	 */
 	bool isEndOfCycle() const override;
+
+	/**
+	 * @return true if the animation is on the bouncing period.
+	 */
+	bool isBouncing() const { return bounce; }
 
 	uint16_t getFullFrames() const override;
 
@@ -116,10 +116,14 @@ public:
 		const uint16_t  last
 	);
 
+	const Direction& getConfigDirection() const { return initDir; };
+
 protected:
 
-	/// Dynamic state for current direction and bouncing.
-	Direction cDirection;
+	/// Immutable direction config read from the animation file.
+	const Direction initDir;
+
+	bool isBouncer() const = delete;
 
 	/**
 	 * Moves the frame to the next one (forward or backward).

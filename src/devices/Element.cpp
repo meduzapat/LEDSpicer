@@ -112,7 +112,7 @@ void Element::checkTime() {
 	if (*leds[SINGLE_LED] and isTime()) *leds[SINGLE_LED] = 0;
 }
 
-void Element::draw() const {
+void Element::drawConfig() const {
 	cout <<
 		std::left << std::setfill(' ') << std::setw(20) << name <<
 		" Led: " << (leds.size() == 1 ? (timeOn ? "Solenoid" : "Single Color") : (leds.size() == 3 ? "RGB" : "Multi RGB"));

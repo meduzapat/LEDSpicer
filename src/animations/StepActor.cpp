@@ -67,11 +67,11 @@ StepActor::FrameTransition StepActor::changeFrameElementCommon(const Directions&
 
 	float percent = stepPercent * stepping.step;
 	// This is fake.
-	uint16_t next = nextOf(cDirection, stepping.frame, direction, stepping.frames - 1);
+	uint16_t next = nextOf(*this, stepping.frame, direction, stepping.frames - 1);
 	// Next is fake and will bounce late due to incorrect direction.
-	if (isBouncer() and (
-			(stepping.frame == 0    and cDirection.isBackward()) or
-			(stepping.isLastFrame() and cDirection.isForward())
+	if (initDir.isBouncer() and (
+			(stepping.frame == 0    and isBackward()) or
+			(stepping.isLastFrame() and isForward())
 		)
 	) {
 		percent = 100;
