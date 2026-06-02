@@ -1,3 +1,5 @@
+<img width="1774" height="481" alt="LEDSpicerBannerHD" src="https://github.com/user-attachments/assets/15f20df0-a1b6-4917-aa4a-53a705db8bf5" />
+
 # LEDSpicer - LED Manager for linux
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
