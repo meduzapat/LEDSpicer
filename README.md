@@ -1,6 +1,6 @@
-<img width="1774" height="481" alt="LEDSpicerBannerHD" src="https://github.com/user-attachments/assets/15f20df0-a1b6-4917-aa4a-53a705db8bf5" />
+<img width="1774" height="481" alt="LEDSpicer™ Banner HD" src="https://github.com/user-attachments/assets/1cc6fa2b-9685-4e23-b156-98e70a942509" />
 
-# LEDSpicer - LED Manager for linux
+# LEDSpicer™ - Interactive LED Control for Arcade Systems
 
 [![GitHub](https://img.shields.io/github/v/release/meduzapat/LEDSpicer?color=blueviolet)](https://github.com/meduzapat/LEDSpicer/releases/latest)
 ![GitHub Release Date](https://img.shields.io/github/release-date/meduzapat/LEDSpicer)
@@ -10,24 +10,39 @@
 [![Static Badge](https://img.shields.io/badge/OH-rgb(90%2C%2042%2C%20130)?label=Project%20Summary&labelColor=gray)](https://openhub.net/p/ledspicer)
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/meduzapat/ledspicer/package/ledspicer/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/meduzapat/ledspicer/package/ledspicer/)
 
-## LEDSpicer: LED and Joystick Control Daemon
+### Open Source Arcade LED and Hardware Control for Linux
 
-LEDSpicer is a Linux daemon for controlling single-color and RGB LEDs across multiple hardware devices. It executes animations and lighting profiles that can be triggered by user commands, network events, or running applications, with native support for MAME game events.
+LEDSpicer™ is an open-source Linux daemon for controlling arcade cabinet hardware. It provides unified management of single-color and RGB LEDs, executes event-driven lighting profiles, and integrates with applications such as MAME to synchronize lighting effects with gameplay.
 
-### Key Features
+In addition to LED control, LEDSpicer™ supports arcade-specific hardware including joystick restrictors and monitor rotators, allowing cabinets to automatically adapt to the running game.
 
-- **Multi-device support** for a wide range of LED controllers
-- **Profile-based activation** triggered by games, commands, or network events
-- **MAME integration** for LED synchronization with in-game activity
-- **Joystick restrictor and rotator control** for arcade applications
+## Features
 
-LEDSpicer combines responsive LED management with mechanical control, making it well-suited for arcade cabinets and interactive projects.
+* Support for a wide range of LED controller hardware
+* Single-color and RGB LED management
+* Real-time animations and lighting effects
+* Event-driven profiles triggered by games, commands, or network events
+* Native MAME integration
+* Joystick restrictor control
+* Monitor rotator control
+* Multi-device management through a single daemon
+* Extensible architecture for automation and custom integrations
+
+## Typical Uses
+
+* Arcade cabinets
+* Retro gaming systems
+* Gaming kiosks
+* Interactive installations
+* Custom control panels
+
+LEDSpicer™ combines dynamic lighting, hardware control, and automation in a single platform designed specifically for arcade and interactive systems.
 
 ## Getting Started
 
 ### Installation
 
-LEDSpicer is available through package repositories for major Linux distributions:
+LEDSpicer™ is available through package repositories for major Linux distributions:
 
 - **Ubuntu/Debian**: [PPA](https://launchpad.net/~meduzapat/+archive/ubuntu/ledspicer)
 - **Fedora**: [COPR](https://copr.fedorainfracloud.org/coprs/meduzapat/LEDSpicer/)
@@ -52,13 +67,13 @@ for more videos visit the YT channel.
 
 ## License
 
-Copyright (C) 2018 - 2024 Patricio A. Rossi
+Copyright (C) 2018 - 2026 Patricio A. Rossi
 
-LEDSpicer is free software: you can redistribute it and/or modify it
+LEDSpicer™ is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-LEDSpicer is distributed in the hope that it will be useful, but
+LEDSpicer™ is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
