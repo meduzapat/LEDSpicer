@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(LEDSpicer VERSION 0.7.5 LANGUAGES CXX)
+project(LEDSpicer VERSION 0.7.6 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 

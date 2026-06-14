@@ -5,6 +5,15 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6] - 2026-06-14
+
+### Fixed
+- Crash and cache handling for crafted profiles (#121)
+- Use-after-free when loading same crafted profile twice
+- Cache/retrieve crafted profiles by game name
+- FORCE_RELOAD and REPLACE flags on craft/load path
+- Profile stack history for FinishLastProfile
+
 ## [0.7.4.1] - 2026-05-06
 
 ### Fixed
