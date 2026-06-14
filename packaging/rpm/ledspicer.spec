@@ -5,7 +5,7 @@
 %global debug_package %{nil}
 
 Name:           ledspicer
-Version:        0.7.4.1
+Version:        0.7.6
 Release:        1%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
@@ -196,9 +196,10 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Tue May 05 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.4.1-1
+* Sun Jun 14 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.6-1
 - Fixed
-  - Several actor behaviors broken by the removal of `cycles` in 0.7.4
-  - `restartTime` causing inconsistent actor behavior
-  - `startAt` not working correctly when running in backward direction
-  - `repeat` not working correctly
+  - Crash and cache handling for crafted profiles (#121)
+  - Use-after-free when loading same crafted profile twice
+  - Cache/retrieve crafted profiles by game name
+  - FORCE_RELOAD and REPLACE flags on craft/load path
+  - Profile stack history for FinishLastProfile

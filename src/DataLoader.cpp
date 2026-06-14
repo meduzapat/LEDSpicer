@@ -397,18 +397,15 @@ void DataLoader::processGroupElements(tinyxml2::XMLElement* groupNode, Group& gr
 }
 
 Profile* DataLoader::getProfileFromCache(const string& name) {
-	if (not profilesCache.exists(name)) {
-		LogDebug("Profile cache miss");
-		return nullptr;
-	}
-
-	auto profile(profilesCache.at(name));
-	LogDebug("Profile from cache");
-	return profile;
+	if (not profilesCache.exists(name)) return nullptr;
+	return profilesCache.at(name);
 }
 
-Profile* DataLoader::processProfile(const string& name, const string& extra) {
+Profile* DataLoader::processProfile(const string& name, const string& cacheKey) {
 
+	// `name` is the file to read; `key` is the cache key and profile name (defaults to the file).
+	// Crafted profiles read a shared platform template but cache under a per-game key.
+	const string& key {cacheKey.empty() ? name : cacheKey};
 	XMLHelper profile(getProjectDir() + createFilename(PROFILE_DIR + name), "Profile");
 	StringUMap tempAttr = processNode(profile.getRoot());
 	Utility::checkAttributes(REQUIRED_PARAM_PROFILE, tempAttr, "root");
@@ -422,7 +419,7 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		Utility::checkAttributes(REQUIRED_PARAM_NAME_ONLY, tempAttr, "transition for profile " + name);
 		transition = tempAttr[PARAM_NAME];
 	}
-	Profile* profilePtr = new Profile(name, Color::getColor(backgroundColor));
+	Profile* profilePtr = new Profile(key, Color::getColor(backgroundColor));
 	processTransition(profilePtr, tempAttr);
 
 	// Check for animations.
@@ -484,11 +481,8 @@ Profile* DataLoader::processProfile(const string& name, const string& extra) {
 		}
 	}
 
-	// Save Cache, replace previous value if any.
-	if (profilesCache.exists(name + extra)) {
-		delete profilesCache[name + extra];
-	}
-	profilesCache[name + extra] = profilePtr;
+	// A replaced profile may still be referenced; the caller frees it after repointing.
+	profilesCache[key] = profilePtr;
 	return profilePtr;
 }
 

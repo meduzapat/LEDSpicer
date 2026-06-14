@@ -1,9 +1,10 @@
-ledspicer (0.7.4.1-1) stable; urgency=medium
+ledspicer (0.7.6-1) stable; urgency=medium
 
   * Fixed
-    - Several actor behaviors broken by the removal of `cycles` in 0.7.4
-    - `restartTime` causing inconsistent actor behavior
-    - `startAt` not working correctly when running in backward direction
-    - `repeat` not working correctly
+    - Crash and cache handling for crafted profiles (#121)
+    - Use-after-free when loading same crafted profile twice
+    - Cache/retrieve crafted profiles by game name
+    - FORCE_RELOAD and REPLACE flags on craft/load path
+    - Profile stack history for FinishLastProfile
 
- -- Patricio A. Rossi <meduzapat@netscape.net>  Tue, 05 May 2026 21:57:20 -0400
+ -- Patricio A. Rossi <meduzapat@netscape.net>  Sun, 14 Jun 2026 00:57:18 -0400

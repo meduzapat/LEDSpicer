@@ -170,12 +170,13 @@ public:
 	static Profile* getProfileFromCache(const string& name);
 
 	/**
-	 * Reads a profile file form disk or cache.
-	 * @param name
-	 * @param extra, if set will use it to differentiate from other profiles with the same name, only used while crafting profiles.
+	 * Reads and builds a profile from disk, storing it in the cache.
+	 * @param name the profile file to read.
+	 * @param cacheKey cache key and profile name; defaults to the file name. Crafted profiles
+	 *        read a shared platform template (name) but cache under a per-game key.
 	 * @throws Error if the profile is invalid.
 	 */
-	static Profile* processProfile(const string& name, const string& extra = "");
+	static Profile* processProfile(const string& name, const string& cacheKey = "");
 
 	/**
 	 * Adds a transition into the cache.

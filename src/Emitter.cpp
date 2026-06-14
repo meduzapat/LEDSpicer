@@ -186,12 +186,12 @@ int main(int argc, char **argv) {
 
 		// Set craft profile mode.
 		if (configValues.exists("craftProfile"))
-			craftProfile = configValues["craftProfile"] == "true";
+			craftProfile = configValues["craftProfile"] == "True";
 
 		// Set use colors file.
 		if (configValues.exists("colorsFile")) {
-			ignoreMissingColors = configValues["colorsFile"] == "strict";
-			useColors = ignoreMissingColors or configValues["colorsFile"] == "true";
+			ignoreMissingColors = configValues["colorsFile"] == "Strict";
+			useColors = ignoreMissingColors or configValues["colorsFile"] == "True";
 			LogDebug(ignoreMissingColors ? "ignoreMissingColors ON" : "ignoreMissingColors OFF");
 		}
 
