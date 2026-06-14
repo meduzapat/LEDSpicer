@@ -61,12 +61,20 @@ protected:
 	Profile* tryProfiles(const vector<string>& data);
 
 	/**
-	 * Attempts create a profile with the values provided.
-	 * Will check cache for an existing profile first.
-	 * @param name
-	 * @return the new crafted profile or null if failed.
+	 * Crafts a profile from a platform template plus the requested elements/animations/inputs.
+	 * Cached per game; honours FLAG_FORCE_RELOAD to rebuild in place.
+	 * @param name the full game name, used as the cache key (e.g. arcade/1943).
+	 * @param platform the platform template to build from (e.g. arcade).
+	 * @return the crafted profile or null if failed.
 	 */
-	Profile* craftProfile(const string& name, const string& elements, const string& groups);
+	Profile* craftProfile(const string& name, const string& platform, const string& elements, const string& groups);
+
+	/**
+	 * Repoints every reference (default, current, profile stack) from old to neu and frees old.
+	 * No-op when old is null or equal to neu. Used after a rebuild so the replaced profile is
+	 * freed only once nothing points at it.
+	 */
+	void replaceProfileReferences(Profile* old, Profile* neu);
 
 	/**
 	 * Initiates the process or replacing the current profile.

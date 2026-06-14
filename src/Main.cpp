@@ -240,7 +240,7 @@ void Main::run() {
 			storeProfile = true;
 			if (not newProfile) {
 				// Craft profile.
-				newProfile = craftProfile(msg.getData()[3], msg.getData()[1], msg.getData()[2]);
+				newProfile = craftProfile(msg.getData()[0], msg.getData()[3], msg.getData()[1], msg.getData()[2]);
 				// Try platform profile.
 				if (not newProfile) newProfile = tryProfiles({msg.getData()[3]});
 			}
@@ -443,132 +443,117 @@ int main(int argc, char **argv) {
 }
 
 Profile* Main::tryProfiles(const vector<string>& data) {
-	Profile
-		// New profile to load.
-		* profile    = nullptr,
-		// Old profile from cache, if any.
-		* oldProfile = nullptr;
-
-	// If there is a profile and reload flag, reload it (used for debug).
-	bool reload(Utility::globalFlags & FLAG_FORCE_RELOAD);
-	for (auto& profileName : data) {
+	// Reload (used for debugging) ignores the cache and rebuilds the profile in place.
+	const bool reload {(Utility::globalFlags & FLAG_FORCE_RELOAD) != 0};
+	for (const auto& profileName : data) {
 		LogDebug("Attempting to load profile: " + profileName);
 		try {
-			// Check cache to get the old version (if any).
-			oldProfile = DataLoader::getProfileFromCache(profileName);
-
-			// Reload is normally used for debugging profiles.
-			if (reload) {
-				LogDebug("Ignoring cache, reloading profile");
-				// Reload or cache miss is the same, but if exist it will be replaced.
-				profile = DataLoader::processProfile(profileName);
-				// Update any reference.
-				if (oldProfile) {
-					DataLoader::removeTransitionFromCache(oldProfile, true);
-					// Check default profile and current profile.
-					if (oldProfile == Profile::defaultProfile) Profile::defaultProfile = profile;
-					if (oldProfile == currentProfile) currentProfile = profile;
-					// Also update all copies before delete.
-					for (auto &p : profiles) if (p == oldProfile) p = profile;
-				}
-				return profile;
+			Profile* old {DataLoader::getProfileFromCache(profileName)};
+			if (old and not reload) {
+				LogDebug("Profile " + profileName + " from cache");
+				return old;
 			}
-
-			if (oldProfile) return oldProfile;
-			return DataLoader::processProfile(profileName);
+			Profile* profile {DataLoader::processProfile(profileName)};
+			replaceProfileReferences(old, profile);
+			return profile;
 		}
-		catch(Error& e) {
+		catch (Error& e) {
 			LogDebug("Profile failed: " + e.getMessage());
 			continue;
 		}
 	}
-	return profile;
+	return nullptr;
 }
 
-Profile* Main::craftProfile(const string& name, const string& elements, const string& groups) {
+void Main::replaceProfileReferences(Profile* old, Profile* neu) {
+	if (not old or old == neu) return;
+	DataLoader::removeTransitionFromCache(old, true);
+	if (old == Profile::defaultProfile) Profile::defaultProfile = neu;
+	if (old == currentProfile)          currentProfile = neu;
+	// Update all stack copies before freeing the replaced profile.
+	for (auto& p : profiles) if (p == old) p = neu;
+	delete old;
+}
 
-	Profile* profile(nullptr);
-	string profileName(name + elements + groups);
+Profile* Main::craftProfile(const string& name, const string& platform, const string& elements, const string& groups) {
+
+	// Crafted profiles are cached per game; reload rebuilds in place.
+	const string cacheKey {EMPTY_PROFILE + name};
+	const bool reload {(Utility::globalFlags & FLAG_FORCE_RELOAD) != 0};
 	try {
-		// Check cache.
-		profile = DataLoader::getProfileFromCache(profileName);
-		if (not profile) {
-			LogDebug("Creating profile with " EMPTY_PROFILE + name);
-			profile = DataLoader::processProfile(EMPTY_PROFILE + name, elements + groups);
-			// Add elements.
-			LogDebug("Adding elements");
-			for (string& n : Utility::explode(elements, FIELD_SEPARATOR)) {
-				const Color* col = nullptr;
-				auto parts = Utility::explode(n, GROUP_SEPARATOR);
-				n = parts[0];
-				if (not Element::allElements.exists(n)) {
-					LogDebug("Unknown element " + n);
-					continue;
-				}
-				if (parts.size() == 2 and Color::hasColor(parts[1]))
-					col = &Color::getColor(parts[1]);
-				else
-					col = &Element::allElements.at(n)->getDefaultColor();
+		Profile* old {DataLoader::getProfileFromCache(cacheKey)};
+		if (old and not reload) {
+			LogDebug("Profile " + cacheKey + " from cache");
+			return old;
+		}
 
-				LogDebug("Using element " + n + " color " + col->getName());
-				profile->addAlwaysOnElement(Element::allElements.at(n), *col, Color::Filters::Normal);
+		LogDebug("Crafting " + cacheKey + " from " EMPTY_PROFILE + platform);
+		Profile* profile {DataLoader::processProfile(EMPTY_PROFILE + platform, cacheKey)};
+
+		// Add elements.
+		LogDebug("Adding elements");
+		for (string& n : Utility::explode(elements, FIELD_SEPARATOR)) {
+			const Color* col = nullptr;
+			auto parts = Utility::explode(n, GROUP_SEPARATOR);
+			n = parts[0];
+			if (not Element::allElements.exists(n)) {
+				LogDebug("Unknown element " + n);
+				continue;
 			}
+			if (parts.size() == 2 and Color::hasColor(parts[1]))
+				col = &Color::getColor(parts[1]);
+			else
+				col = &Element::allElements.at(n)->getDefaultColor();
 
-			// Add Groups.
-			/*
-			LogDebug("Adding groups");
-			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-				LogDebug("Using group " + n);
-				if (Group::layout.exists(n)) {
-					profile->addAlwaysOnGroup(
-						&Group::layout.at(n), DataLoader::allElements.at(n)->getDefaultColor()
-					);
-				}
-				else {
-					LogDebug(n + " failed");
-				}
+			LogDebug("Using element " + n + " color " + col->getName());
+			profile->addAlwaysOnElement(Element::allElements.at(n), *col, Color::Filters::Normal);
+		}
+
+		// Add Animations.
+		LogDebug("Adding Animations");
+		for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
+			LogDebug("Loading animation " + n);
+			try {
+				profile->addAnimation(DataLoader::processAnimation(n));
 			}
-			*/
-
-			// Add Animations.
-			LogDebug("Adding Animations");
-			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-				LogDebug("Loading animation " + n);
-				try {
-					profile->addAnimation(DataLoader::processAnimation(n));
-				}
-				catch (...) {
-					LogDebug(n + " failed");
-					continue;
-				}
-			}
-
-			// Add Inputs.
-			LogDebug("Adding Inputs");
-			for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
-				LogDebug("Loading input " + n);
-				try {
-					DataLoader::processInput(profile, n);
-				}
-				catch (...) {
-					LogDebug(n + " failed");
-					continue;
-				}
+			catch (...) {
+				LogDebug(n + " failed");
+				continue;
 			}
 		}
+
+		// Add Inputs.
+		LogDebug("Adding Inputs");
+		for (string& n : Utility::explode(groups, FIELD_SEPARATOR)) {
+			LogDebug("Loading input " + n);
+			try {
+				DataLoader::processInput(profile, n);
+			}
+			catch (...) {
+				LogDebug(n + " failed");
+				continue;
+			}
+		}
+
+		replaceProfileReferences(old, profile);
+		return profile;
 	}
 	catch (Error& e) {
 		LogNotice(e.getMessage());
+		return nullptr;
 	}
-	return profile;
 }
 
 void Main::changeProfile(Profile* to, bool store) {
 	// TODO add benchmark timers
 	// If there is a profile and replace flag, replace current profile.
-	bool replace(profiles.size() and (Utility::globalFlags & FLAG_REPLACE));
+	bool replace {profiles.size() and (Utility::globalFlags & FLAG_REPLACE)};
 	if (to) {
-		LogInfo((replace ? "Replacing Profile " + currentProfile->getName() + " with " : "Changing profile " + currentProfile->getName() + " with ") + to->getName());
+		LogInfo((
+			(Utility::globalFlags & FLAG_FORCE_RELOAD) ? "Reloading profile " :
+			replace                                    ? "Replacing profile " :
+			                                             "Changing profile ")
+			+ currentProfile->getName() + " with " + to->getName());
 	}
 	else {
 		LogInfo("Terminating Profile " + currentProfile->getName());
@@ -593,8 +578,18 @@ void Main::changeProfile(Profile* to, bool store) {
 		if (to) to->reset();
 	}
 
-	if (replace) profiles.pop_back();
-	if (store) profiles.push_back(to);
+	// Stack maintenance (RELOAD already refreshed every matching instance from disk during fetch):
+	//  - REPLACE swaps the top with the new profile, unless the top is already the same profile;
+	//  - otherwise the load is pushed onto the history stack.
+	if (store) {
+		if (replace) {
+			if (profiles.back() != to) {
+				profiles.pop_back();
+				profiles.push_back(to);
+			}
+		}
+		else profiles.push_back(to);
+	}
 	currentProfile = to;
 	if (to and not (Utility::globalFlags & FLAG_NO_INPUTS)) to->startInputs();
 	Utility::globalFlags = 0;
