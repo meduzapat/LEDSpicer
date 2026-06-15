@@ -1,0 +1,80 @@
+name: Publish release packages
+
+# Fires after a GitHub Release is published, i.e. once the tag and its source
+# tarball exist. That ordering matters: both the AUR PKGBUILD checksum and the
+# Fedora spec's Source0 point at .../archive/refs/tags/<version>.tar.gz, which
+# only exists after the Release is cut.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # AUR: regenerate PKGBUILD/.SRCINFO with the real checksum and push to the AUR
+  # repo. Runs on a stock runner because generate-changelogs.sh templates
+  # .SRCINFO itself (no makepkg / Arch container needed).
+  # ---------------------------------------------------------------------------
+  aur:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the released tag
+        uses: actions/checkout@v6
+
+      - name: Verify the AUR key is configured
+        run: |
+          if [ -z "${{ secrets.AUR_SSH_PRIVATE_KEY }}" ]; then
+            echo "::error::AUR_SSH_PRIVATE_KEY secret is not set."
+            exit 1
+          fi
+
+      - name: Generate PKGBUILD and .SRCINFO with the real checksum
+        run: |
+          ./packaging/generate-changelogs.sh
+          if grep -q "SKIP" packaging/arch/PKGBUILD; then
+            echo "::error::Checksum is still SKIP - the tag tarball was not reachable."
+            exit 1
+          fi
+
+      - name: Publish to AUR
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur -o IdentitiesOnly=yes"
+
+          git clone ssh://aur@aur.archlinux.org/ledspicer.git aur-repo
+          cp packaging/arch/PKGBUILD  aur-repo/PKGBUILD
+          cp packaging/arch/.SRCINFO aur-repo/.SRCINFO
+
+          cd aur-repo
+          if git diff --quiet; then
+            echo "Nothing changed in the AUR repo; skipping push."
+            exit 0
+          fi
+          git config user.name  "LEDSpicer release bot"
+          git config user.email "meduzapat@nescape.net"
+          git add PKGBUILD .SRCINFO
+          git commit -m "Update to ${VERSION}"
+          git push
+
+  # ---------------------------------------------------------------------------
+  # COPR: poke the custom webhook so Fedora rebuilds from the (now-tagged) repo.
+  # Independent of the AUR job so one failing distro never blocks the other.
+  # ---------------------------------------------------------------------------
+  copr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the COPR build
+        run: |
+          if [ -z "${{ secrets.COPR_WEBHOOK_URL }}" ]; then
+            echo "::error::COPR_WEBHOOK_URL secret is not set."
+            exit 1
+          fi
+          curl -X POST --fail-with-body -sS "${{ secrets.COPR_WEBHOOK_URL }}"
