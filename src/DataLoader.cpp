@@ -141,6 +141,43 @@ void DataLoader::processDevices() {
 	}
 }
 
+void DataLoader::parseColorOrder(
+	const string& colorFormat,
+	uint16_t& c,
+	uint16_t& r,
+	uint16_t& g,
+	uint16_t& b,
+	vector<bool>& ledCheck,
+	const string& location
+) {
+	// Must be a permutation of the three channels, one each, case insensitive.
+	if (colorFormat.size() != 3
+		or colorFormat.find_first_not_of("RGBrgb") != string::npos
+		or colorFormat.find_first_of("Rr") == string::npos
+		or colorFormat.find_first_of("Gg") == string::npos
+		or colorFormat.find_first_of("Bb") == string::npos)
+		throw Utilities::Error("Color format must be a permutation of R, G and B, got '" + colorFormat + "' in " + location);
+	for (char col : colorFormat) {
+		switch (col) {
+		case 'R':
+		case 'r':
+			ledCheck[c] = true;
+			r = c++;
+			break;
+		case 'G':
+		case 'g':
+			ledCheck[c] = true;
+			g = c++;
+			break;
+		case 'B':
+		case 'b':
+			ledCheck[c] = true;
+			b = c++;
+			break;
+		}
+	}
+}
+
 void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device) {
 
 	// Only used to report unused LEDs.
@@ -207,8 +244,8 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 				// 1st RGB element
 				pos  ((Utility::parseNumber(tempAttr[PARAM_POSITION], invalidValueFor(PARAM_POSITION) " in " + device->getFullName()) - 1) * 3),
 				elem (1);
-			string
-				order(tempAttr.exists(PARAM_COLORFORMAT) ? tempAttr.at(PARAM_COLORFORMAT) : DEFAULT_ORDER),
+			const string
+				rgbFormat(tempAttr.exists(PARAM_COLORFORMAT) ? tempAttr.at(PARAM_COLORFORMAT) : DEFAULT_ORDER),
 				groupName(name);
 			// Create a group for the strip only.
 			if (size > 3)
@@ -222,22 +259,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 			// Process element(s)
 			for (uint16_t c = pos; c < pos + size; ++elem) {
 				string elemName(name + (size > 3 ? to_string(elem) : ""));
-				for (char col : order) {
-					switch (col) {
-					case 'r':
-						ledCheck[c] = true;
-						r = c++;
-						break;
-					case 'g':
-						ledCheck[c] = true;
-						g = c++;
-					break;
-					case 'b':
-						ledCheck[c] = true;
-						b = c++;
-					break;
-					}
-				}
+				parseColorOrder(rgbFormat, c, r, g, b, ledCheck, device->getFullName());
 				device->registerElement(
 					elemName,
 					r, g , b,
@@ -265,23 +287,7 @@ void DataLoader::processDeviceElements(tinyxml2::XMLElement* deviceNode, Device*
 				if (not Utility::verifyValue<uint16_t>(pos, 0, device->getNumberOfElements())) {
 					throw Utilities::Error("Invalid value " + posStr + " in " + tempAttr.at(PARAM_POSITIONS) + " for element " + name + " in " + device->getFullName());
 				}
-				// Process element(s)
-				for (char col : order) {
-					switch (col) {
-					case 'r':
-						ledCheck[c] = true;
-						r = c++;
-						break;
-					case 'g':
-						ledCheck[c] = true;
-						g = c++;
-					break;
-					case 'b':
-						ledCheck[c] = true;
-						b = c++;
-					break;
-					}
-				}
+				parseColorOrder(order, c, r, g, b, ledCheck, name + " in " + device->getFullName());
 				ledPositions.push_back(r);
 				ledPositions.push_back(g);
 				ledPositions.push_back(b);

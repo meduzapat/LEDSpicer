@@ -58,7 +58,7 @@ void Adalight::transfer() const {
 
 	// Data
 	serialData.insert(serialData.end(), LEDs.begin(), LEDs.begin() + numIndividualLeds);
-
+	serialData.push_back('\0');
 
 	transferToConnection(serialData);
 	/* for testing:*/

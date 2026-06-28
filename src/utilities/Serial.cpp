@@ -155,7 +155,6 @@ void Serial::disconnect() {
 }
 
 void Serial::transferToConnection(vector<uint8_t>& data) const {
-	data.push_back('\0');
 	Connection::transferToConnection(data);
 	size_t totalWritten = 0;
 	while (totalWritten < data.size()) {
