@@ -301,6 +301,28 @@ protected:
 	void processDeviceElements(tinyxml2::XMLElement* deviceNode, Device* device);
 
 	/**
+	 * Resolves a colorFormat order (a permutation of R, G and B, case
+	 * insensitive) into the three channel LED indices, advancing the running
+	 * index and marking every consumed LED.
+	 * @param colorFormat the channel order, e.g. "RGB" or "grb"
+	 * @param c running LED index, advanced by 3
+	 * @param r set to the red channel LED index
+	 * @param g set to the green channel LED index
+	 * @param b set to the blue channel LED index
+	 * @param ledCheck per LED used flags, marked for each channel
+	 * @param location context appended to error messages
+	 */
+	static void parseColorOrder(
+		const string& colorFormat,
+		uint16_t& c,
+		uint16_t& r,
+		uint16_t& g,
+		uint16_t& b,
+		vector<bool>& ledCheck,
+		const string& location
+	);
+
+	/**
 	 * Reads the layout and group sections from config.
 	 * @return the default layout properties.
 	 */

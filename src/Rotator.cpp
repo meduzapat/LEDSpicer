@@ -97,21 +97,31 @@ int main(int argc, char **argv) {
 
 		// Reset Only.
 		if (commandline == "-r" or commandline == "--reset") {
+			if (i + 1 >= argc) {
+				LogError("Missing value for " + commandline);
+				return EXIT_FAILURE;
+			}
 			resetWays = argv[++i];
 			continue;
 		}
 
 		// Alternative configuration.
 		if (commandline == "-c" or commandline == "--config") {
+			if (i + 1 >= argc) {
+				LogError("Missing value for " + commandline);
+				return EXIT_FAILURE;
+			}
 			configFile = argv[++i];
 			continue;
 		}
 
-		if ((i + 2) > argc) {
+		if ((i + 2) >= argc) {
 			LogError("Invalid player data");
 			return EXIT_FAILURE;
 		}
-		playersRequestedData.emplace(commandline + "_" + argv[i + 1], Restrictor::str2ways(argv[i + 2]));
+		const string key(commandline + "_" + argv[i + 1]);
+		if (not playersRequestedData.emplace(key, Restrictor::str2ways(argv[i + 2])).second)
+			LogWarning("Duplicate request for " + Restrictor::getProfileStr(key) + ", ignoring the second value");
 		i+=2;
 	}
 
@@ -119,8 +129,6 @@ int main(int argc, char **argv) {
 		LogError("Nothing to do");
 		return EXIT_SUCCESS;
 	}
-
-	Log::initialize(true);
 
 	if (configFile.empty())
 		configFile = CONFIG_FILE;
@@ -179,6 +187,7 @@ int main(int argc, char **argv) {
 				// Set Rotations.
 				if (playersRequestedData.size() and playersRequestedData.exists(pd.first)) {
 					availablePlayersData.emplace(pd.first, playersRequestedData.at(pd.first));
+					playersRequestedData.erase(pd.first);
 				}
 				// Reset all.
 				else if (resetWays.size()) {
@@ -199,7 +208,9 @@ int main(int argc, char **argv) {
 			delete restrictor;
 			sleep_for(std::chrono::milliseconds(250));
 		}
-
+		// Anything left was requested but matched no restrictor.
+		for (const auto& pd : playersRequestedData)
+			LogWarning(Restrictor::getProfileStr(pd.first) + " requested but not found in any restrictor");
 	}
 	catch(Error& e) {
 		LogError("Error: " + e.getMessage());
