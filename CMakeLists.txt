@@ -408,7 +408,7 @@ add_custom_target(uninstall
 file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"[Unit]\n"
 	"Description=LEDSpicer Daemon\n"
-	"After=network.target sound.target\n"
+	"After=network.target\n"
 	"StartLimitIntervalSec=60s\n"
 	"StartLimitBurst=3\n\n"
 
@@ -419,18 +419,6 @@ file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"RestartSec=5s\n"
 	"ExecStop=/bin/kill -TERM $MAINPID\n"
 	"TimeoutStopSec=15s\n"
-)
-
-# Optional PulseAudio support
-if(ENABLE_PULSEAUDIO)
-	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		"# Optional PulseAudio socket hint (daemon reconnects if unavailable) remember to change 1000 with the used ID if different\n"
-		"Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native\n"
-	)
-endif()
-
-# Base service file bottom part.
-file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"\n"
 	"[Install]\n"
 	"WantedBy=multi-user.target\n"

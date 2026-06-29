@@ -58,6 +58,20 @@ protected:
 	/// Shared PCM handle for audio capture.
 	static snd_pcm_t* pcm;
 
+	/// Capture device name, set by the first instance.
+	static string pcmName;
+
+	/**
+	 * Opens and starts the capture device.
+	 * @return true if the device is ready, false on any failure (left closed).
+	 */
+	static bool connect();
+
+	/**
+	 * Closes the capture device if open.
+	 */
+	static void disconnect();
+
 	void calcPeak() override;
 };
 
