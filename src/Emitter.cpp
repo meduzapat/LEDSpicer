@@ -95,15 +95,7 @@ int main(int argc, char **argv) {
 
 		// Version Text.
 		if (commandline == "-v" or commandline == "--version") {
-			cout
-				<< endl <<
-				"Emitter is part of " PROJECT_NAME PROJECT_VERSION << endl <<
-				PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
-				"For more information visit <" PROJECT_SITE ">\n\n"
-				"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
-				PROJECT_NAME " is free software under the GPL 3 license\n\n"
-				"See the GNU General Public License for more details <http://www.gnu.org/licenses/>"
-				<< endl;
+			cout << endl << "Emitter is part of " << LEDSpicer::LICENSE_BLOCK << endl;
 			return EXIT_SUCCESS;
 		}
 

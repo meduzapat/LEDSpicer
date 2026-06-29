@@ -45,6 +45,7 @@ CMakeCache.txt
 #tests/tests*
 ledspicerd.service
 ledspicer.pc
+src/config.hpp
 
 # Compiled Dynamic libraries
 *.so

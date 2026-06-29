@@ -5,14 +5,12 @@ project(LEDSpicer VERSION 0.7.6 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 # Project details
-set(PROJECT_NAME      "${CMAKE_PROJECT_NAME}")
-set(PROJECT_VERSION   "${CMAKE_PROJECT_VERSION}")
-set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/")
-set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
+set(PROJECT_NAME      ${CMAKE_PROJECT_NAME})
+set(PROJECT_VERSION   ${CMAKE_PROJECT_VERSION})
+set(PROJECT_DATA_DIR  ${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/)
+set(PROJECT_CONF_DIR  ${CMAKE_INSTALL_SYSCONFDIR})
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
-set(COPYRIGHT         "Copyright © 2018 - 2026 Patricio A. Rossi")
-set(MAINTAINER_EMAIL  "meduzapat@netscape.net")
 set(DATA_VERSION      "1.1")
 
 # Set C++ standard
@@ -35,20 +33,11 @@ set(PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "pkg-config fil
 set(INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/ledspicer" CACHE PATH "documentation and examples install directory")
 
 # Global compile definitions (for source code)
-add_compile_definitions(
-	PROJECT_NAME="${PROJECT_NAME}"
-	PROJECT_VERSION="${PROJECT_VERSION}"
-	PROJECT_DATA_DIR="${PROJECT_DATA_DIR}"
-	PROJECT_CONF_DIR="${PROJECT_CONF_DIR}"
-	PROJECT_SITE="${PROJECT_SITE}"
-	PROJECT_BUGREPORT="${PROJECT_BUGREPORT}"
-	COPYRIGHT="${COPYRIGHT}"
-	DATA_VERSION="${DATA_VERSION}"
-)
+configure_file(data/config.hpp.in ${CMAKE_SOURCE_DIR}/src/config.hpp @ONLY)
 
 # Options for conditional features
-option(ENABLE_PULSEAUDIO  "Enables the pulseaudio plugin"            ON)
-option(ENABLE_ALSAAUDIO   "Enables the alsaaudio plugin"             ON)
+option(ENABLE_PULSEAUDIO  "Enables the pulseaudio plugin"            OFF)
+option(ENABLE_ALSAAUDIO   "Enables the alsaaudio plugin"             OFF)
 # Devices
 option(ENABLE_NANOLED     "Enables the output plugin nanoled"        OFF)
 option(ENABLE_PACDRIVE    "Enables the output plugin pacdrive"       OFF)
@@ -275,7 +264,6 @@ endif()
 target_include_directories(ledspicerd PRIVATE ${LEDSPICER_INCLUDE_DIRS})
 target_link_libraries(ledspicerd ${LEDSPICER_LIBS})
 
-target_compile_definitions(ledspicerd PRIVATE DEVICES_DIR="${DEVICES_DIR}/")
 install(TARGETS ledspicerd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Emitter utility
