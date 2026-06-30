@@ -26,7 +26,6 @@ VERSION=$(sed -n 's/.*project(LEDSpicer VERSION \([0-9.]*\).*/\1/p' "$CMAKE_FILE
 DATA_VERSION=$(sed -n 's/.*set(DATA_VERSION[[:space:]]*"\([0-9.]*\)".*/\1/p' "$CMAKE_FILE")
 URL=$(sed -n 's/.*set(PROJECT_SITE[[:space:]]*"\([^"]*\)".*/\1/p' "$CMAKE_FILE")
 EMAIL=$(sed -n 's/.*set(MAINTAINER_EMAIL[[:space:]]*"\([^"]*\)".*/\1/p' "$CMAKE_FILE")
-# Extract maintainer name from COPYRIGHT line: "Copyright © 2018 - 2026 Patricio A. Rossi"
 MAINTAINER=$(sed -n 's/.*set(COPYRIGHT[[:space:]]*"[^"]*[0-9]\{4\} \(.*\)").*/\1/p' "$CMAKE_FILE")
 
 # Validate required values
