@@ -33,7 +33,9 @@ jobs:
       - name: Generate PKGBUILD and .SRCINFO with the real checksum
         run: |
           ./packaging/generate-changelogs.sh
-          if grep -q "SKIP" packaging/arch/PKGBUILD; then
+          # Anchor to the checksum line: a bare "SKIP" also matches unrelated
+          # tokens such as CMAKE_SKIP_BUILD_RPATH and would fail every release.
+          if grep -qE "^sha256sums=\('SKIP'\)" packaging/arch/PKGBUILD; then
             echo "::error::Checksum is still SKIP - the tag tarball was not reachable."
             exit 1
           fi
