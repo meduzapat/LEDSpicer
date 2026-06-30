@@ -47,7 +47,14 @@ PulseAudio::PulseAudio(StringUMap& parameters, Group* const group) :
 		return;
 	}
 
-	connect();
+	// Must not abort load: on failure fall back to the background retry.
+	try {
+		connect();
+	}
+	catch (Error& e) {
+		LogWarning("PulseAudio connection failed: " + e.getMessage() + ", will keep retrying");
+		scheduleReconnect();
+	}
 }
 
 PulseAudio::~PulseAudio() {
@@ -82,9 +89,14 @@ void PulseAudio::connect() {
 	}
 
 	pa_context_set_state_callback(context, PulseAudio::onContextSetState, nullptr);
-	pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+
+	// Derive the user's socket from the effective uid (already dropped to it).
+	// PULSE_SERVER overrides.
+	const char* envServer = getenv("PULSE_SERVER");
+	string server(envServer ? "" : "unix:/run/user/" + to_string(getuid()) + "/pulse/native");
+	pa_context_connect(context, envServer ? nullptr : server.c_str(), PA_CONTEXT_NOFLAGS, nullptr);
 	pa_threaded_mainloop_start(tml);
-	LogDebug("PulseAudio connection initiated");
+	LogDebug("PulseAudio connecting to " + (envServer ? string(envServer) : server));
 }
 
 void PulseAudio::disconnect() {

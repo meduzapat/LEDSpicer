@@ -5,7 +5,7 @@
 %global debug_package %{nil}
 
 Name:           ledspicer
-Version:        0.7.6
+Version:        0.7.7
 Release:        1%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
@@ -196,10 +196,16 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Sun Jun 14 2026 Patricio A. Rossi <meduzapat@netscape.net> - 0.7.6-1
+* Mon Jun 29 2026 Patricio A. Rossi (MeduZa) <meduzapat@netscape.net> - 0.7.7-1
+- Added
+  - Automated release publishing to COPR and AUR.
+- Changed
+  - Daemon starts independently of the user session and audio; audio now connects lazily so the service comes up as soon as the network is ready (#125)
+  - systemd service no longer waits on `sound.target` and no longer sets `PULSE_SERVER` — the daemon derives the per-user PulseAudio socket itself (#125)
+  - CMake build cleanups and definition fixes; generated `config.hpp`
 - Fixed
-  - Crash and cache handling for crafted profiles (#121)
-  - Use-after-free when loading same crafted profile twice
-  - Cache/retrieve crafted profiles by game name
-  - FORCE_RELOAD and REPLACE flags on craft/load path
-  - Profile stack history for FinishLastProfile
+  - ALSA capture device opens without throwing and reopens automatically if it is missing or later lost (#125)
+  - PulseAudio falls back to the background retry on an initial connection failure instead of aborting startup (#125)
+  - Rotator argument-parsing crash and a redundant initialization (#123)
+  - Non-working TOS serial restrictor (#123)
+  - Hardened `colorFormat` parsing (accepts `RGB`/`rgb`) and now warns on duplicate player/joystick rotator requests instead of silently dropping them (#123)

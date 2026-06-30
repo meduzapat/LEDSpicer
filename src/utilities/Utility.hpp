@@ -170,6 +170,7 @@ public:
 	 * @return the current user program config dir without the ending /.
 	 */
 	static const string getConfigDir();
+
 };
 
 } // namespace

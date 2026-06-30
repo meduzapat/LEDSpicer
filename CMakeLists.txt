@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(LEDSpicer VERSION 0.7.6 LANGUAGES CXX)
+project(LEDSpicer VERSION 0.7.7 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
 # Project details
-set(PROJECT_NAME      "${CMAKE_PROJECT_NAME}")
-set(PROJECT_VERSION   "${CMAKE_PROJECT_VERSION}")
-set(PROJECT_DATA_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/")
-set(PROJECT_CONF_DIR  "${CMAKE_INSTALL_SYSCONFDIR}")
+set(PROJECT_NAME      ${CMAKE_PROJECT_NAME})
+set(PROJECT_VERSION   ${CMAKE_PROJECT_VERSION})
+set(PROJECT_DATA_DIR  ${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/)
+set(PROJECT_CONF_DIR  ${CMAKE_INSTALL_SYSCONFDIR})
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
-set(COPYRIGHT         "Copyright © 2018 - 2026 Patricio A. Rossi")
 set(MAINTAINER_EMAIL  "meduzapat@netscape.net")
 set(DATA_VERSION      "1.1")
 
@@ -35,20 +34,11 @@ set(PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "pkg-config fil
 set(INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/ledspicer" CACHE PATH "documentation and examples install directory")
 
 # Global compile definitions (for source code)
-add_compile_definitions(
-	PROJECT_NAME="${PROJECT_NAME}"
-	PROJECT_VERSION="${PROJECT_VERSION}"
-	PROJECT_DATA_DIR="${PROJECT_DATA_DIR}"
-	PROJECT_CONF_DIR="${PROJECT_CONF_DIR}"
-	PROJECT_SITE="${PROJECT_SITE}"
-	PROJECT_BUGREPORT="${PROJECT_BUGREPORT}"
-	COPYRIGHT="${COPYRIGHT}"
-	DATA_VERSION="${DATA_VERSION}"
-)
+configure_file(data/config.hpp.in ${CMAKE_SOURCE_DIR}/src/config.hpp @ONLY)
 
 # Options for conditional features
-option(ENABLE_PULSEAUDIO  "Enables the pulseaudio plugin"            ON)
-option(ENABLE_ALSAAUDIO   "Enables the alsaaudio plugin"             ON)
+option(ENABLE_PULSEAUDIO  "Enables the pulseaudio plugin"            OFF)
+option(ENABLE_ALSAAUDIO   "Enables the alsaaudio plugin"             OFF)
 # Devices
 option(ENABLE_NANOLED     "Enables the output plugin nanoled"        OFF)
 option(ENABLE_PACDRIVE    "Enables the output plugin pacdrive"       OFF)
@@ -275,7 +265,6 @@ endif()
 target_include_directories(ledspicerd PRIVATE ${LEDSPICER_INCLUDE_DIRS})
 target_link_libraries(ledspicerd ${LEDSPICER_LIBS})
 
-target_compile_definitions(ledspicerd PRIVATE DEVICES_DIR="${DEVICES_DIR}/")
 install(TARGETS ledspicerd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Emitter utility
@@ -420,7 +409,7 @@ add_custom_target(uninstall
 file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"[Unit]\n"
 	"Description=LEDSpicer Daemon\n"
-	"After=network.target sound.target\n"
+	"After=network.target\n"
 	"StartLimitIntervalSec=60s\n"
 	"StartLimitBurst=3\n\n"
 
@@ -431,18 +420,6 @@ file(WRITE ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"RestartSec=5s\n"
 	"ExecStop=/bin/kill -TERM $MAINPID\n"
 	"TimeoutStopSec=15s\n"
-)
-
-# Optional PulseAudio support
-if(ENABLE_PULSEAUDIO)
-	file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
-		"# Optional PulseAudio socket hint (daemon reconnects if unavailable) remember to change 1000 with the used ID if different\n"
-		"Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native\n"
-	)
-endif()
-
-# Base service file bottom part.
-file(APPEND ${CMAKE_BINARY_DIR}/ledspicerd.service
 	"\n"
 	"[Install]\n"
 	"WantedBy=multi-user.target\n"

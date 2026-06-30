@@ -143,4 +143,3 @@ const std::string Utility::getHomeDir() {
 const string Utility::getConfigDir() {
 	return string(getHomeDir() + "/.local/share/" PROJECT_NAME "/");
 }
-

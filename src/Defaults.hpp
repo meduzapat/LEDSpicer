@@ -80,6 +80,8 @@ using std::chrono::duration_cast;
 #include <thread>
 using std::this_thread::sleep_for;
 
+#include "config.hpp"
+
 #pragma once
 
 template<

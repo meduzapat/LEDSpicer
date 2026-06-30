@@ -5,6 +5,23 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.7] - 2026-06-30
+
+### Added
+- Automated release publishing to COPR and AUR.
+
+### Changed
+- Daemon starts independently of the user session and audio; audio now connects lazily so the service comes up as soon as the network is ready (#125)
+- systemd service no longer waits on `sound.target` and no longer sets `PULSE_SERVER` — the daemon derives the per-user PulseAudio socket itself (#125)
+- CMake build cleanups and definition fixes; generated `config.hpp`
+
+### Fixed
+- ALSA capture device opens without throwing and reopens automatically if it is missing or later lost (#125)
+- PulseAudio falls back to the background retry on an initial connection failure instead of aborting startup (#125)
+- Rotator argument-parsing crash and a redundant initialization (#123)
+- Non-working TOS serial restrictor (#123)
+- Hardened `colorFormat` parsing (accepts `RGB`/`rgb`) and now warns on duplicate player/joystick rotator requests instead of silently dropping them (#123)
+
 ## [0.7.6] - 2026-06-14
 
 ### Fixed

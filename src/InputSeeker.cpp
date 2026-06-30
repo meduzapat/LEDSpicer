@@ -30,16 +30,8 @@ void resetInputMode() {
 }
 
 int main(int, char **) {
-
-	cout <<
-		"Input Seeker v" PROJECT_VERSION << endl <<
-		"Part of LEDSpicer project" << endl <<
-		"This program will open all the system inputs and listen for events to easy the task of setting input plugins" << endl << endl <<
-		PROJECT_NAME PROJECT_VERSION " " COPYRIGHT "\n\n"
-		"For more information visit <" PROJECT_SITE ">\n\n"
-		"To report errors or bugs visit <" PROJECT_BUGREPORT ">\n"
-		PROJECT_NAME " is free software under the GPL 3 license\n\n"
-		"See the GNU General Public License for more details <http://www.gnu.org/licenses/>" << endl << endl <<
+	cout << endl <<
+		"Input Seeker is part of " << LICENSE_BLOCK << endl <<
 		"press q to exit" << endl << endl;
 
 	DIR *dir;
