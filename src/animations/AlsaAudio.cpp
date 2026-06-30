@@ -26,35 +26,41 @@ using namespace LEDSpicer::Animations;
 
 using LEDSpicer::Devices::Group;
 
-snd_pcm_t* AlsaAudio::pcm    = nullptr;
+snd_pcm_t* AlsaAudio::pcm     = nullptr;
 uint8_t AlsaAudio::instances = 0;
+string AlsaAudio::pcmName;
 
 AlsaAudio::AlsaAudio(StringUMap& parameters, Group* const group) :
 	AudioActor(parameters, group) {
 
 	++instances;
+	if (pcm) return;
 
-	LogInfo("Connecting to ALSA " SND_LIB_VERSION_STR);
+	if (pcmName.empty())
+		pcmName = parameters.exists("pcm") ? parameters["pcm"] : "default";
 
-	if (pcm) {
-		LogInfo("Reusing ALSA connection");
-		return;
-	}
+	// Does not throw: calcPeak retries if the device is not ready or later drops.
+	connect();
+}
 
-	string PCM = parameters.exists("pcm") ? parameters["pcm"] : "default";
+AlsaAudio::~AlsaAudio() {
+	if (--instances) return;
+	disconnect();
+}
+
+bool AlsaAudio::connect() {
 
 	int err;
-	// Open with non-blocking flag
-	if ((err = snd_pcm_open(&pcm, PCM.c_str(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK)) < 0)
-		throw Error("Unable to open ") << PCM << ": " << snd_strerror(err);
+	// Non-blocking so a missing device fails fast.
+	if ((err = snd_pcm_open(&pcm, pcmName.c_str(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK)) < 0) {
+		LogDebug("Unable to open " + pcmName + ": " + snd_strerror(err));
+		pcm = nullptr;
+		return false;
+	}
 
-	// Calculate latency based on FPS
-	// Frame time = 1000ms / FPS
-	uint32_t frameTimeMs = 1000 / getFPS();
-	// Buffer should be 2-3x frame time to prevent underruns
-	uint32_t bufferLatencyUs = frameTimeMs * 2500;
+	// Buffer should be 2-3x the frame time to prevent underruns.
+	uint32_t bufferLatencyUs = (1000 / getFPS()) * 2500;
 
-	// Set basic parameters with appropriate latency
 	if ((err = snd_pcm_set_params(
 		pcm,
 		SND_PCM_FORMAT_S16_LE,
@@ -63,30 +69,40 @@ AlsaAudio::AlsaAudio(StringUMap& parameters, Group* const group) :
 		SAMPLE_RATE,
 		0,  // No resampling
 		bufferLatencyUs
-	)) < 0)
-		throw Error("Unable to set parameters for " + PCM + ": " + string(snd_strerror(err)));
-	// Explicitly prepare the PCM
-	if ((err = snd_pcm_prepare(pcm)) < 0)
-		throw Error("Unable to prepare PCM: " + string(snd_strerror(err)));
+	)) < 0) {
+		LogDebug("Unable to set parameters for " + pcmName + ": " + string(snd_strerror(err)));
+		disconnect();
+		return false;
+	}
 
-	// Start capture
-	if ((err = snd_pcm_start(pcm)) < 0)
-		throw Error("Unable to start PCM: " + string(snd_strerror(err)));
+	if ((err = snd_pcm_prepare(pcm)) < 0) {
+		LogDebug("Unable to prepare PCM: " + string(snd_strerror(err)));
+		disconnect();
+		return false;
+	}
 
-	LogInfo("ALSA connected");
+	if ((err = snd_pcm_start(pcm)) < 0) {
+		LogDebug("Unable to start PCM: " + string(snd_strerror(err)));
+		disconnect();
+		return false;
+	}
+
+	LogInfo("ALSA connected to " + pcmName);
+	return true;
 }
 
-AlsaAudio::~AlsaAudio() {
-	--instances;
-	if (instances > 0) return;
-
-	LogInfo("Closing ALSA");
+void AlsaAudio::disconnect() {
+	if (not pcm) return;
 	snd_pcm_drop(pcm);
 	snd_pcm_close(pcm);
 	pcm = nullptr;
 }
 
 void AlsaAudio::calcPeak() {
+
+	// Reconnect after a device loss; skip the frame while unavailable.
+	if (not pcm and not connect()) return;
+
 	// Calculate how many samples we need based on FPS
 	// This gives us "fresh" audio data matching our update rate
 	static const uint16_t samplesNeeded = (SAMPLE_RATE / getFPS()); // e.g., 48000/30 = 1600 samples
@@ -107,9 +123,10 @@ void AlsaAudio::calcPeak() {
 		return;
 	}
 
-	// Bail on other errors
+	// Device gone: drop so the next frame reconnects.
 	if (frames < 0) {
-		LogInfo("ALSA error: " + string(snd_strerror(frames)));
+		LogWarning("ALSA error: " + string(snd_strerror(frames)) + ", reconnecting");
+		disconnect();
 		return;
 	}
 
