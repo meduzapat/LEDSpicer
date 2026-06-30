@@ -20,11 +20,11 @@ In addition to LED control, LEDSpicer™ supports arcade-specific hardware inclu
 
 * Support for a wide range of LED controller hardware
 * Single-color and RGB LED management
+* Handles actuators, Solenoids, motors
 * Real-time animations and lighting effects
 * Event-driven profiles triggered by games, commands, or network events
 * Native MAME integration
 * Joystick restrictor control
-* Monitor rotator control
 * Multi-device management through a single daemon
 * Extensible architecture for automation and custom integrations
 
