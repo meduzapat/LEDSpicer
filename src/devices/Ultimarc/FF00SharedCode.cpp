@@ -19,21 +19,10 @@ void FF00SharedCode::resetLeds() {
 
 	// Turn off all LEDs and internal buffer.
 	setLeds(0);
-	data[0] = 0x80; //FIXME this may be wrong.
+	data[FF00_MSG_COMMAND] = 0x80;
 	transferToConnection(data);
 }
 
 void FF00SharedCode::transfer() const {
-
-	// Send FE00 command.
-	vector<uint8_t> data FF00_MSG(0xFE, 0);
-	transferToConnection(data);
-
-	// Send pairs.
-	for (uint16_t c = 0; c < LEDs.size(); c+=2) {
-		data.clear();
-		data.push_back(LEDs[c]);
-		data.push_back(LEDs[c + 1]);
-		transferToConnection(data);
-	}
+	transferPairs(FF00_MSG(0, 0), FF00_MSG_COMMAND);
 }

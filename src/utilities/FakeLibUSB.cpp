@@ -30,6 +30,8 @@ bool fakeFailOpen = false;
 
 std::vector<libusb_device*> fakeDevices;
 
+std::vector<FakeTransfer> fakeTransfers;
+
 int libusb_init(libusb_context** ctx) {
 	LogNotice("Using a Fake libusb");
 	if (fakeFailInit) return LIBUSB_ERROR_IO;
@@ -55,12 +57,19 @@ void libusb_free_device_list(libusb_device** list, int) {
 	delete[] list;
 }
 
-int libusb_get_device_descriptor(libusb_device*, libusb_device_descriptor* desc) {
-	// Populate from fake device (assume dev has data; in tests, set it).
-	desc->idVendor  = 0x1234;
-	desc->idProduct = 0xABCD;
-	desc->bcdDevice = 0x40;
+int libusb_get_device_descriptor(libusb_device* dev, libusb_device_descriptor* desc) {
+	*desc = dev->descriptor;
 	return LIBUSB_SUCCESS;
+}
+
+int libusb_get_active_config_descriptor(libusb_device* dev, libusb_config_descriptor** config) {
+	if (not dev->configuration) return LIBUSB_ERROR_NOT_FOUND;
+	*config = const_cast<libusb_config_descriptor*>(dev->configuration);
+	return LIBUSB_SUCCESS;
+}
+
+void libusb_free_config_descriptor(libusb_config_descriptor*) {
+	// Don't free; the configuration is owned by the fake device.
 }
 
 libusb_device *libusb_get_device(libusb_device_handle *dev_handle) {
@@ -102,8 +111,18 @@ int libusb_control_transfer(
 	uint16_t w_length,
 	unsigned int timeout
 ) {
+	// Reads are served from the report descriptor the test gave the device.
+	if (request_type & LIBUSB_ENDPOINT_IN) {
+		const std::vector<uint8_t>& report = handle->associated_dev->reportDescriptor;
+		const uint16_t size = w_length < report.size() ? w_length : report.size();
+		std::copy(report.begin(), report.begin() + size, data);
+		LogDebug("Fake Read: wValue: " + Utility::hex2str(w_value) +
+			" wIndex: " + Utility::hex2str(w_index) + " wLength: " + std::to_string(size));
+		return size;
+	}
 	LogDebug("Fake Transfer: wValue: " + Utility::hex2str(w_value) +
 		" wIndex: " + Utility::hex2str(w_index) + " wLength: " + std::to_string(w_length));
+	fakeTransfers.push_back({w_value, w_index, std::vector<uint8_t>(data, data + w_length)});
 	// Fake success: "transferred" all bytes.
 	return w_length;
 }
@@ -135,8 +154,8 @@ const char* libusb_error_name(int) {
 	return "FAKE_ERROR";
 }
 
-uint8_t libusb_get_bus_number(libusb_device*) {
-	return 1; // stable fake value
+uint8_t libusb_get_bus_number(libusb_device* dev) {
+	return dev->bus;
 }
 
 uint8_t libusb_get_device_address(libusb_device*) {
@@ -144,7 +163,7 @@ uint8_t libusb_get_device_address(libusb_device*) {
 }
 
 int libusb_get_port_numbers(
-	libusb_device* /*dev*/,
+	libusb_device* dev,
 	uint8_t* port_numbers,
 	int port_numbers_len
 ) {
@@ -152,7 +171,8 @@ int libusb_get_port_numbers(
 		return LIBUSB_ERROR_IO;
 	}
 
-	// Fake a simple USB topology: bus → port 1
-	port_numbers[0] = 1;
-	return 1; // number of ports written
+	const int size = static_cast<int>(dev->ports.size()) < port_numbers_len ?
+		static_cast<int>(dev->ports.size()) : port_numbers_len;
+	std::copy(dev->ports.begin(), dev->ports.begin() + size, port_numbers);
+	return size;
 }

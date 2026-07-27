@@ -95,6 +95,15 @@ public:
 	virtual bool isNonBasedId() const;
 
 	/**
+	 * Tests an enumerated device against this board USB signature.
+	 * Hardware that encodes more than the board position into the product code overrides this.
+	 *
+	 * @param descriptor the enumerated device descriptor.
+	 * @return true if the device is a candidate for this board.
+	 */
+	virtual bool matchesSignature(const libusb_device_descriptor& descriptor) const;
+
+	/**
 	 * This function will be used to close the USB session,
 	 * need to be called only once when ledspicer exit.
 	 */
@@ -119,6 +128,13 @@ protected:
 	 * Connects to the USB board.
 	 */
 	virtual void connect();
+
+	/**
+	 * Extra explanation appended to the error thrown when the board is not on the bus.
+	 *
+	 * @return the hint, empty when the hardware has nothing to add.
+	 */
+	virtual string notFoundHint() const;
 
 	/**
 	 * Claims the interface.

@@ -322,28 +322,28 @@ install(TARGETS processLookup RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 # NanoLED output plugin
 if(ENABLE_NANOLED)
 	add_usb_device_plugin(UltimarcNanoLed
-		"src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/NanoLed.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/NanoLed.cpp"
 	)
 endif()
 
 # PacDrive output plugin
 if(ENABLE_PACDRIVE)
 	add_usb_device_plugin(UltimarcPacDrive
-		"src/devices/Ultimarc/PacDrive.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/PacDrive.cpp"
 	)
 endif()
 
 # PacLed64 output plugin
 if(ENABLE_PACLED64)
 	add_usb_device_plugin(UltimarcPacLed64
-		"src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/PacLed64.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/PacLed64.cpp"
 	)
 endif()
 
 # Ultimate I/O output plugin
 if(ENABLE_ULTIMATEIO)
 	add_usb_device_plugin(UltimarcUltimate
-		"src/devices/Ultimarc/Ultimate.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/Ultimate.cpp"
 	)
 endif()
 
