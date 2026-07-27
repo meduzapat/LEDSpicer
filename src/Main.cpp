@@ -97,7 +97,7 @@ void Main::run() {
 #ifdef BENCHMARK
 			// Time message needs reset.
 			timeMessage = {};
-			timeAnimation = duration_cast<milliseconds>(high_resolution_clock::now() - start);
+			timeAnimation = duration_cast<microseconds>(high_resolution_clock::now() - start);
 #endif
 			sendData();
 			continue;
@@ -250,7 +250,7 @@ void Main::run() {
 		default: break;
 		}
 #ifdef BENCHMARK
-		timeMessage = duration_cast<milliseconds>(high_resolution_clock::now() - start);
+		timeMessage = duration_cast<microseconds>(high_resolution_clock::now() - start);
 #endif
 		if (newProfile) {
 			newProfile->enableAnimations(not (Utility::globalFlags & FLAG_NO_ANIMATIONS));

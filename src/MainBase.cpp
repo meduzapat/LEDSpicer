@@ -212,14 +212,18 @@ void MainBase::wait(milliseconds wasted) {
 		start = high_resolution_clock::now();
 		sleep_for(DataLoader::waitTime - wasted);
 #ifdef BENCHMARK
-		LogDebug("Waited time: " + to_string(duration_cast<milliseconds>(high_resolution_clock::now() - start).count()) + "ms");
+		LogDebug("Waited time: " + to_string(duration_cast<microseconds>(high_resolution_clock::now() - start).count()) + "us");
 #endif
 	}
 	else {
 		LogInfo("The frame took " + to_string(wasted.count()) + "ms to render, that is longer than the minimal wait time of " + to_string(DataLoader::waitTime.count()) + "ms.");
 	}
 #ifdef BENCHMARK
-	LogDebug("Message time: " + to_string(timeMessage.count()) + "ms, Animation Time: " + to_string(timeAnimation.count()) + "ms, Transmission time: " + to_string(timeTransfer.count()) + "ms.");
+	LogDebug(
+		"Message time: "      + to_string(timeMessage.count())   + "us, "
+		"Animation time: "    + to_string(timeAnimation.count()) + "us, "
+		"Transmission time: " + to_string(timeTransfer.count())  + "us."
+	);
 #endif
 }
 
@@ -232,7 +236,7 @@ void MainBase::sendData() {
 	for (auto device : Device::devices)
 		device->packData();
 #ifdef BENCHMARK
-	timeTransfer = duration_cast<milliseconds>(high_resolution_clock::now() - startTransfer);
+	timeTransfer = duration_cast<microseconds>(high_resolution_clock::now() - startTransfer);
 #endif
 	// Wait...
 	wait(duration_cast<milliseconds>(high_resolution_clock::now() - start));
