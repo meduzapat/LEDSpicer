@@ -220,7 +220,6 @@ void MainBase::wait(milliseconds wasted) {
 	}
 #ifdef BENCHMARK
 	LogDebug(
-		"Message time: "      + to_string(timeMessage.count())   + "us, "
 		"Animation time: "    + to_string(timeAnimation.count()) + "us, "
 		"Transmission time: " + to_string(timeTransfer.count())  + "us."
 	);

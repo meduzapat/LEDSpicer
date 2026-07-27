@@ -91,7 +91,6 @@ protected:
 	/// Time consumed by every stage of the frame.
 	microseconds
 		timeAnimation,
-		timeMessage,
 		timeTransfer;
 #endif
 
