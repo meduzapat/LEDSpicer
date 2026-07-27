@@ -39,11 +39,37 @@ public:
 	using USB::transferToConnection;
 	using USB::transferFromConnection;
 
+	using USB::matchesSignature;
+	using USB::notFoundHint;
+
 	virtual uint16_t getVendor() const override { return 0x1234; }
 	virtual uint16_t getProduct() const override { return 0xABCD; }
 	virtual void afterConnect() override {}
 	virtual void afterClaimInterface() override {}
 };
+
+/// A board whose product code carries more than the board position, like the Ultimate I/O.
+class RangeUSB : public MockUSB {
+public:
+	using MockUSB::MockUSB;
+
+	bool matchesSignature(const libusb_device_descriptor& descriptor) const override {
+		return descriptor.idVendor == getVendor() and
+			descriptor.idProduct >= 0xABCD and descriptor.idProduct <= 0xABD0;
+	}
+
+	string notFoundHint() const override { return ", check the board mode"; }
+};
+
+/// Builds a fake board with an explicit descriptor and bus position.
+libusb_device* fakeBoard(uint16_t vendor, uint16_t product, uint8_t bus = 1, uint8_t port = 1) {
+	libusb_device* device = new libusb_device();
+	device->descriptor.idVendor  = vendor;
+	device->descriptor.idProduct = product;
+	device->bus                  = bus;
+	device->ports                = {port};
+	return device;
+}
 
 class USBTest : public ::testing::Test {
 
@@ -157,6 +183,56 @@ TEST_F(USBTest, CloseSession) {
 	USB::closeSession();
 	string output = testing::internal::GetCapturedStdout();
 	EXPECT_TRUE(output.find("Closing USB session") != string::npos);
+}
+
+TEST_F(USBTest, MatchesSignatureDefaultsToVendorAndProduct) {
+
+	MockUSB usb(0x0200, 0, 1, 5);
+	libusb_device_descriptor descriptor;
+
+	descriptor.idVendor  = 0x1234;
+	descriptor.idProduct = 0xABCD;
+	EXPECT_TRUE(usb.matchesSignature(descriptor));
+
+	descriptor.idProduct = 0xABCE;
+	EXPECT_FALSE(usb.matchesSignature(descriptor));
+
+	descriptor.idVendor  = 0x1235;
+	descriptor.idProduct = 0xABCD;
+	EXPECT_FALSE(usb.matchesSignature(descriptor));
+
+	EXPECT_TRUE(usb.notFoundHint().empty());
+}
+
+TEST_F(USBTest, ConnectFindsADeviceThroughAnOverriddenSignature) {
+
+	// The only board on the bus carries a product code the default rule would reject.
+	fakeDevices.push_back(fakeBoard(0x1234, 0xABCF));
+
+	RangeUSB usb(0x0200, 0, 1, 5);
+	usb.connect();
+	usb.disconnect();
+}
+
+TEST_F(USBTest, ConnectSkipsDevicesTheSignatureRejects) {
+
+	fakeDevices.push_back(fakeBoard(0x1234, 0x0001));
+	fakeDevices.push_back(fakeBoard(0x9999, 0xABCD));
+
+	MockUSB usb(0x0200, 0, 1, 5);
+	EXPECT_THROW(usb.connect(), Error);
+}
+
+TEST_F(USBTest, NotFoundHintIsAppendedToTheError) {
+
+	RangeUSB usb(0x0200, 0, 1, 5);
+	try {
+		usb.connect();
+		FAIL() << "connect() should not find a board";
+	}
+	catch (Error& e) {
+		EXPECT_NE(e.getMessage().find("check the board mode"), string::npos);
+	}
 }
 
 int main(int argc, char **argv) {

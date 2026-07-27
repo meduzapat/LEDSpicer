@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /**
- * @file      Ultimarc.hpp
- * @since     Sep 27, 2018
+ * @file      Ultimarc.cpp
+ * @since     Jul 27, 2026
  * @author    Patricio A. Rossi (MeduZa)
  *
  * @copyright Copyright © 2018 - 2026 Patricio A. Rossi (MeduZa)
@@ -20,39 +20,20 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "devices/DeviceUSB.hpp"
+#include "Ultimarc.hpp"
 
-#pragma once
+using namespace LEDSpicer::Devices::Ultimarc;
 
-namespace LEDSpicer::Devices::Ultimarc {
+void Ultimarc::transferPairs(vector<uint8_t> message, uint8_t command) const {
 
-/**
- * Ultimarc family data and definitions.
- */
-class Ultimarc : public DeviceUSB {
+	// Announce the stream.
+	message[command]     = 0xFE;
+	message[command + 1] = 0;
+	transferToConnection(message);
 
-public:
-
-	using DeviceUSB::DeviceUSB;
-
-	uint16_t getVendor() const {
-		return ULTIMARC_VENDOR;
+	for (uint16_t c = 0; c < LEDs.size(); c += 2) {
+		message[command]     = LEDs[c];
+		message[command + 1] = LEDs[c + 1];
+		transferToConnection(message);
 	}
-
-protected:
-
-	void afterClaimInterface() override {}
-
-	/**
-	 * Streams the LED buffer as a 0xFE reset followed by intensity pairs.
-	 * Only the byte order is common between the boards that use this, the report framing is not,
-	 * so every caller provides its own message and says where the command byte sits in it.
-	 *
-	 * @param message the device report framing.
-	 * @param command index of the command byte inside the message, the value byte follows it.
-	 */
-	void transferPairs(vector<uint8_t> message, uint8_t command) const;
-
-};
-
-} // namespace
+}
