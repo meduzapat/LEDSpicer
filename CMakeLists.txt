@@ -54,6 +54,7 @@ option(ENABLE_DEVELOP     "Enables development mode"                 OFF)
 option(ENABLE_TESTS       "Enables building and running tests"       OFF)
 option(ENABLE_DRY_RUN     "Enables dry run mode using mock hardware" OFF)
 option(ENABLE_BENCHMARK   "Enables displaying timing information"    OFF)
+option(ENABLE_SHOW_OUTPUT "Enables dumping the data sent to devices" OFF)
 
 if(ENABLE_DEVELOP)
 	# adds extra debugging logs
@@ -61,8 +62,13 @@ if(ENABLE_DEVELOP)
 endif()
 
 if(ENABLE_BENCHMARK)
-	# adds extra debugging logs
+	# times every stage of the frame, needs logLevel Debug to be displayed
 	add_compile_definitions(BENCHMARK=1)
+endif()
+
+if(ENABLE_SHOW_OUTPUT)
+	# dumps every buffer transferred to the hardware
+	add_compile_definitions(SHOW_OUTPUT=1)
 endif()
 
 # Find required packages (pkgConfig Threads and dl)
@@ -470,6 +476,8 @@ Run tests    : ${ENABLE_TESTS}
 ------ Special modes --------
 Develop mode : ${ENABLE_DEVELOP}
 Dry run mode : ${ENABLE_DRY_RUN}
+Benchmark    : ${ENABLE_BENCHMARK}
+Show output  : ${ENABLE_SHOW_OUTPUT}
 MiSTer code  : ${ENABLE_MISTER}
 ---- Conditional Actors -----
 PULSE AUDIO  : ${ENABLE_PULSEAUDIO}
