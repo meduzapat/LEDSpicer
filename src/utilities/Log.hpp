@@ -133,7 +133,105 @@ public:
 	 */
 	static const string level2str(const int level);
 
+#ifdef DEVELOP
+
+	/// Sections that can be traced independently, they are bit flags so they can be combined.
+	enum class Categories : uint16_t {
+		None     = 0,
+		Core     = 1 << 0,
+		Actors   = 1 << 1,
+		Inputs   = 1 << 2,
+		Devices  = 1 << 3,
+		Messages = 1 << 4,
+		Profiles = 1 << 5,
+		All      = 0xFFFF
+	};
+
+	/**
+	 * Returns true when the log level and the active categories allow this trace.
+	 * @param category
+	 * @return
+	 */
+	static bool tracing(const Categories category) {
+		return isLogging(LOG_DEBUG) and (categories & static_cast<uint16_t>(category));
+	}
+
+	/**
+	 * Replaces the active categories with a comma separated list of names.
+	 * An unknown name is reported and ignored.
+	 * @param list
+	 */
+	static void setCategories(const string& list);
+
+	/**
+	 * Converts a category name into its value.
+	 * @param category
+	 * @return
+	 */
+	static Categories str2category(const string& category);
+
+	/**
+	 * Converts the active categories into their string representation.
+	 * @return
+	 */
+	static const string categories2str();
+
+	/**
+	 * Emits a trace line.
+	 * Traces are a foreground development tool and never reach the syslog.
+	 * @param message
+	 */
+	static void trace(const string& message);
+
+	/**
+	 * Accumulates a trace line and emits it once, when the instance goes out of scope.
+	 * A named instance builds a line over several statements, a temporary emits a single line.
+	 * Emitting on destruction is what keeps a line complete when the function returns early.
+	 */
+	class Trace {
+
+	public:
+
+		Trace(const Categories category) : active(tracing(category)) {}
+
+		Trace(const Trace&) = delete;
+
+		~Trace() {flush();}
+
+		/**
+		 * Appends content to the line under construction.
+		 * @tparam T
+		 * @param value
+		 * @return
+		 */
+		template <typename T>
+		Trace& operator<<(const T& value) {
+			if (active) buffer << value;
+			return *this;
+		}
+
+		/**
+		 * Emits what is accumulated so far and starts a new line.
+		 */
+		void flush();
+
+	protected:
+
+		/// The line under construction.
+		std::ostringstream buffer;
+
+		/// Set when the category and the log level allow this trace.
+		const bool active;
+	};
+
+#endif
+
 protected:
+
+#ifdef DEVELOP
+	/// Active trace categories.
+	static uint16_t categories;
+#endif
 
 	/**
 	 * The level of logging.

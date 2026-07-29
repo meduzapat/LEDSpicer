@@ -39,6 +39,7 @@ protected:
 	void TearDown() override {
 		// Reset to default after each test.
 		Log::setLogLevel(LOG_NOTICE);
+		Log::setCategories("All");
 	}
 };
 
@@ -155,6 +156,129 @@ TEST_F(LogTest, InitializeAndTerminate) {
 	Log::info("Test after terminate stdout");
 	output = testing::internal::GetCapturedStdout();
 	EXPECT_EQ(output, "Test after terminate stdout\n");
+}
+
+TEST_F(LogTest, CategoryConversions) {
+	EXPECT_EQ(Log::str2category("Core"),     Log::Categories::Core);
+	EXPECT_EQ(Log::str2category("Actors"),   Log::Categories::Actors);
+	EXPECT_EQ(Log::str2category("Inputs"),   Log::Categories::Inputs);
+	EXPECT_EQ(Log::str2category("Devices"),  Log::Categories::Devices);
+	EXPECT_EQ(Log::str2category("Messages"), Log::Categories::Messages);
+	EXPECT_EQ(Log::str2category("Profiles"), Log::Categories::Profiles);
+	EXPECT_EQ(Log::str2category("All"),      Log::Categories::All);
+
+	// Invalid is reported and ignored.
+	testing::internal::CaptureStderr();
+	EXPECT_EQ(Log::str2category("Nope"), Log::Categories::None);
+	string output = testing::internal::GetCapturedStderr();
+	EXPECT_TRUE(output.find("Invalid trace category Nope ignored") != string::npos);
+}
+
+TEST_F(LogTest, SetAndReportCategories) {
+	// Everything is active by default.
+	EXPECT_EQ(Log::categories2str(), "All");
+
+	// Spaces around the names are tolerated, order follows the enum not the list.
+	Log::setCategories("Inputs, Actors");
+	EXPECT_EQ(Log::categories2str(), "Actors,Inputs");
+	EXPECT_TRUE(Log::tracing(Log::Categories::Actors));
+	EXPECT_TRUE(Log::tracing(Log::Categories::Inputs));
+	EXPECT_FALSE(Log::tracing(Log::Categories::Devices));
+
+	// An unknown name contributes nothing but does not discard the valid ones.
+	testing::internal::CaptureStderr();
+	Log::setCategories("Devices,Nope");
+	testing::internal::GetCapturedStderr();
+	EXPECT_EQ(Log::categories2str(), "Devices");
+
+	// Reporting the active set does not depend on the log level.
+	Log::setLogLevel(LOG_ERR);
+	EXPECT_EQ(Log::categories2str(), "Devices");
+	EXPECT_FALSE(Log::tracing(Log::Categories::Devices));
+}
+
+TEST_F(LogTest, TracingNeedsBothLevelAndCategory) {
+	Log::setCategories("Actors");
+
+	EXPECT_TRUE(Log::tracing(Log::Categories::Actors));
+	EXPECT_FALSE(Log::tracing(Log::Categories::Inputs));
+
+	// Below Debug nothing is traced, whatever the categories say.
+	Log::setLogLevel(LOG_INFO);
+	EXPECT_FALSE(Log::tracing(Log::Categories::Actors));
+}
+
+TEST_F(LogTest, TraceEmitsOnceWhenLeavingScope) {
+	testing::internal::CaptureStdout();
+	{
+		Log::Trace trace(Log::Categories::Actors);
+		trace << "one" << " " << 2 << " ";
+		trace << "three";
+		// Nothing is emitted until the instance dies.
+		EXPECT_EQ(testing::internal::GetCapturedStdout(), "");
+		testing::internal::CaptureStdout();
+	}
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "one 2 three\n");
+}
+
+TEST_F(LogTest, TraceEmitsNothingWhenTheCategoryIsOff) {
+	Log::setCategories("Inputs");
+	testing::internal::CaptureStdout();
+	{
+		Log::Trace trace(Log::Categories::Actors);
+		trace << "should not appear";
+	}
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "");
+}
+
+TEST_F(LogTest, TraceEmitsNothingWhenEmpty) {
+	testing::internal::CaptureStdout();
+	{
+		Log::Trace trace(Log::Categories::Actors);
+	}
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "");
+}
+
+TEST_F(LogTest, TraceKeepsStreamStateBetweenInsertions) {
+	// A manipulator applies to the value inserted by the next call, which only
+	// works because the instance keeps one stream for the whole line.
+	testing::internal::CaptureStdout();
+	{
+		Log::Trace trace(Log::Categories::Actors);
+		trace << std::setw(4) << std::setfill('0') << 7;
+	}
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "0007\n");
+}
+
+TEST_F(LogTest, TraceSurvivesAnEarlyReturn) {
+	// The reason the line is emitted on destruction: a function that returns in
+	// the middle of building a line still produces a complete line.
+	auto builds = [](bool leaveEarly) {
+		Log::Trace trace(Log::Categories::Actors);
+		trace << "start ";
+		if (leaveEarly)
+			return;
+		trace << "end";
+	};
+
+	testing::internal::CaptureStdout();
+	builds(true);
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "start \n");
+
+	testing::internal::CaptureStdout();
+	builds(false);
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "start end\n");
+}
+
+TEST_F(LogTest, TraceFlushStartsANewLine) {
+	testing::internal::CaptureStdout();
+	{
+		Log::Trace trace(Log::Categories::Actors);
+		trace << "first";
+		trace.flush();
+		trace << "second";
+	}
+	EXPECT_EQ(testing::internal::GetCapturedStdout(), "first\nsecond\n");
 }
 
 // Note: Syslog tests skipped to avoid system log pollution; focus on stdout.

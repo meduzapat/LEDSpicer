@@ -21,11 +21,19 @@
  */
 
 #include "Log.hpp"
+#ifdef DEVELOP
+#include "Utility.hpp"
+#endif
 
 using namespace LEDSpicer::Utilities;
 
 // Default to notice
 int Log::minLevel = LOG_NOTICE;
+
+#ifdef DEVELOP
+// Everything is traced until the configuration narrows it down.
+uint16_t Log::categories = static_cast<uint16_t>(Log::Categories::All);
+#endif
 
 void (*Log::logFn)(const string&, int) = Log::logIntoStdOut;
 
@@ -137,3 +145,69 @@ const string Log::level2str(const int level) {
 	}
 	return "Unknown";
 }
+
+#ifdef DEVELOP
+
+void Log::Trace::flush() {
+	if (not active)
+		return;
+	const string message(buffer.str());
+	if (message.empty())
+		return;
+	Log::trace(message);
+	buffer.str("");
+	buffer.clear();
+}
+
+void Log::trace(const string& message) {
+	// Flushed on every line, a trace that is lost when the daemon crashes is useless.
+	cout << message << endl;
+}
+
+void Log::setCategories(const string& list) {
+	categories = static_cast<uint16_t>(Categories::None);
+	for (string& name : Utility::explode(list, ',')) {
+		Utility::trim(name);
+		categories |= static_cast<uint16_t>(str2category(name));
+	}
+}
+
+Log::Categories Log::str2category(const string& category) {
+	if (category == "Core")
+		return Categories::Core;
+	if (category == "Actors")
+		return Categories::Actors;
+	if (category == "Inputs")
+		return Categories::Inputs;
+	if (category == "Devices")
+		return Categories::Devices;
+	if (category == "Messages")
+		return Categories::Messages;
+	if (category == "Profiles")
+		return Categories::Profiles;
+	if (category == "All")
+		return Categories::All;
+	LogError("Invalid trace category " + category + " ignored");
+	return Categories::None;
+}
+
+const string Log::categories2str() {
+	if (categories == static_cast<uint16_t>(Categories::All))
+		return "All";
+	vector<string> names;
+	for (const auto& category : {
+		std::make_pair(Categories::Core,     "Core"),
+		std::make_pair(Categories::Actors,   "Actors"),
+		std::make_pair(Categories::Inputs,   "Inputs"),
+		std::make_pair(Categories::Devices,  "Devices"),
+		std::make_pair(Categories::Messages, "Messages"),
+		std::make_pair(Categories::Profiles, "Profiles")
+	})
+		if (categories & static_cast<uint16_t>(category.first))
+			names.push_back(category.second);
+	if (names.empty())
+		return "None";
+	return Utility::implode(names, ',');
+}
+
+#endif

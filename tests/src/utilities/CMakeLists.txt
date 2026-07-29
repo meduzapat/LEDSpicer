@@ -43,9 +43,11 @@ add_test_executable(ColorfulTest
 # Test Log class
 add_test_executable(LogTest
 	"${CMAKE_CURRENT_SOURCE_DIR}/LogTest.cpp"
-	"${CMAKE_SOURCE_DIR}/src/utilities/Log.cpp"
+	"${CMAKE_SOURCE_DIR}/src/utilities/Log.cpp;${CMAKE_SOURCE_DIR}/src/utilities/Utility.cpp"
 	""
 )
+# The trace categories only exist on develop builds, so the test needs them too.
+target_compile_definitions(LogTest PRIVATE DEVELOP=1)
 
 # Test Socks class
 add_test_executable(SocksTest
