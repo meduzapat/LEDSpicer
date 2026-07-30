@@ -82,13 +82,24 @@ Repeat for each task or fix before a release.
    cd "${BUILD_DIR}/tests" && make && ctest
    ```
    Your IDE can do the same once configured with `-DENABLE_TESTS=ON`.
-4. Commit and push:
+4. To measure where a frame spends its time, build with `-DENABLE_BENCHMARK=ON`.
+   The daemon then logs the animation and transmission time of every rendered
+   frame, plus the time taken by every message it processes. The timings go
+   through the debug log, so the configuration file needs `logLevel="Debug"` for
+   them to appear; there is no command line switch for the log level (`-l` is the
+   LED test). Running detached sends them to syslog, so use `-f` to read them on
+   the terminal:
+   ```bash
+   cmake -S . -B "${BUILD_DIR}" -DENABLE_BENCHMARK=ON
+   "${BUILD_DIR}/ledspicerd" -f -c /etc/ledspicer.conf
+   ```
+5. Commit and push:
    ```bash
    git add -A
    git commit -m "Short description of change"
    git push origin feature/my-task
    ```
-5. Open a PR `feature/my-task` → `development` and merge once green.
+6. Open a PR `feature/my-task` → `development` and merge once green.
 
 ## 4. Release
 

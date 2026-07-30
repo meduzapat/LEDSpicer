@@ -82,17 +82,16 @@ protected:
 	vector<Profile*> profiles;
 
 	/// Starting point for the frame.
-	high_resolution_clock::time_point
-#ifdef BENCHMARK
-		start,
-		startTransfer;
+	high_resolution_clock::time_point start;
 
-	milliseconds
+#ifdef BENCHMARK
+	/// Starting point for the transfer of the frame to the devices.
+	high_resolution_clock::time_point startTransfer;
+
+	/// Time consumed by every stage of the frame.
+	microseconds
 		timeAnimation,
-		timeMessage,
 		timeTransfer;
-#else
-		start;
 #endif
 
 	/**

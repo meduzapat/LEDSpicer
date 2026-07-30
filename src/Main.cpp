@@ -95,9 +95,7 @@ void Main::run() {
 		if (not messages.read()) {
 			currentProfile->runFrame();
 #ifdef BENCHMARK
-			// Time message needs reset.
-			timeMessage = {};
-			timeAnimation = duration_cast<milliseconds>(high_resolution_clock::now() - start);
+			timeAnimation = duration_cast<microseconds>(high_resolution_clock::now() - start);
 #endif
 			sendData();
 			continue;
@@ -250,7 +248,8 @@ void Main::run() {
 		default: break;
 		}
 #ifdef BENCHMARK
-		timeMessage = duration_cast<milliseconds>(high_resolution_clock::now() - start);
+		// This iteration read and processed a message instead of rendering, so it reports on its own.
+		LogDebug("Message time: " + to_string(duration_cast<microseconds>(high_resolution_clock::now() - start).count()) + "us.");
 #endif
 		if (newProfile) {
 			newProfile->enableAnimations(not (Utility::globalFlags & FLAG_NO_ANIMATIONS));
@@ -538,7 +537,6 @@ Profile* Main::craftProfile(const string& name, const string& platform, const st
 }
 
 void Main::changeProfile(Profile* to, bool store) {
-	// TODO add benchmark timers
 	// If there is a profile and replace flag, replace current profile.
 	bool replace {profiles.size() and (Utility::globalFlags & FLAG_REPLACE)};
 	if (to) {
@@ -563,6 +561,9 @@ void Main::changeProfile(Profile* to, bool store) {
 		while (true) {
 			start = high_resolution_clock::now();
 			if (not transition->run()) break;
+#ifdef BENCHMARK
+			timeAnimation = duration_cast<microseconds>(high_resolution_clock::now() - start);
+#endif
 			sendData();
 		}
 		transition->deactivate();
