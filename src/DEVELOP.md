@@ -26,35 +26,52 @@ Those 41 logging sites are split across two channels that behave very differentl
 
 The animation instrumentation, which is the reason the flag exists, is almost entirely on the raw `cout` channel.
 
+## How actor debug output composes
+
+Actor debug output is **additive**: each class in the call chain contributes its own part of one line, and the deepest one closes it. A frame line is assembled, not printed by a single owner. That is the design, and the absence of `endl` in the upper layers is correct.
+
+Two shapes exist in the tree:
+
+| shape | actors | line ends where |
+|---|---|---|
+| additive | `Serpentine`, `Filler` | `StepActor::changeFrameElement*` → `StepActor.cpp:34` / `StepActor.cpp:88` |
+| standalone | `Gradient`, `Random`, `Pulse`, `FileReader`, `AudioActor` | own `endl` |
+
+`Serpentine` and `Filler` are the only `StepActor` subclasses that call `changeFrameElement()`, so they are the only two participants in the additive chain.
+
+The rule that follows: **`changeFrameElement()` terminates the line, `changeElementColor()` does not.** `changeElementColor()` contributes nothing to the chain. An actor that has opened a fragment and then reaches `changeElementColor()` ends the frame with the line still open.
+
 ## Bugs
 
-### Serpentine: unterminated debug line (known issue)
+### Serpentine: line abruptly ended without `endl` (known issue)
 
-`Serpentine::calculateElements` (Serpentine.cpp:70-135) opens an output line at Serpentine.cpp:72 and never closes it. The newline is emitted by a different class: `StepActor::changeFrameElementCommon` (StepActor.cpp:88), reached only through the `changeFrameElement()` calls. Four paths exist and only three get a newline:
+`Serpentine::calculateElements` opens its fragment at Serpentine.cpp:72 and then, on the `speed == VeryFast` shortcut, calls `changeElementColor()` (Serpentine.cpp:81) instead of `changeFrameElement()`. The chain is abandoned mid-line and nothing terminates it.
 
-| path | terminated by |
+| path | ends the line |
 |---|---|
 | no tail, not VeryFast | `changeFrameElement` → StepActor.cpp:88 |
-| no tail, **VeryFast** | **nothing** |
+| no tail, **VeryFast** (Serpentine.cpp:80-81) | **nothing** |
 | tail, not VeryFast | `changeFrameElement` → StepActor.cpp:88 |
 | tail, VeryFast | explicit `endl` at Serpentine.cpp:127 |
 
+The last row is the same defect already spot-fixed: the `endl` at Serpentine.cpp:125-129 was added precisely because that `VeryFast` branch leaves the chain too. The tail-less branch was missed.
+
 With `tailLength="0" speed="VeryFast"` the daemon emits `Serpentine: → ` once per frame onto a single line that grows without bound. Measured on a 6-element group at 30 FPS: 522 characters after 3 seconds.
 
-### Filler: the same defect, in all four modes
+### Filler: the same defect, in all four modes, none of them fixed
 
-Filler.cpp:71-87 opens `Filler: <dir> <Filling|Emptying> <color> ` with no newline, on the same borrowed-newline arrangement. Every mode takes a `speed == VeryFast` shortcut that calls `changeElementColor()` directly and bypasses `changeFrameElement()`, so the newline never arrives:
+Filler.cpp:71-87 opens `Filler: <dir> <Filling|Emptying> <color> `, correctly additive. Every mode then takes the same `speed == VeryFast` shortcut out of the chain, and unlike Serpentine none of them carries the compensating `endl`:
 
-- `fillElementsLinear` Filler.cpp:116-119
-- `fillElementsRandom` Filler.cpp:145-148
-- `fillElementsWave` Filler.cpp:191-194
-- `fillElementsCurtain` Filler.cpp:208-211
+| mode | leaves the chain at |
+|---|---|
+| `fillElementsLinear` | Filler.cpp:116-117 |
+| `fillElementsRandom` | Filler.cpp:145-146 |
+| `fillElementsWave` | Filler.cpp:191-192 |
+| `fillElementsCurtain` | Filler.cpp:208-211 |
 
 Measured with `mode="Normal" speed="VeryFast"`: 779 characters on one line after 3 seconds.
 
-### Cross-class newline coupling
-
-Even on the paths that work, the line opened by `Serpentine` or `Filler` is closed by `StepActor`. The two are unrelated by design, and StepActor has no way to know a caller left a line open. Any change to StepActor's debug output silently breaks the formatting of both actors. This is the root cause of the two bugs above, not an incidental detail of them.
+Five broken paths in total, one shared cause: the `VeryFast` shortcut is the only place either actor calls `changeElementColor()` after opening a fragment.
 
 ### `Main.cpp:402` is a no-op
 
@@ -116,6 +133,7 @@ Main.cpp:401-403, Serpentine.cpp:115-119, Serpentine.cpp:126-128 and DataLoader.
 
 ## Not bugs, but worth recording
 
+- **The missing `endl` in the `Serpentine` and `Filler` openers is correct.** They are the top of an additive chain, not standalone lines. The fix for the five broken paths is to keep the chain intact (or close it at the point it is left), never to add `endl` at Serpentine.cpp:72 or Filler.cpp:71 — that would split every working frame line in two.
 - **`MainBase.cpp:91` is the only `#ifndef DEVELOP` in the tree, and it is correct.** It skips `validateLed()` in `testLeds` precisely because `Device::setLed` gains that validation under DEVELOP (Device.cpp:46). Correct, but it is an invisible coupling between two files.
 - **DEVELOP compiles clean.** Verified against DRY_RUN on/off, BENCHMARK, SHOW_OUTPUT, MiSTer, TESTS, both audio actors, and every USB/serial device plugin. No warnings, no dead references.
 - **`tests/` contains no DEVELOP references.** The flag is untested by construction.
@@ -173,19 +191,19 @@ Channel legend: `L` = `LogDebug`, `C` = raw `cout` behind `isLogging(LOG_DEBUG)`
 | FrameActor.cpp:75-77 | L | "Starting ActorN from frame X" | missing space after `Actor` |
 | FrameActor.cpp:131-134 | L | "Actor N completed after X cycles" | duplicated in DirectionActor |
 | DirectionActor.cpp:116-119 | L | "Actor N completed after X cycles" | duplicate of the above |
-| StepActor.cpp:32-36 | C | "Element N faded X%" + `endl` | closes lines Filler left open |
-| StepActor.cpp:81-90 | C | "Frame X to Y Step S to T P%" + `endl` | closes lines Serpentine left open |
+| StepActor.cpp:32-36 | C | "Element N faded X%" + `endl` | deepest layer of the additive chain, terminates the line |
+| StepActor.cpp:81-90 | C | "Frame X to Y Step S to T P%" + `endl` | deepest layer of the additive chain, terminates the line |
 
 ### Actor plugins
 
 | file:line | ch | what | notes |
 |---|---|---|---|
-| Serpentine.cpp:72-76 | C | `"Serpentine: <dir> "` | opens a line, never closes it |
-| Serpentine.cpp:88-92 | C | `"Tail: "` | |
+| Serpentine.cpp:72-76 | C | `"Serpentine: <dir> "` | opens the fragment; additive, correct |
+| Serpentine.cpp:88-92 | C | `"Tail: "` | appends to the fragment |
 | Serpentine.cpp:95-99 | C | `"<pos>=--% "` — tail element on the head position | |
 | Serpentine.cpp:114-120 | C | `"<pos>=<pct>% "` | misindented |
-| Serpentine.cpp:125-129 | C | `endl`, VeryFast path only | misindented; the sole explicit terminator |
-| Filler.cpp:71-87 | C | `"Filler: <dir> <Filling\|Emptying> <color> "` | opens a line, never closes it |
+| Serpentine.cpp:125-129 | C | `endl`, tail + VeryFast path only | spot-fix for one `VeryFast` branch leaving the chain; misindented |
+| Filler.cpp:71-87 | C | `"Filler: <dir> <Filling\|Emptying> <color> "` | opens the fragment; additive, correct |
 | Gradient.cpp:59-68 | C | direction + frame/step counters | self-terminating |
 | Random.cpp:39-43 | C | frame + transition percent | self-terminating |
 | Pulse.cpp:42-50 | C | frame, fade percent, colour | self-terminating |
