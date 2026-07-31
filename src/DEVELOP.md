@@ -2,7 +2,15 @@
 
 `-DENABLE_DEVELOP=ON` defines `DEVELOP=1` (CMakeLists.txt:53-62). The flag exists so instrumentation that is too noisy, too slow, or too invasive to ship can live in the tree without ever reaching a production binary. It is reserved for cases where step-by-step debugging cannot isolate the problem, typically per-frame state in the animation loop. It is a developer-only switch: nothing in the user documentation, the config format, or the runtime interface refers to it.
 
-One requirement follows from that and is worth stating plainly, because the current code does not meet it: **DEVELOP output must reach the terminal.** Syslog is not a debugging destination, and a detached process has no terminal to write to.
+## Established facts
+
+Three properties define what DEVELOP is meant to be. The code currently satisfies none of them.
+
+1. **DEVELOP output goes to the terminal, forced.** Syslog is not a debugging destination.
+2. **DEVELOP output is independent of the log level.** The compile flag is the gate. `logLevel` governs normal logging and must not reach DEVELOP output in either direction — neither suppressing it, nor being raised by it.
+3. **DEVELOP in daemon mode is a waste.** Detaching destroys the output the build exists to produce. Open: force foreground, or warn.
+
+Fact 2 is the one with the widest reach. Of the 41 logging sites, **36 are coupled to `Log` and violate it**; only the 5 unguarded raw `cout` sites are already correct. See *Both output channels contradict fact 2* below.
 
 This document is the inventory of what the flag currently does, and the defects found while taking that inventory.
 
@@ -26,7 +34,7 @@ Those 41 logging sites are split across two channels that behave very differentl
 | raw `cout`, wrapped in `if (Log::isLogging(LOG_DEBUG))` | 13 | stdout only | yes, manually |
 | raw `cout`, unwrapped | 5 | stdout only | no |
 
-The animation instrumentation, which is the reason the flag exists, is almost entirely on the raw `cout` channel — which reaches the terminal or nothing at all, never syslog. The `LogDebug` half goes to syslog in the default run mode. Neither half satisfies the requirement above unaided.
+Measured against the three facts: the 23 `LogDebug` sites break facts 1 and 2, the 13 guarded `cout` sites break fact 2, and only the 5 unguarded `cout` sites are already correct.
 
 ## How actor debug output composes
 
@@ -111,7 +119,20 @@ Verified by symbol — the `daemon` import is linked in or out by DRY_RUN alone:
 | DEVELOP | detaches (`daemon@GLIBC` present) | discarded — needs `-f` |
 | DEVELOP + DRY_RUN | never detaches (`daemon@GLIBC` absent) | reaches the terminal |
 
-So `-f` is currently mandatory for a plain DEVELOP build. The reason this has not bitten is that DEVELOP is in practice used with DRY_RUN, where the daemonize path is compiled out entirely. If DEVELOP is meant to imply a terminal, it must also imply never detaching — `-f` should not be something the developer has to remember.
+So `-f` is currently mandatory for a plain DEVELOP build. The reason this has not bitten is that DEVELOP is in practice used with DRY_RUN, where the daemonize path is compiled out entirely.
+
+**Forcing foreground costs nothing.** `Modes::Normal` and `Modes::Foreground` differ in exactly two places in the whole tree:
+
+| difference | site |
+|---|---|
+| daemonizes | MainBase.cpp:44 |
+| log destination | Main.cpp:371 |
+
+Everything else treats them identically — same network port (MainBase.cpp:31-32), same device initialisation, same main loop. Both differences are precisely what DEVELOP has to override anyway, so coercing `Normal` to `Foreground` under DEVELOP loses no coverage: there is no third behaviour that only the detached path exercises.
+
+That also makes it the smallest change. A single coercion after argv parsing and before Main.cpp:371 removes the need for a DEVELOP special-case at Main.cpp:402 *and* at MainBase.cpp:43 — three conditionals collapse into one.
+
+The alternative, warning instead of forcing, leaves a binary that still produces nothing: the warning has to be emitted before detaching, and the developer still has to remember `-f`. It converts a silent failure into a documented one rather than into a working build. Decision is open (fact 3).
 
 ### The forced `LOG_DEBUG` lands too late to cover loading
 
@@ -126,13 +147,23 @@ Measured with `logLevel="Error"` in the config:
 
 The 23 lines confirm DEVELOP does override the config level — but only from `Main ledspicer;` onward. The load phase, which is exactly what you want visible when chasing a config or load-order bug, stays silent. Forcing the level earlier is not enough on its own: DataLoader.cpp:49 would overwrite it again.
 
-### The `isLogging(LOG_DEBUG)` guards are dead in the daemon
+### Both output channels contradict fact 2
 
-Main.cpp:403 forces the log level to `LOG_DEBUG` unconditionally in a DEVELOP build, so `if (Log::isLogging(LOG_DEBUG))` is always true inside `ledspicerd`. The guard's only real effect is in the gtest binaries, which never raise the level — so what looks like a runtime switch for the developer is in practice accidental noise suppression for tests. Verified: test output is byte-identical between DEVELOP=ON and DEVELOP=OFF builds.
+DEVELOP output must not depend on the log level. Every site that goes through `Log` does.
 
-### Five raw `cout` sites bypass that guard
+| sites | mechanism | violates |
+|---|---|---|
+| 23 `LogDebug(...)` | expands to `if (Log::isLogging(LOG_DEBUG)) Log::debug(...)` | fact 2 (level-gated) **and** fact 1 (syslog in `Modes::Normal`) |
+| 13 raw `cout` inside `if (Log::isLogging(LOG_DEBUG))` | manual level check | fact 2 |
+| 5 raw `cout`, unguarded | none | — correct as-is |
 
-Actor.cpp:148, FileReader.cpp:119, FileReader.cpp:123, Profile.cpp:31 and Profile.cpp:36 write to `cout` with no level check at all. They are inconsistent with the other thirteen raw-`cout` sites, and they are the sites that would leak into test output.
+So the five sites I would otherwise have flagged as inconsistent — Actor.cpp:148, FileReader.cpp:119, FileReader.cpp:123, Profile.cpp:31, Profile.cpp:36 — are the only ones already meeting the requirement. The other 36 are the deviation.
+
+`Log::setLogLevel(LOG_DEBUG)` at Main.cpp:403 does not fix this. It does not make DEVELOP output independent of the level; it raises **normal** logging to debug, silently overriding the `logLevel` the user put in the config. That is a second knob being turned to compensate for the first being wrong.
+
+The two changes are coupled and must land together: dropping Main.cpp:403 while leaving the guards in place would be a regression. Today the forced `LOG_DEBUG` keeps every guard permanently true, so the coupling is invisible; remove the forcing alone and the default level (`LOG_NOTICE`, Log.cpp:28) starts suppressing DEVELOP output outright.
+
+Evidence the guards are inert today: DEVELOP=ON and DEVELOP=OFF gtest output is byte-identical, because the test binaries never raise the level and every guarded site is therefore silent in both.
 
 ### `DataLoader.cpp:785` logs in the wrong place
 
