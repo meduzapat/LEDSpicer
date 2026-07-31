@@ -2,6 +2,8 @@
 
 `-DENABLE_DEVELOP=ON` defines `DEVELOP=1` (CMakeLists.txt:53-62). The flag exists so instrumentation that is too noisy, too slow, or too invasive to ship can live in the tree without ever reaching a production binary. It is reserved for cases where step-by-step debugging cannot isolate the problem, typically per-frame state in the animation loop. It is a developer-only switch: nothing in the user documentation, the config format, or the runtime interface refers to it.
 
+One requirement follows from that and is worth stating plainly, because the current code does not meet it: **DEVELOP output must reach the terminal.** Syslog is not a debugging destination, and a detached process has no terminal to write to.
+
 This document is the inventory of what the flag currently does, and the defects found while taking that inventory.
 
 Line numbers are as of commit `a66c58b`.
@@ -20,11 +22,11 @@ Those 41 logging sites are split across two channels that behave very differentl
 
 | channel | sites | destination | level-gated |
 |---|---|---|---|
-| `LogDebug(...)` | 23 | syslog when daemonized, stdout otherwise | yes, by the macro itself |
+| `LogDebug(...)` | 23 | syslog in `Modes::Normal`, terminal otherwise | yes, by the macro itself |
 | raw `cout`, wrapped in `if (Log::isLogging(LOG_DEBUG))` | 13 | stdout only | yes, manually |
 | raw `cout`, unwrapped | 5 | stdout only | no |
 
-The animation instrumentation, which is the reason the flag exists, is almost entirely on the raw `cout` channel.
+The animation instrumentation, which is the reason the flag exists, is almost entirely on the raw `cout` channel — which reaches the terminal or nothing at all, never syslog. The `LogDebug` half goes to syslog in the default run mode. Neither half satisfies the requirement above unaided.
 
 ## How actor debug output composes
 
@@ -73,30 +75,47 @@ Measured with `mode="Normal" speed="VeryFast"`: 779 characters on one line after
 
 Five broken paths in total, one shared cause: the `VeryFast` shortcut is the only place either actor calls `changeElementColor()` after opening a fragment.
 
-### `Main.cpp:402` is a no-op
+### DEVELOP debug output goes to syslog instead of the terminal
+
+The requirement is that DEVELOP output reaches the terminal — syslog is not a debugging destination. Main.cpp:402 exists to enforce exactly that, and does not:
 
 ```cpp
 Log::logToStdTerm(DataLoader::getMode() != DataLoader::Modes::Normal);
 ```
 
-`Log::initialize()` was already called at Main.cpp:371 with the identical expression, and `Log::initialize` does nothing but forward to `logToStdTerm` (Log.cpp:32-34). `DataLoader::setMode()` is only ever called during argv parsing (Main.cpp:333-364), which completes before that. The line cannot change anything.
+In the default `Modes::Normal` that argument is `false`, so `logToStdTerm` selects **syslog** (Log.cpp:60-70). It is also the identical expression `Log::initialize()` was already called with at Main.cpp:371, and `Log::initialize` does nothing but forward to `logToStdTerm` (Log.cpp:32-34) — `DataLoader::setMode()` only runs during argv parsing (Main.cpp:333-364), well before both. So the line changes nothing and leaves the logger pointed at syslog. The intent needs `Log::logToStdTerm(true)`.
 
-### `-f` is mandatory under DEVELOP, unless DRY_RUN is also on
+Measured, DEVELOP build, `logLevel="Debug"`, terminal capture:
 
-DEVELOP does **not** suppress daemonizing. The guard at MainBase.cpp:43 is `#ifndef DRY_RUN`, not `#ifndef DEVELOP`, so a DEVELOP-only build in `Modes::Normal` still calls `daemon(0, 0)` (MainBase.cpp:46) and points stdout at `/dev/null`. `LogDebug` survives — `logToStdTerm(false)` had already switched the logger to syslog — but every raw-`cout` site is lost, and that is most of the instrumentation.
-
-Verified by symbol: the `daemon` import is linked in or absent depending on DRY_RUN alone.
-
-| build | `Modes::Normal` | raw `cout` visible |
+| run mode | `LogDebug` on terminal | raw `cout` on terminal |
 |---|---|---|
-| DEVELOP | detaches (`daemon@GLIBC` present) | no — needs `-f` |
-| DEVELOP + DRY_RUN | never detaches (`daemon@GLIBC` absent) | yes |
+| `Modes::Normal` (no `-f`) | **0** | 96 |
+| `Modes::Foreground` (`-f`) | 5 | 115 |
 
-So `-f` is required for a plain DEVELOP build. The reason this has not bitten is that DEVELOP is in practice used together with DRY_RUN, where the daemonize path is compiled out entirely.
+Confirmed positively with `strace`: in `Modes::Normal` the DEVELOP build makes 31 `connect(AF_UNIX, "/dev/log")` calls. It is actively pushing its debug output into syslog.
+
+Three separate things have to hold for the requirement to be met, and none of them do:
+
+1. **Destination.** Main.cpp:402 must force the terminal unconditionally, not mirror the run mode.
+2. **Timing.** Both the destination and the level are set *after* `config.readConfiguration()` (Main.cpp:394), so the whole load phase has already been logged at the config file's settings. See below.
+3. **The terminal has to still exist.** See the next entry — in `Modes::Normal` the process has detached and stdout is `/dev/null`, so forcing `logIntoStdOut` on its own would write nowhere.
+
+### DEVELOP still daemonizes, so there is no terminal to write to
+
+DEVELOP does **not** suppress detaching. The guard at MainBase.cpp:43 is `#ifndef DRY_RUN`, not `#ifndef DEVELOP`, so a DEVELOP-only build in `Modes::Normal` calls `daemon(0, 0)` (MainBase.cpp:46), which points stdin, stdout and stderr at `/dev/null`. Every raw-`cout` site is lost, and that is most of the instrumentation.
+
+Verified by symbol — the `daemon` import is linked in or out by DRY_RUN alone:
+
+| build | `Modes::Normal` | raw `cout` |
+|---|---|---|
+| DEVELOP | detaches (`daemon@GLIBC` present) | discarded — needs `-f` |
+| DEVELOP + DRY_RUN | never detaches (`daemon@GLIBC` absent) | reaches the terminal |
+
+So `-f` is currently mandatory for a plain DEVELOP build. The reason this has not bitten is that DEVELOP is in practice used with DRY_RUN, where the daemonize path is compiled out entirely. If DEVELOP is meant to imply a terminal, it must also imply never detaching — `-f` should not be something the developer has to remember.
 
 ### The forced `LOG_DEBUG` lands too late to cover loading
 
-Main.cpp:403 sets `LOG_DEBUG`, but it runs *after* `config.readConfiguration()` (Main.cpp:394), and `DataLoader::readConfiguration` sets the level from the config file at DataLoader.cpp:48-50. Everything logged while parsing the configuration, devices, elements, groups, profiles and animations is therefore emitted at the **config's** level, not at debug.
+Main.cpp:403 sets `LOG_DEBUG`, but it runs *after* `config.readConfiguration()` (Main.cpp:394), and `DataLoader::readConfiguration` sets the level from the config file at DataLoader.cpp:48-50. Everything logged while parsing the configuration, devices, elements, groups, profiles and animations is emitted at the **config's** level and to the **config's** destination, not at debug and not to the terminal.
 
 Measured with `logLevel="Error"` in the config:
 
@@ -177,7 +196,7 @@ Channel legend: `L` = `LogDebug`, `C` = raw `cout` behind `isLogging(LOG_DEBUG)`
 |---|---|---|---|
 | Main.cpp:26-28 | D | `#include <execinfo.h>` | |
 | Main.cpp:52-58 | B | backtrace dump on SIGSEGV / SIGILL / SIGFPE / SIGBUS | the flag's clearest justified use |
-| Main.cpp:400-404 | B | force `logToStdTerm()` + `setLogLevel(LOG_DEBUG)` | line 402 is a no-op; line 403 kills every `isLogging` guard and runs after loading |
+| Main.cpp:400-404 | B | force `logToStdTerm()` + `setLogLevel(LOG_DEBUG)` | line 402 selects syslog instead of the terminal; line 403 kills every `isLogging` guard; both run after loading |
 | MainBase.cpp:59-61 | L | "Device Handler of type X instance deleted" | |
 | MainBase.cpp:91-93 | B | `#ifndef` — skip `validateLed` in `testLeds` | only inverted use; pairs with Device.cpp:46 |
 | DataLoader.cpp:779-781 | L | "Profile X instance deleted" | |
