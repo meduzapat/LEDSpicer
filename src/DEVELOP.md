@@ -81,11 +81,31 @@ Log::logToStdTerm(DataLoader::getMode() != DataLoader::Modes::Normal);
 
 `Log::initialize()` was already called at Main.cpp:371 with the identical expression, and `Log::initialize` does nothing but forward to `logToStdTerm` (Log.cpp:32-34). `DataLoader::setMode()` is only ever called during argv parsing (Main.cpp:333-364), which completes before that. The line cannot change anything.
 
-### DEVELOP `cout` output is discarded in the default run mode
+### `-f` is mandatory under DEVELOP, unless DRY_RUN is also on
 
-Under DEVELOP, Main.cpp:403 forces `LOG_DEBUG`, but `Modes::Normal` still daemonizes at MainBase.cpp:46 (`daemon(0, 0)`), which points stdout at `/dev/null`. `LogDebug` survives, because `logToStdTerm(false)` switched the logger to syslog. Every raw-`cout` site — which is most of the instrumentation — is lost. A DEVELOP build only shows its animation output when run with `-f`.
+DEVELOP does **not** suppress daemonizing. The guard at MainBase.cpp:43 is `#ifndef DRY_RUN`, not `#ifndef DEVELOP`, so a DEVELOP-only build in `Modes::Normal` still calls `daemon(0, 0)` (MainBase.cpp:46) and points stdout at `/dev/null`. `LogDebug` survives — `logToStdTerm(false)` had already switched the logger to syslog — but every raw-`cout` site is lost, and that is most of the instrumentation.
 
-`DRY_RUN` masks this: the daemonize call is inside `#ifndef DRY_RUN`, so a DEVELOP+DRY_RUN build never daemonizes and everything appears. DEVELOP alone does not behave the same way.
+Verified by symbol: the `daemon` import is linked in or absent depending on DRY_RUN alone.
+
+| build | `Modes::Normal` | raw `cout` visible |
+|---|---|---|
+| DEVELOP | detaches (`daemon@GLIBC` present) | no — needs `-f` |
+| DEVELOP + DRY_RUN | never detaches (`daemon@GLIBC` absent) | yes |
+
+So `-f` is required for a plain DEVELOP build. The reason this has not bitten is that DEVELOP is in practice used together with DRY_RUN, where the daemonize path is compiled out entirely.
+
+### The forced `LOG_DEBUG` lands too late to cover loading
+
+Main.cpp:403 sets `LOG_DEBUG`, but it runs *after* `config.readConfiguration()` (Main.cpp:394), and `DataLoader::readConfiguration` sets the level from the config file at DataLoader.cpp:48-50. Everything logged while parsing the configuration, devices, elements, groups, profiles and animations is therefore emitted at the **config's** level, not at debug.
+
+Measured with `logLevel="Error"` in the config:
+
+| build | lines emitted | load-phase lines (`Setting FPS`, `Reading <file>`, …) |
+|---|---|---|
+| DEVELOP=OFF | 0 | 0 |
+| DEVELOP=ON | 23 | 0 |
+
+The 23 lines confirm DEVELOP does override the config level — but only from `Main ledspicer;` onward. The load phase, which is exactly what you want visible when chasing a config or load-order bug, stays silent. Forcing the level earlier is not enough on its own: DataLoader.cpp:49 would overwrite it again.
 
 ### The `isLogging(LOG_DEBUG)` guards are dead in the daemon
 
@@ -157,7 +177,7 @@ Channel legend: `L` = `LogDebug`, `C` = raw `cout` behind `isLogging(LOG_DEBUG)`
 |---|---|---|---|
 | Main.cpp:26-28 | D | `#include <execinfo.h>` | |
 | Main.cpp:52-58 | B | backtrace dump on SIGSEGV / SIGILL / SIGFPE / SIGBUS | the flag's clearest justified use |
-| Main.cpp:400-404 | B | force `logToStdTerm()` + `setLogLevel(LOG_DEBUG)` | line 402 is a no-op; line 403 kills every `isLogging` guard |
+| Main.cpp:400-404 | B | force `logToStdTerm()` + `setLogLevel(LOG_DEBUG)` | line 402 is a no-op; line 403 kills every `isLogging` guard and runs after loading |
 | MainBase.cpp:59-61 | L | "Device Handler of type X instance deleted" | |
 | MainBase.cpp:91-93 | B | `#ifndef` — skip `validateLed` in `testLeds` | only inverted use; pairs with Device.cpp:46 |
 | DataLoader.cpp:779-781 | L | "Profile X instance deleted" | |
