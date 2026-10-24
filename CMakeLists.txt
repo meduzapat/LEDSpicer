@@ -11,6 +11,7 @@ set(PROJECT_DATA_DIR  ${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/)
 set(PROJECT_CONF_DIR  ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
+set(MAINTAINER_NAME   "Patricio A. Rossi (MeduZa)")
 set(MAINTAINER_EMAIL  "meduzapat@netscape.net")
 set(DATA_VERSION      "1.1")
 
