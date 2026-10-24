@@ -5,6 +5,20 @@ All notable changes to LEDSpicer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.8] - 2026-10-24
+
+### Added
+- `ENABLE_SHOW_OUTPUT` CMake option to dump the data sent to the devices (#131)
+
+### Fixed
+- Ultimate I/O board, LED interface and transfer protocol are read from the USB descriptors, so boards work in keyboard and DInput mode and on current firmware (#128)
+- Example `ledspicer.conf` declared data version 1.0 and was rejected by the daemon (#119)
+- Default configuration path was relative (`etc/ledspicer.conf`) when `CMAKE_INSTALL_SYSCONFDIR` was not set explicitly (#119)
+- AUR release guard failing to match `CMAKE_SKIP_BUILD_RPATH`
+
+### Breaking Changes
+- Ultimate I/O supports 2 boards; the operating mode is detected, so the `boardId` 3 and 4 workaround for Dinput mode (#16) is rejected. Use `boardId="1"` or `boardId="2"` (#128)
+
 ## [0.7.7] - 2026-06-30
 
 ### Added
