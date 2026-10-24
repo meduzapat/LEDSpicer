@@ -62,7 +62,7 @@ void USB::connect() {
 		for (size_t idx = 0; list[idx] != nullptr; ++idx) {
 			libusb_device_descriptor desc;
 			if (libusb_get_device_descriptor(list[idx], &desc) != 0) continue;
-			if (desc.idVendor != getVendor() or desc.idProduct != getProduct()) continue;
+			if (not matchesSignature(desc)) continue;
 
 			Candidate c;
 			c.dev = list[idx];
@@ -90,7 +90,7 @@ void USB::connect() {
 			libusb_device_descriptor desc;
 			libusb_get_device_descriptor(device, &desc);
 
-			if (desc.idVendor == getVendor() and desc.idProduct == getProduct()) {
+			if (matchesSignature(desc)) {
 				// For ID by product only check the vendor and product.
 				if (isProductBasedId()) {
 					break;
@@ -110,13 +110,20 @@ void USB::connect() {
 	libusb_free_device_list(list, 1);
 
 	if (rc == LIBUSB_SUCCESS) {
-		libusb_set_auto_detach_kernel_driver(handle, true);
+		// Without this the kernel HID driver keeps the interface and claiming it fails.
+		const int detach = libusb_set_auto_detach_kernel_driver(handle, true);
+		if (detach != LIBUSB_SUCCESS)
+			LogWarning(
+				"Unable to enable kernel driver auto detach on " +
+				Utility::hex2str(getVendor()) + ":" + Utility::hex2str(getProduct()) +
+				": " + libusb_error_name(detach)
+			);
 		return;
 	}
 
 	throw Error("Failed to open device ")  <<
 			Utility::hex2str(getVendor())  << ":" <<
-			Utility::hex2str(getProduct()) << " id " << getId();
+			Utility::hex2str(getProduct()) << " id " << getId() << notFoundHint();
 }
 
 void USB::disconnect() {
@@ -135,11 +142,20 @@ void USB::disconnect() {
 }
 
 void USB::claimInterface() {
+
 	LogDebug("Claiming interface " + to_string(interface));
-	if (libusb_claim_interface(handle, interface))
-		throw Error("Unable to claim interface to ") <<
-				Utility::hex2str(getVendor()) << ":" <<
-				Utility::hex2str(getProduct());
+
+	const int rc = libusb_claim_interface(handle, interface);
+	if (not rc) return;
+
+	Error error("Unable to claim interface ");
+	error << to_string(interface) << " on " <<
+			Utility::hex2str(getVendor()) << ":" <<
+			Utility::hex2str(getProduct()) << ": " << libusb_error_name(rc);
+	// Devices are claimed before the socket is bound, so a second daemon lands here first.
+	if (rc == LIBUSB_ERROR_BUSY)
+		error << ", another program is using the board, check for a running ledspicerd";
+	throw error;
 }
 
 void USB::closeSession() {
@@ -161,6 +177,14 @@ bool USB::isProductBasedId() const {
 
 bool USB::isNonBasedId() const {
 	return false;
+}
+
+bool USB::matchesSignature(const libusb_device_descriptor& descriptor) const {
+	return descriptor.idVendor == getVendor() and descriptor.idProduct == getProduct();
+}
+
+string USB::notFoundHint() const {
+	return "";
 }
 
 int USB::send(vector<uint8_t>& data) const {

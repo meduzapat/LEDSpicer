@@ -20,3 +20,4 @@ add_test_executable(ItemsTest
 )
 
 add_subdirectory(transitions)
+add_subdirectory(Ultimarc)

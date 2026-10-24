@@ -27,14 +27,33 @@
 
 // Fake types (minimal stubs for libusb structs).
 struct libusb_context {};
-struct libusb_device {};
+struct libusb_device_descriptor {
+	uint16_t idVendor  = 0x1234;
+	uint16_t idProduct = 0xABCD;
+	uint16_t bcdDevice = 0x40;
+};
+struct libusb_interface_descriptor {
+	uint8_t                     bInterfaceNumber = 0;
+	const unsigned char*        extra            = nullptr;
+	int                         extra_length     = 0;
+};
+struct libusb_interface {
+	const libusb_interface_descriptor* altsetting = nullptr;
+};
+struct libusb_config_descriptor {
+	uint8_t                 bNumInterfaces = 0;
+	const libusb_interface* interface      = nullptr;
+};
+/// Tests populate these; every stub reads the device it was handed instead of a global.
+struct libusb_device {
+	libusb_device_descriptor        descriptor;
+	uint8_t                         bus   = 1;
+	std::vector<uint8_t>            ports {1};
+	const libusb_config_descriptor* configuration = nullptr;
+	std::vector<uint8_t>            reportDescriptor;
+};
 struct libusb_device_handle {
 	libusb_device* associated_dev = nullptr;
-};
-struct libusb_device_descriptor {
-	uint16_t idVendor;
-	uint16_t idProduct;
-	uint16_t bcdDevice;
 };
 
 // Constants (copied from real libusb for compatibility).
@@ -55,8 +74,11 @@ enum {
 	LIBUSB_ERROR_OTHER = -99
 };
 #define LIBUSB_ENDPOINT_OUT        0x00
+#define LIBUSB_ENDPOINT_IN         0x80
 #define LIBUSB_REQUEST_TYPE_CLASS  0x20
 #define LIBUSB_RECIPIENT_INTERFACE 0x01
+
+#define LIBUSB_REQUEST_GET_DESCRIPTOR 0x06
 
 // Log levels (reuse from libusb, but stubbed).
 #define LIBUSB_LOG_LEVEL_NONE    0
@@ -73,12 +95,23 @@ extern bool fakeFailInit;
 extern bool fakeFailOpen;
 extern std::vector<libusb_device*> fakeDevices;  // Pre-populate in tests.
 
+/// One recorded outgoing control transfer.
+struct FakeTransfer {
+	uint16_t             wValue;
+	uint16_t             wIndex;
+	std::vector<uint8_t> data;
+};
+/// Every outgoing transfer, in order, so tests can assert the wire format.
+extern std::vector<FakeTransfer> fakeTransfers;
+
 // Stub function declarations.
 int libusb_init(libusb_context** ctx);
 void libusb_exit(libusb_context* ctx);
 ssize_t libusb_get_device_list(libusb_context* ctx, libusb_device*** list);
 void libusb_free_device_list(libusb_device** list, int unref_devices);
 int libusb_get_device_descriptor(libusb_device* dev, libusb_device_descriptor* desc);
+int libusb_get_active_config_descriptor(libusb_device* dev, libusb_config_descriptor** config);
+void libusb_free_config_descriptor(libusb_config_descriptor* config);
 libusb_device* libusb_get_device(libusb_device_handle* dev_handle);
 int libusb_open(libusb_device* dev, libusb_device_handle** handle);
 int libusb_claim_interface(libusb_device_handle* handle, int interface_number);

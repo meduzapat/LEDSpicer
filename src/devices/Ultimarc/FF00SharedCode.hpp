@@ -11,6 +11,8 @@
 #pragma once
 
 #define FF00_MSG(byte1, byte2) {byte1, byte2}
+/// Index of the command byte inside FF00_MSG.
+#define FF00_MSG_COMMAND 0
 #define FF00_TRANSFER 2 // Batches.
 
 namespace LEDSpicer::Devices::Ultimarc {

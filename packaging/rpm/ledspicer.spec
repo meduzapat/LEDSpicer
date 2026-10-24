@@ -5,7 +5,7 @@
 %global debug_package %{nil}
 
 Name:           ledspicer
-Version:        0.7.7
+Version:        0.7.8
 Release:        1%{?dist}
 Summary:        LED controller daemon for arcade cabinets and RGB lighting
 License:        GPL-3.0-or-later
@@ -196,16 +196,13 @@ that use the LEDSpicer library.
 # =============================================================================
 
 %changelog
-* Mon Jun 29 2026 Patricio A. Rossi (MeduZa) <meduzapat@netscape.net> - 0.7.7-1
+* Sat Oct 24 2026 Patricio A. Rossi (MeduZa) <meduzapat@netscape.net> - 0.7.8-1
 - Added
-  - Automated release publishing to COPR and AUR.
-- Changed
-  - Daemon starts independently of the user session and audio; audio now connects lazily so the service comes up as soon as the network is ready (#125)
-  - systemd service no longer waits on `sound.target` and no longer sets `PULSE_SERVER` — the daemon derives the per-user PulseAudio socket itself (#125)
-  - CMake build cleanups and definition fixes; generated `config.hpp`
+  - `ENABLE_SHOW_OUTPUT` CMake option to dump the data sent to the devices (#131)
 - Fixed
-  - ALSA capture device opens without throwing and reopens automatically if it is missing or later lost (#125)
-  - PulseAudio falls back to the background retry on an initial connection failure instead of aborting startup (#125)
-  - Rotator argument-parsing crash and a redundant initialization (#123)
-  - Non-working TOS serial restrictor (#123)
-  - Hardened `colorFormat` parsing (accepts `RGB`/`rgb`) and now warns on duplicate player/joystick rotator requests instead of silently dropping them (#123)
+  - Ultimate I/O board, LED interface and transfer protocol are read from the USB descriptors, so boards work in keyboard and DInput mode and on current firmware (#128)
+  - Example `ledspicer.conf` declared data version 1.0 and was rejected by the daemon (#119)
+  - Default configuration path was relative (`etc/ledspicer.conf`) when `CMAKE_INSTALL_SYSCONFDIR` was not set explicitly (#119)
+  - AUR release guard failing to match `CMAKE_SKIP_BUILD_RPATH`
+- Breaking Changes
+  - Ultimate I/O supports 2 boards; the operating mode is detected, so the `boardId` 3 and 4 workaround for Dinput mode (#16) is rejected. Use `boardId="1"` or `boardId="2"` (#128)

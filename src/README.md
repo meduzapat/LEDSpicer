@@ -41,7 +41,7 @@ Header comments should include the following information:
 - Headers should be grouped logically.
 - Standard library headers should be included before other headers.
 - Use relative paths for project headers.
-- Use guard macros to prevent multiple inclusion, they should be after includes and before definitions.
+- Use `#pragma once` to prevent multiple inclusion, never include guards. It goes after the includes and before the definitions.
 
 ### Example
 
@@ -51,8 +51,7 @@ Header comments should include the following information:
 #include "Connection.hpp"
 #include "Brands.hpp"
 
-#ifndef LSUSB_HPP_
-#define LSUSB_HPP_ 1
+#pragma once
 
 ```
 
@@ -316,11 +315,15 @@ LogError("Some bad errir");
 ## Conditional Compilation
 
 - Use conditional compilation directives sparingly and only when necessary to avoid making the code harder to understand.
-- There are several debugging CONSTANTS created by autotools while configuring.
-	- DEVELOP to be used for development only code.
-	- SHOW_OUTPUT used by hardware to display the data sent to their controllers.
-	- check config,h fo more details
-	- new constants need to be docummented.
+- There are several CONSTANTS created by CMake while configuring, every one of them has a matching option in CMakeLists.txt.
+	- DEVELOP to be used for development only code, from -DENABLE_DEVELOP=ON.
+	- BENCHMARK times every stage of the frame, from -DENABLE_BENCHMARK=ON. The timings are logged at Debug level, so the configuration needs logLevel="Debug" to display them.
+	- SHOW_OUTPUT used by hardware to display the data sent to their controllers, from -DENABLE_SHOW_OUTPUT=ON.
+	- DRY_RUN replaces libusb with FakeLibUSB and fakes the serial ports, from -DENABLE_DRY_RUN=ON.
+	- MiSTer to be used for MiSTer only code, from -DENABLE_MISTER=ON.
+	- PULSEAUDIO and ALSAAUDIO enable their audio actors, from -DENABLE_PULSEAUDIO=ON and -DENABLE_ALSAAUDIO=ON.
+	- Check config.hpp for the values CMake bakes into the code.
+	- New constants need to be documented here and wired into CMakeLists.txt, a constant that no option can set is dead code.
 
 ### Example
 

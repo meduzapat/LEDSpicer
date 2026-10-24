@@ -43,6 +43,16 @@ protected:
 
 	void afterClaimInterface() override {}
 
+	/**
+	 * Streams the LED buffer as a 0xFE reset followed by intensity pairs.
+	 * Only the byte order is common between the boards that use this, the report framing is not,
+	 * so every caller provides its own message and says where the command byte sits in it.
+	 *
+	 * @param message the device report framing.
+	 * @param command index of the command byte inside the message, the value byte follows it.
+	 */
+	void transferPairs(vector<uint8_t> message, uint8_t command) const;
+
 };
 
 } // namespace

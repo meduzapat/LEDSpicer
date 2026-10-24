@@ -26,7 +26,7 @@ VERSION=$(sed -n 's/.*project(LEDSpicer VERSION \([0-9.]*\).*/\1/p' "$CMAKE_FILE
 DATA_VERSION=$(sed -n 's/.*set(DATA_VERSION[[:space:]]*"\([0-9.]*\)".*/\1/p' "$CMAKE_FILE")
 URL=$(sed -n 's/.*set(PROJECT_SITE[[:space:]]*"\([^"]*\)".*/\1/p' "$CMAKE_FILE")
 EMAIL=$(sed -n 's/.*set(MAINTAINER_EMAIL[[:space:]]*"\([^"]*\)".*/\1/p' "$CMAKE_FILE")
-MAINTAINER=$(sed -n 's/.*set(COPYRIGHT[[:space:]]*"[^"]*[0-9]\{4\} \(.*\)").*/\1/p' "$CMAKE_FILE")
+MAINTAINER=$(sed -n 's/.*set(MAINTAINER_NAME[[:space:]]*"\([^"]*\)".*/\1/p' "$CMAKE_FILE")
 
 # Validate required values
 if [[ -z "$VERSION" ]]; then
@@ -47,8 +47,9 @@ if [[ -z "$URL" ]]; then
 fi
 
 if [[ -z "$MAINTAINER" ]]; then
-	echo "Warning: Could not parse maintainer name from COPYRIGHT, using default"
-	MAINTAINER="Patricio A. Rossi (MeduZa)"
+	echo "Error: Could not parse MAINTAINER_NAME from CMakeLists.txt"
+	echo "Expected: set(MAINTAINER_NAME \"Your Name\")"
+	exit 1
 fi
 
 # Package release is always 1 (reset on each new version)
@@ -201,9 +202,9 @@ fetch_checksum() {
 	echo "Fetching tarball checksum from GitHub..."
 	echo "  URL: $tarball_url"
 
-	CHECKSUM=$(curl -sL "$tarball_url" 2>/dev/null | sha256sum | cut -d' ' -f1)
+	CHECKSUM=$(curl -fsL "$tarball_url" 2>/dev/null | sha256sum | cut -d' ' -f1)
 
-	# Empty file hash means tarball not found
+	# Empty file hash means tarball not found, -f keeps the error page out of the hash
 	if [[ -z "$CHECKSUM" || "$CHECKSUM" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]]; then
 		echo "  Warning: Tag ${VERSION} not found on GitHub (or network error)"
 		echo "  Using sha256sums=('SKIP') - run again after tagging"

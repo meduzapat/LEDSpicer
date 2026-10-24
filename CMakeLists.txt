@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(LEDSpicer VERSION 0.7.7 LANGUAGES CXX)
+project(LEDSpicer VERSION 0.7.8 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -8,9 +8,10 @@ include(GNUInstallDirs)
 set(PROJECT_NAME      ${CMAKE_PROJECT_NAME})
 set(PROJECT_VERSION   ${CMAKE_PROJECT_VERSION})
 set(PROJECT_DATA_DIR  ${CMAKE_INSTALL_FULL_DATADIR}/ledspicer/)
-set(PROJECT_CONF_DIR  ${CMAKE_INSTALL_SYSCONFDIR})
+set(PROJECT_CONF_DIR  ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 set(PROJECT_SITE      "https://github.com/meduzapat/LEDSpicer")
 set(PROJECT_BUGREPORT "https://github.com/meduzapat/LEDSpicer/issues")
+set(MAINTAINER_NAME   "Patricio A. Rossi (MeduZa)")
 set(MAINTAINER_EMAIL  "meduzapat@netscape.net")
 set(DATA_VERSION      "1.1")
 
@@ -54,6 +55,7 @@ option(ENABLE_DEVELOP     "Enables development mode"                 OFF)
 option(ENABLE_TESTS       "Enables building and running tests"       OFF)
 option(ENABLE_DRY_RUN     "Enables dry run mode using mock hardware" OFF)
 option(ENABLE_BENCHMARK   "Enables displaying timing information"    OFF)
+option(ENABLE_SHOW_OUTPUT "Enables dumping the data sent to devices" OFF)
 
 if(ENABLE_DEVELOP)
 	# adds extra debugging logs
@@ -61,8 +63,13 @@ if(ENABLE_DEVELOP)
 endif()
 
 if(ENABLE_BENCHMARK)
-	# adds extra debugging logs
+	# times every stage of the frame, needs logLevel Debug to be displayed
 	add_compile_definitions(BENCHMARK=1)
+endif()
+
+if(ENABLE_SHOW_OUTPUT)
+	# dumps every buffer transferred to the hardware
+	add_compile_definitions(SHOW_OUTPUT=1)
 endif()
 
 # Find required packages (pkgConfig Threads and dl)
@@ -322,28 +329,28 @@ install(TARGETS processLookup RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 # NanoLED output plugin
 if(ENABLE_NANOLED)
 	add_usb_device_plugin(UltimarcNanoLed
-		"src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/NanoLed.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/NanoLed.cpp"
 	)
 endif()
 
 # PacDrive output plugin
 if(ENABLE_PACDRIVE)
 	add_usb_device_plugin(UltimarcPacDrive
-		"src/devices/Ultimarc/PacDrive.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/PacDrive.cpp"
 	)
 endif()
 
 # PacLed64 output plugin
 if(ENABLE_PACLED64)
 	add_usb_device_plugin(UltimarcPacLed64
-		"src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/PacLed64.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/FF00SharedCode.cpp;src/devices/Ultimarc/PacLed64.cpp"
 	)
 endif()
 
 # Ultimate I/O output plugin
 if(ENABLE_ULTIMATEIO)
 	add_usb_device_plugin(UltimarcUltimate
-		"src/devices/Ultimarc/Ultimate.cpp"
+		"src/devices/Ultimarc/Ultimarc.cpp;src/devices/Ultimarc/Ultimate.cpp"
 	)
 endif()
 
@@ -470,6 +477,8 @@ Run tests    : ${ENABLE_TESTS}
 ------ Special modes --------
 Develop mode : ${ENABLE_DEVELOP}
 Dry run mode : ${ENABLE_DRY_RUN}
+Benchmark    : ${ENABLE_BENCHMARK}
+Show output  : ${ENABLE_SHOW_OUTPUT}
 MiSTer code  : ${ENABLE_MISTER}
 ---- Conditional Actors -----
 PULSE AUDIO  : ${ENABLE_PULSEAUDIO}
